@@ -382,7 +382,20 @@ class ModelCatalogFilter extends Model {
 	}
 
 	public function getFilterGroup($filter_group_id) {
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "filter_group` fg LEFT JOIN " . DB_PREFIX . "filter_group_description fgd ON (fg.filter_group_id = fgd.filter_group_id) WHERE fg.filter_group_id = '" . (int)$filter_group_id . "' AND fgd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
+		$query = $this->db->query("
+			SELECT 
+				* 
+			FROM `" . DB_PREFIX . "filter_group` fg 
+			LEFT JOIN " . DB_PREFIX . "filter_group_description fgd 
+			ON (
+				fg.filter_group_id = fgd.filter_group_id 
+				-- AND fg.store_id = fgd.store_id
+			) 
+			WHERE fg.filter_group_id 	= '" . (int)$filter_group_id . "' 
+				-- AND fg.store_id 				= '" . $this->session->data['store_id'] . "'
+				AND fgd.language_id 		= '" . (int)$this->config->get('config_language_id') . "'
+				AND fgd.store_id 				= '" . $this->session->data['store_id'] . "'
+		");
 
 		return $query->row;
 	}
