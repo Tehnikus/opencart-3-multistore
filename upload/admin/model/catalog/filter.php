@@ -258,10 +258,127 @@ class ModelCatalogFilter extends Model {
 	}
 
 	public function deleteFilter($filter_group_id) {
-		$this->db->query("DELETE FROM `" . DB_PREFIX . "filter_group` WHERE filter_group_id = '" . (int)$filter_group_id . "'");
-		$this->db->query("DELETE FROM `" . DB_PREFIX . "filter_group_description` WHERE filter_group_id = '" . (int)$filter_group_id . "'");
-		$this->db->query("DELETE FROM `" . DB_PREFIX . "filter` WHERE filter_group_id = '" . (int)$filter_group_id . "'");
-		$this->db->query("DELETE FROM `" . DB_PREFIX . "filter_description` WHERE filter_group_id = '" . (int)$filter_group_id . "'");
+
+		$this->db->query("START TRANSACTION");
+
+		try {
+
+			$groupFiltersByStore = $this->db->query("
+				SELECT 
+					`filter_id`
+				FROM " . DB_PREFIX . "filter
+				WHERE filter_group_id =  " . (int) $filter_group_id . "
+					AND `store_id` 				= " . (int) $this->session->data['store_id'] . "
+			")->rows;
+
+			$groupFiltersAll = $this->db->query("
+				SELECT 
+					`filter_id`
+				FROM " . DB_PREFIX . "filter
+				WHERE `filter_group_id` =  " . (int) $filter_group_id . "
+			")->rows;
+			
+			$this->db->query("
+				DELETE FROM `" . DB_PREFIX . "filter_group_description` 
+				WHERE `filter_group_id` = '" . (int)$filter_group_id . "' 
+					AND `store_id` = '" . (int) $this->session->data['store_id'] . "'
+			");
+			$this->db->query("
+				DELETE FROM `" . DB_PREFIX . "filter` 
+				WHERE `filter_group_id` = '" . (int)$filter_group_id . "' 
+					AND `store_id` = '" . (int) $this->session->data['store_id'] . "'
+			");
+			$this->db->query("
+				DELETE FROM `" . DB_PREFIX . "filter_description` 
+				WHERE `filter_group_id` = '" . (int)$filter_group_id . "' 
+					AND `store_id` = '" . (int) $this->session->data['store_id'] . "'
+			");
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "filter_group_to_store
+				WHERE `filter_group_id` = '" . (int) $filter_group_id . "'
+					AND `store_id` = '" . (int) $this->session->data['store_id'] . "'
+			");
+
+			foreach ($groupFiltersByStore as $filter) {
+				$this->db->query("
+					DELETE FROM " . DB_PREFIX . "product_filter
+					WHERE `filter_id` = '" . (int) $filter['filter_id'] . "'
+						AND `store_id` 	= '" . (int) $this->session->data['store_id'] . "'
+				");
+				$this->db->query("
+					DELETE FROM " . DB_PREFIX . "category_filter
+					WHERE `filter_id` = '" . (int) $filter['filter_id'] . "'
+						AND `store_id` 	= '" . (int) $this->session->data['store_id'] . "'
+				");
+				$this->db->query("
+					DELETE FROM " . DB_PREFIX . "seo_url
+					WHERE `query` 	= 'filter_id=" . (int) $filter['filter_id'] . "'
+						AND `store_id` 	= '" . (int) $this->session->data['store_id'] . "'
+				");
+
+				// Delete cache
+				$this->deleteCache($filter['filter_id']);
+			}
+			
+			// Check if filter group is present in other stores
+			$filterGroupInOtherStores = $this->db->query("
+				SELECT
+					`filter_group_id`
+				FROM " . DB_PREFIX . "filter_group_to_store
+				WHERE `filter_group_id`  = '" . (int) $filter_group_id . "'
+					AND `store_id` 		<> '" . (int) $this->session->data['store_id'] . "' 
+			")->num_rows;
+
+			// Delete all filter group data if filter group is not present in any other store
+			if (!$filterGroupInOtherStores) {
+				$tables = [
+					'filter_group',
+					'filter_group_description',
+					'filter',
+					'filter_description',
+					'filter_group_to_store',
+				];
+
+				// Remove all redundant data if present 
+				foreach ($tables as $table) {
+					$this->db->query("
+						DELETE FROM " . DB_PREFIX . $table . "
+						WHERE filter_group_id = " . (int) $filter_group_id
+					);
+				}
+
+				foreach ($groupFiltersAll as $filter) {
+					$this->db->query("
+						DELETE FROM " . DB_PREFIX . "product_filter
+						WHERE `filter_id` = '" . (int) $filter['filter_id'] . "'
+					");
+					$this->db->query("
+						DELETE FROM " . DB_PREFIX . "category_filter
+						WHERE `filter_id` = '" . (int) $filter['filter_id'] . "'
+					");
+					$this->db->query("
+						DELETE FROM " . DB_PREFIX . "seo_url
+						WHERE `query` = 'filter_id=" . (int) $filter['filter_id'] . "'
+					");
+				}
+			}
+
+			$this->db->query("COMMIT");
+
+			// Rebuild facet indexes
+			$this->load->model('catalog/facet');
+			$store_id = (int) $this->session->data['store_id'];
+			$this->model_catalog_facet->buildFacetNames(facet_group_id: $filter_group_id, facet_type: 2, store_id: $store_id);
+			$this->model_catalog_facet->buildFacetIndex(facet_group_id: $filter_group_id, facet_type: 2, store_id: $store_id);
+
+			return true;
+
+		} catch (\Throwable $e) {
+
+			$this->db->query("ROLLBACK");
+
+			throw $e;
+		}
 	}
 
 	public function getFilterGroup($filter_group_id) {
