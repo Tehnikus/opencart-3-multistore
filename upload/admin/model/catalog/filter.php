@@ -103,31 +103,157 @@ class ModelCatalogFilter extends Model {
 	}
 
 	public function editFilter($filter_group_id, $data) {
-		$this->db->query("UPDATE `" . DB_PREFIX . "filter_group` SET sort_order = '" . (int)$data['sort_order'] . "' WHERE filter_group_id = '" . (int)$filter_group_id . "'");
 
-		$this->db->query("DELETE FROM " . DB_PREFIX . "filter_group_description WHERE filter_group_id = '" . (int)$filter_group_id . "'");
+		$this->db->query("START TRANSACTION");
 
-		foreach ($data['filter_group_description'] as $language_id => $value) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "filter_group_description SET filter_group_id = '" . (int)$filter_group_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "'");
-		}
-
-		$this->db->query("DELETE FROM " . DB_PREFIX . "filter WHERE filter_group_id = '" . (int)$filter_group_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "filter_description WHERE filter_group_id = '" . (int)$filter_group_id . "'");
-
-		if (isset($data['filter'])) {
-			foreach ($data['filter'] as $filter) {
-				if ($filter['filter_id']) {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "filter SET filter_id = '" . (int)$filter['filter_id'] . "', filter_group_id = '" . (int)$filter_group_id . "', sort_order = '" . (int)$filter['sort_order'] . "'");
-				} else {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "filter SET filter_group_id = '" . (int)$filter_group_id . "', sort_order = '" . (int)$filter['sort_order'] . "'");
-				}
-
-				$filter_id = $this->db->getLastId();
-
-				foreach ($filter['filter_description'] as $language_id => $filter_description) {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "filter_description SET filter_id = '" . (int)$filter_id . "', language_id = '" . (int)$language_id . "', filter_group_id = '" . (int)$filter_group_id . "', name = '" . $this->db->escape($filter_description['name']) . "'");
+		try {
+			$this->db->query("
+				UPDATE `" . DB_PREFIX . "filter_group` 
+				SET 
+					sort_order = '" . (int)$data['sort_order'] . "' 
+				WHERE filter_group_id = '" . (int)$filter_group_id . "'
+			");
+	
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "filter_group_description 
+				WHERE filter_group_id = '" . (int)$filter_group_id . "'
+					AND store_id = " . (int) $this->session->data['store_id'] . "
+			");
+	
+			foreach ($data['filter_group_description'] as $language_id => $value) {
+				$this->db->query("
+					INSERT INTO " . DB_PREFIX . "filter_group_description 
+					SET 
+						filter_group_id = '" . (int)$filter_group_id . "', 
+						language_id = '" . (int)$language_id . "', 
+						store_id = " . (int) $this->session->data['store_id'] . ",
+						name = '" . $this->db->escape($value['name']) . "'
+				");
+			}
+	
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "filter 
+				WHERE filter_group_id = '" . (int)$filter_group_id . "'
+					AND store_id = " . (int) $this->session->data['store_id'] . "
+			");
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "filter_description 
+				WHERE filter_group_id = '" . (int)$filter_group_id . "'
+					AND store_id = " . (int) $this->session->data['store_id'] . "
+			");
+	
+			if (isset($data['filter'])) {
+				foreach ($data['filter'] as $filter) {
+					if ($filter['filter_id']) {
+						$this->db->query("
+							INSERT INTO " . DB_PREFIX . "filter 
+							SET 
+								filter_id 			= '" . (int) $filter['filter_id'] . "', 
+								filter_group_id = '" . (int) $filter_group_id . "', 
+								sort_order 			= '" . (int) $filter['sort_order'] . "', 
+								store_id 				= '" . (int) $this->session->data['store_id'] . "'
+						");
+					} else {
+						$this->db->query("
+							INSERT INTO " . DB_PREFIX . "filter 
+							SET 
+								filter_group_id 	= '" . (int) $filter_group_id . "', 
+								sort_order 				= '" . (int) $filter['sort_order'] . "', 
+								store_id 					= '" . (int) $this->session->data['store_id'] . "'
+						");
+					}
+	
+					$filter_id = $this->db->getLastId();
+					// Delete cache
+					$this->deleteCache($filter_id);
+	
+					foreach ($filter['filter_description'] as $language_id => $filter_description) {
+						$this->db->query("
+							INSERT INTO " . DB_PREFIX . "filter_description 
+							SET 
+								filter_id 			= '" . (int) $filter_id . "', 
+								language_id 		= '" . (int) $language_id . "', 
+								store_id 				= '" . $this->session->data['store_id'] . "', 
+								filter_group_id = '" . (int) $filter_group_id . "', 
+								name = '" . $this->db->escape($filter_description['name']) . "'
+						");
+	
+						$this->db->query("
+							DELETE FROM " . DB_PREFIX . "seo_url
+							WHERE `query` 			= 'filter=" . (int) $filter_id . "'
+								AND `language_id` = '" . (int) $language_id . "'
+								AND `store_id` 		= '" . (int) $this->session->data['store_id'] . "'
+						");
+	
+						if (isset($filter_description['url']) && !empty($filter_description['url'])) {
+							$this->db->query("
+								INSERT INTO " . DB_PREFIX . "seo_url
+								SET
+									`query` 			= 'filter=" . (int) $filter_id . "', 
+									`keyword` 		= '" . $this->db->escape($filter_description['url']) . "', 
+									`language_id` = '" . (int) $language_id . "', 
+									`store_id` 		= '" . (int) $this->session->data['store_id'] . "'
+							");
+						}
+					}
 				}
 			}
+
+			// Stores association
+			// Remove all unselected stores
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "filter_group_to_store
+				WHERE `filter_group_id` = '" . (int) $filter_group_id . "' 
+					AND `store_id` NOT IN (" . implode(',', array_map('intval', $data['stores_association'])) . ")
+			");
+
+			// Remove only current store no matter if it's selected
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "filter_group_to_store
+				WHERE `filter_group_id` = '" . (int) $filter_group_id . "' 
+					AND `store_id` 				= '" . (int) $this->session->data['store_id'] . "'
+			");
+			
+			// Write store association and store related data
+			if (isset($data['stores_association']) && !empty($data['stores_association'])) {
+				foreach ($data['stores_association'] as $store_id) {
+					if (((int) $store_id) === ((int) $this->session->data['store_id'])) {
+						// Set data for current store
+						$this->db->query("
+							INSERT INTO " . DB_PREFIX . "filter_group_to_store
+							SET
+								`filter_group_id` = '" . (int) $filter_group_id . "', 
+								`store_id` 				= '" . (int) $store_id . "',
+								`sort_order` 			= '" . (int) $data['sort_order'] . "' 
+						");
+					} else {
+						// Skip if data for other stores already exists
+						$this->db->query("
+							INSERT IGNORE INTO " . DB_PREFIX . "filter_group_to_store
+							SET
+								`filter_group_id` = '" . (int) $filter_group_id . "', 
+								`store_id` 				= '" . (int) $store_id . "',
+								`sort_order` 			= '" . (int) $data['sort_order'] . "' 
+						");						
+					}
+				}
+			}
+
+			$this->db->query("COMMIT");
+
+			// Rebuild facet indexes
+			$this->load->model('catalog/facet');
+			$store_id = (int) $this->session->data['store_id'];
+			$this->model_catalog_facet->buildFacetNames(facet_group_id: $filter_group_id, facet_type: 2, store_id: $store_id);
+			$this->model_catalog_facet->buildFacetIndex(facet_group_id: $filter_group_id, facet_type: 2, store_id: $store_id);
+
+			return $filter_group_id;
+
+		} catch (\Throwable $e) {
+
+			$this->db->query("ROLLBACK");
+
+			throw $e;
 		}
 	}
 
