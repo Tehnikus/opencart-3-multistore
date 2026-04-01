@@ -114,7 +114,7 @@ class ControllerCatalogFilter extends Controller {
 		if (isset($this->request->get['sort'])) {
 			$sort = $this->request->get['sort'];
 		} else {
-			$sort = 'fgd.name';
+			$sort = 'name';
 		}
 
 		if (isset($this->request->get['order'])) {
@@ -169,15 +169,22 @@ class ControllerCatalogFilter extends Controller {
 
 		$filter_total = $this->model_catalog_filter->getTotalFilterGroups();
 
+		$this->load->model('setting/store');
+		$data['stores'] = $this->model_setting_store->getMultistores();
 		$results = $this->model_catalog_filter->getFilterGroups($filter_data);
 
-		foreach ($results as $result) {
-			$data['filters'][] = array(
+		foreach ($results as &$result) {
+			$result['edit'] = $this->url->link('catalog/filter/edit', 'user_token=' . $this->session->data['user_token'] . '&filter_group_id=' . $result['filter_group_id'] . $url, true);
+			$data['filters'][] = [
 				'filter_group_id' => $result['filter_group_id'],
-				'name'            => $result['name'],
-				'sort_order'      => $result['sort_order'],
-				'edit'            => $this->url->link('catalog/filter/edit', 'user_token=' . $this->session->data['user_token'] . '&filter_group_id=' . $result['filter_group_id'] . $url, true)
-			);
+        'name' 						=> $result['name'],
+        'values_list' 		=> $result['values_list'],
+        'filter_count' 		=> $result['filter_count'],
+        'sort_order' 			=> $result['sort_order'],
+        'stores' 					=> $result['stores'],
+        'product_count' 	=> $result['product_count'],
+				'edit' 						=> $this->url->link('catalog/filter/edit', 'user_token=' . $this->session->data['user_token'] . '&filter_group_id=' . $result['filter_group_id'] . $url, true),
+			];
 		}
 
 		if (isset($this->error['warning'])) {
@@ -212,8 +219,8 @@ class ControllerCatalogFilter extends Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['sort_name'] = $this->url->link('catalog/filter', 'user_token=' . $this->session->data['user_token'] . '&sort=fgd.name' . $url, true);
-		$data['sort_sort_order'] = $this->url->link('catalog/filter', 'user_token=' . $this->session->data['user_token'] . '&sort=fg.sort_order' . $url, true);
+		$data['sort_name'] = $this->url->link('catalog/filter', 'user_token=' . $this->session->data['user_token'] . '&sort=name' . $url, true);
+		$data['sort_sort_order'] = $this->url->link('catalog/filter', 'user_token=' . $this->session->data['user_token'] . '&sort=fg2s.sort_order' . $url, true);
 
 		$url = '';
 
@@ -246,12 +253,18 @@ class ControllerCatalogFilter extends Controller {
 	}
 
 	protected function getForm() {
-		$data['text_form'] = !isset($this->request->get['filter_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
+		$data['text_form'] = !isset($this->request->get['filter_group_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
 		} else {
 			$data['error_warning'] = '';
+		}
+		
+		if (isset($this->error['stores_association'])) {
+			$data['error_store_association'] = $this->error['stores_association'];
+		} else {
+			$data['error_store_association'] = '';
 		}
 
 		if (isset($this->error['group'])) {
@@ -334,6 +347,13 @@ class ControllerCatalogFilter extends Controller {
 			$data['filters'] = array();
 		}
 
+		// Filter group to store association
+		$this->load->model('setting/store');
+		$data['stores'] = $this->model_setting_store->getMultistores();
+		$data['currentStore'] = $this->session->data['store_id'];
+		$data['stores_association'] = $this->request->post['stores_association'] ?? $this->model_catalog_filter->getStoresAssociation($this->request->get['filter_group_id'] ?? null) ?? [];
+		// End store association
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -346,8 +366,12 @@ class ControllerCatalogFilter extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
+		if (!isset($this->request->post['stores_association']) || empty($this->request->post['stores_association'])) {
+			$this->error['stores_association'] = $this->language->get('error_stores_association');
+		}
+
 		foreach ($this->request->post['filter_group_description'] as $language_id => $value) {
-			if ((utf8_strlen($value['name']) < 1) || (utf8_strlen($value['name']) > 64)) {
+			if ((utf8_strlen($value['name']) < 1) || (utf8_strlen($value['name']) > 255)) {
 				$this->error['group'][$language_id] = $this->language->get('error_group');
 			}
 		}
@@ -355,7 +379,7 @@ class ControllerCatalogFilter extends Controller {
 		if (isset($this->request->post['filter'])) {
 			foreach ($this->request->post['filter'] as $filter_id => $filter) {
 				foreach ($filter['filter_description'] as $language_id => $filter_description) {
-					if ((utf8_strlen($filter_description['name']) < 1) || (utf8_strlen($filter_description['name']) > 64)) {
+					if ((utf8_strlen($filter_description['name']) < 1) || (utf8_strlen($filter_description['name']) > 255)) {
 						$this->error['filter'][$filter_id][$language_id] = $this->language->get('error_name');
 					}
 				}
@@ -381,8 +405,9 @@ class ControllerCatalogFilter extends Controller {
 
 			$filter_data = array(
 				'filter_name' => $this->request->get['filter_name'],
+				'store_id'		=> (int) $this->session->data['store_id'],
 				'start'       => 0,
-				'limit'       => 5
+				'limit'       => 20
 			);
 
 			$filters = $this->model_catalog_filter->getFilters($filter_data);
