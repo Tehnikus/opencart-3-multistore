@@ -7,6 +7,24 @@ class ModelLocalisationLanguage extends Model {
 		$this->cache->delete('admin.language');
 
 		$language_id = $this->db->getLastId();
+		$source_language_id = $this->config->get('config_language_id');
+
+		// Language to store association
+		if (isset($data['stores_association']) && !empty($data['stores_association'])) {
+			foreach ($data['stores_association'] as $store_id) {
+				$this->db->query("
+					INSERT INTO " . DB_PREFIX . "language_to_store
+					SET
+						`language_id` 				= '" . (int) $language_id . "', 
+						`store_id` 		 				= '" . (int) $store_id . "'
+				");
+			}
+		}
+
+		// New language add 
+		return $this->cloneLanguage($language_id, $source_language_id);
+		// RETURN
+		// Next code is left for compatibility with future Github pull requests from base Opencart 3.x.x.x branch
 
 		// Attribute
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "attribute_description WHERE language_id = '" . (int)$this->config->get('config_language_id') . "'");
