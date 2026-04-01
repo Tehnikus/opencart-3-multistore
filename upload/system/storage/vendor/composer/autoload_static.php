@@ -22,10 +22,6 @@ class ComposerStaticInit7e91736ee6f2ba04cea5881fb95f1857
     );
 
     public static $prefixLengthsPsr4 = array (
-        'W' => 
-        array (
-            'Wechat\\' => 7,
-        ),
         'T' => 
         array (
             'Twig\\Extra\\Cache\\' => 17,
@@ -79,10 +75,6 @@ class ComposerStaticInit7e91736ee6f2ba04cea5881fb95f1857
     );
 
     public static $prefixDirsPsr4 = array (
-        'Wechat\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/zoujingli/wechat-php-sdk/Wechat',
-        ),
         'Twig\\Extra\\Cache\\' => 
         array (
             0 => __DIR__ . '/..' . '/twig/cache-extra',

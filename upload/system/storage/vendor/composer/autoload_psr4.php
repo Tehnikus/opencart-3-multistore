@@ -6,7 +6,6 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname(dirname(dirname(dirname($vendorDir))));
 
 return array(
-    'Wechat\\' => array($vendorDir . '/zoujingli/wechat-php-sdk/Wechat'),
     'Twig\\Extra\\Cache\\' => array($vendorDir . '/twig/cache-extra'),
     'Twig\\' => array($vendorDir . '/twig/twig/src'),
     'Tools\\PHPStan\\' => array($baseDir . '/tools/phpstan'),
