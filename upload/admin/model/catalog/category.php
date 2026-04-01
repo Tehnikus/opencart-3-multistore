@@ -665,24 +665,101 @@ class ModelCatalogCategory extends Model {
 		return $query->row;
 	}
 
+	// Get categories list
+	// Used in admin category list AND autocomplete
+	// Regular list should show categories in all stores with related to store
+	// Autocomplete should always have parameter store_id to filter categories by store id
 	public function getCategories($data = array()) {
-		$sql = "SELECT cp.category_id AS category_id, GROUP_CONCAT(cd1.name ORDER BY cp.level SEPARATOR '&nbsp;&nbsp;&gt;&nbsp;&nbsp;') AS name, c1.parent_id, c1.sort_order FROM " . DB_PREFIX . "category_path cp LEFT JOIN " . DB_PREFIX . "category c1 ON (cp.category_id = c1.category_id) LEFT JOIN " . DB_PREFIX . "category c2 ON (cp.path_id = c2.category_id) LEFT JOIN " . DB_PREFIX . "category_description cd1 ON (cp.path_id = cd1.category_id) LEFT JOIN " . DB_PREFIX . "category_description cd2 ON (cp.category_id = cd2.category_id) WHERE cd1.language_id = '" . (int)$this->config->get('config_language_id') . "' AND cd2.language_id = '" . (int)$this->config->get('config_language_id') . "'";
+		$result = [];
+		$where = [];
 
-		if (!empty($data['filter_name'])) {
-			$sql .= " AND cd2.name LIKE '%" . $this->db->escape($data['filter_name']) . "%'";
+		$where[] = "
+			cd.language_id = '" . (int) $this->config->get('config_language_id') . "'
+		";
+
+		// Connect to external table
+		$where[] = "
+			cd.category_id = c.category_id
+		";
+
+		if (isset($data['filter_name'])) {
+			$where[] = "
+				cd.name LIKE '%" . $this->db->escape($data['filter_name']) . "%'
+			";
+		}
+		if (isset($data['store_id'])) {
+			$where[] = "
+				cd.store_id = '" . (int) $data['store_id'] . "'
+			";
 		}
 
-		$sql .= " GROUP BY cp.category_id";
+		$sql = "
+			SELECT
+				c.category_id,
+				c2s.image,
+				c2s.status,
+				c2s.sort_order,
+				c2s.top,
+				c2s.column,
+				(
+					SELECT 
+						GROUP_CONCAT(t.name ORDER BY t.level SEPARATOR '&nbsp;&#9656;&nbsp; ')
+					FROM (
+						SELECT
+							cp.level,
+							(
+								SELECT cd2.name
+								FROM " . DB_PREFIX . "category_description cd2
+								WHERE cd2.category_id = cp.path_id
+								ORDER BY
+									FIELD(cd2.store_id, '" . (int)$this->session->data['store_id'] . "') DESC,
+									FIELD(cd2.language_id, '" . (int)$this->config->get('config_language_id') . "') DESC
+								LIMIT 1
+							) AS name
+					FROM " . DB_PREFIX . "category_path cp
+					WHERE cp.category_id = c.category_id
+						AND cp.store_id = (
+							SELECT cp2.store_id
+							FROM " . DB_PREFIX . "category_path cp2
+							WHERE cp2.category_id = c.category_id
+							ORDER BY FIELD(cp2.store_id, '" . (int)$this->session->data['store_id'] . "') DESC
+							LIMIT 1
+						)
+					) t
+				) AS `name`,
+				(SELECT JSON_OBJECTAGG(c2s.store_id, c2s.status) FROM " . DB_PREFIX . "category_to_store c2s WHERE c2s.category_id = c.category_id) AS status_to_store,
+				(SELECT COUNT(cf.filter_id) FROM " . DB_PREFIX . "category_filter cf WHERE cf.category_id = c.category_id AND cf.store_id = '" . (int) $this->session->data['store_id'] . "') AS filter_count,
+				(SELECT COUNT(p2c.product_id) FROM " . DB_PREFIX . "product_to_category p2c WHERE p2c.category_id = c.category_id AND p2c.store_id = '" . (int) $this->session->data['store_id'] . "') AS product_count,
+				(SELECT JSON_ARRAYAGG(c2s.store_id) FROM " . DB_PREFIX . "category_to_store c2s WHERE c.category_id = c2s.category_id) AS stores
+			FROM " . DB_PREFIX . "category c
+			LEFT JOIN " . DB_PREFIX . "category_to_store c2s
+				ON c2s.category_id = c.category_id
+				AND c2s.store_id = '" . (int) $this->session->data['store_id'] . "' 
+			WHERE EXISTS (
+				SELECT
+					1
+				FROM " . DB_PREFIX . "category_to_store c2s
+        JOIN " . DB_PREFIX . "category_description cd
+          ON cd.category_id = c2s.category_id
+          AND cd.store_id = c2s.store_id
+				WHERE " . implode(' and ', $where) . "
+			)
+		";
 
 		$sort_data = array(
 			'name',
-			'sort_order'
+			'stores',
+			'product_count',
+			'c2s.top',
+			'c2s.parent_id',
+			'c2s.sort_order',
+			'c2s.date_modified'
 		);
 
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-			$sql .= " ORDER BY " . $data['sort'];
+			$sql .= " ORDER BY FIELD(c2s.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, " . $data['sort'];
 		} else {
-			$sql .= " ORDER BY sort_order";
+			$sql .= " ORDER BY FIELD(c2s.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, c2s.sort_order";
 		}
 
 		if (isset($data['order']) && ($data['order'] == 'DESC')) {
@@ -705,7 +782,13 @@ class ModelCatalogCategory extends Model {
 
 		$query = $this->db->query($sql);
 
-		return $query->rows;
+		foreach ($query->rows ?? [] as $row) {
+			$row['stores'] 					= json_decode($row['stores'] ?? '[]');
+			$row['status_to_store'] = json_decode($row['status_to_store'] ?? '[]', true);
+			$result[] = $row;
+		}
+
+		return $result;
 	}
 
 	public function getCategoryDescriptions($category_id) {
