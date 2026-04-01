@@ -174,14 +174,83 @@ class ModelCatalogManufacturer extends Model {
 		}
 	}
 
-	public function deleteManufacturer($manufacturer_id) {
-		$this->db->query("DELETE FROM `" . DB_PREFIX . "manufacturer` WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
-		$this->db->query("DELETE FROM `" . DB_PREFIX . "manufacturer_to_store` WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
-		$this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE query = 'manufacturer_id=" . (int)$manufacturer_id . "'");
+	public function deleteManufacturer($manufacturer_id) : bool {
+		$this->db->query("START TRANSACTION");
+		
+		try {
 
-		$this->cache->delete('manufacturer');
+			$this->db->query("
+				DELETE FROM `" . DB_PREFIX . "manufacturer_to_store` 
+				WHERE manufacturer_id = '" . (int) $manufacturer_id . "'
+					AND store_id 				= '" . (int) $this->session->data['store_id'] . "'
+			");
+
+			$this->db->query("
+				DELETE FROM `" . DB_PREFIX . "manufacturer_description` 
+				WHERE manufacturer_id = '" . (int) $manufacturer_id . "'
+					AND store_id 				= '" . (int) $this->session->data['store_id'] . "'
+			");
+
+			$this->db->query("
+				DELETE FROM `" . DB_PREFIX . "seo_url` 
+				WHERE query 		= 'manufacturer_id=" . (int) $manufacturer_id . "'
+					AND store_id 	= '" . (int) $this->session->data['store_id'] . "'
+			");
+			
+			// Check manufacturer in other stores
+			$manufacturerInOtherStores = $this->db->query("
+				SELECT
+					manufacturer_id
+				FROM " . DB_PREFIX . "manufacturer_to_store
+				WHERE manufacturer_id  = '" . (int) $manufacturer_id . "'
+					AND store_id 		<> '" . (int) $this->session->data['store_id'] . "' 
+			")->num_rows;
+
+			if (!$manufacturerInOtherStores) {
+				$tables = [
+					'manufacturer',
+					'manufacturer_description',
+				];
+
+				// Remove all redundant data if present 
+				foreach ($tables as $table) {
+					$this->db->query("
+						DELETE FROM " . DB_PREFIX . $table . "
+						WHERE manufacturer_id = " . (int) $manufacturer_id
+					);
+				}
+
+				// Cleanup URLs
+				$this->db->query("
+					DELETE FROM " . DB_PREFIX . "seo_url
+					WHERE `query` = 'manufacturer_id=" . (int) $manufacturer_id . "'
+				");
+
+				// Update manufacturer to product connection
+				$this->db->query("
+					UPDATE " . DB_PREFIX . "product
+					SET
+						manufacturer_id = '0'
+					WHERE manufacturer_id = '" . (int) $manufacturer_id . "'
+				");
+				
+			}
+			
+			$this->db->query("COMMIT");
+
+			// Rebuild facet indexes
+			$this->load->model('catalog/facet');
+			$store_id = (int) $this->session->data['store_id'];
+			$this->model_catalog_facet->buildFacetNames(facet_value_id: $manufacturer_id, facet_type: 5, store_id: $store_id);
+			$this->model_catalog_facet->buildFacetIndex(facet_value_id: $manufacturer_id, facet_type: 5, store_id: $store_id);
+
+			return true;
+
+		} catch (\Throwable $e) {
+			$this->db->query("ROLLBACK");
+			throw $e;
+		}
 	}
-
 	public function getManufacturer($manufacturer_id) {
 		$query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "manufacturer WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
 
