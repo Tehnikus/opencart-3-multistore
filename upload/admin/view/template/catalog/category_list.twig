@@ -35,36 +35,74 @@
               <thead>
                 <tr>
                   <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                  <td style="width: 70px" class="text-center">{{ column_image }}</td>
                   <td class="text-left">{% if sort == 'name' %}
                     <a href="{{ sort_name }}" class="{{ order|lower }}">{{ column_name }}</a>
                     {% else %}
                     <a href="{{ sort_name }}">{{ column_name }}</a>
-                    {% endif %}</td>
-                  <td class="text-right">{% if sort == 'sort_order' %}
-                    <a href="{{ sort_sort_order }}" class="{{ order|lower }}">{{ column_sort_order }}</a>
+                    {% endif %}
+                  </td>
+                  <td style="width: 50px" class="text-center"><a href="{{ sort_top }}" {% if sort == 'c2s.top' %}class="{{ order|lower }}"{% endif %}>{{ column_top_category }}</a></td>
+                  <td style="width: 50px" class="text-center">{{ column_filters }}</td>
+                  <td style="width: 50px" class="text-center"><a href="{{ sort_product_count }}" {% if sort == 'product_count' %}class="{{ order|lower }}"{% endif %}>{{ column_product_count }}</a></td>
+                  <td style="width: 50px" class="text-center">
+                    {% if sort == 'c2s.sort_order' %}
+                      <a href="{{ sort_sort_order }}" class="{{ order|lower }}">{{ column_sort_order }}</a>
                     {% else %}
-                    <a href="{{ sort_sort_order }}">{{ column_sort_order }}</a>
-                    {% endif %}</td>
-                  <td class="text-right">{{ column_action }}</td>
+                      <a href="{{ sort_sort_order }}">{{ column_sort_order }}</a>
+                    {% endif %}
+                  </td>
+                  <td style="width: 50px" class="text-center">{{ column_status }}</td>
+                  <td style="width: 50px" class="text-center">{{ column_action }}</td>
                 </tr>
               </thead>
               <tbody>
                 {% if categories %}
                 {% for category in categories %}
                 <tr>
-                  <td class="text-center">{% if category.category_id in selected %}
-                    <input type="checkbox" name="selected[]" value="{{ category.category_id }}" checked="checked" />
+                  <td class="text-center">
+                    {% if category.category_id in selected %}
+                      <input type="checkbox" name="selected[]" value="{{ category.category_id }}" checked="checked" />
                     {% else %}
-                    <input type="checkbox" name="selected[]" value="{{ category.category_id }}" />
-                    {% endif %}</td>
-                  <td class="text-left">{{ category.name }}</td>
-                  <td class="text-right">{{ category.sort_order }}</td>
-                  <td class="text-right"><a href="{{ category.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+                      <input type="checkbox" name="selected[]" value="{{ category.category_id }}" />
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    <img src="{{ category.image }}" class="img-thumbnail" loading="lazy" />
+                  </td>
+                  <td class="text-left">
+                    <p><b>{{ category.name }}</b></p>
+                    <p>
+                      {% for store in stores %}
+                        {% if store.store_id in category.stores %}
+                          {% if category.status_to_store[store.store_id] == 1 %}
+                            <span class="badge alert-success"><i class="fa fa-play"></i>&nbsp;{{ store.name }}</span>
+                          {% else %}
+                            <span class="badge"><i class="fa fa-pause"></i>&nbsp;{{ store.name }}</span>
+                          {% endif %}
+                        {% else %}
+                          <span class="badge alert-danger"><i class="fa fa-times"></i>&nbsp;{{ store.name }}</span>
+                        {% endif %}
+                      {% endfor %}
+                    </p>
+                  </td>
+                  <td class="text-center"><b>{% if category.top %}<i class="fa fa-check text-success"></i>{% else %}<i class="fa fa-times text-muted"></i>{% endif %}</b></td>
+                  <td class="text-center"><b>{{ category.filter_count }}</b></td>
+                  <td class="text-center"><b>{{ category.product_count }}</b></td>
+                  <td class="text-center"><b>{{ category.sort_order }}</b></td>
+                  <td class="text-center">
+                    {% if category.status_to_store[currentStore] == '1' %}
+                      <button class="btn btn-success statusBtn" data-category-id="{{ category.category_id }}" data-category-status="{{ category.status_to_store[currentStore] }}" type="button"><i class="fa fa-play"></i></button>
+                    {% else %}
+                      <button class="btn btn-danger statusBtn" data-category-id="{{ category.category_id }}" data-category-status="{{ category.status_to_store[currentStore] }}" type="button"><i class="fa fa-stop"></i></button>
+                    {% endif %}
+                  </td>
+                  <td class="text-center"><a href="{{ category.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
                 </tr>
                 {% endfor %}
                 {% else %}
                 <tr>
-                  <td class="text-center" colspan="4">{{ text_no_results }}</td>
+                  <td class="text-center" colspan="9">{{ text_no_results }}</td>
                 </tr>
                 {% endif %}
               </tbody>
@@ -79,4 +117,26 @@
     </div>
   </div>
 </div>
+
+{# Change order status btn #}
+<script>
+document.addEventListener('click', async e => {
+  if (e.target.closest('.statusBtn')) {
+    const userToken = "{{ user_token }}";
+    const statusBtn = e.target.closest('.statusBtn');
+    const categoryId = statusBtn.dataset.categoryId
+    const categoryStatus = statusBtn.dataset.categoryStatus
+    const body = new FormData();
+    body.append('category_id', categoryId);
+    body.append('status', categoryStatus);
+
+    let response = await fetch(`index.php?route=catalog/category/fetchSetCategoryStatus&user_token=${userToken}`, {method: "POST", body}).then(r => r.json());
+    if (response.newStatus === 1) {
+      statusBtn.outerHTML = `<button class="btn btn-success statusBtn" data-category-id="${categoryId}" data-category-status="${response.newStatus}" type="button"><i class="fa fa-play"></i></button>`;
+    } else {
+      statusBtn.outerHTML = `<button class="btn btn-danger statusBtn" data-category-id="${categoryId}" data-category-status="${response.newStatus}" type="button"><i class="fa fa-stop"></i></button>`;
+    }
+  }
+})
+</script>
 {{ footer }}

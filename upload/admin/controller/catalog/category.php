@@ -206,13 +206,27 @@ class ControllerCatalogCategory extends Controller {
 
 		foreach ($results as $result) {
 			$data['categories'][] = array(
-				'category_id' => $result['category_id'],
-				'name'        => $result['name'],
-				'sort_order'  => $result['sort_order'],
-				'edit'        => $this->url->link('catalog/category/edit', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $result['category_id'] . $url, true),
-				'delete'      => $this->url->link('catalog/category/delete', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $result['category_id'] . $url, true)
+				'category_id' 		=> $result['category_id'],
+				'image' 					=> ($result['image'] && is_file(DIR_IMAGE . $result['image'])) ? HTTPS_CATALOG . 'image/' . $result['image'] : HTTPS_CATALOG . 'image/no_image.webp',
+				'name'        		=> $result['name'],
+				'sort_order'  		=> $result['sort_order'],
+				'stores'  				=> $result['stores'],
+				'product_count'  	=> $result['product_count'],
+				'filter_count'  	=> $result['filter_count'],
+				'top' 						=> $result['top'],
+				'status' 					=> $result['status'],
+				'status_to_store' => $result['status_to_store'],
+				'edit'        		=> $this->url->link('catalog/category/edit', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $result['category_id'] . $url, true),
+				'delete'      		=> $this->url->link('catalog/category/delete', 'user_token=' . $this->session->data['user_token'] . '&category_id=' . $result['category_id'] . $url, true)
 			);
 		}
+
+		// Get stores list
+		$this->load->model('setting/store');
+		$data['stores'] = $this->model_setting_store->getMultistores();
+		// Get current store context
+		$data['currentStore'] = $this->session->data['store_id'];
+		$data['user_token'] = $this->session->data['user_token'];
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
@@ -246,8 +260,10 @@ class ControllerCatalogCategory extends Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
+		$data['sort_product_count'] = $this->url->link('catalog/category', 'user_token=' . $this->session->data['user_token'] . '&sort=product_count' . $url, true);
+		$data['sort_top'] = $this->url->link('catalog/category', 'user_token=' . $this->session->data['user_token'] . '&sort=c2s.top' . $url, true);
 		$data['sort_name'] = $this->url->link('catalog/category', 'user_token=' . $this->session->data['user_token'] . '&sort=name' . $url, true);
-		$data['sort_sort_order'] = $this->url->link('catalog/category', 'user_token=' . $this->session->data['user_token'] . '&sort=sort_order' . $url, true);
+		$data['sort_sort_order'] = $this->url->link('catalog/category', 'user_token=' . $this->session->data['user_token'] . '&sort=c2s.sort_order' . $url, true);
 
 		$url = '';
 
@@ -294,12 +310,12 @@ class ControllerCatalogCategory extends Controller {
 			$data['error_name'] = array();
 		}
 
-		if (isset($this->error['meta_title'])) {
-			$data['error_meta_title'] = $this->error['meta_title'];
+		if (isset($this->error['category_store'])) {
+			$data['error_category_store'] = $this->error['category_store'];
 		} else {
-			$data['error_meta_title'] = array();
+			$data['error_category_store'] = '';
 		}
-
+		
 		if (isset($this->error['keyword'])) {
 			$data['error_keyword'] = $this->error['keyword'];
 		} else {
@@ -404,31 +420,19 @@ class ControllerCatalogCategory extends Controller {
 		}
 
 		$this->load->model('setting/store');
-
-		$data['stores'] = array();
-
-		$data['stores'][] = array(
-			'store_id' => 0,
-			'name'     => $this->language->get('text_default')
-		);
-
-		$stores = $this->model_setting_store->getStores();
-
-		foreach ($stores as $store) {
-			$data['stores'][] = array(
-				'store_id' => $store['store_id'],
-				'name'     => $store['name']
-			);
-		}
+		$data['stores'] = $this->model_setting_store->getMultistores();
+		// Current store_id to check current store checkbox in stores list
+		$data['currentStore'] = $this->session->data['store_id'];
 
 		if (isset($this->request->post['category_store'])) {
 			$data['category_store'] = $this->request->post['category_store'];
 		} elseif (isset($this->request->get['category_id'])) {
 			$data['category_store'] = $this->model_catalog_category->getCategoryStores($this->request->get['category_id']);
 		} else {
-			$data['category_store'] = array(0);
+			$data['category_store'] = array();
 		}
 
+		// Image
 		if (isset($this->request->post['image'])) {
 			$data['image'] = $this->request->post['image'];
 		} elseif (!empty($category_info)) {
@@ -437,17 +441,16 @@ class ControllerCatalogCategory extends Controller {
 			$data['image'] = '';
 		}
 
-		$this->load->model('tool/image');
 
 		if (isset($this->request->post['image']) && is_file(DIR_IMAGE . $this->request->post['image'])) {
-			$data['thumb'] = $this->model_tool_image->resize($this->request->post['image'], 100, 100);
+			$data['thumb'] = HTTPS_CATALOG . 'image/' . $this->request->post['image'];
 		} elseif (!empty($category_info) && is_file(DIR_IMAGE . $category_info['image'])) {
-			$data['thumb'] = $this->model_tool_image->resize($category_info['image'], 100, 100);
+			$data['thumb'] = HTTPS_CATALOG . 'image/' . $category_info['image'];
 		} else {
-			$data['thumb'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+			$data['thumb'] = HTTPS_CATALOG . 'image/no_image.webp';
 		}
 
-		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+		$data['placeholder'] = HTTPS_CATALOG . 'image/no_image.webp';
 
 		if (isset($this->request->post['top'])) {
 			$data['top'] = $this->request->post['top'];
@@ -513,13 +516,13 @@ class ControllerCatalogCategory extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
+		if (!isset($this->request->post['category_store']) || empty($this->request->post['category_store'])) {
+			$this->error['category_store'] = $this->language->get('error_stores_association');
+		}
+
 		foreach ($this->request->post['category_description'] as $language_id => $value) {
 			if ((utf8_strlen($value['name']) < 1) || (utf8_strlen($value['name']) > 255)) {
 				$this->error['name'][$language_id] = $this->language->get('error_name');
-			}
-
-			if ((utf8_strlen($value['meta_title']) < 1) || (utf8_strlen($value['meta_title']) > 255)) {
-				$this->error['meta_title'][$language_id] = $this->language->get('error_meta_title');
 			}
 		}
 
@@ -590,10 +593,11 @@ class ControllerCatalogCategory extends Controller {
 
 			$filter_data = array(
 				'filter_name' => $this->request->get['filter_name'],
+				'store_id'		=> (int) $this->session->data['store_id'],
 				'sort'        => 'name',
 				'order'       => 'ASC',
 				'start'       => 0,
-				'limit'       => 5
+				'limit'       => 20
 			);
 
 			$results = $this->model_catalog_category->getCategories($filter_data);
@@ -601,7 +605,7 @@ class ControllerCatalogCategory extends Controller {
 			foreach ($results as $result) {
 				$json[] = array(
 					'category_id' => $result['category_id'],
-					'name'        => strip_tags(html_entity_decode($result['name'], ENT_QUOTES, 'UTF-8'))
+					'name'        => strip_tags(html_entity_decode($result['name'] ?? '', ENT_QUOTES, 'UTF-8'))
 				);
 			}
 		}
@@ -613,6 +617,23 @@ class ControllerCatalogCategory extends Controller {
 		}
 
 		array_multisort($sort_order, SORT_ASC, $json);
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function fetchSetCategoryStatus() : void {
+		$categoryId 			= (int) $this->request->post['category_id'];
+		$currentStatus 	= (int) $this->request->post['status'];
+		$newStatus 			= 0;
+
+		if ($currentStatus === 0) {
+			$newStatus = 1;
+		}
+
+		$this->load->model('catalog/category');
+		$newStatus = $this->model_catalog_category->setCategoryStatus($categoryId, $newStatus);
+		$json = ['categoryId' => $categoryId, 'newStatus' => $newStatus];
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
