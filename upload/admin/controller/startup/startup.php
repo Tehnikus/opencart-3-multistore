@@ -1,8 +1,31 @@
 <?php
 class ControllerStartupStartup extends Controller {
 	public function index() {
+
+		// Set current store_id
+		if (!isset($this->session->data['store_id'])) {
+			$this->session->data['store_id'] = (int) $this->config->get('config_store_id');
+		}
+
+		// Switch current store_id by get request
+		if (isset($this->request->get['store_id'])) {
+			$this->session->data['store_id'] = $this->request->get['store_id'];
+		}
+
 		// Settings
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "setting WHERE store_id = '0'");
+		
+		foreach ($query->rows as $setting) {
+			if (!$setting['serialized']) {
+				$this->config->set($setting['key'], $setting['value']);
+			} else {
+				$this->config->set($setting['key'], json_decode($setting['value'], true));
+			}
+		}
+
+		// Get settings from current store excuding store config and merge with default store
+		// This includes modules, themes, etc.
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "setting WHERE store_id = '" . (int) $this->session->data['store_id'] . "' AND `code` <> 'config'");
 		
 		foreach ($query->rows as $setting) {
 			if (!$setting['serialized']) {

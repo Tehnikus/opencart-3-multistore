@@ -57,3 +57,32 @@
     </ul>
     {% endif %} </div>
 </header>
+{# Store switch #}
+<div id="storeSwitch" data-current-store-id="{{ currentStoreId }}">
+  {% for store in stores %}
+    <p>
+      {% if store.storeId == currentStoreId %}
+        <span class="h2 storeLink currentStore alert-success">{{ store.name }}</span>
+      {% else %}
+        <a href="{{ store.storeSwitchLink }}">
+          <span class="h2 storeLink">{{ store.name }}</span>
+        </a>
+      {% endif %}
+    </p>
+  {% endfor %}
+</div>
+
+{# Set store on tab switch #}
+<script>
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible') {
+      const currentStoreId = document.getElementById('storeSwitch')?.dataset?.currentStoreId;
+      const userToken = "{{ user_token }}"
+      try {
+        const response = await fetch(`index.php?route=setting/store/fetchSetCurrentStoreId&user_token=${userToken}&store_id=${currentStoreId}`).then(r => r.json());
+      } catch(e) {
+        console.error(e)
+      }
+    }
+  });
+</script>
