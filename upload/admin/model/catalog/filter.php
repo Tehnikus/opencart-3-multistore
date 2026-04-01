@@ -399,19 +399,58 @@ class ModelCatalogFilter extends Model {
 
 		return $query->row;
 	}
+	
+	// Display filter groups list in admin filters section
+	// Should display all filters from all stores but switch names and values relative to current store id 
+	public function getFilterGroups($data = []) : array {
+		$result = [];
 
-	public function getFilterGroups($data = array()) {
-		$sql = "SELECT * FROM `" . DB_PREFIX . "filter_group` fg LEFT JOIN " . DB_PREFIX . "filter_group_description fgd ON (fg.filter_group_id = fgd.filter_group_id) WHERE fgd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
+		$sql = "
+			SELECT
+				fg.filter_group_id,
+				fg2s.sort_order,
+				(
+					SELECT 
+						fgd.name 
+					FROM " . DB_PREFIX . "filter_group_description fgd 
+					WHERE fgd.filter_group_id = fg.filter_group_id 
+					ORDER BY 
+						FIELD(fgd.store_id, '" . (int) $this->session->data['store_id'] ."') DESC,
+						FIELD(fgd.language_id, '" . (int) $this->config->get('config_language_id') . "') DESC
+						LIMIT 1
+				) AS `name`,
+				(SELECT JSON_ARRAYAGG(fd.name) FROM " . DB_PREFIX . "filter_description fd WHERE fd.filter_group_id = fg.filter_group_id AND fd.language_id = '" . (int) $this->config->get('config_language_id') . "' AND fd.store_id = '" . (int) $this->session->data['store_id'] . "') AS values_list,
+				(
+					SELECT 
+						COUNT(DISTINCT pf.product_id) 
+					FROM " . DB_PREFIX . "product_filter pf 
+					WHERE pf.filter_id IN (
+						SELECT 
+							f.filter_id
+						FROM " . DB_PREFIX . "filter f
+						WHERE f.filter_group_id = fg.filter_group_id
+							AND f.store_id = '" . $this->session->data['store_id'] . "'
+					)
+						AND pf.store_id = '" . $this->session->data['store_id'] . "'
+				) AS product_count,
+				(SELECT COUNT(DISTINCT(f.filter_id)) as filter_count FROM " . DB_PREFIX . "filter f WHERE f.filter_group_id = fg.filter_group_id) AS filter_count,
+				(SELECT JSON_ARRAYAGG(fg2s.store_id) FROM " . DB_PREFIX . "filter_group_to_store fg2s WHERE fg.filter_group_id = fg2s.filter_group_id) AS stores
+			FROM " . DB_PREFIX . "filter_group fg
+			LEFT JOIN " . DB_PREFIX . "filter_group_to_store fg2s 
+				ON fg2s.filter_group_id = fg.filter_group_id
+				AND fg2s.store_id = '" . (int) $this->session->data['store_id'] . "'
+		";
 
 		$sort_data = array(
-			'fgd.name',
-			'fg.sort_order'
+			'name',
+			'fg2s.sort_order'
 		);
 
+		// Order by current store, then by $data['sort']
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-			$sql .= " ORDER BY " . $data['sort'];
+			$sql .= " ORDER BY FIELD(fg2s.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, " . $data['sort'];
 		} else {
-			$sql .= " ORDER BY fgd.name";
+			$sql .= " ORDER BY FIELD(fg2s.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, name";
 		}
 
 		if (isset($data['order']) && ($data['order'] == 'DESC')) {
@@ -433,14 +472,26 @@ class ModelCatalogFilter extends Model {
 		}
 
 		$query = $this->db->query($sql);
+		
+		foreach ($query->rows ?? [] as $row) {
+			$row['stores'] = json_decode($row['stores'] ?? '[]');
+			$row['values_list'] = json_decode($row['values_list'] ?? '[]');
+			$result[] = $row;
+		}
 
-		return $query->rows;
+		return $result;
 	}
-
+	
 	public function getFilterGroupDescriptions($filter_group_id) {
 		$filter_group_data = array();
 
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "filter_group_description WHERE filter_group_id = '" . (int)$filter_group_id . "'");
+		$query = $this->db->query("
+			SELECT 
+				* 
+			FROM " . DB_PREFIX . "filter_group_description 
+			WHERE filter_group_id = '" . (int)$filter_group_id . "'
+				AND store_id = '" . (int) $this->session->data['store_id'] . "'
+		");
 
 		foreach ($query->rows as $result) {
 			$filter_group_data[$result['language_id']] = array('name' => $result['name']);
