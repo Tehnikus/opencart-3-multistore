@@ -23,5 +23,4 @@ return array(
     'Psr\\Container\\' => array($vendorDir . '/psr/container/src'),
     'Psr\\Cache\\' => array($vendorDir . '/psr/cache/src'),
     'League\\Uri\\' => array($vendorDir . '/league/uri', $vendorDir . '/league/uri-interfaces'),
-    'Braintree\\' => array($vendorDir . '/braintree/braintree_php/lib/Braintree'),
 );

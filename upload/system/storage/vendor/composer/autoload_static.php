@@ -46,10 +46,6 @@ class ComposerStaticInit7e91736ee6f2ba04cea5881fb95f1857
         array (
             'League\\Uri\\' => 11,
         ),
-        'B' => 
-        array (
-            'Braintree\\' => 10,
-        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -123,20 +119,6 @@ class ComposerStaticInit7e91736ee6f2ba04cea5881fb95f1857
             0 => __DIR__ . '/..' . '/league/uri',
             1 => __DIR__ . '/..' . '/league/uri-interfaces',
         ),
-        'Braintree\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/braintree/braintree_php/lib/Braintree',
-        ),
-    );
-
-    public static $prefixesPsr0 = array (
-        'B' => 
-        array (
-            'Braintree' => 
-            array (
-                0 => __DIR__ . '/..' . '/braintree/braintree_php/lib',
-            ),
-        ),
     );
 
     public static $classMap = array (
@@ -149,7 +131,6 @@ class ComposerStaticInit7e91736ee6f2ba04cea5881fb95f1857
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit7e91736ee6f2ba04cea5881fb95f1857::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit7e91736ee6f2ba04cea5881fb95f1857::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit7e91736ee6f2ba04cea5881fb95f1857::$prefixesPsr0;
             $loader->classMap = ComposerStaticInit7e91736ee6f2ba04cea5881fb95f1857::$classMap;
 
         }, null, ClassLoader::class);

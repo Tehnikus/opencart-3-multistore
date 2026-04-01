@@ -3,22 +3,13 @@
         'name' => 'opencart/opencart',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'e7dde664c884ddae05d6e338280085bfbaea27b2',
+        'reference' => '61ce8488c7ebdd42f3005e35813cc418f4fd01ef',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../../../../',
         'aliases' => array(),
         'dev' => true,
     ),
     'versions' => array(
-        'braintree/braintree_php' => array(
-            'pretty_version' => '3.40.0',
-            'version' => '3.40.0.0',
-            'reference' => '840fc6ebf8d96756fed475cce94565fef178187d',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../braintree/braintree_php',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
         'league/uri' => array(
             'pretty_version' => '7.5.1',
             'version' => '7.5.1.0',
@@ -40,7 +31,7 @@
         'opencart/opencart' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'e7dde664c884ddae05d6e338280085bfbaea27b2',
+            'reference' => '61ce8488c7ebdd42f3005e35813cc418f4fd01ef',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../../../../',
             'aliases' => array(),
