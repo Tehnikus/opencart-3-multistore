@@ -34,7 +34,7 @@ class ControllerCommonFileManager extends Controller {
 
 		$data['images'] = array();
 
-		$this->load->model('tool/image');
+		// $this->load->model('tool/image');
 
 		if (substr(str_replace('\\', '/', realpath($directory) . '/' . $filter_name), 0, strlen(DIR_IMAGE . 'catalog')) == str_replace('\\', '/', DIR_IMAGE . 'catalog')) {
 			// Get directories
@@ -84,7 +84,7 @@ class ControllerCommonFileManager extends Controller {
 				);
 			} elseif (is_file($image)) {
 				$data['images'][] = array(
-					'thumb' => $this->model_tool_image->resize(utf8_substr($image, utf8_strlen(DIR_IMAGE)), 100, 100),
+					'thumb' => $server . 'image/' . utf8_substr($image, utf8_strlen(DIR_IMAGE)),
 					'name'  => implode(' ', $name),
 					'type'  => 'image',
 					'path'  => utf8_substr($image, utf8_strlen(DIR_IMAGE)),
