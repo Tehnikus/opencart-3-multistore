@@ -174,11 +174,17 @@ class ControllerCatalogManufacturer extends Controller {
 		foreach ($results as $result) {
 			$data['manufacturers'][] = array(
 				'manufacturer_id' => $result['manufacturer_id'],
+				'image' 					=> ($result['image'] && is_file(DIR_IMAGE . $result['image'])) ? HTTPS_CATALOG . 'image/' . $result['image'] : HTTPS_CATALOG . 'image/no_image.webp',
 				'name'            => $result['name'],
 				'sort_order'      => $result['sort_order'],
+				'stores'      		=> $result['stores'],
+				'product_count'   => $result['product_count'],
 				'edit'            => $this->url->link('catalog/manufacturer/edit', 'user_token=' . $this->session->data['user_token'] . '&manufacturer_id=' . $result['manufacturer_id'] . $url, true)
 			);
 		}
+
+		$this->load->model('setting/store');
+		$data['stores'] = $this->model_setting_store->getMultistores();
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
@@ -213,7 +219,8 @@ class ControllerCatalogManufacturer extends Controller {
 		}
 
 		$data['sort_name'] = $this->url->link('catalog/manufacturer', 'user_token=' . $this->session->data['user_token'] . '&sort=name' . $url, true);
-		$data['sort_sort_order'] = $this->url->link('catalog/manufacturer', 'user_token=' . $this->session->data['user_token'] . '&sort=sort_order' . $url, true);
+		$data['product_count'] = $this->url->link('catalog/manufacturer', 'user_token=' . $this->session->data['user_token'] . '&sort=product_count' . $url, true);
+		$data['sort_sort_order'] = $this->url->link('catalog/manufacturer', 'user_token=' . $this->session->data['user_token'] . '&sort=m2s.sort_order' . $url, true);
 
 		$url = '';
 
@@ -258,6 +265,12 @@ class ControllerCatalogManufacturer extends Controller {
 			$data['error_name'] = $this->error['name'];
 		} else {
 			$data['error_name'] = '';
+		}
+
+		if (isset($this->error['stores_association'])) {
+			$data['error_store_association'] = $this->error['stores_association'];
+		} else {
+			$data['error_store_association'] = '';
 		}
 
 		if (isset($this->error['keyword'])) {
@@ -316,29 +329,10 @@ class ControllerCatalogManufacturer extends Controller {
 
 		$this->load->model('setting/store');
 
-		$data['stores'] = array();
-
-		$data['stores'][] = array(
-			'store_id' => 0,
-			'name'     => $this->language->get('text_default')
-		);
-
-		$stores = $this->model_setting_store->getStores();
-
-		foreach ($stores as $store) {
-			$data['stores'][] = array(
-				'store_id' => $store['store_id'],
-				'name'     => $store['name']
-			);
-		}
-
-		if (isset($this->request->post['manufacturer_store'])) {
-			$data['manufacturer_store'] = $this->request->post['manufacturer_store'];
-		} elseif (isset($this->request->get['manufacturer_id'])) {
-			$data['manufacturer_store'] = $this->model_catalog_manufacturer->getManufacturerStores($this->request->get['manufacturer_id']);
-		} else {
-			$data['manufacturer_store'] = array(0);
-		}
+		$data['stores'] = $this->model_setting_store->getMultistores();
+		$data['currentStore'] = $this->session->data['store_id'];
+		$data['manufacturer_store'] = $this->request->post['manufacturer_store'] ?? $this->model_catalog_manufacturer->getManufacturerStores($this->request->get['manufacturer_id'] ?? null) ?? [];
+		$data['manufacturer_description'] = $this->request->post['manufacturer_description'] ?? $this->model_catalog_manufacturer->getManufacturerDescriptions($this->request->get['manufacturer_id'] ?? null) ?? [];
 
 		if (isset($this->request->post['image'])) {
 			$data['image'] = $this->request->post['image'];
@@ -348,17 +342,15 @@ class ControllerCatalogManufacturer extends Controller {
 			$data['image'] = '';
 		}
 
-		$this->load->model('tool/image');
-
 		if (isset($this->request->post['image']) && is_file(DIR_IMAGE . $this->request->post['image'])) {
-			$data['thumb'] = $this->model_tool_image->resize($this->request->post['image'], 100, 100);
+			$data['thumb'] = HTTPS_CATALOG . 'image/' . $this->request->post['image'];
 		} elseif (!empty($manufacturer_info) && is_file(DIR_IMAGE . $manufacturer_info['image'])) {
-			$data['thumb'] = $this->model_tool_image->resize($manufacturer_info['image'], 100, 100);
+			$data['thumb'] = HTTPS_CATALOG . 'image/' . $manufacturer_info['image'];
 		} else {
-			$data['thumb'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+			$data['thumb'] = HTTPS_CATALOG . 'image/no_image.webp';
 		}
 
-		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+		$data['placeholder'] = HTTPS_CATALOG . 'image/no_image.webp';
 
 		if (isset($this->request->post['sort_order'])) {
 			$data['sort_order'] = $this->request->post['sort_order'];
@@ -392,8 +384,14 @@ class ControllerCatalogManufacturer extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		if ((utf8_strlen($this->request->post['name']) < 1) || (utf8_strlen($this->request->post['name']) > 64)) {
-			$this->error['name'] = $this->language->get('error_name');
+		if (!isset($this->request->post['manufacturer_store']) || empty($this->request->post['manufacturer_store'])) {
+			$this->error['stores_association'] = $this->language->get('error_stores_association');
+		}
+
+		foreach ($this->request->post['manufacturer_description'] as $language_id => $value) {
+			if ((utf8_strlen($value['name']) < 1) || (utf8_strlen($value['name']) > 255)) {
+				$this->error['name'][$language_id] = $this->language->get('error_name');
+			}
 		}
 
 		if ($this->request->post['manufacturer_seo_url']) {
@@ -447,8 +445,9 @@ class ControllerCatalogManufacturer extends Controller {
 
 			$filter_data = array(
 				'filter_name' => $this->request->get['filter_name'],
+				'store_id'		=> $this->session->data['store_id'],
 				'start'       => 0,
-				'limit'       => 5
+				'limit'       => 20
 			);
 
 			$results = $this->model_catalog_manufacturer->getManufacturers($filter_data);
