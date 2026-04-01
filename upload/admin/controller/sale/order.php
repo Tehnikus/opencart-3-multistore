@@ -1531,7 +1531,7 @@ class ControllerSaleOrder extends Controller {
 					$store_telephone = $store_info['config_telephone'];
 					$store_fax = $store_info['config_fax'];
 				} else {
-					$store_address = $this->config->get('config_address');
+					$store_address = $this->config->get('config_address')[$order_info['language_id']];
 					$store_email = $this->config->get('config_email');
 					$store_telephone = $this->config->get('config_telephone');
 					$store_fax = $this->config->get('config_fax');
@@ -1743,7 +1743,7 @@ class ControllerSaleOrder extends Controller {
 					$store_email = $store_info['config_email'];
 					$store_telephone = $store_info['config_telephone'];
 				} else {
-					$store_address = $this->config->get('config_address');
+					$store_address = $this->config->get('config_address')[$order_info['language_id']];
 					$store_email = $this->config->get('config_email');
 					$store_telephone = $this->config->get('config_telephone');
 				}
