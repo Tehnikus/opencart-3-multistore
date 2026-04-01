@@ -155,4 +155,111 @@ class ModelSettingStore extends Model {
 
 		return $query->row['total'];
 	}
+
+	public function getMultistores() {
+		$stores = [];
+
+		$stores[0] = [
+			'store_id' => 0,
+			'name'     => $this->config->get('config_name'),
+			'url'	     => HTTPS_CATALOG
+		];
+
+		$multiStores = $this->getStores();
+
+		foreach ($multiStores as $store) {
+			$stores[(int) $store['store_id']] = [
+				'store_id' => (int) $store['store_id'],
+				'name'     => $store['name'],
+				'url'	     => $this->request->server['HTTPS'] ? $store['ssl'] : $store['url'],
+			];
+		}
+
+		return $stores;
+	}
+
+	// Language to store association
+		public function getLanguagesAssociation($id = null) : array {
+		$result = [];
+
+		if (!isset($id)) {
+			$id === 0;
+		}
+
+		// Get stores association
+		$storeData = $this->db->query("
+			SELECT
+				language_id
+			FROM `" . DB_PREFIX . "language_to_store`
+			WHERE store_id = '" . (int) $id . "'
+		");
+		foreach ($storeData->rows as $store) {
+			$result[] = $store['language_id']; 
+		}
+
+		return $result;
+	}
+
+	public function cloneLayouts($targetStoreId) : array {
+		
+	$layoutMap = [];
+		// Get default store layouts
+		$layouts = $this->db->query("
+			SELECT 
+				* 
+			FROM " . DB_PREFIX . "layout
+			WHERE store_id = 0
+		")->rows;
+
+		// Copy new layouts with new store_id and map them to create associated routes
+		foreach ($layouts as $layout) {
+			$this->db->query("
+				INSERT INTO " . DB_PREFIX . "layout
+				SET 
+					name 			= '" . $this->db->escape($layout['name']) . "',
+					store_id 	= '" . (int) $targetStoreId . "'
+			");
+			$new_layout_id = $this->db->getLastId();
+			$layoutMap[$layout['layout_id']] = $new_layout_id;
+		}
+
+		// Copy routes
+		foreach ($layoutMap as $oldId => $newId) {
+			// Get routes from default store
+			$routes = $this->db->query("
+				SELECT 
+					*
+				FROM " . DB_PREFIX . "layout_route
+				WHERE layout_id = '" . (int) $oldId . "'
+					AND store_id = 0
+			")->rows;
+
+			// Copy each route and assign new layout_id as its parent
+			foreach ($routes as $route) {
+				$this->db->query("
+					INSERT INTO " . DB_PREFIX . "layout_route
+					SET 
+						layout_id   = '" . (int) $newId . "',
+						store_id    = '" . (int) $targetStoreId . "',
+						route       = '" . $this->db->escape($route['route']) . "',
+						is_wildcard = '" . (int) $route['is_wildcard'] . "'
+				");
+			}
+		}
+
+		return $layoutMap;
+	}
+
+	// Get all themes, installed and not installed
+	public function getAllThemes() : array {
+		$themes = [];
+
+		$directories = glob(DIR_CATALOG . 'view/theme/*', GLOB_ONLYDIR);
+
+		foreach ($directories as $directory) {
+			$themes[] = basename($directory);
+		}
+
+		return $themes;
+	}
 }
