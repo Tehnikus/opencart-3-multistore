@@ -57,19 +57,96 @@ class ModelCatalogAttributeGroup extends Model {
 		}
 	}
 
-	public function editAttributeGroup($attribute_group_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "attribute_group SET sort_order = '" . (int)$data['sort_order'] . "' WHERE attribute_group_id = '" . (int)$attribute_group_id . "'");
+	public function editAttributeGroup($attribute_group_id, $data) : int {
 
-		$this->db->query("DELETE FROM " . DB_PREFIX . "attribute_group_description WHERE attribute_group_id = '" . (int)$attribute_group_id . "'");
+		$this->db->query("START TRANSACTION");
 
-		foreach ($data['attribute_group_description'] as $language_id => $value) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "attribute_group_description SET attribute_group_id = '" . (int)$attribute_group_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "'");
+		try {
+			$this->db->query("
+				UPDATE " . DB_PREFIX . "attribute_group 
+				SET 
+					sort_order = '" . (int)$data['sort_order'] . "' 
+				WHERE attribute_group_id = '" . (int)$attribute_group_id . "'
+			");
+	
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "attribute_group_description 
+				WHERE attribute_group_id = '" . (int)$attribute_group_id . "'
+					AND store_id = '" . (int) $this->session->data['store_id'] . "'
+			");
+	
+			foreach ($data['attribute_group_description'] as $language_id => $value) {
+				$this->db->query("
+					INSERT INTO " . DB_PREFIX . "attribute_group_description 
+					SET 
+						attribute_group_id = '" . (int)$attribute_group_id . "', 
+						language_id = '" . (int)$language_id . "', 
+						store_id = '" . (int) $this->session->data['store_id'] . "', 
+						name = '" . $this->db->escape($value['name']) . "'
+				");
+			}
+	
+			// Stores association
+			// Remove all unselected stores
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "attribute_group_to_store
+				WHERE `attribute_group_id` 	= '" . (int) $attribute_group_id . "'
+					AND `store_id` NOT IN (" . implode(',', array_map('intval', $data['stores_association'])) . ")
+			");
+
+			// Remove only current store no matter if it's selected
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "attribute_group_to_store
+				WHERE `attribute_group_id` 	= '" . (int) $attribute_group_id . "'
+					AND `store_id` = '" . (int) $this->session->data['store_id'] . "'
+			");
+
+			// Write store association and store related data
+			if (isset($data['stores_association']) && !empty($data['stores_association'])) {
+				foreach ($data['stores_association'] as $store_id) {
+					// Set data for current store
+					if (((int) $store_id) === ((int) $this->session->data['store_id'])) {
+						$this->db->query("
+						INSERT INTO " . DB_PREFIX . "attribute_group_to_store
+						SET
+							`attribute_group_id` 	= '" . (int) $attribute_group_id . "', 
+							`store_id` 						= '" . (int) $store_id . "',
+							`sort_order` 					= '" . (int) $data['sort_order'] . "'
+						");
+					} else {
+						// Skip if data for other stores already exists
+						$this->db->query("
+							INSERT IGNORE INTO " . DB_PREFIX . "attribute_group_to_store
+							SET
+								`attribute_group_id` 	= '" . (int) $attribute_group_id . "', 
+								`store_id` 						= '" . (int) $store_id . "',
+								`sort_order` 					= '" . (int) $data['sort_order'] . "'
+						");
+					}
+				}
+			}
+			// End stores association
+
+			$this->db->query("COMMIT");
+
+			// Delete cache
+			$this->deleteCache($attribute_group_id);
+			
+			// Rebuild facet indexes
+			$this->load->model('catalog/facet');
+			$store_id = (int) $this->session->data['store_id'];
+			$this->model_catalog_facet->buildFacetNames(facet_group_id: $attribute_group_id, facet_type: 4, store_id: $store_id);
+
+			return $attribute_group_id;
+			
+		} catch (\Throwable $e) {
+
+			$this->db->query("ROLLBACK");
+			
+			throw $e;
 		}
+		
 	}
-
-	public function deleteAttributeGroup($attribute_group_id) {
-		$this->db->query("DELETE FROM " . DB_PREFIX . "attribute_group WHERE attribute_group_id = '" . (int)$attribute_group_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "attribute_group_description WHERE attribute_group_id = '" . (int)$attribute_group_id . "'");
 	}
 
 	public function getAttributeGroup($attribute_group_id) {
