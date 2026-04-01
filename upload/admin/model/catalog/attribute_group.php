@@ -147,6 +147,84 @@ class ModelCatalogAttributeGroup extends Model {
 		}
 		
 	}
+
+	public function deleteAttributeGroup($attribute_group_id) : bool {
+
+		$this->db->query("START TRANSACTION");
+
+		try {
+
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "attribute_group_description 
+				WHERE attribute_group_id 	= '" . (int) $attribute_group_id . "'
+					AND store_id 						= '" . (int) $this->session->data['store_id'] . "'
+			");
+
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "attribute_group_to_store
+				WHERE attribute_group_id 	= '" . (int) $attribute_group_id . "'
+					AND store_id 						= '" . (int) $this->session->data['store_id'] . "'
+			");
+
+			// Check if attribute group is present in other stores
+			$attributeGroupInOtherStores = $this->db->query("
+				SELECT
+					attribute_group_id
+				FROM " . DB_PREFIX . "attribute_group_to_store
+				WHERE attribute_group_id  = '" . (int) $attribute_group_id . "'
+					AND store_id 						<> '" . (int) $this->session->data['store_id'] . "' 
+			")->num_rows;
+
+			// Delete attributes in this group and current store
+			$attributesInGroup = $this->db->query("
+				SELECT
+					attribute_id
+				FROM " . DB_PREFIX . "attribute_to_store
+				WHERE attribute_group_id = '" . (int) $attribute_group_id . "'
+					AND store_id = '" . (int) $this->session->data['store_id'] . "'
+			")->rows;
+
+			$this->load->model('catalog/attribute');
+			foreach ($attributesInGroup as $attribute) {
+				$this->model_catalog_attribute->deleteAttribute($attribute['attribute_id']);
+			}
+
+			// Delete all attribute group data rows if attribute group is not present in any other store
+			if (!$attributeGroupInOtherStores) {
+				$tables = [
+					'attribute',
+					'attribute_group',
+					'attribute_group_description',
+				];
+
+				// Remove all redundant data if present 
+				foreach ($tables as $table) {
+					$this->db->query("
+						DELETE FROM " . DB_PREFIX . $table . "
+						WHERE attribute_group_id = " . (int) $attribute_group_id
+					);
+				}				
+			}
+
+			$this->db->query("COMMIT");
+
+			// Delete cache
+			$this->deleteCache($attribute_group_id);
+
+			// Rebuild facet indexes
+			$this->load->model('catalog/facet');
+			$store_id = (int) $this->session->data['store_id'];
+			$this->model_catalog_facet->buildFacetNames(facet_group_id: $attribute_group_id, facet_type: 4, store_id: $store_id);
+			
+			return true;
+			
+		} catch (\Throwable $e) {
+
+			$this->db->query("ROLLBACK");
+
+			throw $e;
+		}
+		
 	}
 
 	public function getAttributeGroup($attribute_group_id) {
