@@ -35,13 +35,12 @@ class DB {
 	}
 
 	/**
-     * 
-     *
-     * @param	string	$sql
-	 * 
-	 * @return	array
-     */
-	public function query($sql) {
+	 * Summary of query
+	 * @param mixed $sql
+	 * @throws \Exception
+	 * @return bool|\stdClass
+	 */
+	public function query($sql): mixed {
 		return $this->adaptor->query($sql);
 	}
 
