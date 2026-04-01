@@ -935,4 +935,44 @@ class ModelCatalogCategory extends Model {
 		return (int) $newStatus;
 	}
 
+	// Delete cache
+	public function deleteCache($category_id, $store_id = null) : void {
+		
+		if ($store_id === null) {
+			$store_id = (int) $this->session->data['store_id'];
+		}
+		$this->load->model('localisation/language');
+		$languages = $this->model_localisation_language->getLanguages();
+		$parent_id = $this->db->query("
+			SELECT
+				parent_id
+			FROM " . DB_PREFIX . "category_to_store
+			WHERE category_id = {$category_id}
+			AND store_id = {$store_id}
+		")->row['parent_id'] ?? 0;
+
+		foreach ($languages as $language) {
+			$language_id = $language['language_id'];
+
+			// Main cache
+			$categoryCacheName 	= "category.store_{$store_id}.language_{$language_id}." . (floor($category_id / 100)) . "00.category_{$category_id}";
+			$this->cache->delete($categoryCacheName);
+
+			// Filter cache
+			$filterCacheName = "category.store_{$store_id}.language_{$language_id}." . (floor($category_id / 100)) . "00.filters_{$category_id}";
+			$this->cache->delete($filterCacheName);
+
+			// Children categories cache of this category 
+			$childrenCacheName 	= "category.store_{$store_id}.language_{$language_id}." . (floor($parent_id / 100)) . "00.child_categories_{$category_id}";
+			$this->cache->delete($childrenCacheName);
+
+			// Children categories cache of parent category 
+			$parentCacheName 	= "category.store_{$store_id}.language_{$language_id}." . (floor($parent_id / 100)) . "00.child_categories_{$parent_id}";
+			$this->cache->delete($parentCacheName);
+
+			// URL cache
+			$urlCacheName = "url.store_{$store_id}.language_{$language_id}.url";
+			$this->cache->delete($urlCacheName);
+		}
+	}
 }
