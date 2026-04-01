@@ -89,7 +89,7 @@ class ModelSettingStore extends Model {
 }
 
 	public function getStore($store_id) {
-		$query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "store WHERE store_id = '" . (int)$store_id . "'");
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "store WHERE store_id = '" . (int)$store_id . "'");
 
 		return $query->row;
 	}
