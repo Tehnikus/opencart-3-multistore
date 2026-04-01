@@ -19,17 +19,12 @@ class ComposerStaticInit7e91736ee6f2ba04cea5881fb95f1857
         'ffecb95d45175fd40f75be8a23b34f90' => __DIR__ . '/..' . '/twig/twig/src/Resources/debug.php',
         'c7baa00073ee9c61edf148c51917cfb4' => __DIR__ . '/..' . '/twig/twig/src/Resources/escaper.php',
         'f844ccf1d25df8663951193c3fc307c8' => __DIR__ . '/..' . '/twig/twig/src/Resources/string_loader.php',
-        'c8e8d17e7ab157f630af324c6fb87d41' => __DIR__ . '/..' . '/zoujingli/wechat-developer/helper.php',
     );
 
     public static $prefixLengthsPsr4 = array (
         'W' => 
         array (
             'Wechat\\' => 7,
-            'WePay\\' => 6,
-            'WePayV3\\' => 8,
-            'WeMini\\' => 7,
-            'WeChat\\' => 7,
         ),
         'T' => 
         array (
@@ -81,32 +76,12 @@ class ComposerStaticInit7e91736ee6f2ba04cea5881fb95f1857
         array (
             'Braintree\\' => 10,
         ),
-        'A' => 
-        array (
-            'AliPay\\' => 7,
-        ),
     );
 
     public static $prefixDirsPsr4 = array (
         'Wechat\\' => 
         array (
             0 => __DIR__ . '/..' . '/zoujingli/wechat-php-sdk/Wechat',
-        ),
-        'WePay\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/zoujingli/wechat-developer/WePay',
-        ),
-        'WePayV3\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/zoujingli/wechat-developer/WePayV3',
-        ),
-        'WeMini\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/zoujingli/wechat-developer/WeMini',
-        ),
-        'WeChat\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/zoujingli/wechat-developer/WeChat',
         ),
         'Twig\\Extra\\Cache\\' => 
         array (
@@ -226,10 +201,6 @@ class ComposerStaticInit7e91736ee6f2ba04cea5881fb95f1857
         array (
             0 => __DIR__ . '/..' . '/braintree/braintree_php/lib/Braintree',
         ),
-        'AliPay\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/zoujingli/wechat-developer/AliPay',
-        ),
     );
 
     public static $prefixesPsr0 = array (
@@ -252,7 +223,6 @@ class ComposerStaticInit7e91736ee6f2ba04cea5881fb95f1857
         'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
         'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
         'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
-        'We' => __DIR__ . '/..' . '/zoujingli/wechat-developer/We.php',
         '©' => __DIR__ . '/..' . '/symfony/cache/Traits/ValueWrapper.php',
     );
 

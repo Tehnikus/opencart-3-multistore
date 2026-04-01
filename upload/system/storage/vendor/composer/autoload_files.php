@@ -18,5 +18,4 @@ return array(
     'ffecb95d45175fd40f75be8a23b34f90' => $vendorDir . '/twig/twig/src/Resources/debug.php',
     'c7baa00073ee9c61edf148c51917cfb4' => $vendorDir . '/twig/twig/src/Resources/escaper.php',
     'f844ccf1d25df8663951193c3fc307c8' => $vendorDir . '/twig/twig/src/Resources/string_loader.php',
-    'c8e8d17e7ab157f630af324c6fb87d41' => $vendorDir . '/zoujingli/wechat-developer/helper.php',
 );
