@@ -297,27 +297,19 @@ class ModelLocalisationLanguage extends Model {
 
 			return $query->rows;
 		} else {
-			$language_data = $this->cache->get('admin.language');
-
-			if (!$language_data) {
-				$language_data = array();
-
-				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "language ORDER BY sort_order, name");
-
-				foreach ($query->rows as $result) {
-					$language_data[$result['code']] = array(
-						'language_id' => $result['language_id'],
-						'name'        => $result['name'],
-						'code'        => $result['code'],
-						'locale'      => $result['locale'],
-						'image'       => $result['image'],
-						'directory'   => $result['directory'],
-						'sort_order'  => $result['sort_order'],
-						'status'      => $result['status']
-					);
-				}
-
-				$this->cache->set('admin.language', $language_data);
+			$language_data = array();
+			$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "language ORDER BY sort_order, name");
+			foreach ($query->rows as $result) {
+				$language_data[$result['code']] = array(
+					'language_id' => $result['language_id'],
+					'name'        => $result['name'],
+					'code'        => $result['code'],
+					'locale'      => $result['locale'],
+					'image'       => $result['image'],
+					'directory'   => $result['directory'],
+					'sort_order'  => $result['sort_order'],
+					'status'      => $result['status']
+				);
 			}
 
 			return $language_data;
