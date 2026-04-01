@@ -223,18 +223,34 @@ class ModelLocalisationLanguage extends Model {
 			$this->db->query("UPDATE " . DB_PREFIX . "setting SET value = '" . $this->db->escape($data['code']) . "' WHERE `key` = 'config_language' AND value = '" . $this->db->escape($language_query->row['code']) . "'");
 			$this->db->query("UPDATE " . DB_PREFIX . "setting SET value = '" . $this->db->escape($data['code']) . "' WHERE `key` = 'config_admin_language' AND value = '" . $this->db->escape($language_query->row['code']) . "'");
 		}
-		
-		$this->cache->delete('catalog.language');
-		$this->cache->delete('admin.language');
+
+		// Language to store association
+		$this->db->query("
+			DELETE FROM " . DB_PREFIX . "language_to_store
+			WHERE language_id = '" . (int) $language_id . "'
+		");
+
+		if (isset($data['stores_association']) && !empty($data['stores_association'])) {
+			foreach ($data['stores_association'] as $store_id) {
+				$this->db->query("
+					INSERT INTO " . DB_PREFIX . "language_to_store
+					SET
+						`language_id` 				= '" . (int) $language_id . "', 
+						`store_id` 		 				= '" . (int) $store_id . "'
+				");
+			}
+		}
 	}
 	
 	public function deleteLanguage($language_id) {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "language WHERE language_id = '" . (int)$language_id . "'");
  		$this->db->query("DELETE FROM " . DB_PREFIX . "seo_url WHERE language_id = '" . (int)$language_id . "'"); 
-		
-		$this->cache->delete('catalog.language');
-		$this->cache->delete('admin.language');
 
+		// Language to store association
+		$this->db->query("
+			DELETE FROM " . DB_PREFIX . "language_to_store
+			WHERE language_id = '" . (int) $language_id . "'
+		");
 	}
 
 	public function getLanguage($language_id) {
