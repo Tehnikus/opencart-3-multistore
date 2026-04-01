@@ -184,18 +184,104 @@ class ModelCatalogInformation extends Model {
 				");
 			}
 		}
-
-		$this->cache->delete('information');
 	}
 
-	public function deleteInformation($information_id) {
-		$this->db->query("DELETE FROM `" . DB_PREFIX . "information` WHERE information_id = '" . (int)$information_id . "'");
-		$this->db->query("DELETE FROM `" . DB_PREFIX . "information_description` WHERE information_id = '" . (int)$information_id . "'");
-		$this->db->query("DELETE FROM `" . DB_PREFIX . "information_to_store` WHERE information_id = '" . (int)$information_id . "'");
-		$this->db->query("DELETE FROM `" . DB_PREFIX . "information_to_layout` WHERE information_id = '" . (int)$information_id . "'");
-		$this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE query = 'information_id=" . (int)$information_id . "'");
+	public function deleteInformation($information_id) : bool {
+		
+		$this->db->query("START TRANSACTION");
+		try {
+			$this->db->query("
+				DELETE FROM `" . DB_PREFIX . "information_description` 
+				WHERE `information_id` = '" . (int) $information_id . "'
+					AND `store_id` = '" . (int) $this->session->data['store_id'] . "'
+			");
+			$this->db->query("
+				DELETE FROM `" . DB_PREFIX . "information_to_store` 
+				WHERE information_id = '" . (int) $information_id . "'
+					AND `store_id` = '" . (int) $this->session->data['store_id'] . "'
+			");
+			$this->db->query("
+				DELETE FROM `" . DB_PREFIX . "information_to_layout` 
+				WHERE `information_id` = '" . (int) $information_id . "'
+					AND `store_id` = '" . (int) $this->session->data['store_id'] . "'
+			");
+			$this->db->query("
+				DELETE FROM `" . DB_PREFIX . "seo_url` 
+				WHERE `query` = 'information_id=" . (int) $information_id . "'
+					AND `store_id` = '" . (int) $this->session->data['store_id'] . "'
+			");
+	
+			// Update information store configs
+			$this->db->query("
+				UPDATE " . DB_PREFIX . "setting
+					SET `value` = '0'
+				WHERE `key` 			= 'config_account_id'
+					AND	`value` 		= '" . (int) $information_id . "'
+					AND `store_id` 	= '" . (int) $this->session->data['store_id'] . "' 
+			");
+			$this->db->query("
+				UPDATE " . DB_PREFIX . "setting
+					SET `value` = '0'
+				WHERE `key` 			= 'config_checkout_id'
+					AND	`value` 		= '" . (int) $information_id . "'
+					AND `store_id` 	= '" . (int) $this->session->data['store_id'] . "' 
+			");
+			$this->db->query("
+				UPDATE " . DB_PREFIX . "setting
+					SET `value` = '0'
+				WHERE `key` 			= 'config_affiliate_id'
+					AND	`value` 		= '" . (int) $information_id . "'
+					AND `store_id` 	= '" . (int) $this->session->data['store_id'] . "' 
+			");
+			$this->db->query("
+				UPDATE " . DB_PREFIX . "setting
+					SET `value` = '0'
+				WHERE `key` 			= 'config_return_id'
+					AND	`value` 		= '" . (int) $information_id . "'
+					AND `store_id` 	= '" . (int) $this->session->data['store_id'] . "' 
+			");
+	
+			// Next code will fully delete every information data if it is not associated to any store
+			// Check if information present in other stores
+			$informationInOtherStores = $this->db->query("
+				SELECT
+					information_id
+				FROM " . DB_PREFIX . "information_to_store
+				WHERE information_id  = '" . (int) $information_id . "'
+					AND store_id 				<> '" . (int) $this->session->data['store_id'] . "' 
+			")->num_rows;
+			
+			// Delete all information data row if information is not present in any other store
+			if (!$informationInOtherStores) {
+				$tables = [
+					'information',
+					'information_description',
+					'information_to_layout',
+				];
+	
+				// Remove all redundant data if present 
+				foreach ($tables as $table) {
+					$this->db->query("
+						DELETE FROM " . DB_PREFIX . $table . "
+						WHERE information_id = " . (int) $information_id
+					);
+				}
+	
+				// Cleanup URLs
+				$this->db->query("
+					DELETE FROM " . DB_PREFIX . "seo_url
+					WHERE `query` = 'information_id=" . (int) $information_id . "'
+				");
+			}
 
-		$this->cache->delete('information');
+			$this->db->query("COMMIT");
+
+			return true;
+			
+		} catch (\Throwable $e) {
+			$this->db->query("ROLLBACK");
+			throw $e;
+		}
 	}
 
 	public function getInformation($information_id) {
