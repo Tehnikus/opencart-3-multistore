@@ -175,6 +175,8 @@ class ControllerDesignLayout extends Controller {
 			$data['layouts'][] = array(
 				'layout_id' => $result['layout_id'],
 				'name'      => $result['name'],
+				'route'			=> $result['route'],
+				'modules'		=> $result['modules'],
 				'edit'      => $this->url->link('design/layout/edit', 'user_token=' . $this->session->data['user_token'] . '&layout_id=' . $result['layout_id'] . $url, true)
 			);
 		}
@@ -308,15 +310,7 @@ class ControllerDesignLayout extends Controller {
 
 		$this->load->model('setting/store');
 
-		$data['stores'] = $this->model_setting_store->getStores();
-
-		if (isset($this->request->post['layout_route'])) {
-			$data['layout_routes'] = $this->request->post['layout_route'];
-		} elseif (isset($this->request->get['layout_id'])) {
-			$data['layout_routes'] = $this->model_design_layout->getLayoutRoutes($this->request->get['layout_id']);
-		} else {
-			$data['layout_routes'] = array();
-		}
+		$data['layout_route'] = $this->request->post['layout_route'] ?? $this->model_design_layout->getLayoutRoutes($this->request->get['layout_id'] ?? null) ?? [];
 
 		$this->load->model('setting/extension');
 
