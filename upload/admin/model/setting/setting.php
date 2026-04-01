@@ -53,11 +53,33 @@ class ModelSettingSetting extends Model {
 		}
 	}
 	
-	public function editSettingValue($code = '', $key = '', $value = '', $store_id = 0) {
+	public function editSettingValue($code = '', $key = '', $value = '', $store_id = null) {
+		if ($store_id === null) {
+			$store_id = (int) $this->session->data['store_id'];
+		}
 		if (!is_array($value)) {
 			$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($value) . "', serialized = '0'  WHERE `code` = '" . $this->db->escape($code) . "' AND `key` = '" . $this->db->escape($key) . "' AND store_id = '" . (int)$store_id . "'");
 		} else {
 			$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape(json_encode($value)) . "', serialized = '1' WHERE `code` = '" . $this->db->escape($code) . "' AND `key` = '" . $this->db->escape($key) . "' AND store_id = '" . (int)$store_id . "'");
+		}
+	}
+
+	public function editLanguageToDefaultStore($data) : void {
+		// Language to store association
+		$this->db->query("
+			DELETE FROM " . DB_PREFIX . "language_to_store
+			WHERE store_id = '0'
+		");
+
+		if (isset($data['languages_association']) && !empty($data['languages_association'])) {
+			foreach ($data['languages_association'] as $language_id) {
+				$this->db->query("
+					INSERT INTO " . DB_PREFIX . "language_to_store
+					SET
+						`language_id` 				= '" . (int) $language_id . "', 
+						`store_id` 		 				= '0'
+				");
+			}
 		}
 	}
 }
