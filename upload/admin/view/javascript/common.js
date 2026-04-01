@@ -286,3 +286,32 @@ $(document).ready(function() {
 		});
 	}
 })(window.jQuery);
+
+document.addEventListener("DOMContentLoaded", () => {
+	const errors = document.querySelectorAll('.text-danger');
+	errors.forEach(error => {
+		const tabs = getFaultyTabs(error, 'tab-pane')
+		tabs.forEach(tab => {
+			tab.style.color = '#c72f1d';
+			tab.style.background = '#f5c1bb';
+		});
+
+	});
+});
+
+function getFaultyTabs(el, className) {
+	let tabs = [];
+	// Start with the immediate parent
+	let currentElement = el.parentNode; 
+
+	while (currentElement && currentElement !== document) {
+		if (currentElement.classList.contains(className)) {
+			tabLinkElement = document.querySelector(`[href="#${currentElement?.id}"]`);
+			tabs.push(tabLinkElement);
+		}
+		// Move up to the next parent
+		currentElement = currentElement.parentNode; 
+	}
+
+	return tabs;
+}
