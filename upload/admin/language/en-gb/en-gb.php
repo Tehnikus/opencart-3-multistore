@@ -157,6 +157,58 @@ $_['error_upload_8']                = 'Warning: File upload stopped by extension
 $_['error_upload_999']              = 'Warning: No error code available!';
 $_['error_curl']                    = 'CURL: Error Code(%s): %s';
 
+// Additional translations
+// Form entries
+$_['entry_store_association']       = 'Store association';
+$_['entry_language_association']    = 'Language association';
+$_['entry_language']                = 'Language';
+$_['entry_store']                   = 'Store';
+$_['entry_parent']                  = 'Main parent category';
+$_['entry_keyword']                 = 'URL';
+$_['entry_wholesale_price']         = 'Wholesale price';
+$_['entry_is_available']            = 'Availble for order';
+// List entries
+$_['edit_filter_group']             = 'Edit %s filter group';
+$_['edit_option_group']             = 'Edit %s option group';
+$_['edit_attribute_group']          = 'Edit %s attribute group';
+// Table columns
+$_['column_language']               = 'Language';
+$_['column_store']                  = 'Store';
+$_['column_image']                  = 'Image';
+$_['column_product_count']          = 'Product count';
+$_['column_status']                 = 'Status';
+$_['column_filters']                = 'Filters';
+$_['column_attributes']             = 'Attributes';
+$_['column_options']                = 'Options';
+$_['column_option_type']            = 'Type';
+$_['column_option_values_list']     = 'Values';
+$_['column_option_count']           = 'Values count';
+$_['column_top_category']           = 'Top menu';
+$_['column_bottom']                 = 'Show in footer';
+$_['column_route']                  = 'Route';
+$_['column_modules']                = 'Modules';
+$_['column_seo']                    = 'SEO Data';
+
+// Tabs
+$_['tab_languages']                 = 'Languages';
+// Errors
+$_['error_language_association']    = 'Select at least one language for this store';
+$_['error_stores_association']      = 'Select at least on store';
+$_['error_parent']                  = 'Select parent category';
+$_['error_no_parent']               = 'No parent category';
+
+// Left column menu
+$_['text_seo'] = 'SEO';
+
+$_['text_seo_pages']          = 'SEO pages';
+$_['text_meta_editor']        = 'Meta editor';
+$_['text_seo_tags']           = 'Tags';
+$_['text_seo_keywords']       = 'Keywords';
+$_['text_sitemap_generator']  = 'Sitemap generator';
+$_['text_seo_url']            = 'SEO URLs';
+$_['text_seo_url_setting']    = 'SEO URLs settings';
+$_['text_facet_filter']       = 'Facet filter';
+
 /* When doing translations only include the matching language code */
 
 // Summernote
