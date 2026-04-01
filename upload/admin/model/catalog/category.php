@@ -478,6 +478,129 @@ class ModelCatalogCategory extends Model {
 		}
 	}
 
+	/**
+	 * Delete category with SQL transaction to keep data integrity
+	 * @param int $category_id category to be deleted
+	 * @param bool $useTransaction used to avoid transaction nesting on nested call of deleteCategory() because SQL does not have nested transactions
+	 * @return bool
+	 */
+	public function deleteCategory($category_id, $useTransaction = true) : bool {
+		
+		if ($useTransaction) {
+			$this->db->query("START TRANSACTION");
+		}
+
+		try {
+			// Delete cache
+			$this->deleteCache($category_id);
+
+			$query = $this->db->query("
+				SELECT * FROM " . DB_PREFIX . "category_path 
+				WHERE path_id  = '" . (int) $category_id . "'
+					AND store_id = '" . (int) $this->session->data['store_id'] . "'
+			");
+
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "category_path 
+				WHERE category_id = '" . (int) $category_id . "'
+					AND store_id 		= '" . (int) $this->session->data['store_id'] . "'
+			");
+	
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "category_description WHERE category_id = '" . (int)$category_id . "' AND store_id = '" . (int) $this->session->data['store_id'] . "'
+			");
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "category_filter WHERE category_id = '" . (int)$category_id . "' AND store_id = '" . (int) $this->session->data['store_id'] . "'
+			");
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "category_to_store WHERE category_id = '" . (int)$category_id . "' AND store_id = '" . (int) $this->session->data['store_id'] . "'
+			");
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "category_to_layout WHERE category_id = '" . (int)$category_id . "' AND store_id = '" . (int) $this->session->data['store_id'] . "'
+			");
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "product_to_category WHERE category_id = '" . (int)$category_id . "' AND store_id = '" . (int) $this->session->data['store_id'] . "'
+			");
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "seo_url WHERE query = 'category_id=" . (int)$category_id . "' AND store_id = '" . (int) $this->session->data['store_id'] . "'
+			");
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "coupon_category WHERE category_id = '" . (int)$category_id . "' AND store_id = '" . (int) $this->session->data['store_id'] . "'
+			");
+
+			// Delete children categories
+			foreach ($query->rows as $result) {
+				// Delete cache
+				$this->deleteCache($result['category_id']);
+				// Second param is false so SQL transaction is not closed prematurely
+				$this->deleteCategory($result['category_id'], false);
+			}
+
+			// Next code will fully delete every category data if it is not associated to any store
+			// Check if category present in other stores
+			$categoryInOtherStores = $this->db->query("
+				SELECT
+					category_id
+				FROM " . DB_PREFIX . "category_to_store
+				WHERE category_id  = '" . (int) $category_id . "'
+					AND store_id 		<> '" . (int) $this->session->data['store_id'] . "' 
+			")->num_rows;
+
+			// Delete all category data row if category is not present in any other store
+			if (!$categoryInOtherStores) {
+				$tables = [
+					'category',
+					'category_description',
+					'category_filter',
+					'category_to_layout',
+					'product_to_category',
+					'category_path',
+					'coupon_category',
+				];
+
+				// Remove all redundant data if present 
+				foreach ($tables as $table) {
+					$this->db->query("
+						DELETE FROM " . DB_PREFIX . $table . "
+						WHERE category_id = " . (int) $category_id
+					);
+				}
+
+				// Cleanup category path
+				$this->db->query("
+					DELETE FROM " . DB_PREFIX . "category_path
+					WHERE `path_id` = '" . (int) $category_id . "'
+				");
+
+				// Cleanup URLs
+				$this->db->query("
+					DELETE FROM " . DB_PREFIX . "seo_url
+					WHERE `query` = 'category_id=" . (int) $category_id . "'
+				");
+			}
+	
+			// Rebuild facet indexes
+			$this->load->model('catalog/facet');
+			$store_id = (int) $this->session->data['store_id'];
+			$this->model_catalog_facet->buildFacetNames(facet_value_id: $category_id, facet_type: 1, store_id: $store_id);
+			$this->model_catalog_facet->buildFacetIndex(facet_value_id: $category_id, facet_type: 1, store_id: $store_id);
+
+			if ($useTransaction) {
+				$this->db->query("COMMIT");
+			}
+
+			return true;
+			
+		} catch (\Throwable $e) {
+			
+			if ($useTransaction) {
+				$this->db->query("ROLLBACK");
+			}
+
+			throw $e;
+		}
+	}
+
 	public function repairCategories($parent_id = 0) {
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "category WHERE parent_id = '" . (int)$parent_id . "'");
 
