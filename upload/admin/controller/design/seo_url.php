@@ -375,7 +375,7 @@ class ControllerDesignSeoUrl extends Controller {
 
 		$this->load->model('setting/store');
 
-		$data['stores'] = $this->model_setting_store->getStores();
+		$data['stores'] = $this->model_setting_store->getMultistores();
 
 		$this->load->model('localisation/language');
 
@@ -465,14 +465,7 @@ class ControllerDesignSeoUrl extends Controller {
 
 		$this->load->model('setting/store');
 
-		$data['stores'] = array();
-
-		$data['stores'][] = array(
-			'store_id' => 0,
-			'name'     => $this->language->get('text_default')
-		);
-
-		$stores = $this->model_setting_store->getStores();
+		$stores = $this->model_setting_store->getMultistores();
 
 		foreach ($stores as $store) {
 			$data['stores'][] = array(
