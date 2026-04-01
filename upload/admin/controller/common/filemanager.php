@@ -59,7 +59,7 @@ class ControllerCommonFileManager extends Controller {
 		$image_total = count($images);
 
 		// Split the array based on current page number and max number of items per page of 10
-		$images = array_splice($images, ($page - 1) * 16, 16);
+		$images = array_splice($images, ($page - 1) * 36, 36);
 
 		foreach ($images as $image) {
 			$name = str_split(basename($image), 14);
@@ -180,7 +180,7 @@ class ControllerCommonFileManager extends Controller {
 		$pagination = new Pagination();
 		$pagination->total = $image_total;
 		$pagination->page = $page;
-		$pagination->limit = 16;
+		$pagination->limit = 36;
 		$pagination->url = $this->url->link('common/filemanager', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}', true);
 
 		$data['pagination'] = $pagination->render();
