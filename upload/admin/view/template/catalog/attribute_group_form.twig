@@ -38,6 +38,28 @@
               {% endfor %}
             </div>
           </div>
+
+          {# Store association #}
+          <div class="form-group required">
+            <label class="col-sm-2 control-label">{{ entry_store_association }}</label>
+            <div class="col-sm-10">
+              <div class="well well-sm" style="height: 150px; overflow: auto;"> 
+                {% for store in stores %}
+                  <div class="checkbox">
+                    <label> 
+                      <input type="checkbox" name="stores_association[]" value="{{ store.store_id }}" {% if store.store_id in stores_association or store.store_id == currentStore %} checked="checked" {% endif %} />
+                      {{ store.name }}
+                    </label>
+                  </div>
+                {% endfor %}
+              </div>
+              {% if error_store_association %}
+                <div class="text-danger">{{ error_store_association }}</div>
+              {% endif %}
+            </div>
+          </div>
+          {# End store association #}
+
           <div class="form-group">
             <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
             <div class="col-sm-10">
