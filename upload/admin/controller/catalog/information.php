@@ -114,7 +114,7 @@ class ControllerCatalogInformation extends Controller {
 		if (isset($this->request->get['sort'])) {
 			$sort = $this->request->get['sort'];
 		} else {
-			$sort = 'id.title';
+			$sort = 'title';
 		}
 
 		if (isset($this->request->get['order'])) {
@@ -176,9 +176,14 @@ class ControllerCatalogInformation extends Controller {
 				'information_id' => $result['information_id'],
 				'title'          => $result['title'],
 				'sort_order'     => $result['sort_order'],
+				'stores'     		 => $result['stores'],
+				'bottom'     		 => $result['bottom'],
 				'edit'           => $this->url->link('catalog/information/edit', 'user_token=' . $this->session->data['user_token'] . '&information_id=' . $result['information_id'] . $url, true)
 			);
 		}
+
+		$this->load->model('setting/store');
+		$data['stores'] = $this->model_setting_store->getMultistores();
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
@@ -212,8 +217,9 @@ class ControllerCatalogInformation extends Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['sort_title'] = $this->url->link('catalog/information', 'user_token=' . $this->session->data['user_token'] . '&sort=id.title' . $url, true);
-		$data['sort_sort_order'] = $this->url->link('catalog/information', 'user_token=' . $this->session->data['user_token'] . '&sort=i.sort_order' . $url, true);
+		$data['sort_bottom'] = $this->url->link('catalog/information', 'user_token=' . $this->session->data['user_token'] . '&sort=i2s.bottom' . $url, true);
+		$data['sort_title'] = $this->url->link('catalog/information', 'user_token=' . $this->session->data['user_token'] . '&sort=title' . $url, true);
+		$data['sort_sort_order'] = $this->url->link('catalog/information', 'user_token=' . $this->session->data['user_token'] . '&sort=i2s.sort_order' . $url, true);
 
 		$url = '';
 
@@ -260,16 +266,16 @@ class ControllerCatalogInformation extends Controller {
 			$data['error_title'] = array();
 		}
 
+		if (isset($this->error['stores_association'])) {
+			$data['error_store_association'] = $this->error['stores_association'];
+		} else {
+			$data['error_store_association'] = '';
+		}
+
 		if (isset($this->error['description'])) {
 			$data['error_description'] = $this->error['description'];
 		} else {
 			$data['error_description'] = array();
-		}
-
-		if (isset($this->error['meta_title'])) {
-			$data['error_meta_title'] = $this->error['meta_title'];
-		} else {
-			$data['error_meta_title'] = array();
 		}
 
 		if (isset($this->error['keyword'])) {
@@ -332,29 +338,17 @@ class ControllerCatalogInformation extends Controller {
 
 		$this->load->model('setting/store');
 
-		$data['stores'] = array();
-
-		$data['stores'][] = array(
-			'store_id' => 0,
-			'name'     => $this->language->get('text_default')
-		);
-
-		$stores = $this->model_setting_store->getStores();
-
-		foreach ($stores as $store) {
-			$data['stores'][] = array(
-				'store_id' => $store['store_id'],
-				'name'     => $store['name']
-			);
-		}
+		$data['stores'] = $this->model_setting_store->getMultistores();
 
 		if (isset($this->request->post['information_store'])) {
 			$data['information_store'] = $this->request->post['information_store'];
 		} elseif (isset($this->request->get['information_id'])) {
 			$data['information_store'] = $this->model_catalog_information->getInformationStores($this->request->get['information_id']);
 		} else {
-			$data['information_store'] = array(0);
+			$data['information_store'] = array();
 		}
+
+		$data['currentStore'] = $this->session->data['store_id'];
 
 		if (isset($this->request->post['bottom'])) {
 			$data['bottom'] = $this->request->post['bottom'];
@@ -412,6 +406,10 @@ class ControllerCatalogInformation extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
+		if (!isset($this->request->post['information_store']) || empty($this->request->post['information_store'])) {
+			$this->error['stores_association'] = $this->language->get('error_stores_association');
+		}
+
 		foreach ($this->request->post['information_description'] as $language_id => $value) {
 			if ((utf8_strlen($value['title']) < 1) || (utf8_strlen($value['title']) > 64)) {
 				$this->error['title'][$language_id] = $this->language->get('error_title');
@@ -419,10 +417,6 @@ class ControllerCatalogInformation extends Controller {
 
 			if (utf8_strlen($value['description']) < 3) {
 				$this->error['description'][$language_id] = $this->language->get('error_description');
-			}
-
-			if ((utf8_strlen($value['meta_title']) < 1) || (utf8_strlen($value['meta_title']) > 255)) {
-				$this->error['meta_title'][$language_id] = $this->language->get('error_meta_title');
 			}
 		}
 

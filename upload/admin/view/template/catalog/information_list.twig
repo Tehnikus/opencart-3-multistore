@@ -35,36 +35,53 @@
               <thead>
                 <tr>
                   <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
-                  <td class="text-left">{% if sort == 'id.title' %}
-                    <a href="{{ sort_title }}" class="{{ order|lower }}">{{ column_title }}</a>
+                  <td class="text-left">
+                    {% if sort == 'title' %}
+                      <a href="{{ sort_title }}" class="{{ order|lower }}">{{ column_title }}</a>
                     {% else %}
-                    <a href="{{ sort_title }}">{{ column_title }}</a>
-                    {% endif %}</td>
-                  <td class="text-right">{% if sort == 'i.sort_order' %}
-                    <a href="{{ sort_sort_order }}" class="{{ order|lower }}">{{ column_sort_order }}</a>
-                    {% else %}
-                    <a href="{{ sort_sort_order }}">{{ column_sort_order }}</a>
-                    {% endif %}</td>
-                  <td class="text-right">{{ column_action }}</td>
+                      <a href="{{ sort_title }}">{{ column_title }}</a>
+                    {% endif %}
+                  </td>
+                  <td style="width: 50px" class="text-center">
+                    <a href="{{ sort_bottom }}" {% if sort == 'i2s.bottom' %} class="{{ order|lower }}" {% endif %}>
+                      {{ column_bottom }}
+                    </a>
+                  </td>
+                  <td style="width: 50px" class="text-center">
+                    <a href="{{ sort_sort_order }}" {% if sort == 'i2s.sort_order' %} class="{{ order|lower }}" {% endif %}>{{ column_sort_order }}</a>
+                  </td>
+                  <td style="width: 50px" class="text-center">{{ column_action }}</td>
                 </tr>
               </thead>
               <tbody>
                 {% if informations %}
-                {% for information in informations %}
-                <tr>
-                  <td class="text-center">{% if information.information_id in selected %}
-                    <input type="checkbox" name="selected[]" value="{{ information.information_id }}" checked="checked" />
-                    {% else %}
-                    <input type="checkbox" name="selected[]" value="{{ information.information_id }}" />
-                    {% endif %}</td>
-                  <td class="text-left">{{ information.title }}</td>
-                  <td class="text-right">{{ information.sort_order }}</td>
-                  <td class="text-right"><a href="{{ information.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
-                </tr>
-                {% endfor %}
+                  {% for information in informations %}
+                  <tr>
+                    <td class="text-center">
+                      {% if information.information_id in selected %}
+                        <input type="checkbox" name="selected[]" value="{{ information.information_id }}" checked="checked" />
+                      {% else %}
+                        <input type="checkbox" name="selected[]" value="{{ information.information_id }}" />
+                      {% endif %}
+                    </td>
+                    <td class="text-left">
+                      <p><b>{{ information.title }}</b></p>
+                      {% for store in stores %}
+                        {% if store.store_id in information.stores %}
+                          <span class="badge alert-success"><i class="fa fa-check"></i>&nbsp;{{ store.name }}</span>
+                        {% else %}
+                          <span class="badge alert-danger "><i class="fa fa-times"></i>&nbsp;{{ store.name }}</span>
+                        {% endif %}
+                      {% endfor %}
+                    </td>
+                    <td class="text-center"><b>{% if information.bottom %}<i class="fa fa-check text-success"></i>{% else %}<i class="fa fa-times text-muted"></i>{% endif %}</b></td>
+                    <td class="text-center"><b>{{ information.sort_order }}</b></td>
+                    <td class="text-center"><a href="{{ information.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+                  </tr>
+                  {% endfor %}
                 {% else %}
                 <tr>
-                  <td class="text-center" colspan="4">{{ text_no_results }}</td>
+                  <td class="text-center" colspan="5">{{ text_no_results }}</td>
                 </tr>
                 {% endif %}
               </tbody>
