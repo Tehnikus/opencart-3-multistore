@@ -1,0 +1,108 @@
+{{ header }}
+<div class="container">
+  <header>
+    <div class="row">
+      <div class="col-sm-6">
+        <h1 class="pull-left">4
+          <small>/4</small>
+        </h1>
+        <h3>{{ heading_title }}
+          <br/>
+          <small>{{ text_step_4 }}</small>
+        </h3>
+      </div>
+      <div class="col-sm-6">
+        <div id="logo" class="pull-right hidden-xs"><img src="view/image/logo.png" alt="OpenCart" title="OpenCart"/></div>
+      </div>
+    </div>
+  </header>
+  <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }} <button type="button" class="close" data-dismiss="alert">&times;</button></div>
+  <div class="visit">
+    <div class="row">
+      <div class="col-sm-5 col-sm-offset-1 text-center">
+        <p><i class="fa fa-shopping-cart fa-5x"></i></p>
+        <a href="../" class="btn btn-secondary">{{ text_catalog }}</a>
+      </div>
+      <div class="col-sm-5 text-center">
+        <p><i class="fa fa-cog fa-5x white"></i></p>
+        <a href="../admin/" class="btn btn-secondary">{{ text_admin }}</a>
+      </div>
+    </div>
+  </div>
+  <div class="core-modules">{{ promotion }}</div>
+  <div class="modules"><a href="https://www.opencart.com/index.php?route=marketplace/extension&amp;utm_source=opencart_install&amp;utm_medium=store_link&amp;utm_campaign=opencart_install" target="_BLANK" class="btn btn-default">{{ text_extension }}</a></div>
+  <div class="mailing">
+    <div class="row">
+      <div class="col-sm-12"><i class="fa fa-envelope-o fa-5x"></i>
+        <h3>{{ text_mail }}
+          <br/>
+          <small>{{ text_mail_description }}</small>
+        </h3>
+        <button type="button" class="btn btn-secondary subscribe pull-right-md">{{ button_mail }}</button>
+      </div>
+    </div>
+  </div>
+  <div class="support text-center">
+    <div class="row">
+      <div class="col-sm-4">
+        <a href="https://www.facebook.com/opencart/" class="icon transition"><i class="fa fa-facebook fa-4x"></i></a>
+        <h3>{{ text_facebook }}</h3>
+        <p>{{ text_facebook_description }}</p>
+        <a href="https://www.facebook.com/opencart/">{{ text_facebook_visit }}</a>
+      </div>
+      <div class="col-sm-4">
+        <a href="https://forum.opencart.com/?utm_source=opencart_install&utm_medium=forum_link&utm_campaign=opencart_install" class="icon transition"><i class="fa fa-comments fa-4x"></i></a>
+        <h3>{{ text_forum }}</h3>
+        <p>{{ text_forum_description }}</p>
+        <a href="https://forum.opencart.com/?utm_source=opencart_install&utm_medium=forum_link&utm_campaign=opencart_install">{{ text_forum_visit }}</a>
+      </div>
+      <div class="col-sm-4">
+        <a href="https://www.opencart.com/index.php?route=support/partner&utm_source=opencart_install&utm_medium=partner_link&utm_campaign=opencart_install" class="icon transition"><i class="fa fa-user fa-4x"></i></a>
+        <h3>{{ text_commercial }}</h3>
+        <p>{{ text_commercial_description }}</p>
+        <a href="https://www.opencart.com/index.php?route=support/partner&utm_source=opencart_install&utm_medium=partner_link&utm_campaign=opencart_install" target="_BLANK">{{ text_commercial_visit }}</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-newsletter" class="modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Sign up to our newsletter</h4>
+      </div>
+      <div class="modal-body">
+        <div id="mc_embed_shell">
+          <link href="//cdn-images.mailchimp.com/embedcode/classic-061523.css" rel="stylesheet" type="text/css">
+          <div id="mc_embed_signup">
+            <form action="https://opencart.us2.list-manage.com/subscribe/post?u=7682b9d9bc273d548837cfa79&amp;id=88ee7f5931&amp;f_id=00a853e0f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank">
+              <div id="mc_embed_signup_scroll"><h2>Subscribe</h2>
+                <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+                <div class="mc-field-group"><label for="mce-EMAIL">Email Address <span class="asterisk">*</span></label><input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required="" value=""></div>
+                <div id="mce-responses" class="clearfalse">
+                  <div class="response" id="mce-error-response" style="display: none;"></div>
+                  <div class="response" id="mce-success-response" style="display: none;"></div>
+                </div>
+                <div aria-hidden="true" style="position: absolute; left: -5000px;"><input type="text" name="b_7682b9d9bc273d548837cfa79_88ee7f5931" tabindex="-1" value=""></div>
+                <div class="clear"><input type="submit" name="subscribe" id="mc-embedded-subscribe" class="button" value="Subscribe"></div>
+             </div>
+           </form>
+          </div>
+        </div>    
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript"><!--
+$(document).ready(function() {
+    $('#modal-newsletter').hide();
+    $('.subscribe').on('click', function() {
+        $('#modal-newsletter').modal('show');
+    });
+});
+//--></script>
+
+{{ footer }}
