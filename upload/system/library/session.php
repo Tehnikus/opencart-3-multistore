@@ -44,7 +44,7 @@ class Session {
 	 * @return	string
  	*/	
 	public function getId() {
-		return $this->session_id;
+		return $this->session_id ?? '';
 	}
 
 	/**
@@ -52,9 +52,12 @@ class Session {
 	 *
 	 * @param	string	$session_id
 	 *
-	 * @return	string
+	 * @return	mixed
  	*/	
 	public function start($session_id = '') {
+		if ($this->isBot()) {
+			return;
+		}
 		if (!$session_id) {
 			if (function_exists('random_bytes')) {
 				$session_id = substr(bin2hex(random_bytes(26)), 0, 26);
@@ -78,7 +81,9 @@ class Session {
 	 * 
  	*/
 	public function close() {
-		$this->adaptor->write($this->session_id, $this->data);
+		if ($this->session_id) {
+			$this->adaptor->write($this->session_id, $this->data);
+		}
 	}
 	
 	/**
@@ -86,5 +91,30 @@ class Session {
  	*/	
 	public function destroy() {
 		$this->adaptor->destroy($this->session_id);
+	}
+
+	private function isBot() {
+		if (empty($_SERVER['HTTP_USER_AGENT'])) {
+			return true;
+		}
+
+		$bots = [
+			'bot', 'spider', 'crawl', 'search', 'fetch', 'walk', 'seo', 'scrap', 'news', // Common names
+			'meta', 'facebook', 'slurp', 'bing', 'pinterest', 'vk', 'google', 'baidu', 'whatsapp', 'flipboard', 'yahoo', 'nuzzel', 'outbrain', 'slack', 'flipboard', 'qwantify', 'bitrix', 'xing',  // Brands
+			'ahrefs','semrush','seranking','mj12','dotbot','linkpad','seokicks','serpstat', 'jetslide', // SEO crawlers
+			'ai', 'gpt', 'gemini', 'grok', 'img2dataset', 'perplexity', // AI
+			'cotoyogi', 'news-please', // Aggressive unkown bots
+			'chrome-lighthouse', 'w3c_validator', // Other
+		];
+
+		$userAgent = strtolower($_SERVER['HTTP_USER_AGENT']);
+
+		foreach ($bots as $bot) {
+			if (strpos($userAgent, $bot) !== false) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
