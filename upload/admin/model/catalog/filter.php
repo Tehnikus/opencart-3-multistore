@@ -1,27 +1,105 @@
 <?php
 class ModelCatalogFilter extends Model {
 	public function addFilter($data) {
-		$this->db->query("INSERT INTO `" . DB_PREFIX . "filter_group` SET sort_order = '" . (int)$data['sort_order'] . "'");
 
-		$filter_group_id = $this->db->getLastId();
+		$this->db->query("START TRANSACTION");
+		
+		try {
 
-		foreach ($data['filter_group_description'] as $language_id => $value) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "filter_group_description SET filter_group_id = '" . (int)$filter_group_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "'");
-		}
-
-		if (isset($data['filter'])) {
-			foreach ($data['filter'] as $filter) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "filter SET filter_group_id = '" . (int)$filter_group_id . "', sort_order = '" . (int)$filter['sort_order'] . "'");
-
-				$filter_id = $this->db->getLastId();
-
-				foreach ($filter['filter_description'] as $language_id => $filter_description) {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "filter_description SET filter_id = '" . (int)$filter_id . "', language_id = '" . (int)$language_id . "', filter_group_id = '" . (int)$filter_group_id . "', name = '" . $this->db->escape($filter_description['name']) . "'");
+			$this->db->query("
+				INSERT INTO `" . DB_PREFIX . "filter_group` 
+				SET 
+					sort_order 	= '" . (int) $data['sort_order'] . "'
+			");
+	
+			$filter_group_id = $this->db->getLastId();
+	
+			foreach ($data['filter_group_description'] as $language_id => $value) {
+				$this->db->query("
+					INSERT INTO " . DB_PREFIX . "filter_group_description 
+					SET 
+						filter_group_id = '" . (int) $filter_group_id . "', 
+						language_id 		= '" . (int) $language_id . "', 
+						store_id 				= '" . (int) $this->session->data['store_id'] . "', 
+						name 						= '" . $this->db->escape($value['name']) . "'
+				");
+			}
+	
+			if (isset($data['filter'])) {
+				foreach ($data['filter'] as $filter) {
+					$this->db->query("
+						INSERT INTO " . DB_PREFIX . "filter 
+						SET 
+							filter_group_id = '" . (int) $filter_group_id . "', 
+							sort_order 			= '" . (int) $filter['sort_order'] . "', 
+							store_id 				= '" . (int) $this->session->data['store_id'] . "'
+					");
+	
+					$filter_id = $this->db->getLastId();
+					// Delete cache
+					$this->deleteCache($filter_id);
+	
+					foreach ($filter['filter_description'] as $language_id => $filter_description) {
+						$this->db->query("
+							INSERT INTO " . DB_PREFIX . "filter_description 
+							SET 
+								filter_id 			= '" . (int) $filter_id . "', 
+								language_id 		= '" . (int) $language_id . "', 
+								filter_group_id = '" . (int) $filter_group_id . "', 
+								store_id 				= '" . (int) $this->session->data['store_id'] . "', 
+								name 						= '" . $this->db->escape($filter_description['name']) . "'
+						");
+	
+						$this->db->query("
+							DELETE FROM " . DB_PREFIX . "seo_url
+							WHERE `query` 			= 'filter=" . (int) $filter_id . "'
+								AND `language_id` = '" . (int) $language_id . "'
+								AND `store_id` 		= '" . (int) $this->session->data['store_id'] . "'
+						");
+	
+						if (isset($filter_description['url']) && !empty($filter_description['url'])) {
+							$this->db->query("
+								INSERT INTO " . DB_PREFIX . "seo_url
+								SET
+									`query` 			= 'filter=" . (int) $filter_id . "', 
+									`keyword` 		= '" . $this->db->escape($filter_description['url']) . "', 
+									`language_id` = '" . (int) $language_id . "', 
+									`store_id` 		= '" . (int) $this->session->data['store_id'] . "'
+							");
+						}
+					}
 				}
 			}
-		}
 
-		return $filter_group_id;
+			// Stores association
+			if (isset($data['stores_association']) && !empty($data['stores_association'])) {
+				foreach ($data['stores_association'] as $store_id) {
+					$this->db->query("
+						INSERT INTO " . DB_PREFIX . "filter_group_to_store
+						SET
+							`filter_group_id` = '" . (int) $filter_group_id . "', 
+							`store_id` 				= '" . (int) $store_id . "',
+							`sort_order` 			= '" . (int) $data['sort_order'] . "'
+					");
+				}
+			}
+
+			$this->db->query("COMMIT");
+
+			// Rebuild facet indexes
+			$this->load->model('catalog/facet');
+			$store_id = (int) $this->session->data['store_id'];
+			$this->model_catalog_facet->buildFacetNames(facet_group_id: $filter_group_id, facet_type: 2, store_id: $store_id);
+			$this->model_catalog_facet->buildFacetIndex(facet_group_id: $filter_group_id, facet_type: 2, store_id: $store_id);
+
+			return $filter_group_id;
+
+		} catch (\Throwable $e) {
+
+			$this->db->query("ROLLBACK");
+
+			throw $e;
+		}
 	}
 
 	public function editFilter($filter_group_id, $data) {
