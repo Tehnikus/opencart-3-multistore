@@ -274,22 +274,62 @@ class ModelCatalogManufacturer extends Model {
 		return $query->row;
 	}
 
-	public function getManufacturers($data = array()) {
-		$sql = "SELECT * FROM " . DB_PREFIX . "manufacturer";
+	public function getManufacturers($data = []) : array {
+		$result = [];
+		$where = [];
 
-		if (!empty($data['filter_name'])) {
-			$sql .= " WHERE name LIKE '" . $this->db->escape($data['filter_name']) . "%'";
+		$where[] = "
+			m.manufacturer_id = m2s.manufacturer_id
+		";
+		if (isset($data['filter_name'])) {
+			$where[] = "md.name LIKE '" . $this->db->escape($data['filter_name']) . "%'";
 		}
+		if (isset($data['store_id'])) {
+			$where[] = "m2s.store_id = '" . (int) $data['store_id'] . "'";
+		}
+
+		$sql = "
+			SELECT
+				m.manufacturer_id,
+				m2s.sort_order,
+				m2s.image,
+				(
+					SELECT 
+						md.name 
+					FROM " . DB_PREFIX . "manufacturer_description md
+					WHERE md.manufacturer_id = m.manufacturer_id
+					ORDER BY 
+						FIELD(md.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, 
+						FIELD(md.language_id, '" . (int) $this->config->get('config_language_id') . "') DESC
+					LIMIT 1
+				) AS `name`,
+				(SELECT COUNT(product_id) FROM " . DB_PREFIX . "product p WHERE p.manufacturer_id = m.manufacturer_id) AS product_count,
+				(SELECT JSON_ARRAYAGG(m2s.store_id) FROM " . DB_PREFIX . "manufacturer_to_store m2s WHERE m.manufacturer_id = m2s.manufacturer_id) AS stores
+				FROM " . DB_PREFIX . "manufacturer m
+				LEFT JOIN " . DB_PREFIX . "manufacturer_to_store m2s
+					ON m2s.manufacturer_id = m.manufacturer_id
+					AND m2s.store_id = '" . (int) $this->session->data['store_id'] . "'
+				WHERE EXISTS (
+					SELECT
+						1
+					FROM " . DB_PREFIX . "manufacturer_to_store m2s
+					JOIN " . DB_PREFIX . "manufacturer_description md
+						ON md.manufacturer_id = m2s.manufacturer_id
+						AND md.store_id = m2s.store_id
+					WHERE " . implode(' AND ', $where) . "
+				)
+		";
 
 		$sort_data = array(
 			'name',
-			'sort_order'
+			'product_count',
+			'm2s.sort_order'
 		);
 
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-			$sql .= " ORDER BY " . $data['sort'];
+			$sql .= " ORDER BY FIELD(m2s.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, " . $data['sort'];
 		} else {
-			$sql .= " ORDER BY name";
+			$sql .= " ORDER BY FIELD(m2s.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, name";
 		}
 
 		if (isset($data['order']) && ($data['order'] == 'DESC')) {
@@ -312,7 +352,12 @@ class ModelCatalogManufacturer extends Model {
 
 		$query = $this->db->query($sql);
 
-		return $query->rows;
+		foreach ($query->rows ?? [] as $row) {
+			$row['stores'] = json_decode($row['stores'] ?? '[]');
+			$result[] = $row;
+		}
+
+		return $result;
 	}
 
 	public function getManufacturerStores($manufacturer_id) {
