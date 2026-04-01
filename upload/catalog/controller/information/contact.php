@@ -70,7 +70,7 @@ class ControllerInformationContact extends Controller {
 		}
 
 		$data['store'] = $this->config->get('config_name');
-		$data['address'] = nl2br($this->config->get('config_address'));
+		$data['address'] = nl2br($this->config->get('config_address')[(int) $this->config->get('config_language_id')]);
 		$data['geocode'] = $this->config->get('config_geocode');
 		$data['geocode_hl'] = $this->config->get('config_language');
 		$data['telephone'] = $this->config->get('config_telephone');
