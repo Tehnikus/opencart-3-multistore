@@ -323,10 +323,16 @@ class ModelCatalogAttributeGroup extends Model {
 		return $result;
 	}
 
-	public function getAttributeGroupDescriptions($attribute_group_id) {
+	public function getAttributeGroupDescriptions($attribute_group_id) : array {
 		$attribute_group_data = array();
 
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "attribute_group_description WHERE attribute_group_id = '" . (int)$attribute_group_id . "'");
+		$query = $this->db->query("
+			SELECT 
+				* 
+			FROM " . DB_PREFIX . "attribute_group_description 
+			WHERE attribute_group_id = '" . (int)$attribute_group_id . "'
+				AND store_id = '" . (int) $this->session->data['store_id'] . "'
+		");
 
 		foreach ($query->rows as $result) {
 			$attribute_group_data[$result['language_id']] = array('name' => $result['name']);
