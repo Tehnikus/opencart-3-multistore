@@ -44,11 +44,6 @@
               <label class="control-label" for="input-store">{{ entry_store }}</label>
               <select name="filter_store_id" id="input-store" class="form-control">
                 <option value=""></option>
-                {% if filter_store_id == '0' %}
-                <option value="0" selected="selected">{{ text_default }}</option>
-                {% else %}
-                <option value="0">{{ text_default }}</option>
-                {% endif %}                  
                 {% for store in stores %}
                 {% if store.store_id == filter_store_id %}
                 <option value="{{ store.store_id }}" selected="selected">{{ store.name }}</option>
