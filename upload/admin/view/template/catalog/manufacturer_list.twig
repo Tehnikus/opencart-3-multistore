@@ -35,17 +35,17 @@
               <thead>
                 <tr>
                   <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
-                  <td class="text-left">{% if sort == 'name' %}
-                    <a href="{{ sort_name }}" class="{{ order|lower }}">{{ column_name }}</a>
-                    {% else %}
-                    <a href="{{ sort_name }}">{{ column_name }}</a>
-                    {% endif %}</td>
-                  <td class="text-right">{% if sort == 'sort_order' %}
-                    <a href="{{ sort_sort_order }}" class="{{ order|lower }}">{{ column_sort_order }}</a>
-                    {% else %}
-                    <a href="{{ sort_sort_order }}">{{ column_sort_order }}</a>
-                    {% endif %}</td>
-                  <td class="text-right">{{ column_action }}</td>
+                  <td style="width: 70px" class="text-center">{{ column_image }}</td>
+                  <td class="text-left">
+                    <a href="{{ sort_name }}" {% if sort == 'name' %} class="{{ order|lower }}" {% endif %} >{{ column_name }}</a>                    
+                  </td>
+                  <td style="width: 50px" class="text-center">
+                    <a href="{{ product_count }}" {% if sort == 'product_count' %} class="{{ order|lower }}" {% endif %} >{{ column_product_count }}</a>
+                  </td>
+                  <td style="width: 50px" class="text-center">
+                    <a href="{{ sort_sort_order }}" {% if sort == 'm2s.sort_order' %} class="{{ order|lower }}" {% endif %} >{{ column_sort_order }}</a>
+                  </td>
+                  <td style="width: 50px" class="text-center">{{ column_action }}</td>
                 </tr>
               </thead>
               <tbody>
@@ -56,15 +56,29 @@
                     <input type="checkbox" name="selected[]" value="{{ manufacturer.manufacturer_id }}" checked="checked" />
                     {% else %}
                     <input type="checkbox" name="selected[]" value="{{ manufacturer.manufacturer_id }}" />
-                    {% endif %}</td>
-                  <td class="text-left">{{ manufacturer.name }}</td>
-                  <td class="text-right">{{ manufacturer.sort_order }}</td>
-                  <td class="text-right"><a href="{{ manufacturer.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+                    {% endif %}
+                  </td>
+                  <td style="width: 70px" class="text-center">
+                    <img src="{{ manufacturer.image }}" loading="lazy" class="img-thumbnail">
+                  </td>
+                  <td class="text-left">
+                    <p><b>{{ manufacturer.name }}</b></p>
+                    {% for store in stores %}
+                      {% if store.store_id in manufacturer.stores %}
+                        <span class="badge alert-success"><i class="fa fa-check"></i>&nbsp;{{ store.name }}</span>
+                      {% else %}
+                        <span class="badge alert-danger "><i class="fa fa-times"></i>&nbsp;{{ store.name }}</span>
+                      {% endif %}
+                    {% endfor %}
+                  </td>
+                  <td class="text-center"><b>{{ manufacturer.product_count }}</b></td>
+                  <td class="text-center"><b>{{ manufacturer.sort_order }}</b></td>
+                  <td class="text-center"><a href="{{ manufacturer.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
                 </tr>
                 {% endfor %}
                 {% else %}
                 <tr>
-                  <td class="text-center" colspan="4">{{ text_no_results }}</td>
+                  <td class="text-center" colspan="6">{{ text_no_results }}</td>
                 </tr>
                 {% endif %}
               </tbody>
