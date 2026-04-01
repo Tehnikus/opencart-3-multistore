@@ -251,8 +251,25 @@ class ModelCatalogManufacturer extends Model {
 			throw $e;
 		}
 	}
+	// Get manufacturer_id and name
+	// Used in manufacturer form and product form
+	// Should always rely on store_id
 	public function getManufacturer($manufacturer_id) {
-		$query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "manufacturer WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
+		$query = $this->db->query("
+			SELECT 
+				m.`manufacturer_id`,
+				m2s.`image`,
+				m2s.`sort_order`,
+				md.`name`
+			FROM " . DB_PREFIX . "manufacturer m
+			LEFT JOIN " . DB_PREFIX . "manufacturer_to_store m2s
+				ON m2s.manufacturer_id 	= m.manufacturer_id
+			LEFT JOIN " . DB_PREFIX . "manufacturer_description md
+				ON md.manufacturer_id = m.manufacturer_id
+				AND md.store_id = m2s.store_id
+			WHERE m.manufacturer_id = '" . (int) $manufacturer_id . "'
+				AND m2s.store_id 			= '" . (int) $this->session->data['store_id'] . "' 
+		");
 
 		return $query->row;
 	}
