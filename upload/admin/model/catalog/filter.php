@@ -567,15 +567,39 @@ class ModelCatalogFilter extends Model {
 	public function getFilterDescriptions($filter_group_id) {
 		$filter_data = array();
 
-		$filter_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "filter WHERE filter_group_id = '" . (int)$filter_group_id . "'");
+		$filter_query = $this->db->query("
+			SELECT 
+				* 
+			FROM " . DB_PREFIX . "filter 
+			WHERE filter_group_id = '" . (int)$filter_group_id . "'
+				AND store_id 				= '" . $this->session->data['store_id'] . "'
+		");
 
 		foreach ($filter_query->rows as $filter) {
 			$filter_description_data = array();
 
-			$filter_description_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "filter_description WHERE filter_id = '" . (int)$filter['filter_id'] . "'");
+			$filter_description_query = $this->db->query("
+				SELECT 
+					*,
+					(	
+						SELECT 
+							`keyword` 
+						FROM " . DB_PREFIX . "seo_url 
+						WHERE `query` 		= 'filter=" . (int) $filter['filter_id'] . "' 
+							AND store_id 		=  fd.store_id
+							AND language_id =  fd.language_id
+						LIMIT 1
+					) AS url
+				FROM " . DB_PREFIX . "filter_description fd
+				WHERE fd.filter_id 	= '" . (int) $filter['filter_id'] . "'
+					AND fd.store_id 	= '" . $this->session->data['store_id'] . "'
+			");
 
 			foreach ($filter_description_query->rows as $filter_description) {
-				$filter_description_data[$filter_description['language_id']] = array('name' => $filter_description['name']);
+				$filter_description_data[$filter_description['language_id']] = [
+					'name' => $filter_description['name'],
+					'url'  => $filter_description['url']
+				];
 			}
 
 			$filter_data[] = array(
