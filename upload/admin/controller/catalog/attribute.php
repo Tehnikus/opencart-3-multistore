@@ -114,7 +114,7 @@ class ControllerCatalogAttribute extends Controller {
 		if (isset($this->request->get['sort'])) {
 			$sort = $this->request->get['sort'];
 		} else {
-			$sort = 'ad.name';
+			$sort = 'name';
 		}
 
 		if (isset($this->request->get['order'])) {
@@ -173,13 +173,23 @@ class ControllerCatalogAttribute extends Controller {
 
 		foreach ($results as $result) {
 			$data['attributes'][] = array(
-				'attribute_id'    => $result['attribute_id'],
-				'name'            => $result['name'],
-				'attribute_group' => $result['attribute_group'],
-				'sort_order'      => $result['sort_order'],
-				'edit'            => $this->url->link('catalog/attribute/edit', 'user_token=' . $this->session->data['user_token'] . '&attribute_id=' . $result['attribute_id'] . $url, true)
+				'attribute_id'    				=> $result['attribute_id'],
+				'attribute_group_id'			=> $result['attribute_group_id'],
+				'name'            				=> $result['name'],
+				'attribute_group' 				=> $result['attribute_group'],
+				'sort_order'      				=> $result['sort_order'],
+				'stores' 									=> $result['stores'],
+				'attribute_group_stores' 	=> $result['attribute_group_stores'],
+				'product_count' 					=> $result['product_count'],
+				'edit'            				=> $this->url->link('catalog/attribute/edit', 'user_token=' . $this->session->data['user_token'] . '&attribute_id=' . $result['attribute_id'] . $url, true)
 			);
 		}
+
+		$data['user_token'] = $this->session->data['user_token'];
+
+		$this->load->model('setting/store');
+		$data['stores'] = $this->model_setting_store->getMultistores();
+		
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
@@ -213,9 +223,9 @@ class ControllerCatalogAttribute extends Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['sort_name'] = $this->url->link('catalog/attribute', 'user_token=' . $this->session->data['user_token'] . '&sort=ad.name' . $url, true);
-		$data['sort_attribute_group'] = $this->url->link('catalog/attribute', 'user_token=' . $this->session->data['user_token'] . '&sort=attribute_group' . $url, true);
-		$data['sort_sort_order'] = $this->url->link('catalog/attribute', 'user_token=' . $this->session->data['user_token'] . '&sort=a.sort_order' . $url, true);
+		$data['sort_name'] = $this->url->link('catalog/attribute', 'user_token=' . $this->session->data['user_token'] . '&sort=name' . $url, true);
+		$data['sort_attribute_group'] = $this->url->link('catalog/attribute', 'user_token=' . $this->session->data['user_token'] . '&sort=attribute_group_id' . $url, true);
+		$data['sort_sort_order'] = $this->url->link('catalog/attribute', 'user_token=' . $this->session->data['user_token'] . '&sort=a2s.sort_order' . $url, true);
 
 		$url = '';
 
@@ -254,6 +264,12 @@ class ControllerCatalogAttribute extends Controller {
 			$data['error_warning'] = $this->error['warning'];
 		} else {
 			$data['error_warning'] = '';
+		}
+
+		if (isset($this->error['stores_association'])) {
+			$data['error_store_association'] = $this->error['stores_association'];
+		} else {
+			$data['error_store_association'] = '';
 		}
 
 		if (isset($this->error['name'])) {
@@ -328,7 +344,7 @@ class ControllerCatalogAttribute extends Controller {
 
 		$this->load->model('catalog/attribute_group');
 
-		$data['attribute_groups'] = $this->model_catalog_attribute_group->getAttributeGroups();
+		$data['attribute_groups'] = $this->model_catalog_attribute_group->getAttributeGroups(['store_id' => $this->session->data['store_id']]);
 
 		if (isset($this->request->post['sort_order'])) {
 			$data['sort_order'] = $this->request->post['sort_order'];
@@ -337,6 +353,15 @@ class ControllerCatalogAttribute extends Controller {
 		} else {
 			$data['sort_order'] = '';
 		}
+
+		// Attribute to store association
+		$this->load->model('setting/store');
+		$data['stores'] = $this->model_setting_store->getMultistores();
+		// Current store_id to check current store checkbox in stores list
+		$data['currentStore'] = $this->session->data['store_id']; 
+		// Store association data
+		$data['stores_association'] = $this->request->post['stores_association'] ?? $this->model_catalog_attribute->getStoresAssociation($this->request->get['attribute_id'] ?? null) ?? [];
+		// End store association
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -348,6 +373,10 @@ class ControllerCatalogAttribute extends Controller {
 	protected function validateForm() {
 		if (!$this->user->hasPermission('modify', 'catalog/attribute')) {
 			$this->error['warning'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['stores_association']) || empty($this->request->post['stores_association'])) {
+			$this->error['stores_association'] = $this->language->get('error_stores_association');
 		}
 
 		if (!$this->request->post['attribute_group_id']) {
@@ -368,15 +397,15 @@ class ControllerCatalogAttribute extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		$this->load->model('catalog/product');
+		// $this->load->model('catalog/product');
 
-		foreach ($this->request->post['selected'] as $attribute_id) {
-			$product_total = $this->model_catalog_product->getTotalProductsByAttributeId($attribute_id);
+		// foreach ($this->request->post['selected'] as $attribute_id) {
+		// 	$product_total = $this->model_catalog_product->getTotalProductsByAttributeId($attribute_id);
 
-			if ($product_total) {
-				$this->error['warning'] = sprintf($this->language->get('error_product'), $product_total);
-			}
-		}
+		// 	if ($product_total) {
+		// 		$this->error['warning'] = sprintf($this->language->get('error_product'), $product_total);
+		// 	}
+		// }
 
 		return !$this->error;
 	}
@@ -389,8 +418,9 @@ class ControllerCatalogAttribute extends Controller {
 
 			$filter_data = array(
 				'filter_name' => $this->request->get['filter_name'],
+				'store_id'		=> (int) $this->session->data['store_id'],
 				'start'       => 0,
-				'limit'       => 5
+				'limit'       => 20
 			);
 
 			$results = $this->model_catalog_attribute->getAttributes($filter_data);
@@ -399,7 +429,8 @@ class ControllerCatalogAttribute extends Controller {
 				$json[] = array(
 					'attribute_id'    => $result['attribute_id'],
 					'name'            => strip_tags(html_entity_decode($result['name'], ENT_QUOTES, 'UTF-8')),
-					'attribute_group' => $result['attribute_group']
+					'attribute_group' => $result['attribute_group'],
+					'stores' 					=> $result['stores'],
 				);
 			}
 		}
