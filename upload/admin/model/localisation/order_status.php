@@ -10,9 +10,6 @@ class ModelLocalisationOrderStatus extends Model {
 				$order_status_id = $this->db->getLastId();
 			}
 		}
-
-		$this->cache->delete('order_status');
-		
 		return $order_status_id;
 	}
 
@@ -22,14 +19,10 @@ class ModelLocalisationOrderStatus extends Model {
 		foreach ($data['order_status'] as $language_id => $value) {
 			$this->db->query("INSERT INTO " . DB_PREFIX . "order_status SET order_status_id = '" . (int)$order_status_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "'");
 		}
-
-		$this->cache->delete('order_status');
 	}
 
 	public function deleteOrderStatus($order_status_id) {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "order_status WHERE order_status_id = '" . (int)$order_status_id . "'");
-
-		$this->cache->delete('order_status');
 	}
 
 	public function getOrderStatus($order_status_id) {
@@ -66,16 +59,8 @@ class ModelLocalisationOrderStatus extends Model {
 
 			return $query->rows;
 		} else {
-			$order_status_data = $this->cache->get('order_status.' . (int)$this->config->get('config_language_id'));
-
-			if (!$order_status_data) {
-				$query = $this->db->query("SELECT order_status_id, name FROM " . DB_PREFIX . "order_status WHERE language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY name");
-
-				$order_status_data = $query->rows;
-
-				$this->cache->set('order_status.' . (int)$this->config->get('config_language_id'), $order_status_data);
-			}
-
+			$query = $this->db->query("SELECT order_status_id, name FROM " . DB_PREFIX . "order_status WHERE language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY name");
+			$order_status_data = $query->rows;
 			return $order_status_data;
 		}
 	}

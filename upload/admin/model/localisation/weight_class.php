@@ -8,9 +8,6 @@ class ModelLocalisationWeightClass extends Model {
 		foreach ($data['weight_class_description'] as $language_id => $value) {
 			$this->db->query("INSERT INTO " . DB_PREFIX . "weight_class_description SET weight_class_id = '" . (int)$weight_class_id . "', language_id = '" . (int)$language_id . "', title = '" . $this->db->escape($value['title']) . "', unit = '" . $this->db->escape($value['unit']) . "'");
 		}
-
-		$this->cache->delete('weight_class');
-		
 		return $weight_class_id;
 	}
 
@@ -22,15 +19,11 @@ class ModelLocalisationWeightClass extends Model {
 		foreach ($data['weight_class_description'] as $language_id => $value) {
 			$this->db->query("INSERT INTO " . DB_PREFIX . "weight_class_description SET weight_class_id = '" . (int)$weight_class_id . "', language_id = '" . (int)$language_id . "', title = '" . $this->db->escape($value['title']) . "', unit = '" . $this->db->escape($value['unit']) . "'");
 		}
-
-		$this->cache->delete('weight_class');
 	}
 
 	public function deleteWeightClass($weight_class_id) {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "weight_class WHERE weight_class_id = '" . (int)$weight_class_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "weight_class_description WHERE weight_class_id = '" . (int)$weight_class_id . "'");
-
-		$this->cache->delete('weight_class');
 	}
 
 	public function getWeightClasses($data = array()) {
@@ -71,16 +64,8 @@ class ModelLocalisationWeightClass extends Model {
 
 			return $query->rows;
 		} else {
-			$weight_class_data = $this->cache->get('weight_class.' . (int)$this->config->get('config_language_id'));
-
-			if (!$weight_class_data) {
-				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "weight_class wc LEFT JOIN " . DB_PREFIX . "weight_class_description wcd ON (wc.weight_class_id = wcd.weight_class_id) WHERE wcd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
-
-				$weight_class_data = $query->rows;
-
-				$this->cache->set('weight_class.' . (int)$this->config->get('config_language_id'), $weight_class_data);
-			}
-
+			$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "weight_class wc LEFT JOIN " . DB_PREFIX . "weight_class_description wcd ON (wc.weight_class_id = wcd.weight_class_id) WHERE wcd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
+			$weight_class_data = $query->rows;
 			return $weight_class_data;
 		}
 	}

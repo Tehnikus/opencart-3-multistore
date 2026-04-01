@@ -8,9 +8,6 @@ class ModelLocalisationLengthClass extends Model {
 		foreach ($data['length_class_description'] as $language_id => $value) {
 			$this->db->query("INSERT INTO " . DB_PREFIX . "length_class_description SET length_class_id = '" . (int)$length_class_id . "', language_id = '" . (int)$language_id . "', title = '" . $this->db->escape($value['title']) . "', unit = '" . $this->db->escape($value['unit']) . "'");
 		}
-
-		$this->cache->delete('length_class');
-		
 		return $length_class_id;
 	}
 
@@ -22,15 +19,11 @@ class ModelLocalisationLengthClass extends Model {
 		foreach ($data['length_class_description'] as $language_id => $value) {
 			$this->db->query("INSERT INTO " . DB_PREFIX . "length_class_description SET length_class_id = '" . (int)$length_class_id . "', language_id = '" . (int)$language_id . "', title = '" . $this->db->escape($value['title']) . "', unit = '" . $this->db->escape($value['unit']) . "'");
 		}
-
-		$this->cache->delete('length_class');
 	}
 
 	public function deleteLengthClass($length_class_id) {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "length_class WHERE length_class_id = '" . (int)$length_class_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "length_class_description WHERE length_class_id = '" . (int)$length_class_id . "'");
-
-		$this->cache->delete('length_class');
 	}
 
 	public function getLengthClasses($data = array()) {
@@ -71,16 +64,8 @@ class ModelLocalisationLengthClass extends Model {
 
 			return $query->rows;
 		} else {
-			$length_class_data = $this->cache->get('length_class.' . (int)$this->config->get('config_language_id'));
-
-			if (!$length_class_data) {
-				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "length_class lc LEFT JOIN " . DB_PREFIX . "length_class_description lcd ON (lc.length_class_id = lcd.length_class_id) WHERE lcd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
-
-				$length_class_data = $query->rows;
-
-				$this->cache->set('length_class.' . (int)$this->config->get('config_language_id'), $length_class_data);
-			}
-
+			$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "length_class lc LEFT JOIN " . DB_PREFIX . "length_class_description lcd ON (lc.length_class_id = lcd.length_class_id) WHERE lcd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
+			$length_class_data = $query->rows;
 			return $length_class_data;
 		}
 	}

@@ -10,8 +10,6 @@ class ModelLocalisationStockStatus extends Model {
 				$stock_status_id = $this->db->getLastId();
 			}
 		}
-
-		$this->cache->delete('stock_status');
 		
 		return $stock_status_id;
 	}
@@ -22,14 +20,10 @@ class ModelLocalisationStockStatus extends Model {
 		foreach ($data['stock_status'] as $language_id => $value) {
 			$this->db->query("INSERT INTO " . DB_PREFIX . "stock_status SET stock_status_id = '" . (int)$stock_status_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "'");
 		}
-
-		$this->cache->delete('stock_status');
 	}
 
 	public function deleteStockStatus($stock_status_id) {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "stock_status WHERE stock_status_id = '" . (int)$stock_status_id . "'");
-
-		$this->cache->delete('stock_status');
 	}
 
 	public function getStockStatus($stock_status_id) {
@@ -66,16 +60,8 @@ class ModelLocalisationStockStatus extends Model {
 
 			return $query->rows;
 		} else {
-			$stock_status_data = $this->cache->get('stock_status.' . (int)$this->config->get('config_language_id'));
-
-			if (!$stock_status_data) {
-				$query = $this->db->query("SELECT stock_status_id, name FROM " . DB_PREFIX . "stock_status WHERE language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY name");
-
-				$stock_status_data = $query->rows;
-
-				$this->cache->set('stock_status.' . (int)$this->config->get('config_language_id'), $stock_status_data);
-			}
-
+			$query = $this->db->query("SELECT stock_status_id, name FROM " . DB_PREFIX . "stock_status WHERE language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY name");
+			$stock_status_data = $query->rows;
 			return $stock_status_data;
 		}
 	}

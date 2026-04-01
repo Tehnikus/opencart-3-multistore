@@ -10,9 +10,6 @@ class ModelLocalisationTaxClass extends Model {
 				$this->db->query("INSERT INTO " . DB_PREFIX . "tax_rule SET tax_class_id = '" . (int)$tax_class_id . "', tax_rate_id = '" . (int)$tax_rule['tax_rate_id'] . "', based = '" . $this->db->escape($tax_rule['based']) . "', priority = '" . (int)$tax_rule['priority'] . "'");
 			}
 		}
-
-		$this->cache->delete('tax_class');
-		
 		return $tax_class_id;
 	}
 
@@ -26,15 +23,11 @@ class ModelLocalisationTaxClass extends Model {
 				$this->db->query("INSERT INTO " . DB_PREFIX . "tax_rule SET tax_class_id = '" . (int)$tax_class_id . "', tax_rate_id = '" . (int)$tax_rule['tax_rate_id'] . "', based = '" . $this->db->escape($tax_rule['based']) . "', priority = '" . (int)$tax_rule['priority'] . "'");
 			}
 		}
-
-		$this->cache->delete('tax_class');
 	}
 
 	public function deleteTaxClass($tax_class_id) {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "tax_class WHERE tax_class_id = '" . (int)$tax_class_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "tax_rule WHERE tax_class_id = '" . (int)$tax_class_id . "'");
-
-		$this->cache->delete('tax_class');
 	}
 
 	public function getTaxClass($tax_class_id) {
@@ -71,16 +64,8 @@ class ModelLocalisationTaxClass extends Model {
 
 			return $query->rows;
 		} else {
-			$tax_class_data = $this->cache->get('tax_class');
-
-			if (!$tax_class_data) {
-				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "tax_class");
-
-				$tax_class_data = $query->rows;
-
-				$this->cache->set('tax_class', $tax_class_data);
-			}
-
+			$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "tax_class");
+			$tax_class_data = $query->rows;
 			return $tax_class_data;
 		}
 	}

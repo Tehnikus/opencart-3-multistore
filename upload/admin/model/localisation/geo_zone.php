@@ -12,9 +12,6 @@ class ModelLocalisationGeoZone extends Model {
 				$this->db->query("INSERT INTO " . DB_PREFIX . "zone_to_geo_zone SET country_id = '" . (int)$value['country_id'] . "', zone_id = '" . (int)$value['zone_id'] . "', geo_zone_id = '" . (int)$geo_zone_id . "', date_added = NOW()");
 			}
 		}
-
-		$this->cache->delete('geo_zone');
-		
 		return $geo_zone_id;
 	}
 
@@ -30,15 +27,11 @@ class ModelLocalisationGeoZone extends Model {
 				$this->db->query("INSERT INTO " . DB_PREFIX . "zone_to_geo_zone SET country_id = '" . (int)$value['country_id'] . "', zone_id = '" . (int)$value['zone_id'] . "', geo_zone_id = '" . (int)$geo_zone_id . "', date_added = NOW()");
 			}
 		}
-
-		$this->cache->delete('geo_zone');
 	}
 
 	public function deleteGeoZone($geo_zone_id) {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "geo_zone WHERE geo_zone_id = '" . (int)$geo_zone_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "zone_to_geo_zone WHERE geo_zone_id = '" . (int)$geo_zone_id . "'");
-
-		$this->cache->delete('geo_zone');
 	}
 
 	public function getGeoZone($geo_zone_id) {
@@ -84,16 +77,8 @@ class ModelLocalisationGeoZone extends Model {
 
 			return $query->rows;
 		} else {
-			$geo_zone_data = $this->cache->get('geo_zone');
-
-			if (!$geo_zone_data) {
-				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "geo_zone ORDER BY name ASC");
-
-				$geo_zone_data = $query->rows;
-
-				$this->cache->set('geo_zone', $geo_zone_data);
-			}
-
+			$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "geo_zone ORDER BY name ASC");
+			$geo_zone_data = $query->rows;
 			return $geo_zone_data;
 		}
 	}
