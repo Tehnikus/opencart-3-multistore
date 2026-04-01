@@ -5,30 +5,88 @@ class ModelSettingStore extends Model {
 
 		$store_id = $this->db->getLastId();
 
-		// Layout Route
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "layout_route WHERE store_id = '0'");
+		// Language to store association
+		$this->db->query("
+			DELETE FROM " . DB_PREFIX . "language_to_store
+			WHERE store_id = '" . (int) $store_id . "'
+		");
 
-		foreach ($query->rows as $layout_route) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "layout_route SET layout_id = '" . (int)$layout_route['layout_id'] . "', route = '" . $this->db->escape($layout_route['route']) . "', store_id = '" . (int)$store_id . "'");
+		if (isset($data['languages_association']) && !empty($data['languages_association'])) {
+			foreach ($data['languages_association'] as $language_id) {
+				$this->db->query("
+					INSERT INTO " . DB_PREFIX . "language_to_store
+					SET
+						`language_id` 				= '" . (int) $language_id . "', 
+						`store_id` 		 				= '" . (int) $store_id . "'
+				");
+			}
 		}
-
-		$this->cache->delete('store');
-
+		
 		return $store_id;
 	}
 
 	public function editStore($store_id, $data) {
 		$this->db->query("UPDATE " . DB_PREFIX . "store SET name = '" . $this->db->escape($data['config_name']) . "', `url` = '" . $this->db->escape($data['config_url']) . "', `ssl` = '" . $this->db->escape($data['config_ssl']) . "' WHERE store_id = '" . (int)$store_id . "'");
 
-		$this->cache->delete('store');
+		// Language to store association
+		$this->db->query("
+			DELETE FROM " . DB_PREFIX . "language_to_store
+			WHERE store_id = '" . (int) $store_id . "'
+		");
+
+		if (isset($data['languages_association']) && !empty($data['languages_association'])) {
+			foreach ($data['languages_association'] as $language_id) {
+				$this->db->query("
+					INSERT INTO " . DB_PREFIX . "language_to_store
+					SET
+						`language_id` 				= '" . (int) $language_id . "', 
+						`store_id` 		 				= '" . (int) $store_id . "'
+				");
+			}
+		}
+
+		// Install selected theme if not installed
+		$this->load->model('setting/extension');
+		$this->model_setting_extension->install('theme', $data['config_theme']);
+
+		return (int) $store_id;
 	}
 
-	public function deleteStore($store_id) {
-		$this->db->query("DELETE FROM " . DB_PREFIX . "store WHERE store_id = '" . (int)$store_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "layout_route WHERE store_id = '" . (int)$store_id . "'");
+	public function deleteStore($store_id = 0) {
 
-		$this->cache->delete('store');
+	if ($store_id === 0) {
+		throw new Exception("You cannot delete default store");
 	}
+
+	$this->db->query("START TRANSACTION");
+
+	try {
+
+		// Get all tables with store_id
+		$tablesToDelete = $this->db->query("
+			SELECT DISTINCT TABLE_NAME AS `table`
+			FROM INFORMATION_SCHEMA.COLUMNS
+			WHERE COLUMN_NAME = 'store_id'
+				AND TABLE_SCHEMA = '" . DB_DATABASE . "'
+				AND TABLE_NAME LIKE '" . DB_PREFIX . "%'
+		")->rows;
+
+		foreach ($tablesToDelete as $table) {
+
+			$this->db->query("
+				DELETE FROM `" . $table['table'] . "`
+				WHERE store_id = '" . (int) $store_id . "'
+			");
+		}
+
+		$this->db->query("COMMIT");
+
+	} catch (\Throwable $e) {
+
+		$this->db->query("ROLLBACK");
+		throw $e;
+	}
+}
 
 	public function getStore($store_id) {
 		$query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "store WHERE store_id = '" . (int)$store_id . "'");
