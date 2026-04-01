@@ -74,16 +74,29 @@ class ControllerCommonHeader extends Controller {
 				'href' => HTTP_CATALOG
 			);
 
-			$this->load->model('setting/store');
+			// Multistore switch
 
-			$results = $this->model_setting_store->getStores();
+			$this->load->model('setting/store');
+			$results = $this->model_setting_store->getMultistores();
+			$data['user_token'] = $this->session->data['user_token'];
 
 			foreach ($results as $result) {
-				$data['stores'][] = array(
+				$route = $this->request->get['route'];
+				$args = $this->request->get;
+				unset($args['route']);
+				$args['store_id'] = $result['store_id'];
+		
+				$storeSwitchLink = $this->url->link($route, http_build_query($args), true);
+
+				$data['stores'][$result['store_id']] = array(
 					'name' => $result['name'],
-					'href' => $result['url']
+					'href' => $result['url'],
+					'storeSwitchLink' => $storeSwitchLink,
+					'storeId' => $result['store_id'],
 				);
 			}
+
+			$data['currentStoreId'] = $this->session->data['store_id'];
 		}
 
 		return $this->load->view('common/header', $data);
