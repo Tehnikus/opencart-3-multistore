@@ -16,7 +16,8 @@
     "twig/twig": "^3.24",
     "zoujingli/wechat-php-sdk": "^1.3",
     "cardinity/cardinity-sdk-php": ">=v3.3.6",
-    "twig/cache-extra": "^3.24"
+    "twig/cache-extra": "^3.24",
+    "symfony/cache": "^8.0"
   },
   "autoload-dev": {
     "psr-4": {
