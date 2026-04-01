@@ -639,4 +639,51 @@ class ModelCatalogFilter extends Model {
 		return $result;
 	}
 
+	public function deleteCache($filter_id, $store_id = null) : void {
+
+		$products 	= [];
+		$categories = [];
+
+		if ($store_id === null) {
+			$store_id = (int) $this->session->data['store_id'];
+		}
+
+		$this->load->model('localisation/language');
+		$languages = $this->model_localisation_language->getLanguages();
+		$categories = $this->db->query("
+			SELECT
+				DISTINCT category_id
+			FROM " . DB_PREFIX . "category_filter
+			WHERE filter_id = '" . $filter_id . "'
+				AND store_id = '" . $store_id . "'
+		")->rows;
+
+		$products = $this->db->query("
+			SELECT
+				DISTINCT product_id
+			FROM " . DB_PREFIX . "product_filter
+			WHERE filter_id = '" . $filter_id . "'
+				AND store_id = '" . $store_id . "'
+		")->rows;
+
+		foreach ($languages as $language) {
+			$language_id = $language['language_id'];
+			// Delete filters cache
+			if (!empty($products)) {
+				foreach ($categories as $category) {
+					$filterCacheName = "category.store_{$store_id}.language_{$language_id}." . (floor($category['category_id'] / 100)) . "00.filters_{$category['category_id']}";
+					$this->cache->delete($filterCacheName);
+				}
+			}
+			
+			if (!empty($categories)) {
+				foreach ($products as $product) {
+					// Delete product cache
+					$productCacheName 	= "product.store_{$store_id}.language_{$language_id}." . (floor($product['product_id'] / 100)) . "00.product_{$product['product_id']}";
+					$this->cache->delete($productCacheName);
+				}
+			}
+		}
+	}
+
 }
