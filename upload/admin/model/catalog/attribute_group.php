@@ -370,4 +370,57 @@ class ModelCatalogAttributeGroup extends Model {
 
 		return $result;
 	}
+
+	public function deleteCache($attribute_group_id, $store_id = null) : void {
+
+		$products 	= [];
+		$categories = [];
+
+		if ($store_id === null) {
+			$store_id = $this->session->data['store_id'];
+		}
+
+		$this->load->model('localisation/language');
+		$languages = $this->model_localisation_language->getLanguages();
+
+		$products = $this->db->query("
+			SELECT
+				DISTINCT product_id
+			FROM " . DB_PREFIX . "product_attribute
+			WHERE attribute_group_id = '" . $attribute_group_id . "'
+				AND store_id = '" . (int) $store_id . "'
+		")->rows;
+
+		if (!empty($products)) {
+			$categories = $this->db->query("
+				SELECT
+					DISTINCT category_id
+				FROM " . DB_PREFIX . "product_to_category
+				WHERE product_id IN(" . implode(',',array_column($products, 'product_id')). ")
+					AND store_id = '" . (int) $store_id . "'
+			")->rows;
+		}
+
+		foreach ($languages as $language) {
+			$language_id = $language['language_id'];
+			// Pproduct cache
+			if (!empty($products)) {
+				foreach ($products as $product) {
+					$productCacheName 	= "product.store_{$store_id}.language_{$language_id}." . (floor($product['product_id'] / 100)) . "00.product_" . $product['product_id'];
+					$this->cache->delete($productCacheName);
+				}
+			}
+
+			if (!empty($categories)) {
+				foreach ($categories as $category) {
+					$category_id = (int) $category['category_id'];
+
+					// Filter cache
+					$filterCacheName = "category.store_{$store_id}.language_{$language_id}." . (floor($category_id / 100)) . "00.filters_{$category_id}";
+					$this->cache->delete($filterCacheName);
+				}
+			}
+		}
+	}
+
 }
