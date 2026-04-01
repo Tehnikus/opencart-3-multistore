@@ -1,0 +1,106 @@
+.tableWrapper {
+  overflow-y: auto;
+  max-height: 80vh;
+  scroll-behavior: smooth;
+  &::-webkit-scrollbar {width: 10px;}
+  &::-webkit-scrollbar-track {background: #f5f5f5;}
+  &::-webkit-scrollbar-thumb {background-color: #aaa;border-radius: 5px}
+  
+  & table {
+    margin-bottom: 0
+  }
+  & thead, & tfoot {
+    position: sticky;
+    z-index: 90;
+    background: #f5f5f5;
+    box-shadow: 0 0 5px 2px #0003;
+    & td, & th {
+      vertical-align: middle!important;
+    }
+    & input, & select {
+      border: 1px solid #ccc;
+      padding: 4px;
+      &:hover, &:focus {
+        border-color: #bbb;
+        box-shadow: none;
+      }
+    }
+    /* Fix sticky header and footer transparent gap */
+    & tr {
+      position: relative;
+      &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1px;
+        height: 2px;
+        pointer-events: none;
+        background: #eee;
+        z-index: 90
+      }
+    }
+  }
+  & thead {
+    top: 0
+  }
+  
+  & tfoot {
+    bottom: 0
+  }
+
+  .btn-group {
+    display: flex;
+    justify-content: center;
+  }
+
+  & button, & .btn {
+    padding: 5px;
+    min-width: 40px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    & i {
+      font-size: 2rem;
+    }
+  }
+
+  & p,
+  & h4 {
+    margin-bottom: 0;
+    margin: 0
+  }
+  
+  & img.cover {
+    border-radius: 5px;
+    box-shadow: 0 0 5px 2px #00000015;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    width: 100px;
+  }
+
+  & .tablePagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: bold;
+
+    & button {
+      background: #fff;
+      border-radius: 3px;
+      border: 1px solid
+    }
+    
+    & button:disabled {
+      background: #eee;
+      border-color: #ccc;
+      color: #999
+    }
+    
+    & .ellipsis {
+      align-content: end
+    }
+  }
+}
