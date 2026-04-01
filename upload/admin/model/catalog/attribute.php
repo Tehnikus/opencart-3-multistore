@@ -238,35 +238,51 @@ class ModelCatalogAttribute extends Model {
 		return $query->row;
 	}
 
+	// Get attributes list
+	// Used in admin attribute list and attribute autocomplete in product form
+	// Should show all attributes in admin attributes list if $data['store_id'] is not set
+	// and only store related attributes in product form if $data['store_id'] is set
 	public function getAttributes($data = array()) {
-		$sql = "SELECT *, (SELECT agd.name FROM " . DB_PREFIX . "attribute_group_description agd WHERE agd.attribute_group_id = a.attribute_group_id AND agd.language_id = '" . (int)$this->config->get('config_language_id') . "') AS attribute_group FROM " . DB_PREFIX . "attribute a LEFT JOIN " . DB_PREFIX . "attribute_description ad ON (a.attribute_id = ad.attribute_id) WHERE ad.language_id = '" . (int)$this->config->get('config_language_id') . "'";
 
-		if (!empty($data['filter_name'])) {
-			$sql .= " AND ad.name LIKE '" . $this->db->escape($data['filter_name']) . "%'";
+		$result = [];
+		$where = [];
+		$orderClause = "";
+		$limitClause = "";
+
+		// Where clause
+		$where[] = " a2s.attribute_id = a.attribute_id "; // Connect WHERE EXISTS with external SELECT "attribute a" table
+		if (isset($data['filter_name'])) {
+			$where[] = " ad.name LIKE '%" . $this->db->escape($data['filter_name']) . "%'";
 		}
 
-		if (!empty($data['filter_attribute_group_id'])) {
-			$sql .= " AND a.attribute_group_id = '" . $this->db->escape($data['filter_attribute_group_id']) . "'";
+		if (isset($data['filter_attribute_group_id'])) {
+			$where[] = " a.attribute_group_id = '" . $this->db->escape($data['filter_attribute_group_id']) . "'";
 		}
 
+		if (isset($data['store_id'])) {
+			$where[] = " a2s.store_id = '" . (int) $data['store_id'] . "'";
+		}
+
+		// Order clause
 		$sort_data = array(
-			'ad.name',
-			'attribute_group',
-			'a.sort_order'
+			'name',
+			'attribute_group_id',
+			'a2s.sort_order'
 		);
 
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-			$sql .= " ORDER BY " . $data['sort'];
+			$orderClause .= " ORDER BY FIELD(a2s.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, " . $data['sort'];
 		} else {
-			$sql .= " ORDER BY attribute_group, ad.name";
+			$orderClause .= " ORDER BY FIELD(a2s.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, attribute_group_id, name";
 		}
 
 		if (isset($data['order']) && ($data['order'] == 'DESC')) {
-			$sql .= " DESC";
+			$orderClause .= " DESC";
 		} else {
-			$sql .= " ASC";
+			$orderClause .= " ASC";
 		}
 
+		// Limit clause
 		if (isset($data['start']) || isset($data['limit'])) {
 			if ($data['start'] < 0) {
 				$data['start'] = 0;
@@ -276,12 +292,75 @@ class ModelCatalogAttribute extends Model {
 				$data['limit'] = 20;
 			}
 
-			$sql .= " LIMIT " . (int)$data['start'] . "," . (int)$data['limit'];
+			$limitClause .= " LIMIT " . (int)$data['start'] . "," . (int)$data['limit'];
 		}
+
+		$sql = "
+			SELECT
+				a.attribute_id,
+				-- Coalesce attribute_group_id so if attribute group is not associated with store, it is retrieved anyway
+				COALESCE(a2s.attribute_group_id, a.attribute_group_id) AS attribute_group_id,
+				a2s.sort_order,
+				(
+					SELECT 
+						ad.name 
+					FROM " . DB_PREFIX . "attribute_description ad
+					WHERE ad.attribute_id = a.attribute_id
+					ORDER BY 
+						FIELD(ad.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, 
+						FIELD(ad.language_id, '" . (int) $this->config->get('config_language_id') . "') DESC
+					LIMIT 1
+				) AS `name`,
+				(
+					SELECT 
+						agd.name 
+					FROM " . DB_PREFIX . "attribute_group_description agd 
+					WHERE agd.attribute_group_id = (
+						SELECT
+							a2s2.attribute_group_id
+						FROM " . DB_PREFIX . "attribute_to_store a2s2
+						WHERE a2s2.attribute_id = a.attribute_id
+						ORDER BY 
+							FIELD(a2s2.store_id, '" . (int) $this->session->data['store_id'] ."') DESC
+						LIMIT 1
+					)
+					ORDER BY 
+						FIELD(agd.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, 
+						FIELD(agd.language_id, '" . (int) $this->config->get('config_language_id') . "') DESC
+					LIMIT 1
+				) AS `attribute_group`,
+				(SELECT COUNT(pa.product_id) FROM " . DB_PREFIX . "product_attribute pa WHERE pa.attribute_id = a.attribute_id AND pa.store_id = a2s.store_id) AS product_count,
+ 				(SELECT JSON_ARRAYAGG(a2s.store_id) FROM " . DB_PREFIX . "attribute_to_store a2s WHERE a.attribute_id = a2s.attribute_id) AS stores,
+ 				(SELECT JSON_ARRAYAGG(ag2s.store_id) FROM " . DB_PREFIX . "attribute_group_to_store ag2s WHERE a.attribute_group_id = ag2s.attribute_group_id) AS attribute_group_stores
+			FROM " . DB_PREFIX . "attribute a 
+			LEFT JOIN " . DB_PREFIX . "attribute_description ad 
+				ON ad.attribute_id 	= a.attribute_id 
+				AND ad.language_id 	= " . (int) $this->config->get('config_language_id') . "
+				AND ad.store_id 		= " . (int) $this->session->data['store_id'] . "
+			LEFT JOIN " . DB_PREFIX . "attribute_to_store a2s 
+				ON a2s.attribute_id = a.attribute_id 
+				AND a2s.store_id 		= " . (int) $this->session->data['store_id'] . "
+      WHERE EXISTS (
+        SELECT 1
+        FROM " . DB_PREFIX . "attribute_to_store a2s
+        JOIN " . DB_PREFIX . "attribute_description ad
+          ON ad.attribute_id = a2s.attribute_id
+          AND ad.store_id = a2s.store_id
+        WHERE " . implode(' AND ', $where) . "
+      )
+			" . $orderClause . "
+			" . $limitClause . "
+		";
 
 		$query = $this->db->query($sql);
 
-		return $query->rows;
+		foreach ($query->rows ?? [] as $row) {
+			$row['stores'] 									= json_decode($row['stores'] ?? '[]');
+			$row['attribute_group_stores'] 	= json_decode($row['attribute_group_stores'] ?? '[]');
+			$result[] = $row;
+		}
+
+		return $result;
 	}
 
 	public function getAttributeDescriptions($attribute_id) {
