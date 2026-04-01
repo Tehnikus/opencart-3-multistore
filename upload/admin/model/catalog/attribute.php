@@ -1,30 +1,67 @@
 <?php
 class ModelCatalogAttribute extends Model {
-	public function addAttribute($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "attribute SET attribute_group_id = '" . (int)$data['attribute_group_id'] . "', sort_order = '" . (int)$data['sort_order'] . "'");
+	public function addAttribute($data) : int {
 
-		$attribute_id = $this->db->getLastId();
+		$this->db->query("START TRANSACTION");
 
-		foreach ($data['attribute_description'] as $language_id => $value) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "attribute_description SET attribute_id = '" . (int)$attribute_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "'");
+		try {
+
+			$this->db->query("
+				INSERT INTO " . DB_PREFIX . "attribute 
+				SET 
+					`attribute_group_id` 	= '" . (int) $data['attribute_group_id'] . "', 
+					`sort_order` 					= '" . (int) $data['sort_order'] . "' 
+			");
+	
+			$attribute_id = $this->db->getLastId();
+
+			// Delete cache
+			$this->deleteCache($attribute_id);
+	
+			foreach ($data['attribute_description'] as $language_id => $value) {
+				$this->db->query("
+					INSERT INTO " . DB_PREFIX . "attribute_description 
+					SET 
+						`attribute_id` 	= '" . (int) $attribute_id . "', 
+						`language_id` 	= '" . (int) $language_id . "', 
+						`store_id` 			= '" . (int) $this->session->data['store_id'] . "', 
+						`name` 					= '" . $this->db->escape($value['name']) . "'
+				");
+			}
+
+			// Stores association
+			if (isset($data['stores_association']) && !empty($data['stores_association'])) {
+				foreach ($data['stores_association'] as $store_id) {
+					$this->db->query("
+						INSERT INTO " . DB_PREFIX . "attribute_to_store
+						SET
+							`attribute_id` 				= '" . (int) $attribute_id . "', 
+							`attribute_group_id` 	= '" . (int) $data['attribute_group_id'] . "', 
+							`store_id` 		 				= '" . (int) $store_id . "',
+							`sort_order` 	 				= '" . (int) $data['sort_order'] . "'
+					");
+				}
+			}
+	
+			$this->db->query("COMMIT");
+
+			// Rebuild facet indexes
+			$this->load->model('catalog/facet');
+			$store_id = (int) $this->session->data['store_id'];
+			$this->model_catalog_facet->buildFacetNames(facet_value_id: $attribute_id, facet_type: 4, store_id: $store_id);
+			$this->model_catalog_facet->buildFacetIndex(facet_value_id: $attribute_id, facet_type: 4, store_id: $store_id);
+			
+			return (int) $attribute_id;
+			
+		} catch (\Throwable $e) {
+
+			$this->db->query("ROLLBACK");
+
+			throw $e;
+			
 		}
-
-		return $attribute_id;
+		
 	}
-
-	public function editAttribute($attribute_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "attribute SET attribute_group_id = '" . (int)$data['attribute_group_id'] . "', sort_order = '" . (int)$data['sort_order'] . "' WHERE attribute_id = '" . (int)$attribute_id . "'");
-
-		$this->db->query("DELETE FROM " . DB_PREFIX . "attribute_description WHERE attribute_id = '" . (int)$attribute_id . "'");
-
-		foreach ($data['attribute_description'] as $language_id => $value) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "attribute_description SET attribute_id = '" . (int)$attribute_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "'");
-		}
-	}
-
-	public function deleteAttribute($attribute_id) {
-		$this->db->query("DELETE FROM " . DB_PREFIX . "attribute WHERE attribute_id = '" . (int)$attribute_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "attribute_description WHERE attribute_id = '" . (int)$attribute_id . "'");
 	}
 
 	public function getAttribute($attribute_id) {
