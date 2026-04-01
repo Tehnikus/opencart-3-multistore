@@ -1,4 +1,4 @@
-@import url(//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&subset=latin,cyrillic-ext,greek-ext,vietnamese);
+/* @import url(//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&subset=latin,cyrillic-ext,greek-ext,vietnamese); */
 
 html, body {
     height: 100%;
@@ -1015,4 +1015,65 @@ html[dir="rtl"] .text-right {
     html[dir="rtl"] .navbar-right {
         float: left !important;
     }
+}
+
+
+#storeSwitch {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px 0 0 255px;
+  gap: 2rem;
+  & .storeLink {
+    padding: 10px 15px;
+    border-radius: 5px;
+    &.currentStore {
+        font-weight: bold;
+    }
+  }
+}
+
+.input-group-addon {
+    display: flex;
+    min-width: 40px;
+    align-items: center;
+    justify-content: center;
+}
+
+.input-group {
+    display: flex;
+    & .input-group-btn {
+        width: auto;
+    }
+    & > * {
+        border-radius: 0;
+        height: 35px
+    }
+    & > :first-child {
+        border-radius: 4px 0 0 4px
+    }
+    & > :last-child {
+        border-radius: 0 4px 4px 0
+    }
+    & > :not(:last-child) {
+        border-right: 0;
+    }
+}
+
+table td p {
+    margin: 3px 0;
+}
+
+.badge {
+    border-radius: 3px;
+    padding: 5px 7px;
+    &.badge-sm {
+        font-weight: normal;
+        padding: 3px 7px;
+    }
+}
+
+
+.has-error .well {
+    border-color: #e3503e;
 }
