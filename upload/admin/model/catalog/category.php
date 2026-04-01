@@ -794,7 +794,13 @@ class ModelCatalogCategory extends Model {
 	public function getCategoryDescriptions($category_id) {
 		$category_description_data = array();
 
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "category_description WHERE category_id = '" . (int)$category_id . "'");
+		$query = $this->db->query("
+			SELECT 
+				* 
+			FROM " . DB_PREFIX . "category_description 
+			WHERE category_id = '" . (int) $category_id . "'
+				AND store_id 		= '" . (int) $this->session->data['store_id'] . "'
+		");
 
 		foreach ($query->rows as $result) {
 			$category_description_data[$result['language_id']] = array(
@@ -810,7 +816,15 @@ class ModelCatalogCategory extends Model {
 	}
 	
 	public function getCategoryPath($category_id) {
-		$query = $this->db->query("SELECT category_id, path_id, level FROM " . DB_PREFIX . "category_path WHERE category_id = '" . (int)$category_id . "'");
+		$query = $this->db->query("
+			SELECT 
+				category_id, 
+				path_id, 
+				level 
+			FROM " . DB_PREFIX . "category_path 
+			WHERE category_id = '" . (int) $category_id . "'
+				AND store_id 		= '" . (int) $this->session->data['store_id'] . "'
+		");
 
 		return $query->rows;
 	}
@@ -818,7 +832,13 @@ class ModelCatalogCategory extends Model {
 	public function getCategoryFilters($category_id) {
 		$category_filter_data = array();
 
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "category_filter WHERE category_id = '" . (int)$category_id . "'");
+		$query = $this->db->query("
+			SELECT 
+				* 
+			FROM " . DB_PREFIX . "category_filter 
+			WHERE category_id = '" . (int) $category_id . "'
+				AND store_id 		= '" . (int) $this->session->data['store_id'] . "'
+		");
 
 		foreach ($query->rows as $result) {
 			$category_filter_data[] = $result['filter_id'];
