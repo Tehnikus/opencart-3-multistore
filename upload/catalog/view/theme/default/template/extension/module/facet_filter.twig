@@ -1,0 +1,69 @@
+{% if facetSets %}
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      {{ heading_title }}
+    </div>
+    <div>
+      <select id="sortOrder">
+        {% for sortOrder in sortOrders %}
+          <option value="{{ sortOrder.value }}" {% if requestSort == sortOrder.value %}selected{% endif %}>{{ sortOrder.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="facetFilter">
+      <a class="btn btn-primary" href="{{ resetLink }}">{{ button_reset_filters }}</a>
+      {% for facetType, facetSet in facetSets %}
+        {% for key, facetGroup in facetSet %}
+          <div class="facetGroup">
+            <h4>{{facetGroup.group_name}}</h4>
+            {% for facetItem in facetGroup.filters %}
+              {% if facetItem.facet_is_available %}
+                <a href="{{ facetItem.url }}" class="facetItem {% if facetItem.facet_is_selected %}active{% endif %}" {% if facetItem.facet_is_selected %}rel="nofollow"{% endif %}>
+                  <input id="{{ facetType }}_{{ facetItem.facet_id }}" type="checkbox" data-facet-type="{{ facetType }}" value="{{ facetItem.facet_id }}" {% if facetItem.facet_id in requests[facetType] %} checked="checked" {% endif %} class="facetInput" />
+                  <label for="{{ facetType }}_{{ facetItem.facet_id }}" class="facetLabel">
+                    <span class="facetName">{{ facetItem.facet_name }}</span>
+                    <span class="productCount">{% if facetGroup.group_is_selected and not (facetItem.facet_id in requests[facetType]) %}+{% endif %}{% if facetItem.facet_is_selected %}{{ facetItem.base_count }}{% else %}{{ facetItem.current_count }}{% endif %}</span>
+                  </label>
+                </a>
+              {% else %}
+              <span class="facetItem">
+                <input type="checkbox" class="facetInput" disabled />
+                <span class="facetName disabled">{{ facetItem.facet_name }}</span>
+              </span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+<script>
+
+document.getElementById('sortOrder').addEventListener('change', (e) => {
+  setParams('sort', e.target.value);
+});
+
+document.querySelectorAll('.facetInput').forEach(e => {
+  e.addEventListener('change', () => {
+    window.location.href = e.parentElement.href;
+  });
+});
+
+function setParams(param, value = null) {
+
+  const url = new URL(window.location.href);
+
+  if (value) {
+    url.searchParams.set(param, value);
+  } else {
+    url.searchParams.delete(param);
+  }
+
+  window.location.href = url.toString();
+
+  // For future reference when filter will get products by JS fetch
+  // history.replaceState(null, '', url);
+}
+
+</script>

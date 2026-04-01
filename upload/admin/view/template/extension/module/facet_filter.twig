@@ -1,0 +1,153 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1>{{ heading_title }}</h1>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module" class="form-horizontal">
+
+          {# Module status #}
+          {# Should always have name module_" . $module_name . "_status to work #}
+          <div class="form-group">
+            <label class="col-sm-1 control-label" for="input-status">{{ entry_status }}</label>
+            <div class="col-sm-11">
+              <select name="module_facet_filter_status" id="input-status" class="form-control">
+                <option value="1" {% if module_facet_filter_status %} selected="selected" {% endif %}>{{ text_enabled }}</option>
+                <option value="0" {% if not module_facet_filter_status %} selected="selected" {% endif %}>{{ text_disabled }}</option>
+              </select>
+            </div>
+          </div>
+
+          {# Cache settings #}
+          <div class="form-group">
+            <label class="col-sm-1 control-label" for="input-status">{{ entry_cache }}</label>
+            <div class="col-sm-11">
+              <select name="module_facet_filter_settings[cache]" id="input-status" class="form-control">
+                <option value="1" {% if settings.cache %} selected="selected" {% endif %}>{{ text_enabled }}</option>
+                <option value="0" {% if not settings.cache %} selected="selected" {% endif %}>{{ text_disabled }}</option>
+              </select>
+            </div>
+          </div>
+
+          {# Settings #}
+          {# Define which filters to display #}
+          <div class="form-group">
+              <label class="col-sm-1 control-label" for="input-status">{{ text_edit }}</label>
+              <div class="col-sm-11">
+                <div class="table-responsive">
+                  <table class="table table-bordered table-hover">
+                    <thead>
+                      <tr>
+                        <td></td>
+                        {% for facetType in facetTypes %}
+                          <td style="width: {{ 100 / (facetTypes|length + 2) }}%" class="text-center">{{ attribute(_context, 'text_show_' ~ facetType) }}</td>
+                        {% endfor %}
+                      </tr>
+                    </thead>
+                    <tbody id="settingsTable">
+                      {% for pageType in pageTypes %}
+                        <tr>
+                          {# Title #}
+                          <td><b>{{ attribute(_context, 'text_' ~ pageType ~ '_settings') }}</b></td>
+                          {# Checkboxes #}
+                          {% for facetType in facetTypes %}
+                            <td class="text-center"><input style="all: revert" type="checkbox" name="module_facet_filter_settings[{{ pageType }}][{{ facetType }}]" value="1" {% if settings[pageType][facetType] %} checked {% endif %} /></td>
+                          {% endfor %}
+                        </tr>
+                      {% endfor %}
+                      
+                      {# Individual category settings #}
+                      <tr><td colspan="9" class="text-center"><b>{{ text_individual_categories }}</b></td></tr>
+                      {% for id, category in settings.distinct_categories %}
+                        <tr class="niftyItem" data-id="{{ id }}">
+                          <td>
+                            <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
+                              <b>{{ category.name }}</b>
+                              <div class="btn-group pull-right">
+                                <a style="padding: 5px 8px;" class="btn btn-primary" target="_blank" href="/admin/index.php?route=catalog/category/edit&category_id=${row.category_id}&user_token=${userToken}"><i class="fa fa-pencil"></i></a>
+                                <button style="padding: 5px 8px;" type="button" class="btn btn-danger niftyItemDelete" onclick="this.closest('.niftyItem').remove();"><i class="fa fa-times"></i></button>
+                              </div>
+                            </div>
+                          </td>
+                          {% for facetType in facetTypes %}
+                            <td class="text-center"><input style="all: revert" type="checkbox" name="module_facet_filter_settings[distinct_categories][{{ id }}][{{ facetType }}]" value="1" {% if settings.distinct_categories[id][facetType] %} checked {% endif %} /></td>
+                          {% endfor %}
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td colspan="9">
+                          <input id="categoryAutocomplete" type="text" class="form-control niftyAutocomplete" placeholder="{{ text_add_category }}" />
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Autocomplete
+  document.addEventListener('DOMContentLoaded', () => {
+    const userToken = "{{ user_token }}";
+    const categoryInput = document.getElementById('categoryAutocomplete');
+
+    const categoryAutocomplete = new niftyAutocomplete({
+      input: categoryInput,
+      selectedItemsBox: document.getElementById('settingsTable'),
+      idKey: `category_id`,
+      request: {
+        url: `${location.protocol}${location.host}/admin/index.php?route=catalog/category/autocomplete`,
+        getParams: {
+          user_token: userToken,
+          filter_name: () => categoryInput.value,
+        }
+      },
+      item: {
+        searchTemplate: (row) => `<div class="niftyItemData"><p><b>${row.name}</b></p></div>`,
+        selectTemplate: (row) => `
+          <tr>
+            <td>
+              <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
+                <b>${row.name}</b>
+                <div class="btn-group pull-right">
+                  <a style="padding: 5px 8px;" class="btn btn-primary" target="_blank" href="/admin/index.php?route=catalog/category/edit&category_id=${row.category_id}&user_token=${userToken}"><i class="fa fa-pencil"></i></a>
+                  <button style="padding: 5px 8px;" type="button" class="btn btn-danger niftyItemDelete"><i class="fa fa-times"></i></button>
+                </div>
+              </div>
+            </td>
+            {% for facetType in facetTypes %}
+              <td class="text-center"><input style="all: revert" type="checkbox" name="module_facet_filter_settings[distinct_categories][${row.category_id}][{{ facetType }}]" value="1" checked /></td>
+            {% endfor %}
+          </tr>
+        `,
+      },
+      behavior: {
+        clearSearchOnSelect: true,
+      }
+    });
+  });
+</script>
+
+{{ footer }}
