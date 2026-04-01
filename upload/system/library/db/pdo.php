@@ -47,7 +47,13 @@ final class PDO {
 			throw new \Exception('Error: ' . $e->getMessage() . ' Error Code : ' . $e->getCode());
 		}
 	}
-
+	
+	/**
+	 * Summary of query
+	 * @param mixed $sql
+	 * @throws \Exception
+	 * @return bool|\stdClass
+	 */
 	public function query($sql, $params = array()) {
 		$this->statement = $this->connection->prepare($sql);
 		
