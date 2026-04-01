@@ -228,23 +228,71 @@ class ModelCatalogAttributeGroup extends Model {
 	}
 
 	public function getAttributeGroup($attribute_group_id) {
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "attribute_group WHERE attribute_group_id = '" . (int)$attribute_group_id . "'");
+
+		$query = $this->db->query("
+			SELECT * FROM " . DB_PREFIX . "attribute_group 
+			WHERE attribute_group_id = '" . (int)$attribute_group_id . "'
+		");
 
 		return $query->row;
 	}
 
-	public function getAttributeGroups($data = array()) {
-		$sql = "SELECT * FROM " . DB_PREFIX . "attribute_group ag LEFT JOIN " . DB_PREFIX . "attribute_group_description agd ON (ag.attribute_group_id = agd.attribute_group_id) WHERE agd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
+	// Get attribute groups in admin attribute group list 
+	// and in attribute form
+	// Should show all attribute groups in admin attribute group list 
+	// and only selected store attribute groups in attribute form 
+	public function getAttributeGroups($data = array()) : array {
+		$result = [];
+		$where = [];
+
+		$where[] = "
+			ag2s.attribute_group_id = ag.attribute_group_id
+		";
+		
+		// Filter by store_id
+		if (isset($data['store_id'])) {
+			$where[] = "
+				ag2s.store_id = " . (int) $data['store_id'] . "
+			";
+		}
+
+		$sql = "
+			SELECT 
+				ag.attribute_group_id,
+				ag2s.sort_order,
+				(
+					SELECT 
+						agd.name 
+					FROM " . DB_PREFIX . "attribute_group_description agd 
+					WHERE agd.attribute_group_id = ag.attribute_group_id 
+					ORDER BY 
+						FIELD(agd.store_id, '" . (int) $this->session->data['store_id'] ."') DESC,
+						FIELD(agd.language_id, '" . (int) $this->config->get('config_language_id') . "') DESC
+						LIMIT 1
+				) AS `name`,
+				(SELECT JSON_ARRAYAGG(ag2s.store_id) FROM " . DB_PREFIX . "attribute_group_to_store ag2s WHERE ag.attribute_group_id = ag2s.attribute_group_id) AS stores
+			FROM " . DB_PREFIX . "attribute_group_to_store ag2s
+			JOIN " . DB_PREFIX . "attribute_group ag
+				ON ag.attribute_group_id = ag2s.attribute_group_id
+			WHERE EXISTS (
+				SELECT
+					1
+				FROM " . DB_PREFIX . "attribute_group_to_store ag2s
+				WHERE " . implode(' AND ', $where) . "
+			)
+		";
 
 		$sort_data = array(
-			'agd.name',
-			'ag.sort_order'
+			'name',
+			'ag2s.sort_order',
+			'attribute_count'
 		);
 
+		// First order by store_id, the by other fields
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-			$sql .= " ORDER BY " . $data['sort'];
+			$sql .= " ORDER BY FIELD(ag2s.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, " . $data['sort'];
 		} else {
-			$sql .= " ORDER BY agd.name";
+			$sql .= " ORDER BY FIELD(ag2s.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, name";
 		}
 
 		if (isset($data['order']) && ($data['order'] == 'DESC')) {
@@ -266,8 +314,13 @@ class ModelCatalogAttributeGroup extends Model {
 		}
 
 		$query = $this->db->query($sql);
+		
+		foreach ($query->rows ?? [] as $row) {
+			$row['stores'] = json_decode($row['stores'] ?? '[]');
+			$result[] = $row;
+		}
 
-		return $query->rows;
+		return $result;
 	}
 
 	public function getAttributeGroupDescriptions($attribute_group_id) {
