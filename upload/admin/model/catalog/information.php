@@ -74,39 +74,114 @@ class ModelCatalogInformation extends Model {
 	}
 
 	public function editInformation($information_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "information SET sort_order = '" . (int)$data['sort_order'] . "', bottom = '" . (isset($data['bottom']) ? (int)$data['bottom'] : 0) . "', status = '" . (int)$data['status'] . "' WHERE information_id = '" . (int)$information_id . "'");
+		$this->db->query("
+			UPDATE " . DB_PREFIX . "information 
+			SET 
+				`sort_order`  = '" . (int) $data['sort_order'] . "', 
+				`bottom`      = '" . (isset($data['bottom']) ? (int) $data['bottom'] : 0) . "', 
+				`status`      = '" . (int) $data['status'] . "' 
+			WHERE `information_id` = '" . (int) $information_id . "'
+		");
 
-		$this->db->query("DELETE FROM " . DB_PREFIX . "information_description WHERE information_id = '" . (int)$information_id . "'");
+		$this->db->query("
+			DELETE FROM " . DB_PREFIX . "information_description 
+			WHERE `information_id` 	= '" . (int) $information_id . "'
+				AND `store_id` 				= '" . (int) $this->session->data['store_id'] . "'
+		");
 
 		foreach ($data['information_description'] as $language_id => $value) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "information_description SET information_id = '" . (int)$information_id . "', language_id = '" . (int)$language_id . "', title = '" . $this->db->escape($value['title']) . "', description = '" . $this->db->escape($value['description']) . "', meta_title = '" . $this->db->escape($value['meta_title']) . "', meta_description = '" . $this->db->escape($value['meta_description']) . "', meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "'");
+			$this->db->query("
+				INSERT INTO " . DB_PREFIX . "information_description 
+				SET 
+					`information_id`    = '" . (int) $information_id . "', 
+					`language_id`       = '" . (int) $language_id . "', 
+					`store_id`					= '" . (int) $this->session->data['store_id'] . "',
+					`title`             = '" . $this->db->escape($value['title']) . "', 
+					`description`       = '" . $this->db->escape($value['description']) . "', 
+					`meta_title`        = '" . $this->db->escape($value['meta_title']) . "', 
+					`meta_description`  = '" . $this->db->escape($value['meta_description']) . "', 
+					`meta_keyword`      = '" . $this->db->escape($value['meta_keyword']) . "'
+			");
 		}
 
-		$this->db->query("DELETE FROM " . DB_PREFIX . "information_to_store WHERE information_id = '" . (int)$information_id . "'");
+		// Store related data
+		// Remove all unselected stores
+		$this->db->query("
+			DELETE FROM " . DB_PREFIX . "information_to_store
+			WHERE `information_id` = '" . (int) $information_id . "'
+				AND `store_id` NOT IN (" . implode(',', array_map('intval', $data['information_store'])) . ")
+		");
 
+		// Remove only current store no matter if it's selected
+		$this->db->query("
+			DELETE FROM " . DB_PREFIX . "information_to_store
+			WHERE `information_id` 	= '" . (int) $information_id . "'
+				AND `store_id` 				= '" . (int) $this->session->data['store_id'] . "'
+		");
+
+		// Write store association and store related data
 		if (isset($data['information_store'])) {
 			foreach ($data['information_store'] as $store_id) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "information_to_store SET information_id = '" . (int)$information_id . "', store_id = '" . (int)$store_id . "'");
+				if (((int) $store_id) === ((int) $this->session->data['store_id'])) {
+					// Set data for current store
+					$this->db->query("
+						INSERT INTO " . DB_PREFIX . "information_to_store 
+						SET 
+							`information_id`  = '" . (int) $information_id . "', 
+							`store_id`        = '" . (int) $store_id . "',
+							`sort_order`   		= '" . (int) $data['sort_order'] . "', 
+							`bottom`       		= '" . (isset($data['bottom']) ? (int) $data['bottom'] : 0) . "', 
+							`status`       		= '" . (int) $data['status'] . "'
+					");
+				} else {
+					// Skip if data for other stores already exists
+					$this->db->query("
+						INSERT IGNORE INTO " . DB_PREFIX . "information_to_store
+						SET 
+							`information_id` 	= '" . (int) $information_id . "',
+							`store_id`    		= '" . (int) $store_id . "'
+					");
+				}
 			}
 		}
 
-		$this->db->query("DELETE FROM " . DB_PREFIX . "seo_url WHERE query = 'information_id=" . (int)$information_id . "'");
+		$this->db->query("
+			DELETE FROM " . DB_PREFIX . "seo_url 
+			WHERE `query` = 'information_id=" . (int) $information_id . "'
+				AND `store_id` = '" . (int) $this->session->data['store_id'] . "'
+		");
 
 		if (isset($data['information_seo_url'])) {
 			foreach ($data['information_seo_url'] as $store_id => $language) {
 				foreach ($language as $language_id => $keyword) {
-					if (trim($keyword)) {
-						$this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'information_id=" . (int)$information_id . "', keyword = '" . $this->db->escape($keyword) . "'");
+					if (((int) $store_id) === ((int) $this->session->data['store_id'])) {
+						$this->db->query("
+							INSERT INTO `" . DB_PREFIX . "seo_url` 
+							SET 
+								`store_id`    = '" . (int) $store_id . "', 
+								`language_id` = '" . (int) $language_id . "', 
+								`query`       = 'information_id=" . (int) $information_id . "', 
+								`keyword`     = '" . $this->db->escape($keyword) . "'
+						");
 					}
 				}
 			}
 		}
 
-		$this->db->query("DELETE FROM `" . DB_PREFIX . "information_to_layout` WHERE information_id = '" . (int)$information_id . "'");
+		$this->db->query("
+			DELETE FROM `" . DB_PREFIX . "information_to_layout` 
+			WHERE `information_id` = '" . (int) $information_id . "'
+		");
 
 		if (isset($data['information_layout'])) {
 			foreach ($data['information_layout'] as $store_id => $layout_id) {
-				$this->db->query("INSERT INTO `" . DB_PREFIX . "information_to_layout` SET information_id = '" . (int)$information_id . "', store_id = '" . (int)$store_id . "', layout_id = '" . (int)$layout_id . "'");
+				$this->db->query("
+					INSERT INTO `" . DB_PREFIX . "information_to_layout` 
+					SET 
+						`information_id` = '" . (int) $information_id . "', 
+						`store_id`       = '" . (int) $store_id . "', 
+						`layout_id`      = '" . (int) $layout_id . "'
+				");
 			}
 		}
 
