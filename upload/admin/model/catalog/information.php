@@ -298,55 +298,110 @@ class ModelCatalogInformation extends Model {
 		return $query->row;
 	}
 
-	public function getInformations($data = array()) {
-		if ($data) {
-			$sql = "SELECT * FROM " . DB_PREFIX . "information i LEFT JOIN " . DB_PREFIX . "information_description id ON (i.information_id = id.information_id) WHERE id.language_id = '" . (int)$this->config->get('config_language_id') . "'";
+	/**
+	 * Get information list in admin information list /admin/controller/catalog/information.php
+	 * admin default store settings /admin/controller/setting/setting.php
+	 * and admin store settings /admin/controller/setting/store.php
+	 * @param array $data
+	 * @return array
+	 */
+	public function getInformations($data = []) : array {
+		$result = [];
+		$where = [];
 
-			$sort_data = array(
-				'id.title',
-				'i.sort_order'
-			);
+		// Where clause
+		// Connect to external table
+		$where[] = "
+			i2.information_id = i.information_id
+		";
+		// Set current language
+		$where[] = "
+			id.language_id = '" . (int)$this->config->get('config_language_id') . "'
+		";
 
-			if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-				$sql .= " ORDER BY " . $data['sort'];
-			} else {
-				$sql .= " ORDER BY id.title";
-			}
-
-			if (isset($data['order']) && ($data['order'] == 'DESC')) {
-				$sql .= " DESC";
-			} else {
-				$sql .= " ASC";
-			}
-
-			if (isset($data['start']) || isset($data['limit'])) {
-				if ($data['start'] < 0) {
-					$data['start'] = 0;
-				}
-
-				if ($data['limit'] < 1) {
-					$data['limit'] = 20;
-				}
-
-				$sql .= " LIMIT " . (int)$data['start'] . "," . (int)$data['limit'];
-			}
-
-			$query = $this->db->query($sql);
-
-			return $query->rows;
-		} else {
-			$information_data = $this->cache->get('information.' . (int)$this->config->get('config_language_id'));
-
-			if (!$information_data) {
-				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "information i LEFT JOIN " . DB_PREFIX . "information_description id ON (i.information_id = id.information_id) WHERE id.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY id.title");
-
-				$information_data = $query->rows;
-
-				$this->cache->set('information.' . (int)$this->config->get('config_language_id'), $information_data);
-			}
-
-			return $information_data;
+		if (isset($data['store_id'])) {
+			$where[] = "
+			 	i2s.store_id = '" . (int) $data['store_id'] . "'
+			";
 		}
+
+		$sql = "
+			SELECT 
+				i.`information_id`,
+				i2s.`store_id`,
+				i2s.`sort_order`,
+				i2s.`bottom`,
+				i2s.`status`,
+				(
+					SELECT 
+						id.title 
+					FROM " . DB_PREFIX . "information_description id 
+					WHERE id.information_id = i.information_id 
+					ORDER BY 
+						FIELD(id.store_id, '" . (int) $this->session->data['store_id'] ."') DESC,
+						FIELD(id.language_id, '" . (int) $this->config->get('config_language_id') . "') DESC
+						LIMIT 1
+				) AS `title`,
+				(SELECT JSON_ARRAYAGG(i2s.store_id) FROM " . DB_PREFIX . "information_to_store i2s WHERE i2s.information_id = i.information_id) AS stores,
+				(SELECT JSON_OBJECTAGG(i2s.store_id, i2s.status) FROM " . DB_PREFIX . "information_to_store i2s WHERE i2s.information_id = i.information_id) AS status_to_store
+			FROM " . DB_PREFIX . "information i 
+			
+			LEFT JOIN " . DB_PREFIX . "information_to_store i2s
+				ON i.information_id = i2s.information_id 
+				AND i2s.store_id = '" . (int) $this->session->data['store_id'] . "'
+
+			WHERE EXISTS (
+				SELECT
+					1
+				FROM " . DB_PREFIX . "information i2
+				JOIN " . DB_PREFIX . "information_description id 
+					ON i2.information_id = id.information_id
+				JOIN " . DB_PREFIX . "information_to_store i2s2
+					ON i2s2.information_id = i2.information_id
+				WHERE " . implode(' AND ', $where) . "
+			)
+		";
+
+		$sort_data = array(
+			'title',
+			'i2s.sort_order',
+			'i2s.bottom',
+		);
+
+		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+			$sql .= " ORDER BY FIELD(i2s.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, " . $data['sort'];
+		} else {
+			$sql .= " ORDER BY FIELD(i2s.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, title";
+		}
+
+		if (isset($data['order']) && ($data['order'] == 'DESC')) {
+			$sql .= " DESC";
+		} else {
+			$sql .= " ASC";
+		}
+
+		if (isset($data['start']) || isset($data['limit'])) {
+			if ($data['start'] < 0) {
+				$data['start'] = 0;
+			}
+
+			if ($data['limit'] < 1) {
+				$data['limit'] = 20;
+			}
+
+			$sql .= " LIMIT " . (int) $data['start'] . "," . (int) $data['limit'];
+		}
+
+		$query = $this->db->query($sql);
+
+		foreach ($query->rows ?? [] as $row) {
+			$row['stores'] 					= json_decode($row['stores'] ?? '[]');
+			$row['status_to_store'] = json_decode($row['status_to_store'] ?? '[]', true);
+
+			$result[] = $row;
+		}
+
+		return $result;
 	}
 
 	public function getInformationDescriptions($information_id) {
