@@ -1,17 +1,42 @@
 <?php
 class ModelCatalogInformation extends Model {
 	public function addInformation($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "information SET sort_order = '" . (int)$data['sort_order'] . "', bottom = '" . (isset($data['bottom']) ? (int)$data['bottom'] : 0) . "', status = '" . (int)$data['status'] . "'");
+		$this->db->query("
+			INSERT INTO " . DB_PREFIX . "information 
+			SET 
+				`sort_order`   = '" . (int) $data['sort_order'] . "', 
+				`bottom`       = '" . (isset($data['bottom']) ? (int) $data['bottom'] : 0) . "', 
+				`status`       = '" . (int) $data['status'] . "'
+			");
 
 		$information_id = $this->db->getLastId();
 
 		foreach ($data['information_description'] as $language_id => $value) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "information_description SET information_id = '" . (int)$information_id . "', language_id = '" . (int)$language_id . "', title = '" . $this->db->escape($value['title']) . "', description = '" . $this->db->escape($value['description']) . "', meta_title = '" . $this->db->escape($value['meta_title']) . "', meta_description = '" . $this->db->escape($value['meta_description']) . "', meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "'");
+			$this->db->query("
+				INSERT INTO " . DB_PREFIX . "information_description 
+				SET 
+					`information_id`    = '" . (int) $information_id . "', 
+					`language_id`       = '" . (int) $language_id . "', 
+					`store_id`					= '" . (int) $this->session->data['store_id'] . "',
+					`title`             = '" . $this->db->escape($value['title']) . "', 
+					`description`       = '" . $this->db->escape($value['description']) . "', 
+					`meta_title`        = '" . $this->db->escape($value['meta_title']) . "', 
+					`meta_description`  = '" . $this->db->escape($value['meta_description']) . "', 
+					`meta_keyword`      = '" . $this->db->escape($value['meta_keyword']) . "'
+			");
 		}
 
 		if (isset($data['information_store'])) {
 			foreach ($data['information_store'] as $store_id) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "information_to_store SET information_id = '" . (int)$information_id . "', store_id = '" . (int)$store_id . "'");
+				$this->db->query("
+					INSERT INTO " . DB_PREFIX . "information_to_store 
+					SET 
+						`information_id`  = '" . (int) $information_id . "', 
+						`store_id`        = '" . (int) $store_id . "',
+						`sort_order`   		= '" . (int) $data['sort_order'] . "', 
+						`bottom`       		= '" . (isset($data['bottom']) ? (int) $data['bottom'] : 0) . "', 
+						`status`       		= '" . (int) $data['status'] . "'
+				");
 			}
 		}
 
@@ -20,7 +45,14 @@ class ModelCatalogInformation extends Model {
 			foreach ($data['information_seo_url'] as $store_id => $language) {
 				foreach ($language as $language_id => $keyword) {
 					if (!empty($keyword)) {
-						$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'information_id=" . (int)$information_id . "', keyword = '" . $this->db->escape($keyword) . "'");
+						$this->db->query("
+							INSERT INTO " . DB_PREFIX . "seo_url 
+							SET 
+								`store_id`    = '" . (int) $store_id . "', 
+								`language_id` = '" . (int) $language_id . "', 
+								`query`       = 'information_id=" . (int) $information_id . "', 
+								`keyword`     = '" . $this->db->escape($keyword) . "'
+						");
 					}
 				}
 			}
@@ -28,11 +60,15 @@ class ModelCatalogInformation extends Model {
 		
 		if (isset($data['information_layout'])) {
 			foreach ($data['information_layout'] as $store_id => $layout_id) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "information_to_layout SET information_id = '" . (int)$information_id . "', store_id = '" . (int)$store_id . "', layout_id = '" . (int)$layout_id . "'");
+				$this->db->query("
+					INSERT INTO " . DB_PREFIX . "information_to_layout 
+					SET 
+						`information_id` = '" . (int) $information_id . "', 
+						`store_id`       = '" . (int) $store_id . "', 
+						`layout_id`      = '" . (int) $layout_id . "'
+				");
 			}
 		}
-
-		$this->cache->delete('information');
 
 		return $information_id;
 	}
