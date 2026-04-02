@@ -795,6 +795,15 @@ class ControllerCatalogProduct extends Controller {
 			$data['stock_status_id'] = 0;
 		}
 
+		// Available for order switch
+		if (isset($this->request->post['is_available'])) {
+			$data['is_available'] = $this->request->post['is_available'];
+		} elseif (!empty($product_info)) {
+			$data['is_available'] = $product_info['is_available'];
+		} else {
+			$data['is_available'] = true;
+		}
+
 		if (isset($this->request->post['status'])) {
 			$data['status'] = $this->request->post['status'];
 		} elseif (!empty($product_info)) {
