@@ -1033,12 +1033,7 @@ html[dir="rtl"] .text-right {
   }
 }
 
-.input-group-addon {
-    display: flex;
-    min-width: 40px;
-    align-items: center;
-    justify-content: center;
-}
+
 
 .input-group {
     display: flex;
@@ -1057,6 +1052,15 @@ html[dir="rtl"] .text-right {
     }
     & > :not(:last-child) {
         border-right: 0;
+    }
+    & .input-group-addon {
+        display: flex;
+        min-width: 40px;
+        align-items: center;
+        justify-content: center;
+        height: auto;
+        padding: 8px 11px;
+        font-size: 1.5rem;
     }
 }
 
