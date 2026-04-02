@@ -114,7 +114,7 @@ class ControllerCatalogOption extends Controller {
 		if (isset($this->request->get['sort'])) {
 			$sort = $this->request->get['sort'];
 		} else {
-			$sort = 'od.name';
+			$sort = 'name';
 		}
 
 		if (isset($this->request->get['order'])) {
@@ -173,12 +173,19 @@ class ControllerCatalogOption extends Controller {
 
 		foreach ($results as $result) {
 			$data['options'][] = array(
-				'option_id'  => $result['option_id'],
-				'name'       => $result['name'],
-				'sort_order' => $result['sort_order'],
-				'edit'       => $this->url->link('catalog/option/edit', 'user_token=' . $this->session->data['user_token'] . '&option_id=' . $result['option_id'] . $url, true)
+				'option_id'  		=> $result['option_id'],
+				'name'       		=> $result['name'],
+				'values_list'   => $result['values_list'],
+				'option_count' 	=> $result['option_count'],
+				'type' 					=> $result['type'],
+				'sort_order' 		=> $result['sort_order'],
+				'stores' 				=> $result['stores'],
+				'edit'       		=> $this->url->link('catalog/option/edit', 'user_token=' . $this->session->data['user_token'] . '&option_id=' . $result['option_id'] . $url, true)
 			);
 		}
+
+		$this->load->model('setting/store');
+		$data['stores'] = $this->model_setting_store->getMultistores();
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
@@ -212,8 +219,10 @@ class ControllerCatalogOption extends Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['sort_name'] = $this->url->link('catalog/option', 'user_token=' . $this->session->data['user_token'] . '&sort=od.name' . $url, true);
-		$data['sort_sort_order'] = $this->url->link('catalog/option', 'user_token=' . $this->session->data['user_token'] . '&sort=o.sort_order' . $url, true);
+		$data['sort_name'] = $this->url->link('catalog/option', 'user_token=' . $this->session->data['user_token'] . '&sort=name' . $url, true);
+		$data['sort_type'] = $this->url->link('catalog/option', 'user_token=' . $this->session->data['user_token'] . '&sort=o.type' . $url, true);
+		$data['sort_option_count'] = $this->url->link('catalog/option', 'user_token=' . $this->session->data['user_token'] . '&sort=option_count' . $url, true);
+		$data['sort_sort_order'] = $this->url->link('catalog/option', 'user_token=' . $this->session->data['user_token'] . '&sort=o2s.sort_order' . $url, true);
 
 		$url = '';
 
