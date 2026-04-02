@@ -79,3 +79,66 @@ function pasteString(source, targetInputs, replaceExisting = true, callback) {
   }
 }
 
+/**
+ * Translate string using Google translate API
+ * @param   {String} text String to be translated
+ * @param   {String} targetLang target language code
+ * @param   {String} sourceLang sourche language code
+ * @param   {Number} attempt Attempt number to avoid ban
+ * @returns {String} Translated string
+ */
+async function googleTranslate(text, targetLang = 'en', sourceLang = 'auto', attempt = 1) {
+  if (!text) {return ''}
+  const base = 'https://translate.googleapis.com/translate_a/single';
+  const params = new URLSearchParams({
+    client: 'gtx',
+    sl: sourceLang,
+    tl: targetLang,
+    dt: 't',
+    q: text,
+  });
+
+  const url = `${base}?${params.toString()}`;
+
+  // Promise timeout to avoid ban
+  await new Promise(resolve => setTimeout(resolve, attempt > 1 ? (700 + Math.random() * 500) : 0));
+
+  try {
+    const res = await fetch(url);
+
+    // If Google return code  is 429, 503 then it looks like our request looks suspicious
+    if (!res.ok) {
+      console.warn(`⚠️ Attempt ${attempt}: HTTP ${res.status} ${res.statusText}`);
+      if (attempt < 3) {
+        // Retry after 3-5 seconds
+        await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
+        return googleTranslate(text, targetLang, sourceLang, attempt + 1);
+      } else {
+        throw new Error(`⚠️ Google Translate refused after ${attempt} attempts`);
+      }
+    }
+
+    const raw = await res.text();
+
+    // Check if response contains captcha
+    if (raw.includes('<html') || raw.includes('automated queries')) {
+      console.warn('⚠️ Looks like Google returned captha or blocked the request. Try again later');
+      return null;
+    }
+
+    // Parse JSON
+    const data = JSON.parse(raw);
+    const translated = data?.[0]?.[0]?.[0] ?? null;
+
+    console.log(`Translate ${text} from ${sourceLang} to ${targetLang}. Result: ${translated}`);
+    return translated;
+
+  } catch (err) {
+    console.error(`Request error (attempt ${attempt}):`, err);
+    if (attempt < 3) {
+      await new Promise(resolve => setTimeout(resolve, 3000 + Math.random() * 2000));
+      return googleTranslate(text, targetLang, sourceLang, attempt + 1);
+    }
+    return null;
+  }
+}
