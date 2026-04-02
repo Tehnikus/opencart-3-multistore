@@ -1882,4 +1882,66 @@ class ModelCatalogProduct extends Model {
 
 		return (int) $newIsAvailable;
 	}
+
+	// Build facet index
+	// Should be called before previous SQL transaction committed
+
+	// Delete cache
+	public function deleteCache($product_id, $store_id = null) : void {
+
+		if ($store_id === null) {
+			$store_id = (int) $this->session->data['store_id'];
+		}
+
+		$this->load->model('localisation/language');
+		$languages = $this->model_localisation_language->getLanguages();
+
+		foreach ($languages as $language) {
+			$language_id 	= (int) $language['language_id'];
+			$store_id 		= (int) $store_id;
+
+			// Delete product cache
+			$productCacheName = "product.store_{$store_id}.language_{$language_id}." . (floor($product_id / 100)) . "00.product_{$product_id}";
+			$this->cache->delete($productCacheName);
+
+			// Delete related products cache
+			$relatedProducts = $this->db->query("
+				SELECT
+					`related_id`
+				FROM " . DB_PREFIX . "product_related
+				WHERE `product_id` = '" . (int) $product_id . "'
+					AND `store_id` = '" . (int) $store_id . "'
+			")->rows;
+
+			foreach ($relatedProducts as $relatedProduct) {
+				$related_id = $relatedProduct['related_id'];
+				$relatedCacheName 	= "product.store_{$store_id}.language_{$language_id}." . (floor($related_id / 100)) . "00.product_{$related_id}";
+				$this->cache->delete($relatedCacheName);
+			}
+
+			$productCategories = $this->db->query("
+				SELECT
+					`category_id`
+				FROM " . DB_PREFIX . "product_to_category
+				WHERE `product_id` = '" . $product_id . "'
+					AND `store_id` = '" . $store_id . "'
+			")->rows;
+			
+			// Delete filter cache and product flags cache
+			foreach ($productCategories as $productCategory) {
+				$category_id = (int) $productCategory['category_id'];
+				// DELETE filter cache to update each related category filter set. Parent category_id is included here by design
+				$filterCacheName = "category.store_{$store_id}.language_{$language_id}." . (floor($category_id / 100)) . "00.filters_{$category_id}";
+				$this->cache->delete($filterCacheName);
+
+				// Delete product flags cache
+				$flagsCacheName = "category.store_{$store_id}.language_{$language_id}." . (floor($category_id / 100)) . "00.product_flags_{$category_id}";
+				$this->cache->delete($flagsCacheName);
+			}
+
+			// Delete URL cache
+			$urlCacheName = "url.store_{$store_id}.language_{$language_id}.url";
+			$this->cache->delete($urlCacheName);
+		}
+	}
 }
