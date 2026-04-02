@@ -1018,44 +1018,209 @@ class ModelCatalogProduct extends Model {
 		return $query->row;
 	}
 
-	public function getProducts($data = array()) {
-		$sql = "SELECT * FROM " . DB_PREFIX . "product p LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
+	// Get product list
+	// Used in admin product list and product autocomplete
+	// Should get all products if no $data['store_id'] is set OR only store specific products otherwise 
+	public function getProducts($data = []) {
+		$result = [];
+		
+		$where = [];
+
+		// Where clause
+		// Connect to external table
+		$where[] = "
+			p2.`product_id` = p.`product_id`
+		";
+		$where[] = "
+			pd.`language_id` = '" . (int)$this->config->get('config_language_id') . "'
+		";
+
+		if (isset($data['store_id'])) {
+			$where[] = "
+			 	p2s2.`store_id` = '" . (int) $data['store_id'] . "'
+			";
+		}
 
 		if (!empty($data['filter_name'])) {
-			$sql .= " AND pd.name LIKE '" . $this->db->escape($data['filter_name']) . "%'";
+			$where[] = "
+			 	AND pd.`name` LIKE '%" . $this->db->escape($data['filter_name']) . "%'
+			";
 		}
 
 		if (!empty($data['filter_model'])) {
-			$sql .= " AND p.model LIKE '" . $this->db->escape($data['filter_model']) . "%'";
+			$where[] = "
+			 	AND p.`model` LIKE '%" . $this->db->escape($data['filter_model']) . "%'
+			";
 		}
 
 		if (!empty($data['filter_price'])) {
-			$sql .= " AND p.price LIKE '" . $this->db->escape($data['filter_price']) . "%'";
+			$where[] = "
+			 	AND p.`price` LIKE '" . $this->db->escape($data['filter_price']) . "%'
+			";
 		}
 
 		if (isset($data['filter_quantity']) && $data['filter_quantity'] !== '') {
-			$sql .= " AND p.quantity = '" . (int)$data['filter_quantity'] . "'";
+			$where[] = "
+			 	AND p.`quantity` = '" . (int) $data['filter_quantity'] . "'
+			";
 		}
 
 		if (isset($data['filter_status']) && $data['filter_status'] !== '') {
-			$sql .= " AND p.status = '" . (int)$data['filter_status'] . "'";
+			$where[] = "
+			 	AND p.`status` = '" . (int) $data['filter_status'] . "'
+			";
 		}
 
-		$sql .= " GROUP BY p.product_id";
+		// Main query
+		$sql = "
+			SELECT 
+				p.`product_id`,
+				p.`model`,
+				COALESCE(p2s.`price`, p.`price`) AS price,
+				p.`wholesale_price`,
+				p.`quantity`,
+				p2s.`image`,
+				p2s.`status`,
+				p2s.`is_available`,
+				p2s.`sort_order`,
+				p2s.`date_modified`,
+				p2s.`parent_id`,
+				pst.`views`,
+				pst.`orders`,
+				(
+					SELECT 
+						pd.`name` 
+					FROM " . DB_PREFIX . "product_description pd 
+					WHERE pd.`product_id` = p.`product_id` 
+					ORDER BY 
+						FIELD(pd.`store_id`, '" . (int) $this->session->data['store_id'] ."') DESC,
+						FIELD(pd.`language_id`, '" . (int) $this->config->get('config_language_id') . "') DESC
+						LIMIT 1
+				) AS `name`,
+				(
+					SELECT 
+						GROUP_CONCAT(t.`name` ORDER BY t.`level` SEPARATOR '&nbsp;&#9656;&nbsp;')
+					FROM (
+						SELECT
+							cp.`level`,
+							(
+								SELECT cd2.`name`
+								FROM " . DB_PREFIX . "category_description cd2
+								WHERE cd2.`category_id` = cp.`path_id`
+								ORDER BY
+									FIELD(cd2.`store_id`, '" . (int)$this->session->data['store_id'] . "') DESC,
+									FIELD(cd2.`language_id`, '" . (int)$this->config->get('config_language_id') . "') DESC
+								LIMIT 1
+							) AS `name`
+					FROM " . DB_PREFIX . "category_path cp
+					WHERE cp.category_id = p2s.parent_id
+						AND cp.store_id = (
+							SELECT cp2.store_id
+							FROM " . DB_PREFIX . "category_path cp2
+							WHERE cp2.category_id = p2s.parent_id
+							ORDER BY FIELD(cp2.store_id, '" . (int)$this->session->data['store_id'] . "') DESC
+							LIMIT 1
+						)
+					) t
+				) AS `parent_name`,
+				(SELECT JSON_ARRAYAGG(p2s.`store_id`) FROM " . DB_PREFIX . "product_to_store p2s WHERE p2s.`product_id` = p.`product_id`) AS stores,
+				(SELECT JSON_OBJECTAGG(p2s.`store_id`, p2s.`status`) FROM " . DB_PREFIX . "product_to_store p2s WHERE p2s.`product_id` = p.`product_id`) AS status_to_store,
+				(SELECT COUNT(pa.`attribute_id`) FROM " . DB_PREFIX . "product_attribute pa WHERE pa.`product_id` = p.`product_id` AND pa.`store_id` = p2s.`store_id`) AS product_attributes,
 
-		$sort_data = array(
-			'pd.name',
+				-- Product options list
+				(SELECT 
+					JSON_OBJECTAGG(
+						t.option_id,
+						JSON_OBJECT(
+							'name', od.`name`,
+							'group_id', od.`option_id`,
+							'values', options_json
+						)
+					)
+					FROM (
+						SELECT
+							pov.`option_id`,
+							JSON_OBJECTAGG(pov.`option_value_id`, ovd.`name`) AS options_json
+						FROM " . DB_PREFIX . "product_option_value pov
+						JOIN " . DB_PREFIX . "option_value_description ovd
+							ON 	ovd.`option_value_id` = pov.`option_value_id`
+							AND ovd.`language_id` 		= '" . (int) $this->config->get('config_language_id') . "'
+						WHERE pov.`product_id` 	= p.`product_id`
+							AND pov.`store_id` 		= p2s.`store_id`
+						GROUP BY pov.`option_id`
+					) t
+				 	JOIN " . DB_PREFIX . "option_description od
+				 		ON od.`option_id` 	 = t.`option_id`
+				 		AND od.`language_id` = '" . (int) $this->config->get('config_language_id') . "'
+						AND od.`store_id` 	 = '" . (int) $this->session->data['store_id'] . "'
+				) AS product_options,
+
+				-- Product filters list
+				(
+					SELECT JSON_OBJECTAGG(
+						fgd.filter_group_id,
+						JSON_OBJECT(
+							'name', fgd.`name`,
+							'group_id', fgd.`filter_group_id`,
+							'values', filters_json
+						)
+					)
+					FROM (
+						SELECT
+							f.`filter_group_id`,
+							JSON_OBJECTAGG(f.`filter_id`, fd.`name`) AS filters_json
+						FROM " . DB_PREFIX . "product_filter pf
+						JOIN " . DB_PREFIX . "filter f
+							ON f.`filter_id` = pf.`filter_id`
+						JOIN " . DB_PREFIX . "filter_description fd
+							ON 	fd.`filter_id` 		= f.`filter_id`
+							AND fd.`language_id` 	= '" . (int) $this->config->get('config_language_id') . "'
+						WHERE pf.`product_id` = p.`product_id`
+							AND pf.`store_id` 	= p2s.`store_id`
+						GROUP BY f.`filter_group_id`
+					) t
+					JOIN " . DB_PREFIX . "filter_group_description fgd
+						ON fgd.`filter_group_id` = t.`filter_group_id`
+						AND fgd.`language_id` = '" . (int) $this->config->get('config_language_id') . "'
+						AND fgd.`store_id` 		= '" . (int) $this->session->data['store_id'] . "'
+				) AS product_filters
+
+			FROM " . DB_PREFIX . "product p 
+
+			LEFT JOIN " . DB_PREFIX . "product_to_store p2s 
+				ON 	p2s.`product_id` 	= p.`product_id`
+				AND p2s.`store_id` 		= '" . (int) $this->session->data['store_id'] . "'
+			LEFT JOIN " . DB_PREFIX . "facet_sort pst
+				ON 	pst.`product_id` = p.`product_id`
+				AND pst.`store_id` 		= '" . (int) $this->session->data['store_id'] . "'
+
+			WHERE EXISTS (
+				SELECT
+					1
+				FROM " . DB_PREFIX . "product p2
+				JOIN " . DB_PREFIX . "product_description pd 
+					ON p2.`product_id` = pd.`product_id`
+				JOIN " . DB_PREFIX . "product_to_store p2s2
+					ON p2s2.`product_id` = p2.`product_id`
+				WHERE " . implode(' AND ', $where) . "
+			)
+				
+		";
+
+		$sort_data = [
+			'name',
 			'p.model',
 			'p.price',
 			'p.quantity',
-			'p.status',
-			'p.sort_order'
-		);
+			'p2s.status',
+			'p2s.sort_order',
+			'p2s.date_modified'
+		];
 
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-			$sql .= " ORDER BY " . $data['sort'];
+			$sql .= " ORDER BY FIELD(p2s.`store_id`, '" . (int) $this->session->data['store_id'] ."') DESC, " . $data['sort'];
 		} else {
-			$sql .= " ORDER BY pd.name";
+			$sql .= " ORDER BY FIELD(p2s.`store_id`, '" . (int) $this->session->data['store_id'] ."') DESC, `name`";
 		}
 
 		if (isset($data['order']) && ($data['order'] == 'DESC')) {
@@ -1077,10 +1242,19 @@ class ModelCatalogProduct extends Model {
 		}
 
 		$query = $this->db->query($sql);
+		
+		foreach ($query->rows ?? [] as $row) {
+			$row['stores'] 					= json_decode($row['stores'] ?? '[]');
+			$row['status_to_store'] = json_decode($row['status_to_store'] ?? '[]', true);
+			$row['product_filters'] = json_decode($row['product_filters'] ?? '[]', true);
+			$row['product_options'] = json_decode($row['product_options'] ?? '[]', true);
 
-		return $query->rows;
+			$result[] = $row;
+		}
+
+		return $result;
+
 	}
-
 	public function getProductsByCategoryId($category_id) {
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product p LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) LEFT JOIN " . DB_PREFIX . "product_to_category p2c ON (p.product_id = p2c.product_id) WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND p2c.category_id = '" . (int)$category_id . "' ORDER BY pd.name ASC");
 
