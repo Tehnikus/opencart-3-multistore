@@ -1447,18 +1447,44 @@ class ModelCatalogProduct extends Model {
 		return $product_attribute_data;
 	}
 
-	public function getProductOptions($product_id) {
-		$product_option_data = array();
+	// Get product associated options
+	// Used in admin/controller/catalog/product/getForm() to show product form data 
+	// and in admin/model/catalog/copyProduct() to duplicate product
+	// Should always rely on store_id context
+	// Returns only non-language data
+	public function getProductOptions($product_id) : array {
+		$product_option_data = [];
 
-		$product_option_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_option` po LEFT JOIN `" . DB_PREFIX . "option` o ON (po.option_id = o.option_id) LEFT JOIN `" . DB_PREFIX . "option_description` od ON (o.option_id = od.option_id) WHERE po.product_id = '" . (int)$product_id . "' AND od.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY o.sort_order ASC");
+		$product_option_query = $this->db->query("
+			SELECT 
+				* 
+			FROM `" . DB_PREFIX . "product_option` po 
+			LEFT JOIN `" . DB_PREFIX . "option` o ON po.`option_id` = o.`option_id` 
+			LEFT JOIN " . DB_PREFIX . "option_to_store o2s ON o2s.`option_id` = po.`option_id` 
+				AND o2s.`store_id` = po.`store_id`
+			LEFT JOIN `" . DB_PREFIX . "option_description` od ON o.`option_id` = od.`option_id`
+			WHERE po.`product_id` 	= '" . (int) $product_id . "' 
+				AND od.`language_id` 	= '" . (int) $this->config->get('config_language_id') . "' 
+				AND o2s.`store_id` 		= '" . (int) $this->session->data['store_id'] . "'
+				AND od.`store_id` 		= '" . (int) $this->session->data['store_id'] . "'
+			ORDER BY o.`sort_order` ASC
+		");
 
 		foreach ($product_option_query->rows as $product_option) {
-			$product_option_value_data = array();
+			$product_option_value_data = [];
 
-			$product_option_value_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_option_value pov LEFT JOIN " . DB_PREFIX . "option_value ov ON(pov.option_value_id = ov.option_value_id) WHERE pov.product_option_id = '" . (int)$product_option['product_option_id'] . "' ORDER BY ov.sort_order ASC");
+			$product_option_value_query = $this->db->query("
+				SELECT 
+					* 
+				FROM " . DB_PREFIX . "product_option_value pov 
+				LEFT JOIN " . DB_PREFIX . "option_value ov ON(pov.option_value_id = ov.option_value_id) 
+				WHERE pov.product_option_id = '" . (int) $product_option['product_option_id'] . "' 
+					AND ov.store_id 					= '" . (int) $this->session->data['store_id'] . "'
+					AND pov.store_id 					= '" . (int) $this->session->data['store_id'] . "'
+				ORDER BY ov.sort_order ASC");
 
 			foreach ($product_option_value_query->rows as $product_option_value) {
-				$product_option_value_data[] = array(
+				$product_option_value_data[] = [
 					'product_option_value_id' => $product_option_value['product_option_value_id'],
 					'option_value_id'         => $product_option_value['option_value_id'],
 					'quantity'                => $product_option_value['quantity'],
@@ -1469,10 +1495,10 @@ class ModelCatalogProduct extends Model {
 					'points_prefix'           => $product_option_value['points_prefix'],
 					'weight'                  => $product_option_value['weight'],
 					'weight_prefix'           => $product_option_value['weight_prefix']
-				);
+				];
 			}
 
-			$product_option_data[] = array(
+			$product_option_data[] = [
 				'product_option_id'    => $product_option['product_option_id'],
 				'product_option_value' => $product_option_value_data,
 				'option_id'            => $product_option['option_id'],
@@ -1480,7 +1506,7 @@ class ModelCatalogProduct extends Model {
 				'type'                 => $product_option['type'],
 				'value'                => $product_option['value'],
 				'required'             => $product_option['required']
-			);
+			];
 		}
 
 		return $product_option_data;
