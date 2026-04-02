@@ -1771,4 +1771,60 @@ class ModelCatalogProduct extends Model {
 
 		return $query->row['total'];
 	}
+
+	// Set product status
+	public function setProductStatus($product_id, $status) : int {
+		// Check if product is assocated with current store
+		$productIsAssociated = $this->db->query("
+			SELECT
+				`product_id`
+			FROM " . DB_PREFIX . "product_to_store
+			WHERE `product_id` = '" . (int) $product_id . "'
+				AND `store_id` = '" . (int) $this->session->data['store_id'] . "'
+		")->row;
+
+		if (!isset($productIsAssociated['product_id'])) {
+			return 0;
+		}
+
+		$this->db->query("
+			UPDATE " . DB_PREFIX . "product_to_store
+				SET 
+					`status` = '" . (int) $status . "',
+					`date_modified` = NOW()
+			WHERE `product_id` = '" . (int) $product_id . "'
+				AND `store_id` = '" . (int) $this->session->data['store_id'] . "'
+		");
+
+		$this->db->query("
+			UPDATE " . DB_PREFIX . "product
+				SET 
+					`status` = '" . (int) $status . "',
+					`date_modified` = NOW()
+			WHERE `product_id` = '" . (int) $product_id . "'
+		");
+
+		$query = $this->db->query("
+			SELECT p2s.`status` 
+			FROM " . DB_PREFIX . "product_to_store p2s
+			JOIN " . DB_PREFIX . "product p
+				ON p2s.`product_id` = p.`product_id`
+			WHERE p2s.`product_id` 	= '" . (int) $product_id . "'
+				AND p2s.`store_id` 		= '" . (int) $this->session->data['store_id'] . "'
+			LIMIT 1
+		")->row;
+
+		$newStatus = $query['status'];
+	
+		// Add product to facet filter index
+		$this->load->model('catalog/facet');
+		$this->model_catalog_facet->buildFacetIndex(product_id: (int) $product_id, store_id: (int) $this->session->data['store_id']);
+		$this->model_catalog_facet->buildFacetSorts(product_id: (int) $product_id, store_id: (int) $this->session->data['store_id']);
+
+		// Delete cache
+		$this->deleteCache($product_id, (int) $this->session->data['store_id']);
+
+		return (int) $newStatus;
+	}
+
 }
