@@ -298,5 +298,51 @@ $('input[name=\'filter_model\']').autocomplete({
 		$('input[name=\'filter_model\']').val(item['label']);
 	}
 });
-//--></script></div>
+//--></script>
+
+{# Change order status btn #}
+<script>
+document.addEventListener('click', async e => {
+  if (e.target.closest('.statusBtn')) {
+    const userToken     = "{{ user_token }}";
+    const currentStore  = "{{ currentStore }}";
+    const storeName     = "{{ stores[currentStore].name }}";
+    const storeBadge    = e.target.closest('tr').querySelector(`[data-store-id="${currentStore}"]`);
+    const productLink   = storeBadge.dataset.productLink;
+    const statusBtn     = e.target.closest('.statusBtn');
+    const productId     = statusBtn.dataset.productId;
+    const productStatus = statusBtn.dataset.productStatus;
+    const body = new FormData();
+    body.append('product_id', productId);
+    body.append('status', productStatus);
+
+    let response = await fetch(`index.php?route=catalog/product/fetchSetProductStatus&user_token=${userToken}`, {method: "POST", body}).then(r => r.json());
+    if (response.newStatus === 1) {
+      storeBadge.outerHTML = `<span class="storeBadge badge alert-success" data-store-id="${currentStore}" data-product-link="${productLink}"><a style="color: inherit;" href="${productLink}" target="_blank"><i class="fa fa-play"></i>&nbsp;${storeName}</a></span>`;
+      statusBtn.outerHTML  = `<button class="btn btn-success statusBtn" data-product-id="${productId}" data-product-status="${response.newStatus}" type="button"><i class="fa fa-play"></i></button>`;
+    } else {
+      storeBadge.outerHTML = `<span class="storeBadge badge" data-store-id="${currentStore}" data-product-link="${productLink}"><i class="fa fa-pause"></i>&nbsp;${storeName}</span>`;
+      statusBtn.outerHTML  = `<button class="btn btn-danger statusBtn" data-product-id="${productId}" data-product-status="${response.newStatus}" type="button"><i class="fa fa-stop"></i></button>`;
+    }
+  }
+  if (e.target.closest('.isAvailableBtn')) {
+    const userToken = "{{ user_token }}";
+    const isAvailableBtn = e.target.closest('.isAvailableBtn');
+    const productId = isAvailableBtn.dataset.productId
+    const isAvailable = isAvailableBtn.dataset.productIsAvailable
+    const body = new FormData();
+    body.append('product_id', productId);
+    body.append('is_available', isAvailable);
+
+    let response = await fetch(`index.php?route=catalog/product/fetchSetProductIsAvailable&user_token=${userToken}`, {method: "POST", body}).then(r => r.json());
+    if (response.newIsAvailable === 1) {
+      isAvailableBtn.outerHTML = `<button class="btn btn-success isAvailableBtn" data-product-id="${productId}" data-product-is-available="${response.newIsAvailable}" type="button"><i class="fa fa-shopping-cart"></i></button>`;
+    } else {
+      isAvailableBtn.outerHTML = `<button class="btn btn-danger isAvailableBtn" data-product-id="${productId}" data-product-is-available="${response.newIsAvailable}" type="button"><i class="fa fa-shopping-cart"></i></button>`;
+    }
+  }
+})
+</script>
+
+</div>
 {{ footer }} 
