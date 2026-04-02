@@ -30,3 +30,52 @@ function createSeoUrl(str, lang = 'en') {
 
   return str;
 }
+
+/**
+ * Copy/paste string from 
+ * @param {String|Element} source An input, to copy value from or a string to be inserted in target input
+ * @param {Element} targetSelector CSS selector of target input where @param text will be inserted
+ * @param {Boolean} replaceExisting Wether to replace existing targetInput text or not
+ * @param {Function} callback A function to apply to target and source elements
+ * @returns 
+ */
+function pasteString(source, targetInputs, replaceExisting = true, callback) {
+
+  let text, sourceInput;
+  if (!targetInputs.length) {
+    // Assume it is single element from querySelector, not querySelectorAll. Put it to array so it can be iterated
+    targetInputs = [targetInputs];
+  }
+
+  if (typeof(source) === "string") {
+    text = source;
+    sourceInput = false;
+  }
+
+  if (source instanceof Element) {
+    text = source.value;
+    sourceInput = source;
+  }
+
+  const hasText = Boolean(text);
+
+  targetInputs.forEach(target => {
+    // Highlight source and target inputs
+    if ((replaceExisting || !target.value) && !target.disabled) {
+      toggleAlert(sourceInput, hasText);
+      toggleAlert(target, hasText);
+    }
+    // Set target input value
+    if (hasText && (replaceExisting || !target.value) && !target.disabled) {target.value = text}
+  });
+
+  function toggleAlert(el, isSuccess) {
+    if (!el) return;
+    el.classList.toggle('alert-success', isSuccess);
+    el.classList.toggle('alert-danger', !isSuccess);
+  }
+  if (callback) {
+    callback(targetInputs, sourceInput);
+  }
+}
+
