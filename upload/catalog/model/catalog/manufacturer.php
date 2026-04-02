@@ -26,54 +26,60 @@ class ModelCatalogManufacturer extends Model {
 		return $query->row ?? [];
 	}
 
-	public function getManufacturers($data = array()) {
-		if ($data) {
-			$sql = "SELECT * FROM " . DB_PREFIX . "manufacturer m LEFT JOIN " . DB_PREFIX . "manufacturer_to_store m2s ON (m.manufacturer_id = m2s.manufacturer_id) WHERE m2s.store_id = '" . (int)$this->config->get('config_store_id') . "'";
+	public function getManufacturers($data = []) : array {
+		$sql = "
+			SELECT 
+				md.`name`,
+				md.`description`,
+				md.`meta_title`,
+				md.`meta_description`,
+				md.`meta_keyword`,
+				md.`date_modified`,
+				m2s.`manufacturer_id`,
+				m2s.`image`,
+				m2s.`sort_order`
+			FROM " . DB_PREFIX . "manufacturer m 
+			JOIN " . DB_PREFIX . "manufacturer_to_store m2s 
+				ON m.`manufacturer_id` 	= m2s.`manufacturer_id`
+				AND m2s.`store_id` 			= '" . (int) $this->config->get('config_store_id') . "'
+			JOIN " . DB_PREFIX . "manufacturer_description md
+				ON md.`manufacturer_id` = m.`manufacturer_id`
+				AND md.`language_id` 		= '" . (int) $this->config->get('config_language_id') . "'
+				AND md.`store_id` 			= '" . (int) $this->config->get('config_store_id') . "'
+			WHERE m2s.`store_id` = '" . (int)$this->config->get('config_store_id') . "'
+		";
 
-			$sort_data = array(
-				'name',
-				'sort_order'
-			);
+		$sort_data = array(
+			'name',
+			'sort_order'
+		);
 
-			if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-				$sql .= " ORDER BY " . $data['sort'];
-			} else {
-				$sql .= " ORDER BY name";
-			}
-
-			if (isset($data['order']) && ($data['order'] == 'DESC')) {
-				$sql .= " DESC";
-			} else {
-				$sql .= " ASC";
-			}
-
-			if (isset($data['start']) || isset($data['limit'])) {
-				if ($data['start'] < 0) {
-					$data['start'] = 0;
-				}
-
-				if ($data['limit'] < 1) {
-					$data['limit'] = 20;
-				}
-
-				$sql .= " LIMIT " . (int)$data['start'] . "," . (int)$data['limit'];
-			}
-
-			$query = $this->db->query($sql);
-
-			return $query->rows;
+		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+			$sql .= " ORDER BY " . $data['sort'];
 		} else {
-			$manufacturer_data = $this->cache->get('manufacturer.' . (int)$this->config->get('config_store_id'));
+			$sql .= " ORDER BY name";
+		}
 
-			if (!$manufacturer_data) {
-				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "manufacturer m LEFT JOIN " . DB_PREFIX . "manufacturer_to_store m2s ON (m.manufacturer_id = m2s.manufacturer_id) WHERE m2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ORDER BY name");
+		if (isset($data['order']) && ($data['order'] == 'DESC')) {
+			$sql .= " DESC";
+		} else {
+			$sql .= " ASC";
+		}
 
-				$manufacturer_data = $query->rows;
-
-				$this->cache->set('manufacturer.' . (int)$this->config->get('config_store_id'), $manufacturer_data);
+		if (isset($data['start']) || isset($data['limit'])) {
+			if ($data['start'] < 0) {
+				$data['start'] = 0;
 			}
 
-			return $manufacturer_data;
+			if ($data['limit'] < 1) {
+				$data['limit'] = 20;
+			}
+
+			$sql .= " LIMIT " . (int)$data['start'] . "," . (int)$data['limit'];
 		}
+
+		$query = $this->db->query($sql);
+
+		return $query->rows ?? [];
 	}
 }
