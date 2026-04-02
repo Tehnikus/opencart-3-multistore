@@ -1293,8 +1293,59 @@ class ModelCatalogProduct extends Model {
 		return $product_description_data;
 	}
 
-	public function getProductCategories($product_id) {
-		$product_category_data = array();
+	public function getPlaceholders($product_id = null) : array {
+		$placeholders = [];
+		if ($product_id === null) {
+			return $placeholders;
+		}
+		$query = $this->db->query("
+			SELECT
+				pd.language_id,
+				(
+					SELECT 
+						pd2.`name` 
+					FROM " . DB_PREFIX . "product_description pd2
+					WHERE pd2.`product_id` = " . $product_id . "
+					ORDER BY 
+						FIELD(pd2.`store_id`, 	 '" . (int) $this->session->data['store_id'] ."') DESC,
+						FIELD(pd2.`language_id`, pd.language_id) DESC
+					LIMIT 1
+				) AS `placeholder_name`,
+				(
+					SELECT 
+						pd2.`meta_title` 
+					FROM " . DB_PREFIX . "product_description pd2
+					WHERE pd2.`product_id` = " . $product_id . "
+					ORDER BY 
+						FIELD(pd2.`store_id`, 	 '" . (int) $this->session->data['store_id'] ."') DESC,
+						FIELD(pd2.`language_id`, pd.language_id) DESC
+					LIMIT 1
+				) AS `placeholder_meta_title`,
+				(
+					SELECT 
+						pd2.`meta_description` 
+					FROM " . DB_PREFIX . "product_description pd2
+					WHERE pd2.`product_id` = " . $product_id . "
+					ORDER BY 
+						FIELD(pd2.`store_id`, 	 '" . (int) $this->session->data['store_id'] ."') DESC,
+						FIELD(pd2.`language_id`, pd.language_id) DESC
+					LIMIT 1
+				) AS `placeholder_meta_description`
+			FROM " . DB_PREFIX . "product_description pd
+			WHERE pd.product_id = '" . (int) $product_id . "'
+		");
+
+		foreach ($query->rows as $result) {
+			$placeholders[$result['language_id']] = [
+				'placeholder_name'             => $result['placeholder_name'],
+				'placeholder_meta_title'       => $result['placeholder_meta_title'],
+				'placeholder_meta_description' => $result['placeholder_meta_description'],
+			];
+		}
+
+		return $placeholders;
+	}
+
 
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "'");
 
