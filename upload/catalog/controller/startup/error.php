@@ -31,7 +31,7 @@ class ControllerStartupError extends Controller {
 		}
 	
 		if ($this->config->get('config_error_display')) {
-			echo '<b>' . $error . '</b>: ' . $message . ' in <b>' . $file . '</b> on line <b>' . $line . '</b>';
+			echo '<pre><b>' . $error . '</b>: ' . $message . ' in <br><b style="user-select:all">' . $file . ':' . $line . '</b><br></pre>';
 		}
 	
 		if ($this->config->get('config_error_log')) {
