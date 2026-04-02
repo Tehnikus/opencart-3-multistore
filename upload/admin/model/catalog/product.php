@@ -864,30 +864,104 @@ class ModelCatalogProduct extends Model {
 	}
 
 	public function deleteProduct($product_id) {
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product WHERE product_id = '" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product_attribute WHERE product_id = '" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product_description WHERE product_id = '" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product_filter WHERE product_id = '" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product_image WHERE product_id = '" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product_option WHERE product_id = '" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product_option_value WHERE product_id = '" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product_related WHERE product_id = '" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product_related WHERE related_id = '" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product_reward WHERE product_id = '" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product_special WHERE product_id = '" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product_to_download WHERE product_id = '" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product_to_layout WHERE product_id = '" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product_to_store WHERE product_id = '" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product_recurring WHERE product_id = " . (int)$product_id);
-		$this->db->query("DELETE FROM " . DB_PREFIX . "review WHERE product_id = '" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "seo_url WHERE query = 'product_id=" . (int)$product_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "coupon_product WHERE product_id = '" . (int)$product_id . "'");
 
-		$this->cache->delete('product');
+		// Delete cache
+		$this->deleteCache($product_id, $this->session->data['store_id']);
+
+		// List of tables with product data
+		$tables = [
+			'product_attribute',
+			'product_description',
+			'product_discount',
+			'product_filter',
+			'product_image',
+			'product_option',
+			'product_option_value',
+			'product_related',
+			'product_reward',
+			'product_special',
+			'product_to_category',
+			'product_to_download',
+			'product_to_layout',
+			'product_to_store',
+			'product_recurring',
+			'review',
+			'coupon_product',
+			'facet_index',
+			'facet_sort',
+		];
+
+		// Delete cache
+		$this->deleteCache($product_id, (int) $this->session->data['store_id']);
+
+		// SQL transaction
+		$this->db->query("START TRANSACTION");
+
+		try {
+			// First delete prodcut data from current store
+			foreach ($tables as $table) {
+				$this->db->query("
+					DELETE FROM " . DB_PREFIX . $table . "
+					WHERE `product_id` = '" . (int) $product_id . "'
+						AND store_id = '" . (int) $this->session->data['store_id'] . "'		
+				");
+			}
+
+			// And delete product URL from current store
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "seo_url 
+				WHERE `query` 		= 'product_id=" . (int) $product_id . "' 
+					AND `store_id` 	= '" . (int) $this->session->data['store_id'] . "'
+			");
+			
+			// Check if product present in other stores
+			$productInOtherStores = $this->db->query("
+				SELECT
+					product_id
+				FROM " . DB_PREFIX . "product_to_store
+				WHERE `product_id` = '" . (int) $product_id . "'
+					AND `store_id` <> '" . (int) $this->session->data['store_id'] . "' 
+			")->rows;
+
+			// If product is not present in any other store delete all product data from all tables without store_id context
+			// Also delete main `product` table row
+			if (empty($productInOtherStores)) {
+				
+				// Delete cache
+				$this->deleteCache($product_id);
+
+				$this->db->query("
+					DELETE FROM " . DB_PREFIX . "product
+					WHERE product_id = '" . (int) $product_id . "'
+				");
+
+				// Remove all remaining data if present 
+				foreach ($tables as $table) {
+					$this->db->query("
+						DELETE FROM " . DB_PREFIX . $table . "
+						WHERE `product_id` = " . (int) $product_id
+					);
+				}
+
+				// Cleanup URLs
+				$this->db->query("
+					DELETE FROM " . DB_PREFIX . "seo_url
+					WHERE `query` = 'product_id=" . (int) $product_id . "'
+				");
+			}
+
+			$this->db->query("COMMIT");
+
+			return true;
+
+		} catch (\Throwable $e) {
+
+			$this->db->query("ROLLBACK");
+
+			throw $e;
+		}
+		
 	}
-
 	public function getProduct($product_id) {
 		$query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "product p LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) WHERE p.product_id = '" . (int)$product_id . "' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
 
