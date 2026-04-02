@@ -229,6 +229,98 @@ class ModelCatalogOption extends Model {
 
 		}
 	}
+
+	public function deleteOption($option_id) : bool {
+
+		$this->db->query("START TRANSACTION");
+
+		try {
+
+			// Tables list to delete option from 
+			$tables = [
+				'option_value',
+				'option_value_description',
+				'option_description',
+				'option_to_store',
+				'product_option',
+			];
+
+			// Get option values to delete option to product association and facet index
+			// No need to filter by store_id here as it will be filtered on deletion
+			$option_values = $this->db->query("
+				SELECT
+					option_value_id
+				FROM " . DB_PREFIX . "option_value
+				WHERE option_id = '" . (int) $option_id . "'
+			")->rows;
+
+			// Check if option exists in other stores
+			$optionsInOtherStores = $this->db->query("
+				SELECT
+					option_id
+				FROM " . DB_PREFIX . "option_to_store
+				WHERE store_id <> '" . (int) $this->session->data['store_id'] . "'
+			")->rows;
+
+			// Delete cache
+			foreach ($option_values as $option_value) {
+				$this->deleteCache($option_value['option_value_id']);
+			}
+
+			// Delete option to product association
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "product_option_value
+				WHERE option_value_id IN(" .  implode(',', array_column($option_values, 'option_value_id')) . ")
+					AND store_id = " . (int) $this->session->data['store_id'] . "
+			");
+
+			// Delete data in current store
+			foreach ($tables as $table) {
+				$this->db->query("
+					DELETE FROM " . DB_PREFIX . $table . "
+					WHERE option_id = " . (int) $option_id . "
+						AND store_id = " . (int) $this->session->data['store_id'] . "
+				");
+			}
+			
+			// If option doesn't exist in other stores then delete it from main table where autoincrement is
+			if (empty($optionsInOtherStores)) {
+				// Delete data in all stores
+				foreach ($tables as $table) {
+					$this->db->query("
+						DELETE FROM " . DB_PREFIX . $table . "
+						WHERE option_id = " . (int) $option_id . "
+					");
+				}
+	
+				// Delete option to product association
+				$this->db->query("
+					DELETE FROM " . DB_PREFIX . "product_option_value
+					WHERE option_value_id IN(" .  implode(',', array_column($option_values, 'option_value_id')) . ")
+				");
+
+				$this->db->query("
+					DELETE FROM " . DB_PREFIX . "option
+					WHERE option_id = " . (int) $option_id . "
+				");
+			}
+			
+			$this->db->query("COMMIT");
+
+			// Rebuild facet indexes
+			$this->load->model('catalog/facet');
+			$store_id = (int) $this->session->data['store_id'];
+			$this->model_catalog_facet->buildFacetNames(facet_group_id: $option_id, facet_type: 3, store_id: $store_id);
+			$this->model_catalog_facet->buildFacetIndex(facet_group_id: $option_id, facet_type: 3, store_id: $store_id);
+
+			return true;
+
+		} catch (\Throwable $e) {
+
+			$this->db->query("ROLLBACK");
+
+			throw $e;
+		}
 	}
 
 	public function getOption($option_id) {
