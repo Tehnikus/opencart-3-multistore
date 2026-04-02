@@ -1,0 +1,85 @@
+.niftyAutocomplete{
+  anchor-name: --nifty-input;
+}
+
+.niftySearch, .niftySelected {
+  overflow-y: auto;
+  border-radius: 5px;
+  & >:nth-child(odd) {background-color: #f7f7f7}
+  & >:nth-child(even) {background-color: #fefefe}
+}
+
+.niftySearch {
+  z-index: 10;
+  box-shadow: 0 0 5px #0003;
+  max-height: 200px;
+  position: absolute;
+  position-anchor: --nifty-input;
+  width: anchor-size(--nifty-input);
+}
+
+.niftySelected:not(tbody) {
+  position: relative;
+  &.scrollY { height: 200px;}
+  background: #fefefe;
+  &::after {
+    content: ''; 
+    position: absolute; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    box-shadow: inset 0 0 3px #0003;
+    pointer-events: none; 
+  }
+}
+
+.niftyItem:not(tr) {
+  display: flex;
+  padding: 5px;
+  align-items: center;
+  &.active {
+    background-color: #dadada;
+    cursor: pointer;
+  }
+  & .niftyItemData {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    & p {margin: 0;}
+  }
+  & .groupButtons{
+    margin-left: auto;
+    display: flex;
+    & button, & a.button {
+      display: flex;
+      align-items: center;
+      height: 25px;
+      border-radius: 0;
+      &:first-child {
+        border-radius: 5px 0 0 5px;
+      }
+      &:last-child {
+        border-radius: 0 5px 5px 0;
+      }
+      &:first-child:last-child {
+        border-radius: 5px;
+      }
+    }
+    & .niftyItemDelete, & .niftyItemEdit {
+      justify-content: center;
+      width: 25px;
+    }
+    & .niftyItemDelete {
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+      border: 1px solid crimson;
+      background: crimson;
+      &:hover, &:focus {
+        background: #d0321e; 
+        border-color: #6e1a10;
+      }
+    }
+  }
+}
