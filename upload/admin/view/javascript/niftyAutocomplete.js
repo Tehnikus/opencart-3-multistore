@@ -130,8 +130,6 @@ class niftyAutocomplete {
       // Get already selected items
       const selectedIds = this.selectedItemsBox ? Array.from(this.selectedItemsBox.querySelectorAll('[data-id]')).map(el => el.dataset.id) : [];
 
-      console.log(selectedIds);
-
       for (let row of data) {
         const id = String(row[this.idKey] ?? '');
         if (selectedIds.includes(id)) continue;
