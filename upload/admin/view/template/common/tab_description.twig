@@ -1,0 +1,209 @@
+
+<ul class="nav nav-tabs" id="descriptionTabLanguage">
+  {% for language in languages %}
+    <li {% if loop.first %}class="active"{% endif %}>
+      <a href="#description_language_{{ language.language_id }}" data-toggle="tab" data-tab-language-id="{{ language.language_id }}">
+        <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> 
+        <span>{{ tab_description }} {{ language.name }}
+      </a>
+    </li>
+  {% endfor %}
+</ul>
+
+<div class="tab-content">
+  {% for language in languages %}
+    <div class="tab-pane {% if loop.first %}active{% endif %}" id="description_language_{{ language.language_id }}">
+
+      {# Name input #}
+      <div class="form-group required">
+        <label class="col-sm-2 control-label" for="input-name{{ language.language_id }}">{{ entry_name }}</label>
+        <div class="col-sm-10">
+        <div class="input-group flex">
+          <span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
+          <span 
+            class="input-group-addon btn" 
+            title="{{ button_copy_to_meta_title }}" 
+            onclick="pasteString(
+              this.closest('.input-group').querySelector('input').value, 
+              document.querySelector('[name=&quot;{{ name_prefix }}[{{ language.language_id }}][meta_title]&quot;]')
+            )"
+          >
+            Title
+          </span>
+          <span 
+            class="input-group-addon btn" 
+            title="{{ button_copy_to_h1 }}" 
+            onclick="pasteString(
+              this.closest('.input-group').querySelector('input').value,
+              document.querySelector('[name=&quot;{{ name_prefix }}[{{ language.language_id }}][h1]&quot;]')
+            )"
+          >
+            H1
+          </span>
+          {% include "common/button_translate.twig"      with {sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][name]' } %}
+          {% include "common/button_create_seo_url.twig" with {seo_url_input: 'seo_url[' ~ language.language_id ~ ']' } %}
+          <input 
+            type="text" 
+            name="{{ name_prefix }}[{{ language.language_id }}][name]" 
+            value="{{ data[language.language_id].name }}" 
+            placeholder="{{ entry_name }}" 
+            id="input-name_{{ language.language_id }}" 
+            class="form-control" 
+            data-language-code="{{ language.code|split('-')[0] }}"
+            onfocusout="pasteString(
+              createSeoUrl(this.closest('.input-group').querySelector('input').value, this.closest('.input-group').querySelector('input').dataset.languageCode), 
+              document.querySelector('[name=&quot;seo_url[{{ language.language_id }}]&quot;]'),
+              false,
+              () => checkUrlDuplicates(document.querySelector('[name=&quot;seo_url[{{ language.language_id }}]&quot;]'), addInputErrorMessages)
+            )"
+          />
+          </div>
+          {% if error_name[language.language_id] %}<div class="text-danger">{{ error_name[language.language_id] }}</div>{% endif %}
+        </div>
+      </div>
+      {# End name input #}
+      
+      {# SEO URL input #}
+      <div class="form-group required">
+        <label class="col-sm-2 control-label" for="input-seo_url{{ language.language_id }}">{{ entry_keyword }}</label>
+        <div class="col-sm-10">
+          <div class="input-group flex">
+            <span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
+            <span 
+              class="input-group-addon btn" 
+              title="{{ button_add_lang_postfix }}" 
+              onclick="
+                let input = this.closest('.input-group').querySelector('input'); 
+                if (input.value && !input.value.endsWith(input.dataset.textPostfix)) {input.value += input.dataset.textPostfix}
+                () => checkUrlDuplicates(document.querySelector('[name=&quot;seo_url[{{ language.language_id }}]&quot;]'), addInputErrorMessages)
+                "
+            >+{{ language.code|split('-')[0] }}</span>
+            <input 
+              type="text" 
+              name="seo_url[{{ language.language_id }}]" 
+              value="{{ seo_url[language.language_id] }}"
+              placeholder="{{ entry_keyword }}" 
+              class="form-control seoUrlInput language_{{ language.language_id }}" 
+              data-text-postfix="-{{ language.code|split('-')[0] }}"
+              data-language-id="{{ language.language_id }}"
+              data-request="{{ seo_url_request }}"
+              id="input-seo_url_{{ language.language_id }}"
+              onfocusout="checkUrlDuplicates(document.querySelector('[name=&quot;seo_url[{{ language.language_id }}]&quot;]'), addInputErrorMessages)"
+            />
+          </div>
+          {% if error_seo_url[language.language_id] %}
+            <div class="text-danger">{{ error_seo_url[language.language_id] }}</div>
+          {% endif %}
+          <br>
+          <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ warning_keyword }}</div>
+        </div>
+      </div>
+      {# End SEO URL input #}
+
+      {# Meta title #}
+      <div class="form-group required">
+        <label class="col-sm-2 control-label" for="input-meta-title{{ language.language_id }}">{{ entry_meta_title }}</label>
+        <div class="col-sm-10">
+          <div class="input-group flex">
+            {% include "common/button_translate.twig" with {sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][meta_title]' } %}
+            <span class="input-group-addon faceclick btn">😊</span>
+            <input 
+              type="text" 
+              name="{{ name_prefix }}[{{ language.language_id }}][meta_title]" 
+              value="{{ data[language.language_id].meta_title }}" 
+              placeholder="{{ entry_meta_title }}" 
+              id="input-meta-title_{{ language.language_id }}" 
+              class="form-control" />
+          </div>
+          {% if error_meta_title[language.language_id] %}
+            <div class="text-danger">{{ error_meta_title[language.language_id] }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      {# H1 input #}
+      <div class="form-group">
+        <label class="col-sm-2 control-label" for="input-h1{{ language.language_id }}">{{ entry_h1 }}</label>
+        <div class="col-sm-10">
+          <div class="input-group flex">
+            {% include "common/button_translate.twig" with {sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][h1]' } %}
+            <span class="input-group-addon faceclick btn">😊</span>
+            <input 
+              type="text" 
+              name="{{ name_prefix }}[{{ language.language_id }}][h1]" 
+              value="{{ data[language.language_id].h1 }}" 
+              placeholder="{{ entry_h1 }}" 
+              id="input-h1_{{ language.language_id }}" 
+              class="form-control" 
+            />
+          </div>
+        </div>
+      </div>
+
+      {# HTML description input #}
+      <div class="form-group">
+        <label class="col-sm-2 control-label" for="input-description{{ language.language_id }}">{{ entry_description }}</label>
+        <div class="col-sm-10">
+          <textarea 
+            name="{{ name_prefix }}[{{ language.language_id }}][description]" 
+            placeholder="{{ entry_description }}" 
+            id="input-description_{{ language.language_id }}" 
+            data-toggle="summernote" 
+            data-lang="{{ summernote }}" 
+            class="form-control">{{ data[language.language_id].description }}</textarea>
+        </div>
+      </div>
+
+      {# Meta description #}
+      <div class="form-group">
+        <label class="col-sm-2 control-label" for="input-meta-description{{ language.language_id }}">{{ entry_meta_description }}</label>
+        <div class="col-sm-10">
+          <div class="input-group flex">
+            {% include "common/button_translate.twig" with {sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][meta_description]' }%}
+            <span class="input-group-addon faceclick btn">😊</span>
+            <textarea 
+              style="font-size: 18px" 
+              name="{{ name_prefix }}[{{ language.language_id }}][meta_description]" 
+              rows="3" placeholder="{{ entry_meta_description }}" 
+              id="input-meta-description_{{ language.language_id }}" 
+              class="form-control">{{ data[language.language_id].meta_description }}</textarea>
+          </div>
+        </div>
+      </div>
+
+      {# Keywords #}
+      <div class="form-group">
+        <label class="col-sm-2 control-label" for="input-meta-keyword{{ language.language_id }}">{{ entry_meta_keyword }}</label>
+        <div class="col-sm-10">
+          <div class="input-group flex">
+            {% include "common/button_translate.twig" with {sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][meta_keyword]' }%}
+            <span class="input-group-addon faceclick btn">😊</span>
+            <textarea 
+              style="font-size: 18px" 
+              name="{{ name_prefix }}[{{ language.language_id }}][meta_keyword]" 
+              rows="3" 
+              placeholder="{{ entry_meta_keyword }}" 
+              id="input-meta-keyword_{{ language.language_id }}" 
+              class="form-control">{{ data[language.language_id].meta_keyword }}</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+
+{# <script defer src="view/javascript/faceclick.js"></script>
+<link rel="stylesheet" href="view/stylesheet/faceclick.css"> #}
+{# 
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Add faceclick.js
+    document.querySelectorAll('.faceclick.btn').forEach(el => {
+      FC.attach(el, el.closest('.input-group.flex').querySelector('input, textarea'));
+    });
+  });
+</script>
+
+ #}
