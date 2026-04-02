@@ -550,4 +550,25 @@ class ModelCatalogOption extends Model {
 
 		return $query->row['total'];
 	}
+
+	public function getStoresAssociation($id = null) : array {
+		$result = [];
+
+		if (!$id) {
+			return $result;
+		}
+
+		// Get stores association
+		$storeData = $this->db->query("
+			SELECT
+				store_id
+			FROM `" . DB_PREFIX . "option_to_store`
+			WHERE option_id = '" . (int) $id . "'
+		");
+		foreach ($storeData->rows as $store) {
+			$result[] = $store['store_id']; 
+		}
+
+		return $result;
+	}
 }
