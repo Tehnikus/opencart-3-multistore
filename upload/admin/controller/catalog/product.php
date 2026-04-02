@@ -516,11 +516,19 @@ class ControllerCatalogProduct extends Controller {
 		} else {
 			$data['error_name'] = array();
 		}
-
-		if (isset($this->error['meta_title'])) {
-			$data['error_meta_title'] = $this->error['meta_title'];
+		
+		// Error if no associated stores selected
+		if (isset($this->error['product_store'])) {
+			$data['error_product_store'] = $this->error['product_store'];
 		} else {
-			$data['error_meta_title'] = array();
+			$data['error_product_store'] = '';
+		}
+
+		// Error parent category id
+		if (isset($this->error['parent_id'])) {
+			$data['error_parent'] = $this->error['parent_id'];
+		} else {
+			$data['error_parent'] = '';
 		}
 
 		if (isset($this->error['model'])) {
@@ -1192,14 +1200,18 @@ class ControllerCatalogProduct extends Controller {
 			if ((utf8_strlen($value['name']) < 1) || (utf8_strlen($value['name']) > 255)) {
 				$this->error['name'][$language_id] = $this->language->get('error_name');
 			}
-
-			if ((utf8_strlen($value['meta_title']) < 1) || (utf8_strlen($value['meta_title']) > 255)) {
-				$this->error['meta_title'][$language_id] = $this->language->get('error_meta_title');
-			}
 		}
 
-		if ((utf8_strlen($this->request->post['model']) < 1) || (utf8_strlen($this->request->post['model']) > 64)) {
+		if ((utf8_strlen($this->request->post['model']) < 1) || (utf8_strlen($this->request->post['model']) > 255)) {
 			$this->error['model'] = $this->language->get('error_model');
+		}
+
+		if (!isset($this->request->post['product_store']) || empty($this->request->post['product_store'])) {
+			$this->error['product_store'] = $this->language->get('error_stores_association');
+		}
+		
+		if (!isset($this->request->post['parent_id']) || empty($this->request->post['parent_id'])) {
+			$this->error['parent_id'] = $this->language->get('error_parent');
 		}
 
 		if ($this->request->post['product_seo_url']) {
