@@ -169,11 +169,18 @@ class ModelCatalogCategory extends Model {
 		return array_values($filter_group_data);
 	}
 
+
 	public function getCategoryLayoutId($category_id) {
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "category_to_layout WHERE category_id = '" . (int)$category_id . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "'");
+		$query = $this->db->query("
+			SELECT 
+				* 
+			FROM " . DB_PREFIX . "category_to_layout 
+			WHERE category_id = '" . (int) $category_id . "' 
+				AND store_id 		= '" . (int) $this->config->get('config_store_id') . "'
+		");
 
 		if ($query->num_rows) {
-			return (int)$query->row['layout_id'];
+			return (int) $query->row['layout_id'];
 		} else {
 			return 0;
 		}
