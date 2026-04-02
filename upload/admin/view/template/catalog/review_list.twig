@@ -64,6 +64,30 @@
                 <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
                 </span></div>
             </div>
+
+            <div class="form-group">
+              <label class="control-label" for="input-store">{{ entry_store }}</label>
+              <div>
+                <select class="form-control" name="store_id" id="input-store">
+                  <option value="">{{ text_select }}</option>
+                  {% for store in stores %}
+                    <option value="{{ store.store_id }}" {% if store.store_id == filter_store %} selected {% endif %}>{{ store.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label" for="input-language">{{ entry_language }}</label>
+              <div>
+                <select class="form-control" name="language_id" id="input-language">
+                  <option value="">{{ text_select }}</option>
+                  {% for language in languages %}
+                    <option value="{{ language.language_id }}" {% if language.language_id == filter_language %} selected {% endif %}>{{ language.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            
             <div class="form-group text-right">
               <button type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
             </div>
@@ -147,6 +171,18 @@ $('#button-filter').on('click', function() {
 	
 	if (filter_status !== '') {
 		url += '&filter_status=' + encodeURIComponent(filter_status); 
+	}		
+
+	var filter_store = $('select[name=\'store_id\']').val();
+	
+	if (filter_store !== '') {
+		url += '&filter_store=' + encodeURIComponent(filter_store); 
+	}		
+
+	var filter_language = $('select[name=\'language_id\']').val();
+	
+	if (filter_language !== '') {
+		url += '&filter_language=' + encodeURIComponent(filter_language); 
 	}		
 			
 	var filter_date_added = $('input[name=\'filter_date_added\']').val();
