@@ -596,12 +596,18 @@ class ModelCatalogProduct extends Model {
 
 		return $products;
 	}
+	
+	public function getProductSpecials($data = []) : array {
+		$data['filter_has_discount'] = 1;
+		$productData = $this->getProducts($data);
+		return $productData;
 	}
 
-	public function getProductDiscounts($product_id) {
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "' AND customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "' AND quantity > 1 AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY quantity ASC, priority ASC, price ASC");
-
-		return $query->rows;
+	public function getLatestProducts($limit) {
+		$data['sort'] = 'date_added';
+		$productData = $this->getProducts($data);
+		return $productData;
+	}
 	}
 
 	public function getProductImages($product_id) {
