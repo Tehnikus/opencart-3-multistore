@@ -713,6 +713,14 @@ class ControllerCatalogProduct extends Controller {
 			$data['price'] = '';
 		}
 
+		if (isset($this->request->post['wholesale_price'])) {
+			$data['price'] = $this->request->post['wholesale_price'];
+		} elseif (!empty($product_info)) {
+			$data['wholesale_price'] = $product_info['wholesale_price'];
+		} else {
+			$data['wholesale_price'] = '';
+		}
+
 		$this->load->model('catalog/recurring');
 
 		$data['recurrings'] = $this->model_catalog_recurring->getRecurrings();
