@@ -364,6 +364,12 @@ class ControllerLocalisationLanguage extends Controller {
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
 
+		$this->load->model('setting/store');
+		$data['stores'] = $this->model_setting_store->getMultistores();
+		$data['currentStore'] = $this->session->data['store_id'];
+		$data['stores_association'] = $this->request->post['stores_association'] ?? $this->model_localisation_language->getStoresAssociation($this->request->get['language_id'] ?? null) ?? [];
+
+
 		$this->response->setOutput($this->load->view('localisation/language_form', $data));
 	}
 
