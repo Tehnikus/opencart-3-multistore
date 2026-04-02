@@ -167,6 +167,22 @@ $_['entry_parent']                  = 'Main parent category';
 $_['entry_keyword']                 = 'URL';
 $_['entry_wholesale_price']         = 'Wholesale price';
 $_['entry_is_available']            = 'Availble for order';
+
+// Tab general lang description => tab_gescription.twig
+$_['entry_h1']                      = 'H1 tag';
+$_['entry_keyword']                 = 'SEO URL';
+$_['entry_description']             = 'Description';
+$_['entry_meta_title']              = 'Meta title';
+$_['entry_meta_description']        = 'Meta description';
+$_['entry_meta_keyword']            = 'Meta keywords';
+$_['entry_seo_page_type']           = 'SEO page type';
+$_['entry_name']                    = 'Name';
+$_['warning_keyword']               = 'Do not use spaces, instead replace spaces with - and make sure the SEO URL is globally unique.';
+
+// Filter form => filter_form.twig
+$_['entry_request']                 = 'Request';
+
+
 // List entries
 $_['edit_filter_group']             = 'Edit %s filter group';
 $_['edit_option_group']             = 'Edit %s option group';
