@@ -97,6 +97,7 @@ class ControllerCommonHeader extends Controller {
 			}
 
 			$data['currentStoreId'] = $this->session->data['store_id'];
+			$data['defaultLanguage'] = json_encode($this->model_localisation_language->getLanguage($this->config->get('config_language_id')) ?? [], true);
 		}
 
 		return $this->load->view('common/header', $data);
