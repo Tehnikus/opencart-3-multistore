@@ -137,7 +137,18 @@ class ModelCatalogReview extends Model {
 	}
 
 	public function getReview($review_id) {
-		$query = $this->db->query("SELECT DISTINCT *, (SELECT pd.name FROM " . DB_PREFIX . "product_description pd WHERE pd.product_id = r.product_id AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "') AS product FROM " . DB_PREFIX . "review r WHERE r.review_id = '" . (int)$review_id . "'");
+		$query = $this->db->query("
+			SELECT 
+				*, 
+				(
+					SELECT pd.name FROM " . DB_PREFIX . "product_description pd 
+					WHERE pd.product_id = r.product_id 
+					AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "'
+					AND pd.store_id = r.store_id
+				) AS product 
+			FROM " . DB_PREFIX . "review r 
+			WHERE r.review_id = '" . (int)$review_id . "'
+		");
 
 		return $query->row;
 	}
