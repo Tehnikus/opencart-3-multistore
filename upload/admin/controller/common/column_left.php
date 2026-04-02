@@ -51,6 +51,14 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			if ($this->user->hasPermission('access', 'extension/module/facet_filter')) {
+				$catalog[] = array(
+					'name'	   => $this->language->get('text_facet_filter'),
+					'href'     => $this->url->link('extension/module/facet_filter', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
 			// Attributes
 			$attribute = array();
 
