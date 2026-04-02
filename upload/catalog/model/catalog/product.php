@@ -113,77 +113,374 @@ class ModelCatalogProduct extends Model {
 		// Return first valid row
     return $valid[0] ?? null;
 	}
-	}
 
-	public function getBestSellerProducts($limit) {
-		$product_data = $this->cache->get('product.bestseller.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . $this->config->get('config_customer_group_id') . '.' . (int)$limit);
+	/**
+	 * Get all  data of a single product and put it into cache
+	 * @param mixed $product_id
+	 * @return array|bool
+	 */
+	public function getProduct($product_id) : array|bool {
+		$product_id 				= (int) $product_id;
+		$language_id 				= (int) $this->config->get('config_language_id');
+		$store_id 					= (int) $this->config->get('config_store_id');
+		$customer_group_id 	= (int) $this->config->get('config_customer_group_id');
+		
+		// Cache
+		$cacheName 	= "product.store_{$store_id}.language_{$language_id}." . (floor($product_id / 100)) . "00.product_{$product_id}";
+		$product 		= $this->cache->get($cacheName);
+		
+		if ($product) {
+			/**
+			 * Filter specials and discounts from cached data so cache shoul not invalidate if (current time > date end)
+			 * TODO use $this->getValidDiscount() here for clarity, as these are mostly the same functions
+			 */ 
+			$now = date('Y-m-d H:i:s');
+			$product['specials'] = array_filter($product['specials'], function ($var) use ($now) {
+				return 
+					strtotime($var['date_start']) <= strtotime($now)
+					&& (
+						strtotime($var['date_end']) >= strtotime($now) 
+						|| $var['date_end'] === null
+						|| str_contains($var['date_end'], '0000-00-00')
+					)
+				;
+			});
+			$product['discounts'] = array_filter($product['discounts'], function ($var) use ($now) {
+				return 
+					strtotime($var['date_start']) <= strtotime($now)
+					&& (
+						strtotime($var['date_end']) >= strtotime($now) 
+						|| $var['date_end'] === null
+						|| str_contains($var['date_end'], '0000-00-00')
+					)
+				;
+			});
 
-		if (!$product_data) {
-			$product_data = array();
-
-			$query = $this->db->query("SELECT op.product_id, SUM(op.quantity) AS total FROM " . DB_PREFIX . "order_product op LEFT JOIN `" . DB_PREFIX . "order` o ON (op.order_id = o.order_id) LEFT JOIN `" . DB_PREFIX . "product` p ON (op.product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE o.order_status_id > '0' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' GROUP BY op.product_id ORDER BY total DESC LIMIT " . (int)$limit);
-
-			foreach ($query->rows as $result) {
-				$product_data[$result['product_id']] = $this->getProduct($result['product_id']);
-			}
-
-			$this->cache->set('product.bestseller.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . $this->config->get('config_customer_group_id') . '.' . (int)$limit, $product_data);
+			return $product;
 		}
 
-		return $product_data;
-	}
+		$sql = "
+			SELECT
+				
+				p.`product_id`,
+				p.`model`,
+				p.`sku`,
+				p.`upc`,
+				p.`ean`,
+				p.`jan`,
+				p.`isbn`,
+				p.`mpn`,
+				p.`location`,
+				p.`quantity`,
+				p.`stock_status_id`,
+				p.`manufacturer_id`,
+				p.`shipping`,
+				p.`points`,
+				p.`tax_class_id`,
+				p.`date_available`,
+				p.`weight`,
+				p.`weight_class_id`,
+				p.`length`,
+				p.`width`,
+				p.`height`,
+				p.`length_class_id`,
+				p.`subtract`,
+				p.`minimum`,
+				p.`viewed`,
+				p.`date_added`,
+				
+				p2s.`sort_order`,
+				p2s.`parent_id`,
+				p2s.`status`,				
+				p2s.`date_modified`,
 
-	public function getProductAttributes($product_id) {
-		$product_attribute_group_data = array();
+				COALESCE(p2s.`image`, p.`image`) AS image,
+				COALESCE(NULLIF(p2s.`price`, 0), p.`price`) AS price,
 
-		$product_attribute_group_query = $this->db->query("SELECT ag.attribute_group_id, agd.name FROM " . DB_PREFIX . "product_attribute pa LEFT JOIN " . DB_PREFIX . "attribute a ON (pa.attribute_id = a.attribute_id) LEFT JOIN " . DB_PREFIX . "attribute_group ag ON (a.attribute_group_id = ag.attribute_group_id) LEFT JOIN " . DB_PREFIX . "attribute_group_description agd ON (ag.attribute_group_id = agd.attribute_group_id) WHERE pa.product_id = '" . (int)$product_id . "' AND agd.language_id = '" . (int)$this->config->get('config_language_id') . "' GROUP BY ag.attribute_group_id ORDER BY ag.sort_order, agd.name");
+				pd.`name`,
+				pd.`meta_title`,
+				pd.`meta_description`,
+				pd.`meta_keyword`,
+				pd.`tag`,
+				pd.`description`,
+				pd.`seo_keywords`,
+				pd.`seo_description`,
+				pd.`faq`,
+				pd.`how_to`,
+				pd.`footer`,
+				pd.`date_modified` AS description_date_modified,
 
-		foreach ($product_attribute_group_query->rows as $product_attribute_group) {
-			$product_attribute_data = array();
+				pst.`views`,
+				pst.`orders`,
+				pst.`returns`,
+				pst.`review_count` AS reviews, 
+				pst.`rating_avg` AS rating,
 
-			$product_attribute_query = $this->db->query("SELECT a.attribute_id, ad.name, pa.text FROM " . DB_PREFIX . "product_attribute pa LEFT JOIN " . DB_PREFIX . "attribute a ON (pa.attribute_id = a.attribute_id) LEFT JOIN " . DB_PREFIX . "attribute_description ad ON (a.attribute_id = ad.attribute_id) WHERE pa.product_id = '" . (int)$product_id . "' AND a.attribute_group_id = '" . (int)$product_attribute_group['attribute_group_id'] . "' AND ad.language_id = '" . (int)$this->config->get('config_language_id') . "' AND pa.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY a.sort_order, ad.name");
+				(
+					SELECT 
+						md.name 
+					FROM " . DB_PREFIX . "manufacturer_description md 
+					WHERE md.manufacturer_id = p.manufacturer_id 
+						AND md.language_id 	= {$language_id}
+						AND md.store_id 		= {$store_id}
+				) AS manufacturer,
 
-			foreach ($product_attribute_query->rows as $product_attribute) {
-				$product_attribute_data[] = array(
-					'attribute_id' => $product_attribute['attribute_id'],
-					'name'         => $product_attribute['name'],
-					'text'         => $product_attribute['text']
-				);
-			}
+				(
+					SELECT JSON_OBJECTAGG(
+						pi.product_image_id, JSON_OBJECT(
+							'image', 			pi.`image`,
+							'sort_order', pi.`sort_order`
+						)
+					)
+					FROM " . DB_PREFIX . "product_image pi
+					WHERE pi.`product_id` = p2s.`product_id`
+						AND pi.`store_id`   = p2s.`store_id`
+				) AS images,
 
-			$product_attribute_group_data[] = array(
-				'attribute_group_id' => $product_attribute_group['attribute_group_id'],
-				'name'               => $product_attribute_group['name'],
-				'attribute'          => $product_attribute_data
-			);
+				(
+					SELECT JSON_OBJECTAGG(
+						ps.product_special_id, JSON_OBJECT(
+							'product_id',         ps.`product_id`,
+							'store_id',           ps.`store_id`,
+							'customer_group_id',  ps.`customer_group_id`,
+							'priority',           ps.`priority`,
+							'price',              ps.`price`,
+							'date_start',         ps.`date_start`,
+							'date_end',           ps.`date_end`
+						)
+					) FROM " . DB_PREFIX . "product_special ps
+					 WHERE ps.`product_id` = p2s.`product_id`
+					 AND ps.`store_id` 		 = p2s.`store_id`
+				) AS specials,
+
+				(
+					SELECT JSON_OBJECTAGG(
+						pd.product_discount_id, JSON_OBJECT(
+							'product_id',          pd.`product_id`,
+							'store_id',            pd.`store_id`,
+							'customer_group_id',   pd.`customer_group_id`,
+							'quantity',            pd.`quantity`,
+							'priority',            pd.`priority`,
+							'price',               pd.`price`,
+							'date_start',          pd.`date_start`,
+							'date_end',            pd.`date_end`
+						)
+					) FROM " . DB_PREFIX . "product_discount pd
+					 WHERE pd.`product_id` = p2s.`product_id`
+					 AND pd.`store_id` 		 = p2s.`store_id`
+				) AS discounts,
+
+				(
+					SELECT JSON_ARRAYAGG(
+						JSON_OBJECT(
+							'attribute_group_id', t.`attribute_group_id`,
+							'name', 							t.`group_name`,
+							'attribute', 					t.`attributes_json`
+						)
+					)
+					FROM (
+						SELECT
+							pa.attribute_group_id,
+							agd.`name` AS `group_name`,
+				
+							JSON_ARRAYAGG(
+								JSON_OBJECT(
+									'name', 				ad.`name`,
+									'attribute_id', pa.`attribute_id`,
+									'text', 				pa.`text`,
+									'sort_order', 	a2s.`sort_order`
+								)
+							) AS `attributes_json`
+				
+						FROM " . DB_PREFIX . "product_attribute pa
+				
+						LEFT JOIN " . DB_PREFIX . "attribute_description ad
+							ON ad.`attribute_id` = pa.`attribute_id`
+							AND ad.`language_id` = pa.`language_id`
+							AND ad.`store_id` = pa.`store_id`
+				
+						LEFT JOIN " . DB_PREFIX . "attribute_group_description agd
+							ON agd.`attribute_group_id` = pa.`attribute_group_id`
+							AND agd.`language_id` = pa.`language_id`
+							AND agd.`store_id` = pa.`store_id`
+				
+						LEFT JOIN " . DB_PREFIX . "attribute_to_store a2s
+							ON a2s.`attribute_id` = pa.`attribute_id`
+							AND a2s.`store_id` = pa.`store_id`
+				
+						WHERE pa.product_id = p2s.product_id
+							AND pa.`language_id` = pd.`language_id`
+							AND pa.`store_id` = p2s.`store_id`
+				
+						GROUP BY pa.`attribute_group_id`
+					) t
+				) AS attributes,
+
+				(
+					SELECT JSON_OBJECTAGG(
+						po.product_option_id, JSON_OBJECT(
+
+							'product_option_id', 		po.`product_option_id`,
+							'option_id', 						po.`option_id`,
+							'value', 								po.`value`,
+							'required', 						po.`required`,
+							'type', 								o.`type`,
+							'sort_order', 					(SELECT o2s.`sort_order` FROM " . DB_PREFIX . "option_to_store o2s WHERE o2s.`option_id` = po.`option_id` AND o2s.`store_id` = po.`store_id` LIMIT 1),
+							'name', 								od.`name`,
+						
+							'product_option_value', (
+								SELECT JSON_ARRAYAGG(
+									JSON_OBJECT(
+										'product_option_value_id',	pov.`product_option_value_id`,
+										'product_option_id',				pov.`product_option_id`,
+										'option_id',								pov.`option_id`,
+										'option_value_id',					pov.`option_value_id`,
+										'quantity',									pov.`quantity`,
+										'subtract',									pov.`subtract`,
+										'price',										pov.`price`,
+										'price_prefix',							pov.`price_prefix`,
+										'points',										pov.`points`,
+										'points_prefix',						pov.`points_prefix`,
+										'weight',										pov.`weight`,
+										'weight_prefix',						pov.`weight_prefix`,
+										'image',										(SELECT ov.`image` FROM " . DB_PREFIX . "option_value ov WHERE ov.`option_value_id` = pov.`option_value_id` AND ov.`store_id` = p2s.`store_id`),
+										'sort_order',								(SELECT ov.`sort_order` FROM " . DB_PREFIX . "option_value ov WHERE ov.`option_value_id` = pov.`option_value_id` AND ov.`store_id` = p2s.`store_id`),
+										'name',											(SELECT ovd.`name` FROM " . DB_PREFIX . "option_value_description ovd WHERE ovd.`option_value_id` = pov.`option_value_id` AND ovd.`language_id` = pd.`language_id` AND ovd.`store_id` = p2s.`store_id`)
+									)
+								)
+								FROM " . DB_PREFIX . "product_option_value pov
+								WHERE pov.product_id 				= po.product_id
+									AND pov.product_option_id = po.product_option_id
+									AND pov.store_id 					= po.store_id
+							)
+						)
+					)
+					FROM " . DB_PREFIX . "product_option po
+					JOIN `" . DB_PREFIX . "option` o
+						ON o.`option_id` 			= po.`option_id`
+					JOIN " . DB_PREFIX . "option_to_store o2s
+						ON 	o2s.`option_id` 	= po.`option_id`
+						AND o2s.store_id 		= p2s.store_id
+					JOIN " . DB_PREFIX . "option_description od
+						ON 	od.`option_id` 		= po.`option_id`
+						AND od.`language_id`	= pd.`language_id`
+						AND od.`store_id` 		= p2s.`store_id`
+					WHERE po.`product_id` 	= p.`product_id`
+						AND po.`store_id` 		= p2s.`store_id`
+				) AS options,
+
+				(
+					SELECT JSON_OBJECTAGG(
+						pr.customer_group_id, JSON_OBJECT(
+							'product_reward_id', 	pr.`product_reward_id`,
+							'customer_group_id', 	pr.`customer_group_id`,
+							'points',            	pr.`points`
+						)
+					)
+						FROM " . DB_PREFIX . "product_reward pr
+						WHERE pr.`product_id` = p2s.`product_id`
+							AND pr.`store_id` 	= p2s.`store_id`
+				) AS rewards, 
+
+				(
+					SELECT 
+						ss.name 
+					FROM " . DB_PREFIX . "stock_status ss 
+					WHERE ss.`stock_status_id` = p.`stock_status_id` 
+						AND ss.`language_id` = {$language_id}
+				) AS stock_status, 
+
+				(
+					SELECT 
+						wcd.`unit` 
+					FROM " . DB_PREFIX . "weight_class_description wcd 
+					WHERE p.`weight_class_id` = wcd.`weight_class_id` 
+						AND wcd.`language_id` = {$language_id}
+				) AS weight_class, 
+
+				(
+					SELECT 
+						lcd.`unit` 
+					FROM " . DB_PREFIX . "length_class_description lcd 
+					WHERE p.`length_class_id` = lcd.`length_class_id` 
+						AND lcd.`language_id` = {$language_id}
+				) AS length_class
+
+			FROM " . DB_PREFIX . "product_to_store p2s
+			LEFT JOIN " . DB_PREFIX . "facet_sort pst
+				ON 	pst.`product_id` = p2s.`product_id`
+				AND pst.`store_id` 	 = p2s.`store_id`
+			JOIN " . DB_PREFIX . "product p
+				ON p.`product_id` = p2s.`product_id`
+			JOIN " . DB_PREFIX . "product_description pd
+				ON 	pd.`product_id`  	= p2s.`product_id`
+				AND pd.`language_id` 	= {$language_id}
+				AND pd.`store_id` 		= p2s.`store_id`
+			WHERE p2s.`product_id` 	= '" . (int) $product_id . "'
+				AND p2s.`store_id` 		= {$store_id}
+				AND p2s.`status` 			= 1
+			LIMIT 1
+		";
+
+		$product = $this->db->query($sql)->row;
+
+		if (empty($product)) {
+			return false;
 		}
 
-		return $product_attribute_group_data;
+		/**
+		 * Decode JSON aggregated data
+		 * Faster then bouncing requests to get separate product data and easier to store cached data
+		 */
+		$product['images'] 							= json_decode($product['images'] 			?? '[]', true);
+		$product['specials'] 						= json_decode($product['specials'] 		?? '[]', true);
+		$product['discounts'] 					= json_decode($product['discounts'] 	?? '[]', true);
+		$product['options'] 						= json_decode($product['options'] 		?? '[]', true);
+		$product['attributes'] 					= json_decode($product['attributes'] 	?? '[]', true);
+		$product['reward'] 							= json_decode($product['rewards'] 		?? '[]', true)[$customer_group_id] ?? null;
+		// Get valid discount float prices and dates in YYYY-MM-DD format
+		$product['discount'] 						= $this->getValidDiscount($product['discounts'], $customer_group_id)['price'] 		?? null;
+		$product['special'] 						= $this->getValidDiscount($product['specials'],  $customer_group_id)['price'] 		?? null;
+		$product['discount_date_end'] 	= $this->getValidDiscount($product['discounts'], $customer_group_id)['date_end'] ?? null;
+		$product['special_date_end'] 		= $this->getValidDiscount($product['specials'],  $customer_group_id)['date_end'] ?? null;
+		// Sort data
+		usort(array: $product['images'], 		callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
+		usort(array: $product['options'], 		callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
+		usort(array: $product['attributes'], callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
+		usort(array: $product['specials'], 	callback: fn ($a, $b) =>  $a['priority'] 	<=> $b['priority']);
+		array_multisort(
+			$product['discounts'],
+			array_column($product['discounts'], 'quantity'),  SORT_ASC,
+			array_column($product['discounts'], 'priority'),  SORT_ASC,
+			array_column($product['discounts'], 'price'),  SORT_ASC,
+		);
+
+		$this->cache->set($cacheName, $product);
+
+		// Filter specials and discounts
+		$now = date('Y-m-d H:i:s');
+		$product['specials'] = array_filter($product['specials'], function ($var) use ($now) {
+			return 
+				strtotime($var['date_start']) <= strtotime($now)
+				&& (
+					strtotime($var['date_end']) >= strtotime($now) 
+					|| $var['date_end'] === null
+					|| str_contains($var['date_end'], '0000-00-00')
+				)
+			;
+		});
+		$product['discounts'] = array_filter($product['discounts'], function ($var) use ($now) {
+			return 
+				strtotime($var['date_start']) <= strtotime($now)
+				&& (
+					strtotime($var['date_end']) >= strtotime($now) 
+					|| $var['date_end'] === null
+					|| str_contains($var['date_end'], '0000-00-00')
+				)
+			;
+		});
+		return $product;
 	}
-
-	public function getProductOptions($product_id) {
-		$product_option_data = array();
-
-		$product_option_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_option po LEFT JOIN `" . DB_PREFIX . "option` o ON (po.option_id = o.option_id) LEFT JOIN " . DB_PREFIX . "option_description od ON (o.option_id = od.option_id) WHERE po.product_id = '" . (int)$product_id . "' AND od.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY o.sort_order");
-
-		foreach ($product_option_query->rows as $product_option) {
-			$product_option_value_data = array();
-
-			$product_option_value_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_option_value pov LEFT JOIN " . DB_PREFIX . "option_value ov ON (pov.option_value_id = ov.option_value_id) LEFT JOIN " . DB_PREFIX . "option_value_description ovd ON (ov.option_value_id = ovd.option_value_id) WHERE pov.product_id = '" . (int)$product_id . "' AND pov.product_option_id = '" . (int)$product_option['product_option_id'] . "' AND ovd.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY ov.sort_order");
-
-			foreach ($product_option_value_query->rows as $product_option_value) {
-				$product_option_value_data[] = array(
-					'product_option_value_id' => $product_option_value['product_option_value_id'],
-					'option_value_id'         => $product_option_value['option_value_id'],
-					'name'                    => $product_option_value['name'],
-					'image'                   => $product_option_value['image'],
-					'quantity'                => $product_option_value['quantity'],
-					'subtract'                => $product_option_value['subtract'],
-					'price'                   => $product_option_value['price'],
-					'price_prefix'            => $product_option_value['price_prefix'],
-					'weight'                  => $product_option_value['weight'],
-					'weight_prefix'           => $product_option_value['weight_prefix']
-				);
 			}
 
 			$product_option_data[] = array(
