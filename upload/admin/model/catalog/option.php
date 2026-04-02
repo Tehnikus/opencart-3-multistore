@@ -337,22 +337,83 @@ class ModelCatalogOption extends Model {
 	}
 
 	public function getOptions($data = array()) {
-		$sql = "SELECT * FROM `" . DB_PREFIX . "option` o LEFT JOIN " . DB_PREFIX . "option_description od ON (o.option_id = od.option_id) WHERE od.language_id = '" . (int)$this->config->get('config_language_id') . "'";
 
-		if (!empty($data['filter_name'])) {
-			$sql .= " AND od.name LIKE '" . $this->db->escape($data['filter_name']) . "%'";
+		$result = [];
+		$where  = [];
+
+		// Connect to external table
+		$where[] = "
+			o2s.option_id = o.option_id
+		";
+		// Set current language
+		$where[] = "
+			od.language_id = '" . (int) $this->config->get('config_language_id') . "'
+		";
+		// Filter by name
+		if (isset($data['filter_name'])) {
+			$where[] = " od.`name` LIKE '%" . $this->db->escape($data['filter_name']) . "%'";
+		}
+		// FIlter by store
+		if (isset($data['store_id'])) {
+			$where[] = " o2s.store_id = '" . (int) $data['store_id'] . "'";
 		}
 
+		// Filter by value existance
+		if (!empty($data['has_values'])) {
+			$where[] = "
+				EXISTS (
+					SELECT 1
+					FROM " . DB_PREFIX . "option o
+					JOIN " . DB_PREFIX . "option_value ov
+						ON ov.option_id = o.option_id
+					WHERE ov.option_id = o.option_id
+						AND ov.store_id  = '" . (int) $this->session->data['store_id'] . "'
+						AND o.type IN ('select', 'checkbox', 'radio')
+				)
+			";
+		}
+
+		// TODO Add wildcard search by option_value_description name
+		$sql = "
+			SELECT 
+				o.option_id,
+				o.type,
+				o2s.sort_order,
+				(
+					SELECT 
+						od.name 
+					FROM " . DB_PREFIX . "option_description od
+					WHERE od.option_id = o.option_id
+					ORDER BY 
+						FIELD(od.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, 
+						FIELD(od.language_id, '" . (int) $this->config->get('config_language_id') . "') DESC
+					LIMIT 1
+				) AS `name`,
+				(SELECT COUNT(ov.option_value_id) FROM " . DB_PREFIX . "option_value ov WHERE ov.option_id = o.option_id AND ov.store_id = '" . (int) $this->session->data['store_id'] . "') AS option_count,
+				(SELECT JSON_ARRAYAGG(o2s.store_id) FROM " . DB_PREFIX . "option_to_store o2s WHERE o2s.option_id = o.option_id) AS stores,
+				(SELECT JSON_ARRAYAGG(ovd.name) FROM " . DB_PREFIX . "option_value_description ovd WHERE ovd.option_id = o.option_id AND ovd.language_id = '" . (int) $this->config->get('config_language_id') . "' AND ovd.store_id = '" . (int) $this->session->data['store_id'] . "') AS values_list
+			FROM `" . DB_PREFIX . "option` o 
+			LEFT JOIN " . DB_PREFIX . "option_to_store o2s
+			 	ON o2s.option_id = o.option_id
+				AND o2s.store_id = '" . (int) $this->session->data['store_id'] . "'
+			WHERE EXISTS (
+				SELECT 1
+				FROM " . DB_PREFIX . "option_to_store o2s
+				JOIN " . DB_PREFIX . "option_description od ON od.option_id = o.option_id
+				WHERE " . implode(' AND ', $where) . "
+			) 
+		";
+
 		$sort_data = array(
-			'od.name',
+			'name',
 			'o.type',
-			'o.sort_order'
+			'o2s.sort_order'
 		);
 
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-			$sql .= " ORDER BY " . $data['sort'];
+			$sql .= " ORDER BY FIELD(o2s.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, " . $data['sort'];
 		} else {
-			$sql .= " ORDER BY od.name";
+			$sql .= " ORDER BY FIELD(o2s.store_id, '" . (int) $this->session->data['store_id'] ."') DESC, name";
 		}
 
 		if (isset($data['order']) && ($data['order'] == 'DESC')) {
@@ -374,8 +435,14 @@ class ModelCatalogOption extends Model {
 		}
 
 		$query = $this->db->query($sql);
+		
+		foreach ($query->rows ?? [] as $row) {
+			$row['stores'] 			= json_decode($row['stores'] ?? '[]');
+			$row['values_list'] = json_decode($row['values_list'] ?? '[]');
+			$result[] = $row;
+		}
 
-		return $query->rows;
+		return $result;
 	}
 
 	public function getOptionDescriptions($option_id) {
