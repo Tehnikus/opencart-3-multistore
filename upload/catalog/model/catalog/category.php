@@ -1,9 +1,55 @@
 <?php
 class ModelCatalogCategory extends Model {
-	public function getCategory($category_id) {
-		$query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "category c LEFT JOIN " . DB_PREFIX . "category_description cd ON (c.category_id = cd.category_id) LEFT JOIN " . DB_PREFIX . "category_to_store c2s ON (c.category_id = c2s.category_id) WHERE c.category_id = '" . (int)$category_id . "' AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND c2s.store_id = '" . (int)$this->config->get('config_store_id') . "' AND c.status = '1'");
+	public function getCategory($category_id) : array {
+		$category_id 	= (int) $category_id;
+		$language_id 	= (int) $this->config->get('config_language_id');
+		$store_id 		= (int) $this->config->get('config_store_id');
 
-		return $query->row;
+		// Cache
+		$categoryCacheName 	= "category.store_{$store_id}.language_{$language_id}." . (floor($category_id / 100)) . "00.category_{$category_id}";
+		$cachedData 				= $this->cache->get($categoryCacheName);
+		if ($cachedData) {
+			return $cachedData;
+		}
+
+		$query = $this->db->query("
+			SELECT 
+				c.`category_id`,
+				c2s.`store_id`,
+				c2s.`parent_id`,
+				c2s.`sort_order`,
+				c2s.`status`,
+				c2s.`top`,
+				c2s.`image`,
+				c2s.`column`,
+				cd.`name`,
+				cd.`meta_title`,
+				cd.`meta_description`,
+				cd.`meta_keyword`,
+				cd.`description`,
+				cd.`seo_keywords`,
+				cd.`seo_description`,
+				cd.`faq`,
+				cd.`how_to`,
+				cd.`footer`,
+				cd.`date_modified`,
+				cd.`language_id`
+			FROM " . DB_PREFIX . "category_to_store c2s
+			INNER JOIN " . DB_PREFIX . "category c
+				ON c.`category_id` = c2s.`category_id`
+			INNER JOIN " . DB_PREFIX . "category_description cd
+				ON  cd.`category_id` 	= c2s.`category_id`
+				AND cd.`language_id` 	= '" . (int) $this->config->get('config_language_id') . "'
+				AND cd.`store_id` 		= c2s.`store_id`
+			WHERE c2s.`category_id` = '" . (int) $category_id . "'
+				AND c2s.`store_id` 		= '" . (int) $this->config->get('config_store_id') . "'
+				AND c2s.`status` 			= 1
+			LIMIT 1
+		");
+
+		$this->cache->set($categoryCacheName, $query->row);
+
+		return $query->row ?? [];
 	}
 
 	public function getCategories($parent_id = 0) {
