@@ -1,10 +1,68 @@
 <?php
 class ControllerSeoFilterPage extends Controller {
+  
+  private $error = [];
+  public $facetTypes = [];
+
+  public function __construct($registry) {
+		parent::__construct($registry);
+    $this->language->load('seo/filter_page');
+    $userToken = (string) $this->session->data['user_token'];
+    $this->facetTypes = [
+      // Autocomplete
+      'category' => [
+        'type'            => 1,
+        'required'        => true,
+        'columnId'        => 'category_id',
+        'title'           => $this->language->get('autocomplete_filter_page_category'),
+        'autocompleteUrl' => $this->url->link('catalog/category/autocomplete', 'user_token=' . $userToken, true),
+      ],
+      'filter' => [
+        'type'            => 2,
+        'required'        => false,
+        'columnId'        => 'filter_id',
+        'title'           => $this->language->get('autocomplete_filter_page_filter'),
+        'autocompleteUrl' => $this->url->link('catalog/filter/autocomplete', 'user_token=' . $userToken, true),
+      ],
+      'option' => [
+        'type'            => 3,
+        'required'        => false,
+        'columnId'        => 'option_value_id',
+        'title'           => $this->language->get('autocomplete_filter_page_option'),
+        'autocompleteUrl' => $this->url->link('catalog/option/autocomplete', 'user_token=' . $userToken, true),
+      ],
+      'attribute' => [
+        'type'            => 4,
+        'required'        => false,
+        'columnId'        => 'attribute_id',
+        'title'           => $this->language->get('autocomplete_filter_page_attribute'),
+        'autocompleteUrl' => $this->url->link('catalog/attribute/autocomplete', 'user_token=' . $userToken, true),
+      ],
+      'manufacturer' => [
+        'type'            => 5,
+        'required'        => false,
+        'columnId'        => 'manufacturer_id',
+        'title'           => $this->language->get('autocomplete_filter_page_manufacturer'),
+        'autocompleteUrl' => $this->url->link('catalog/manufacturer/autocomplete', 'user_token=' . $userToken, true),
+      ],
+      // No autocomplete
+      'has_discount' => [
+        'type'            => 9,
+        'required'        => false,
+        'title'           => $this->language->get('autocomplete_filter_page_has_discount'),
+      ],
+      'is_featured' => [
+        'type'            => 10,
+        'required'        => false,
+        'title'           => $this->language->get('autocomplete_filter_page_is_featured'),
+      ],
+    ];
+	}
+
   public function index() {
     $this->load->language('seo/filter_page');
     $this->load->model('seo/filter_page');
     $this->document->setTitle($this->language->get('heading_title'));
-
     $this->getList();
   }
 
@@ -33,6 +91,9 @@ class ControllerSeoFilterPage extends Controller {
     $this->load->model('setting/store');
     $this->load->model('localisation/language');
     $this->load->model('seo/filter_page');
+    $this->load->language('seo/filter_page');
+    $this->document->addScript('view/javascript/niftyAutocomplete.js');
+		$this->document->addStyle('view/stylesheet/niftyAutocomplete.css');
     
     $data       = [];
     $id         = $this->request->get['filter_page_id'] ?? null;
@@ -40,6 +101,7 @@ class ControllerSeoFilterPage extends Controller {
     $url        = '&' . http_build_query(array_intersect_key($this->request->get, array_flip(['sort', 'order', 'page'])));
 
     $data = [
+      'facetTypes'    => $this->facetTypes,
       'description'   => $this->model_seo_filter_page->getFilterPageDescriptions($id),
       'facet'         => $this->model_seo_filter_page->getFilterPageFacets($id),
       'column_left'   => $this->load->controller('common/column_left'),
@@ -47,9 +109,11 @@ class ControllerSeoFilterPage extends Controller {
       'header'        => $this->load->controller('common/header'),
       'languages'     => $this->model_localisation_language->getLanguages(),
       'stores'        => $this->model_setting_store->getMultistores(),
-      'action'        => $id ? $this->url->link('catalog/category/edit', 'user_token=' . $user_token . '&category_id=' . $id . $url, true) : $this->url->link('catalog/category/add', 'user_token=' . $user_token . $url, true),
-      'cancel'        => $this->url->link('catalog/category', 'user_token=' . $user_token . $url, true),
+      'action'        => $id ? $this->url->link('seo/filter_page/edit', 'user_token=' . $user_token . '&filter_page_id=' . $id . $url, true) : $this->url->link('seo/filter_page/add', 'user_token=' . $user_token . $url, true),
+      'cancel'        => $this->url->link('seo/filter_page', 'user_token=' . $user_token . $url, true),
+      'user_token'    => (string) $this->session->data['user_token'],
     ];
+
     $this->response->setOutput($this->load->view('seo/filter_page_form', $data));
   }
 
