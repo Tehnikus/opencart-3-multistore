@@ -1114,12 +1114,12 @@ class ControllerCatalogProduct extends Controller {
 				$thumb = $product_image['image'];
 			} else {
 				$image = '';
-				$thumb = 'no_image.png';
+				$thumb = 'no_image.webp';
 			}
 
 			$data['product_images'][] = array(
 				'image'      => $image,
-				'thumb'      => $this->model_tool_image->resize($thumb, 100, 100),
+				'thumb'      => HTTPS_CATALOG . 'image/' . $thumb,
 				'sort_order' => $product_image['sort_order']
 			);
 		}
