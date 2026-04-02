@@ -340,20 +340,25 @@
                     {% endfor %}</div>
                 </div>
               </div>
-              <div class="form-group">
+              <div class="form-group required">
                 <label class="col-sm-2 control-label">{{ entry_store }}</label>
                 <div class="col-sm-10">
-                  <div class="well well-sm" style="height: 150px; overflow: auto;"> {% for store in stores %}
-                      <div class="checkbox">
-                        <label> {% if store.store_id in product_store %}
-                            <input type="checkbox" name="product_store[]" value="{{ store.store_id }}" checked="checked"/>
-                            {{ store.name }}
-                          {% else %}
-                            <input type="checkbox" name="product_store[]" value="{{ store.store_id }}"/>
-                            {{ store.name }}
-                          {% endif %} </label>
-                      </div>
-                    {% endfor %}</div>
+                  <div class="well well-sm" style="height: 150px; overflow: auto;">
+                    {% for store in stores %}
+                        <div class="checkbox">
+                          <label> {% if store.store_id in product_store or store.store_id == currentStore %}
+                              <input type="checkbox" name="product_store[]" value="{{ store.store_id }}" checked="checked"/>
+                              {{ store.name }}
+                            {% else %}
+                              <input type="checkbox" name="product_store[]" value="{{ store.store_id }}"/>
+                              {{ store.name }}
+                            {% endif %} </label>
+                        </div>
+                    {% endfor %}
+                  </div>
+                  {% if error_product_store %}
+                    <div class="text-danger">{{ error_product_store }}</div>
+                  {% endif %}
                 </div>
               </div>
               <div class="form-group">
