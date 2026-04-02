@@ -1,0 +1,15 @@
+<span 
+  class="input-group-addon btn" 
+  title="{{ button_create_seo_url }}" 
+  onclick="pasteString(
+    createSeoUrl(
+      this.closest('.input-group').querySelector('input').value, 
+      this.closest('.input-group').querySelector('input').dataset.languageCode
+    ), 
+    document.querySelector('[name=&quot;{{ seo_url_input }}&quot;]'),
+    true,
+    () => checkUrlDuplicates(document.querySelector('[name=&quot;{{ seo_url_input }}]&quot;]'), addInputErrorMessages)
+  )"
+>
+  <i class="fa fa-link"></i>
+</span>
