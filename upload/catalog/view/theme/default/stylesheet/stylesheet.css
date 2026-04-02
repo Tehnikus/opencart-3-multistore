@@ -811,3 +811,58 @@ html[dir=rtl] #cart .dropdown-menu {
     }
    
 }
+
+.facetFilter {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.facetGroup {
+  display: flex;
+  flex-wrap: wrap;
+	gap: .4rem;
+  flex: 1 0 auto;
+	& h4 {
+	 margin: 0		
+	}
+}
+.facetItem {
+  display: flex;
+  flex: 1 0 100%;
+  align-items: center;
+  gap: 0.7rem;
+	& input {
+		margin: 0;
+		padding: 0;
+	}
+	& .facetLabel {
+		display: flex;
+		flex: 1;
+		margin: 0;
+		padding: 0;
+		align-items: center;
+		cursor: pointer;
+	}
+  /*! padding: 0.7rem; */
+	& .productCount {
+		background: #9797e7;
+		padding: 2px 5px;
+		color: #fff;
+		border-radius: 7px;
+		min-width: 25px;
+		display: flex;
+		justify-content: center;
+  }
+	& .facetName {
+		flex: 1;
+	}
+	&.active{
+		& .productCount {
+			background: #aaa
+		}
+		& .facetName {
+			font-weight: bold;
+		}
+	}
+}
