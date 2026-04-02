@@ -1,9 +1,29 @@
 <?php
 class ModelCatalogManufacturer extends Model {
-	public function getManufacturer($manufacturer_id) {
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "manufacturer m LEFT JOIN " . DB_PREFIX . "manufacturer_to_store m2s ON (m.manufacturer_id = m2s.manufacturer_id) WHERE m.manufacturer_id = '" . (int)$manufacturer_id . "' AND m2s.store_id = '" . (int)$this->config->get('config_store_id') . "'");
+	public function getManufacturer($manufacturer_id) : array {
+		$query = $this->db->query("
+			SELECT 
+				md.`name`,
+				md.`description`,
+				md.`meta_title`,
+				md.`meta_description`,
+				md.`meta_keyword`,
+				md.`date_modified`,
+				m2s.`manufacturer_id`,
+				m2s.`image`,
+				m2s.`sort_order`
+			FROM " . DB_PREFIX . "manufacturer m 
+			JOIN " . DB_PREFIX . "manufacturer_to_store m2s 
+				ON m.`manufacturer_id` 	= m2s.`manufacturer_id`
+				AND m2s.`store_id` 			= '" . (int) $this->config->get('config_store_id') . "'
+			JOIN " . DB_PREFIX . "manufacturer_description md
+				ON md.`manufacturer_id` = m.`manufacturer_id`
+				AND md.`language_id` 		= '" . (int) $this->config->get('config_language_id') . "'
+				AND md.`store_id` 			= '" . (int) $this->config->get('config_store_id') . "'
+			WHERE m.`manufacturer_id` = '" . (int)$manufacturer_id . "' 
+		");
 
-		return $query->row;
+		return $query->row ?? [];
 	}
 
 	public function getManufacturers($data = array()) {
