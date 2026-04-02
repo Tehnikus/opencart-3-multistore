@@ -47,9 +47,48 @@ class ModelCatalogReview extends Model {
 	}
 
 	public function editReview($review_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "review SET author = '" . $this->db->escape($data['author']) . "', product_id = '" . (int)$data['product_id'] . "', text = '" . $this->db->escape(strip_tags($data['text'])) . "', rating = '" . (int)$data['rating'] . "', status = '" . (int)$data['status'] . "', date_added = '" . $this->db->escape($data['date_added']) . "', date_modified = NOW() WHERE review_id = '" . (int)$review_id . "'");
+		$this->db->query("
+			UPDATE " . DB_PREFIX . "review 
+			SET 
+				product_id 	= '" . (int) $data['product_id'] . "', 
+				language_id = '" . (int) $data['language_id'] . "',
+				store_id 		= '" . (int) $data['store_id'] . "',
+				status 			= '" . (int) $data['status'] . "', 
+				rating 			= '" . (int) $data['rating'] . "', 
+				author 			= '" . $this->db->escape($data['author']) . "', 
+				text 				= '" . $this->db->escape(strip_tags($data['text'])) . "', 
+				date_added 	= '" . $this->db->escape($data['date_added']) . "',
+				date_modified = NOW() 
+			WHERE 
+				review_id = '" . (int)$review_id . "'
+		");
 
-		$this->cache->delete('product');
+		$this->db->query("
+			INSERT INTO " . DB_PREFIX . "facet_sort (product_id, store_id, review_count, rating_avg, date_last_review)
+			VALUES ('" . (int) $data['product_id'] . "', '" . (int) $data['store_id'] . "', 1, '" . (int) $data['rating'] . "', NOW())
+			ON DUPLICATE KEY UPDATE 
+				review_count = (
+					SELECT 
+						COUNT(*) 
+					FROM " . DB_PREFIX . "review r1 
+					WHERE r1.product_id = '" . (int) $data['product_id'] . "'
+						AND r1.store_id 	= '" . (int) $data['store_id'] . "'
+						AND r1.status 		= '1' 
+				),
+				rating_avg = (
+					SELECT 
+						AVG(rating) AS total 
+					FROM " . DB_PREFIX . "review r1 
+					WHERE r1.product_id = '" . (int) $data['product_id'] . "'
+						AND r1.store_id 	= '" . (int) $data['store_id'] . "'
+						AND r1.status 		= '1' 
+				),
+				date_last_review = NOW()
+		");
+
+		// Delete cache
+		$this->load->model('catalog/product');
+		$this->model_catalog_product->deleteCache($data['product_id'], $data['store_id']);
 	}
 
 	public function deleteReview($review_id) {
