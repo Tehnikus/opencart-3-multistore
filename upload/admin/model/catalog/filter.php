@@ -526,23 +526,22 @@ class ModelCatalogFilter extends Model {
 	public function getFilters($data) {
 		$sql = "
 			SELECT 
-				*, 
-				(SELECT 
-						name 
-					FROM " . DB_PREFIX . "filter_group_description fgd 
-					WHERE f.filter_group_id = fgd.filter_group_id 
-						AND fgd.language_id = '" . (int)$this->config->get('config_language_id') . "'
-						AND fgd.store_id = '" . (int) $this->session->data['store_id'] . "'
-				) AS `group` 
+				f.filter_id,
+				fd.name,
+				fgd.name AS `group` 
 				FROM " . DB_PREFIX . "filter f 
 				LEFT JOIN " . DB_PREFIX . "filter_description fd ON (f.filter_id = fd.filter_id AND f.store_id = fd.store_id) 
+				LEFT JOIN " . DB_PREFIX . "filter_group_description fgd ON (fgd.filter_group_id = fd.filter_group_id AND fgd.store_id = fd.store_id) 
 				WHERE fd.language_id 	= '" . (int)$this->config->get('config_language_id') . "'
 					AND f.store_id 			= '" . $this->session->data['store_id'] . "'
 					AND fd.store_id 		= '" . $this->session->data['store_id'] . "'
 		";
 
 		if (!empty($data['filter_name'])) {
-			$sql .= " AND fd.name LIKE '" . $this->db->escape($data['filter_name']) . "%'";
+			$sql .= " AND (
+				fd.name LIKE '%" . $this->db->escape($data['filter_name']) . "%'
+				OR fgd.name LIKE '%" . $this->db->escape($data['filter_name']) . "%'
+			)";
 		}
 
 		$sql .= " ORDER BY f.sort_order ASC";
