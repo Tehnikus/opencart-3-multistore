@@ -299,11 +299,26 @@
                       <option value="1">{{ text_enabled }}</option>
                       <option value="0" selected="selected">{{ text_disabled }}</option>
                     {% endif %}
-
-
                   </select>
                 </div>
               </div>
+              
+              {# Available for order switch #}
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-status">{{ entry_is_available }}</label>
+                <div class="col-sm-10">
+                  <select name="is_available" id="input-is_available" class="form-control">
+                    {% if is_available %}
+                      <option value="1" selected="selected">{{ text_enabled }}</option>
+                      <option value="0">{{ text_disabled }}</option>
+                    {% else %}
+                      <option value="1">{{ text_enabled }}</option>
+                      <option value="0" selected="selected">{{ text_disabled }}</option>
+                    {% endif %}
+                  </select>
+                </div>
+              </div>
+              {# End avalable for order switch #}
               <div class="form-group">
                 <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
                 <div class="col-sm-10">
@@ -311,6 +326,7 @@
                 </div>
               </div>
             </div>
+
             <div class="tab-pane" id="tab-links">
               <div class="form-group">
                 <label class="col-sm-2 control-label" for="input-manufacturer"><span data-toggle="tooltip" title="{{ help_manufacturer }}">{{ entry_manufacturer }}</span></label>
