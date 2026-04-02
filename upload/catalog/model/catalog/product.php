@@ -608,12 +608,31 @@ class ModelCatalogProduct extends Model {
 		$productData = $this->getProducts($data);
 		return $productData;
 	}
+
+	public function getProductAttributes($product_id) : array {
+		$product = $this->getProduct($product_id);
+		$attributes = $product['attributes'] ?? [];
+		return $attributes;
 	}
 
-	public function getProductImages($product_id) {
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_image WHERE product_id = '" . (int)$product_id . "' ORDER BY sort_order ASC");
+	public function getProductOptions($product_id) : array {
+		$product = $this->getProduct($product_id);
+		$options = $product['options'] ?? [];
+		return $options;
+	}
 
-		return $query->rows;
+	// Product bulk discounts
+	public function getProductDiscounts($product_id) {
+		$product = $this->getProduct($product_id);
+		$discounts = $product['discounts'] ?? [];
+		return $discounts;
+	}
+
+	// Additional product images
+	public function getProductImages($product_id) : array {
+		$product = $this->getProduct($product_id);
+		$images = $product['images'] ?? [];
+		return $images;
 	}
 
 	public function getProductRelated($product_id) {
