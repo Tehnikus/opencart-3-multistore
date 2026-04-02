@@ -1359,8 +1359,21 @@ class ModelCatalogProduct extends Model {
 		return $placeholders;
 	}
 
+	// Get product associated categories
+	// Used in admin/controller/catalog/product/getForm() to show product form data 
+	// and in admin/model/catalog/copyProduct() to duplicate product
+	// Should always rely on store_id context
+	// Returns only ids, so no lang context needed here
+	public function getProductCategories($product_id) : array {
+		$product_category_data = [];
 
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "'");
+		$query = $this->db->query("
+			SELECT 
+				* 
+			FROM " . DB_PREFIX . "product_to_category 
+			WHERE `product_id`  = '" . (int) $product_id . "' 
+				AND `store_id` 		= '" . (int) $this->session->data['store_id'] . "'
+		");
 
 		foreach ($query->rows as $result) {
 			$product_category_data[] = $result['category_id'];
