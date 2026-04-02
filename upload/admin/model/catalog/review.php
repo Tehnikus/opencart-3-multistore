@@ -92,9 +92,48 @@ class ModelCatalogReview extends Model {
 	}
 
 	public function deleteReview($review_id) {
-		$this->db->query("DELETE FROM " . DB_PREFIX . "review WHERE review_id = '" . (int)$review_id . "'");
 
-		$this->cache->delete('product');
+		$reviewData = $this->db->query("
+			SELECT
+				*
+			FROM " . DB_PREFIX . "review
+			WHERE review_id = '" . (int) $review_id . "'
+			LIMIT 1
+		")->row;
+		
+
+		$this->db->query("
+			UPDATE " . DB_PREFIX . "facet_sort ps
+			SET
+				ps.review_count = (
+					SELECT 
+						COUNT(*) 
+					FROM " . DB_PREFIX . "review r1 
+					WHERE r1.product_id = '" . (int) $reviewData['product_id'] . "'
+						AND r1.store_id 	= '" . (int) $reviewData['store_id'] . "'
+						AND r1.status 		= '1' 
+				),
+				ps.rating_avg = (
+					SELECT 
+						AVG(rating) AS total 
+					FROM " . DB_PREFIX . "review r1 
+					WHERE r1.product_id = '" . (int) $reviewData['product_id'] . "'
+						AND r1.store_id 	= '" . (int) $reviewData['store_id'] . "'
+						AND r1.status 		= '1' 
+				)
+			WHERE ps.product_id = '" . (int) $reviewData['product_id'] . "'
+				AND ps.store_id = '" . (int) $reviewData['store_id'] . "'
+		");
+
+		$this->db->query("
+			DELETE FROM " . DB_PREFIX . "review 
+			WHERE review_id = '" . (int) $review_id . "'
+		");
+
+
+		// Delete cache
+		$this->load->model('catalog/product');
+		$this->model_catalog_product->deleteCache($reviewData['product_id'], $reviewData['store_id']);
 	}
 
 	public function getReview($review_id) {
