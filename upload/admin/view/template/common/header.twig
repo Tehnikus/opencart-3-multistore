@@ -27,6 +27,7 @@
 <link href="{{ link.href }}" rel="{{ link.rel }}" />
 {% endfor %}
 <script src="view/javascript/common.js" type="text/javascript"></script>
+<script defer src="view/javascript/helpers.js" type="text/javascript"></script>
 {% for script in scripts %}
 <script type="text/javascript" src="{{ script }}"></script>
 {% endfor %}
@@ -46,11 +47,6 @@
           {% for store in stores %}
           <li><a href="{{ store.href }}" target="_blank">{{ store.name }}</a></li>
           {% endfor %}
-          <li role="separator" class="divider"></li>
-          <li class="dropdown-header">{{ text_help }}</li>
-          <li><a href="https://www.opencart.com" target="_blank"><i class="fa fa-opencart fa-fw"></i> {{ text_homepage }}</a></li>
-          <li><a href="https://docs.opencart.com" target="_blank"><i class="fa fa-file-text-o fa-fw"></i> {{ text_documentation }}</a></li>
-          <li><a href="https://forum.opencart.com" target="_blank"><i class="fa fa-comments-o fa-fw"></i> {{ text_support }}</a></li>
         </ul>
       </li>
       <li><a href="{{ logout }}"><i class="fa fa-sign-out"></i> <span class="hidden-xs hidden-sm hidden-md">{{ text_logout }}</span></a></li>
