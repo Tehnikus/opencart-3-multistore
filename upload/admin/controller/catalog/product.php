@@ -1304,12 +1304,13 @@ class ControllerCatalogProduct extends Controller {
 			if (isset($this->request->get['limit'])) {
 				$limit = (int)$this->request->get['limit'];
 			} else {
-				$limit = 5;
+				$limit = 20;
 			}
 
 			$filter_data = array(
 				'filter_name'  => $filter_name,
 				'filter_model' => $filter_model,
+				'store_id'		 => (int) $this->session->data['store_id'],
 				'start'        => 0,
 				'limit'        => $limit
 			);
