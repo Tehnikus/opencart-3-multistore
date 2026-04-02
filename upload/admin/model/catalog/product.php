@@ -1261,20 +1261,33 @@ class ModelCatalogProduct extends Model {
 		return $query->rows;
 	}
 
-	public function getProductDescriptions($product_id) {
-		$product_description_data = array();
+	// Get product description for product edit form
+	// Should always rely on store_id
+	public function getProductDescriptions($product_id) : array {
+		$product_description_data = [];
 
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_description WHERE product_id = '" . (int)$product_id . "'");
+		$query = $this->db->query("
+			SELECT 
+				*
+			FROM " . DB_PREFIX . "product_description pd
+			WHERE pd.`product_id` = '" . (int)$product_id . "' 
+				AND pd.`store_id` 	 = '" . (int) $this->session->data['store_id'] . "'
+		");
 
 		foreach ($query->rows as $result) {
-			$product_description_data[$result['language_id']] = array(
-				'name'             => $result['name'],
-				'description'      => $result['description'],
-				'meta_title'       => $result['meta_title'],
-				'meta_description' => $result['meta_description'],
-				'meta_keyword'     => $result['meta_keyword'],
-				'tag'              => $result['tag']
-			);
+			$product_description_data[$result['language_id']] = [
+				'name'             	=> $result['name'],
+				'description'      	=> $result['description'],
+				'meta_title'       	=> $result['meta_title'],
+				'meta_description' 	=> $result['meta_description'],
+				'meta_keyword'     	=> $result['meta_keyword'],
+				'tag'              	=> $result['tag'],
+				'seo_keywords'     	=> $result['seo_keywords'],
+				'seo_description'  	=> $result['seo_description'],
+				'faq'              	=> $result['faq'],
+				'how_to'           	=> $result['how_to'],
+				'footer'           	=> $result['footer'],
+			];
 		}
 
 		return $product_description_data;
