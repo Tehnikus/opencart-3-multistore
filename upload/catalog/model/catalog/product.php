@@ -74,90 +74,45 @@ class ModelCatalogProduct extends Model {
 				date_last_view = NOW()
 		");
 	}
-	}
 
-	public function getProductSpecials($data = array()) {
-		$sql = "SELECT DISTINCT ps.product_id, (SELECT AVG(rating) FROM " . DB_PREFIX . "review r1 WHERE r1.product_id = ps.product_id AND r1.status = '1' GROUP BY r1.product_id) AS rating FROM " . DB_PREFIX . "product_special ps LEFT JOIN " . DB_PREFIX . "product p ON (ps.product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' AND ps.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "' AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW()) AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW())) GROUP BY ps.product_id";
+	/**
+	 * Get valid discount row from all product discounts
+	 * Compares date start and end, and customer group
+	 * And returns array of discount with dates and discount value if valid row is found
+	 * @param array $rows
+	 * @param int $customerGroupId
+	 * @return array|null
+	 */
+	private function getValidDiscount(array $rows, int $customerGroupId): ?array {
+    $now = time();
 
-		$sort_data = array(
-			'pd.name',
-			'p.model',
-			'ps.price',
-			'rating',
-			'p.sort_order'
-		);
+    $valid = array_filter($rows, function ($r) use ($customerGroupId, $now) : bool {
 
-		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-			if ($data['sort'] == 'pd.name' || $data['sort'] == 'p.model') {
-				$sql .= " ORDER BY LCASE(" . $data['sort'] . ")";
-			} else {
-				$sql .= " ORDER BY " . $data['sort'];
-			}
-		} else {
-			$sql .= " ORDER BY p.sort_order";
-		}
-
-		if (isset($data['order']) && ($data['order'] == 'DESC')) {
-			$sql .= " DESC, LCASE(pd.name) DESC";
-		} else {
-			$sql .= " ASC, LCASE(pd.name) ASC";
-		}
-
-		if (isset($data['start']) || isset($data['limit'])) {
-			if ($data['start'] < 0) {
-				$data['start'] = 0;
+			// Remove all rows that don't match customer_group_id 
+			if ((int) $r['customer_group_id'] !== $customerGroupId) {
+				return false;
 			}
 
-			if ($data['limit'] < 1) {
-				$data['limit'] = 20;
-			}
-
-			$sql .= " LIMIT " . (int)$data['start'] . "," . (int)$data['limit'];
-		}
-
-		$product_data = array();
-
-		$query = $this->db->query($sql);
-
-		foreach ($query->rows as $result) {
-			$product_data[$result['product_id']] = $this->getProduct($result['product_id']);
-		}
-
-		return $product_data;
-	}
-
-	public function getLatestProducts($limit) {
-		$product_data = $this->cache->get('product.latest.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . $this->config->get('config_customer_group_id') . '.' . (int)$limit);
-
-		if (!$product_data) {
-			$product_data = array();
-			$query = $this->db->query("SELECT p.product_id FROM " . DB_PREFIX . "product p LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ORDER BY p.date_added DESC LIMIT " . (int)$limit);
-
-			foreach ($query->rows as $result) {
-				$product_data[$result['product_id']] = $this->getProduct($result['product_id']);
-			}
-
-			$this->cache->set('product.latest.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . $this->config->get('config_customer_group_id') . '.' . (int)$limit, $product_data);
-		}
-
-		return $product_data;
-	}
-
-	public function getPopularProducts($limit) {
-		$product_data = $this->cache->get('product.popular.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . $this->config->get('config_customer_group_id') . '.' . (int)$limit);
-	
-		if (!$product_data) {
-			$product_data = array();
-			$query = $this->db->query("SELECT p.product_id FROM " . DB_PREFIX . "product p LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ORDER BY p.viewed DESC, p.date_added DESC LIMIT " . (int)$limit);
-	
-			foreach ($query->rows as $result) {
-				$product_data[$result['product_id']] = $this->getProduct($result['product_id']);
-			}
+			// Normalize null dates from non strict SQL to null
+			$start 	= (!$r['date_start'] || str_starts_with($r['date_start'],	'0000-00-00')) ? null : strtotime($r['date_start']);
+			$end 	= (!$r['date_end'] || str_starts_with($r['date_end'],	'0000-00-00')) ? null : strtotime($r['date_end']);;
 			
-			$this->cache->set('product.popular.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . $this->config->get('config_customer_group_id') . '.' . (int)$limit, $product_data);
-		}
-		
-		return $product_data;
+			// Remove all rows where discount starts later then now
+			if ($start && $start > $now) {return false;}
+			// remove all rows where discount ends earlier then now 
+			if ($end && $end < $now) {return false;}
+
+			return true;
+    });
+
+		// Order rows first by priority then by price
+    usort($valid, fn($a,$b) =>
+			[$a['priority'], $a['price']] <=> [$b['priority'], $b['price']]
+    );
+
+		// Return first valid row
+    return $valid[0] ?? null;
+	}
 	}
 
 	public function getBestSellerProducts($limit) {
