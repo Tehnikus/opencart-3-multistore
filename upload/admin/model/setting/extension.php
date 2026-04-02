@@ -1,9 +1,23 @@
 <?php
 class ModelSettingExtension extends Model {	
-	public function getInstalled($type) {
+	// Get installed extensions by code and store
+	// Should always rely on store_id to display separate extensions list for different stores
+	public function getInstalled($type, $store_id = null) {
+
+		if ($store_id === null) {
+			$store_id = (int) $this->session->data['store_id'];
+		}
+
 		$extension_data = array();
 
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "extension` WHERE `type` = '" . $this->db->escape($type) . "' ORDER BY `code`");
+		$query = $this->db->query("
+			SELECT 
+				* 
+			FROM `" . DB_PREFIX . "extension` 
+			WHERE `type` 			= '" . $this->db->escape($type) . "' 
+				AND `store_id` 	= '" . (int) $store_id . "'
+			ORDER BY `code`
+		");
 
 		foreach ($query->rows as $result) {
 			$extension_data[] = $result['code'];
@@ -12,17 +26,39 @@ class ModelSettingExtension extends Model {
 		return $extension_data;
 	}
 
-	public function install($type, $code) {
-		$extensions = $this->getInstalled($type);
+	// Install extension
+	// Should always rely on store_id to separate extensions of different stores
+	public function install($type, $code, $store_id = null) {
+		if ($store_id === null) {
+			$store_id = (int) $this->session->data['store_id'];
+		}
+		$extensions = $this->getInstalled($type, $store_id);
 
 		if (!in_array($code, $extensions)) {
-			$this->db->query("INSERT INTO `" . DB_PREFIX . "extension` SET `type` = '" . $this->db->escape($type) . "', `code` = '" . $this->db->escape($code) . "'");
+			$this->db->query("
+				INSERT INTO `" . DB_PREFIX . "extension` 
+				SET 
+					`type` 			= '" . $this->db->escape($type) . "', 
+					`code` 			= '" . $this->db->escape($code) . "',
+					`store_id` 	= '" . (int) $store_id . "'
+			");
 		}
 	}
-
+	
+	// Install extension
+	// Should always rely on store_id to separate extensions of different stores
 	public function uninstall($type, $code) {
-		$this->db->query("DELETE FROM `" . DB_PREFIX . "extension` WHERE `type` = '" . $this->db->escape($type) . "' AND `code` = '" . $this->db->escape($code) . "'");
-		$this->db->query("DELETE FROM `" . DB_PREFIX . "setting` WHERE `code` = '" . $this->db->escape($type . '_' . $code) . "'");
+		$this->db->query("
+			DELETE FROM `" . DB_PREFIX . "extension` 
+			WHERE `type` = '" . $this->db->escape($type) . "' 
+				AND `code` = '" . $this->db->escape($code) . "'
+				AND `store_id` = '" . (int) $this->session->data['store_id'] . "'
+		");
+		$this->db->query("
+			DELETE FROM `" . DB_PREFIX . "setting` 
+			WHERE `code` = '" . $this->db->escape($type . '_' . $code) . "'
+				AND `store_id` = '" . (int) $this->session->data['store_id'] . "'
+		");
 	}	
 
 	public function addExtensionInstall($filename, $extension_download_id = 0) {
