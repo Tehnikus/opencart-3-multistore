@@ -677,6 +677,7 @@ class ControllerCatalogProduct extends Controller {
 		// Current store_id to check current store checkbox in stores list
 		$data['currentStore'] = $this->session->data['store_id'];
 
+		$data['inputPlaceholders'] = $this->model_catalog_product->getPlaceholders($this->request->get['product_id'] ?? null);
 
 		if (isset($this->request->post['product_store'])) {
 			$data['product_store'] = $this->request->post['product_store'];
