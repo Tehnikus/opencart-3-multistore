@@ -10,7 +10,7 @@ class ControllerProductSpecial extends Controller {
 		if (isset($this->request->get['sort'])) {
 			$sort = $this->request->get['sort'];
 		} else {
-			$sort = 'p.sort_order';
+			$sort = 'sort_order';
 		}
 
 		if (isset($this->request->get['order'])) {
@@ -137,8 +137,8 @@ class ControllerProductSpecial extends Controller {
 
 		$data['sorts'][] = array(
 			'text'  => $this->language->get('text_default'),
-			'value' => 'p.sort_order-ASC',
-			'href'  => $this->url->link('product/special', 'sort=p.sort_order&order=ASC' . $url)
+			'value' => 'sort_order-ASC',
+			'href'  => $this->url->link('product/special', 'sort=sort_order&order=ASC' . $url)
 		);
 
 		$data['sorts'][] = array(
