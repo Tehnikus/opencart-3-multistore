@@ -263,6 +263,12 @@ class ControllerCatalogOption extends Controller {
 			$data['error_warning'] = '';
 		}
 
+		if (isset($this->error['stores_association'])) {
+			$data['error_store_association'] = $this->error['stores_association'];
+		} else {
+			$data['error_store_association'] = '';
+		}
+
 		if (isset($this->error['name'])) {
 			$data['error_name'] = $this->error['name'];
 		} else {
@@ -351,8 +357,6 @@ class ControllerCatalogOption extends Controller {
 			$option_values = array();
 		}
 
-		$this->load->model('tool/image');
-
 		$data['option_values'] = array();
 
 		foreach ($option_values as $option_value) {
@@ -361,14 +365,14 @@ class ControllerCatalogOption extends Controller {
 				$thumb = $option_value['image'];
 			} else {
 				$image = '';
-				$thumb = 'no_image.png';
+				$thumb = 'no_image.webp';
 			}
 
 			$data['option_values'][] = array(
 				'option_value_id'          => $option_value['option_value_id'],
 				'option_value_description' => $option_value['option_value_description'],
 				'image'                    => $image,
-				'thumb'                    => $this->model_tool_image->resize($thumb, 100, 100),
+				'thumb'                    => HTTPS_CATALOG . 'image/' .$thumb,
 				'sort_order'               => $option_value['sort_order']
 			);
 		}
