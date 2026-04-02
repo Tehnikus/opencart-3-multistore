@@ -6,11 +6,6 @@
         <button type="submit" form="form-filter-page" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
         <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
       <h1>{{ heading_title }}</h1>
-      <ul class="breadcrumb">
-        {% for breadcrumb in breadcrumbs %}
-        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-        {% endfor %}
-      </ul>
     </div>
   </div>
   <div class="container-fluid">
@@ -31,7 +26,11 @@
           </ul>
           <div class="tab-content">
             <div class="tab-pane active" id="tab-general"></div>
-            <div class="tab-pane" id="tab-description"></div>
+            {% set data               =  filter_page_description  %}
+            {% set name_prefix        = 'filter_page_description' %}
+            <div class="tab-pane" id="tab-description">
+              {% include "common/tab_description.twig" %}
+            </div>
           </div>
         </form>
       </div>
