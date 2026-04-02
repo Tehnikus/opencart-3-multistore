@@ -1692,13 +1692,7 @@ class ControllerExtensionAdvertiseGoogle extends Controller {
 
                 $this->load->model('setting/store');
 
-                $children[] = array(
-                    'name' => $this->config->get('config_name'),
-                    'children' => array(),
-                    'href' => $this->url->link('extension/advertise/google', 'store_id=0&user_token=' . $this->session->data['user_token'], true)
-                );
-
-                foreach ($this->model_setting_store->getStores() as $store) {
+                foreach ($this->model_setting_store->getMultistores() as $store) {
                     $children[] = array(
                         'name' => $store['name'],
                         'children' => array(),
