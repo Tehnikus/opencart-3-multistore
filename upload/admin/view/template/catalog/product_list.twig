@@ -72,7 +72,7 @@
           </div>
         </div>
       </div> #}
-      <div class="col-md-9 col-md-pull-3 col-sm-12">
+      <div class="col-md-12">
         <div class="panel panel-default">
           <div class="panel-heading">
             <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
@@ -84,13 +84,23 @@
                   <thead>
                     <tr>
                       <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
-                      <td class="text-center">{{ column_image }}</td>
-                      <td class="text-left">{% if sort == 'pd.name' %} <a href="{{ sort_name }}" class="{{ order|lower }}">{{ column_name }}</a> {% else %} <a href="{{ sort_name }}">{{ column_name }}</a> {% endif %}</td>
-                      <td class="text-left">{% if sort == 'p.model' %} <a href="{{ sort_model }}" class="{{ order|lower }}">{{ column_model }}</a> {% else %} <a href="{{ sort_model }}">{{ column_model }}</a> {% endif %}</td>
-                      <td class="text-right">{% if sort == 'p.price' %} <a href="{{ sort_price }}" class="{{ order|lower }}">{{ column_price }}</a> {% else %} <a href="{{ sort_price }}">{{ column_price }}</a> {% endif %}</td>
-                      <td class="text-right">{% if sort == 'p.quantity' %} <a href="{{ sort_quantity }}" class="{{ order|lower }}">{{ column_quantity }}</a> {% else %} <a href="{{ sort_quantity }}">{{ column_quantity }}</a> {% endif %}</td>
-                      <td class="text-left">{% if sort == 'p.status' %} <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
-                      <td class="text-right">{{ column_action }}</td>
+                      <td style="width: 70px" class="text-center">{{ column_image }}</td>
+                      <td class="text-left">
+                        {% if sort == 'name' %} 
+                          <a href="{{ sort_name }}" class="{{ order|lower }}">{{ column_name }}</a> {% else %} <a href="{{ sort_name }}">{{ column_name }}</a> 
+                        {% endif %}
+                        {% if sort == 'p.model' %} 
+                          <a href="{{ sort_model }}" class="{{ order|lower }}">{{ column_model }}</a> {% else %} <a href="{{ sort_model }}">{{ column_model }}</a> 
+                        {% endif %}
+                      </td>
+                      <td>{{ column_seo }}</td>
+                      <td style="width: 200px" class="text-center" data-collapse-selector="filterColumn" >{{ column_filters }}<button type="button" class="collapseColumn pull-right">&harr;</button></td>
+                      <td style="width: 200px" class="text-center" data-collapse-selector="optionColumn" >{{ column_options }}<button type="button" class="collapseColumn pull-right">&harr;</button></td>
+                      <td style="width: 50px" class="text-center">{{ column_attributes }}</td>
+                      <td style="width: 50px" class="text-center">{% if sort == 'p.price' %} <a href="{{ sort_price }}" class="{{ order|lower }}">{{ column_price }}</a> {% else %} <a href="{{ sort_price }}">{{ column_price }}</a> {% endif %}</td>
+                      <td style="width: 50px" class="text-center">{% if sort == 'p.quantity' %} <a href="{{ sort_quantity }}" class="{{ order|lower }}">{{ column_quantity }}</a> {% else %} <a href="{{ sort_quantity }}">{{ column_quantity }}</a> {% endif %}</td>
+                      <td style="width: 100px" class="text-center">{% if sort == 'p2s.status' %} <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
+                      <td style="width: 50px" class="text-center">{{ column_action }}</td>
                     </tr>
                   </thead>
                   <tbody>
@@ -103,22 +113,93 @@
                       {% else %}
                       <input type="checkbox" name="selected[]" value="{{ product.product_id }}" />
                       {% endif %}</td>
-                    <td class="text-center">{% if product.image %} <img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span> {% endif %}</td>
-                    <td class="text-left">{{ product.name }}</td>
-                    <td class="text-left">{{ product.model }}</td>
+                    <td class="text-center">
+                      <img src="{{ product.image }}" class="img-thumbnail" loading="lazy" />
+                    </td>
+                    <td class="text-left">
+                      <p><b>{{ product.name }}</b>&nbsp;({{ product.model }})</p>
+                      <p>
+                        {% if product.parent_id %}
+                          <a href="{{ store.url }}index.php?route=product/category&category_id={{ product.parent_id }}">{{ product.parent_name }}</a>
+                        {% else %}
+                          <span class="text-danger">{{ error_no_parent }}</span>
+                        {% endif %}
+                      </p>
+                      <p>
+                        {% for store in stores %}
+                          {% if store.store_id in product.stores %}
+                            {% if product.status_to_store[store.store_id] == 1 %}
+                              <span class="storeBadge badge alert-success" data-store-id="{{ store.store_id }}" data-product-link="{{ store.url }}index.php?route=product/product{% if product.parent_id %}&category_id={{ product.parent_id }}{% endif %}&product_id={{ product.product_id }}">
+                                <a style="color: inherit;" href="{{ store.url }}index.php?route=product/product{% if product.parent_id %}&category_id={{ product.parent_id }}{% endif %}&product_id={{ product.product_id }}" target="_blank">
+                                  <i class="fa fa-play"></i>&nbsp;{{ store.name }}
+                                </a>
+                              </span>
+                            {% else %}
+                              <span class="storeBadge badge" data-store-id="{{ store.store_id }}" data-product-link="{{ store.url }}index.php?route=product/product{% if product.parent_id %}&category_id={{ product.parent_id }}{% endif %}&product_id={{ product.product_id }}"><i class="fa fa-pause"></i>&nbsp;{{ store.name }}</span>
+                            {% endif %}
+                          {% else %}
+                            <span class="storeBadge badge alert-danger"><i class="fa fa-times"></i>&nbsp;{{ store.name }}</span>
+                          {% endif %}
+                        {% endfor %}
+                      </p>
+                    </td>
+                    <td>
+
+                    </td>
+                    <td class="text-left">
+                      <div style="max-height: 100px; overflow-y: auto">
+                        {% set count = 0 %}
+                        {% for groupId, group in product.product_filters %}
+                          <p style="cursor: default" title="{{ group.name }}">
+                            {% for itemId, item in group.values %}
+                              <a href="index.php?route=catalog/filter/edit&user_token={{ user_token }}&filter_group_id={{ groupId }}" title="{{ edit_filter_group|format(group.name) }}" target="_blank"><span class="badge badge-sm">{{ item }}</span></a>
+                              {% set count = count + 1 %}
+                            {% endfor %}
+                          </p>
+                        {% endfor %}
+                      </div>
+                    </td>
+                    <td class="text-left">
+                      <div style="max-height: 100px; overflow-y: auto">
+                        {% set count = 0 %}
+                        {% for groupId, group in product.product_options %}
+                          <p style="cursor: default">
+                            {% for itemId, item in group.values %}
+                              <a href="index.php?route=catalog/option/edit&user_token={{ user_token }}&option_id={{ groupId }}" title="{{ edit_option_group|format(group.name) }}" target="_blank"><span class="badge badge-sm">{{ item }}</span>
+                              {% set count = count + 1 %}
+                            {% endfor %}
+                          </p>
+                        {% endfor %}
+                      </div>
+                    </td>
+                    <td class="text-center"><b>{{ product.product_attributes }}</b></td>
                     <td class="text-right">{% if product.special %} <span style="text-decoration: line-through;">{{ product.price }}</span><br/>
-                      <div class="text-danger">{{ product.special }}</div>
+                      <div class="text-danger"><b>{{ product.special }}</b></div>
                       {% else %}
-                      {{ product.price }}
-                      {% endif %}</td>
-                    <td class="text-right">{% if product.quantity <= 0 %} <span class="label label-warning">{{ product.quantity }}</span> {% elseif product.quantity <= 5 %} <span class="label label-danger">{{ product.quantity }}</span> {% else %} <span class="label label-success">{{ product.quantity }}</span> {% endif %}</td>
-                    <td class="text-left">{{ product.status }}</td>
-                    <td class="text-right"><a href="{{ product.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+                      <b>{{ product.price }}</b>
+                      {% endif %}
+                    </td>
+                    <td class="text-center">{% if product.quantity <= 0 %} <span class="label label-warning">{{ product.quantity }}</span> {% elseif product.quantity <= 5 %} <span class="label label-danger">{{ product.quantity }}</span> {% else %} <span class="label label-success">{{ product.quantity }}</span> {% endif %}</td>
+                    <td class="text-center">
+                      <div class="btn-group">
+                        {% if product.status_to_store[currentStore] == '1' %}
+                          <button {% if currentStore not in product.stores %}disabled style="background: #999; border-color: #777"{% endif %} class="btn btn-success statusBtn" data-product-id="{{ product.product_id }}" data-product-status="{{ product.status_to_store[currentStore] }}" type="button"><i class="fa fa-play"></i></button>
+                        {% else %}
+                          <button {% if currentStore not in product.stores %}disabled style="background: #999; border-color: #777"{% endif %} class="btn btn-danger statusBtn" data-product-id="{{ product.product_id }}" data-product-status="{{ product.status_to_store[currentStore] }}" type="button"><i class="fa fa-stop"></i></button>
+                        {% endif %}
+                        {% if product.is_available == '1' %}
+                          <button {% if currentStore not in product.stores %}disabled style="background: #999; border-color: #777"{% endif %} class="btn btn-success isAvailableBtn" data-product-id="{{ product.product_id }}" data-product-is-available="{{ product.is_available }}" type="button"><i class="fa fa-shopping-cart"></i></button>
+                        {% else %}
+                          <button {% if currentStore not in product.stores %}disabled style="background: #999; border-color: #777"{% endif %} class="btn btn-danger isAvailableBtn" data-product-id="{{ product.product_id }}" data-product-is-available="{{ product.is_available }}" type="button"><i class="fa fa-shopping-cart"></i></button>
+                        {% endif %}
+                      </div>
+                    </td>
+                    <td class="text-center"><a href="{{ product.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
                   </tr>
                   {% endfor %}
                   {% else %}
                   <tr>
-                    <td class="text-center" colspan="8">{{ text_no_results }}</td>
+                    <td class="text-center" colspan="10">{{ text_no_results }}</td>
                   </tr>
                   {% endif %}
                     </tbody>
