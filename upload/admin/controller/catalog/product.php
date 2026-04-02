@@ -337,18 +337,14 @@ class ControllerCatalogProduct extends Controller {
 			'limit'           => $this->config->get('config_limit_admin')
 		);
 
-		$this->load->model('tool/image');
-
 		$product_total = $this->model_catalog_product->getTotalProducts($filter_data);
 
 		$results = $this->model_catalog_product->getProducts($filter_data);
 
 		foreach ($results as $result) {
-			if (is_file(DIR_IMAGE . $result['image'])) {
-				$image = $this->model_tool_image->resize($result['image'], 40, 40);
-			} else {
-				$image = $this->model_tool_image->resize('no_image.png', 40, 40);
-			}
+
+			$image = ($result['image'] && is_file(DIR_IMAGE . $result['image'])) ? HTTPS_CATALOG . 'image/' . $result['image'] : HTTPS_CATALOG . 'image/no_image.webp';
+
 
 			$special = false;
 
@@ -361,6 +357,8 @@ class ControllerCatalogProduct extends Controller {
 					break;
 				}
 			}
+
+		// Get stores list
 		$this->load->model('setting/store');
 		$data['stores'] = $this->model_setting_store->getMultistores();
 		// Get current store context
