@@ -1087,17 +1087,15 @@ class ControllerCatalogProduct extends Controller {
 			$data['image'] = '';
 		}
 
-		$this->load->model('tool/image');
-
 		if (isset($this->request->post['image']) && is_file(DIR_IMAGE . $this->request->post['image'])) {
-			$data['thumb'] = $this->model_tool_image->resize($this->request->post['image'], 100, 100);
+			$data['thumb'] = HTTPS_CATALOG . 'image/' . $this->request->post['image'];
 		} elseif (!empty($product_info) && is_file(DIR_IMAGE . $product_info['image'])) {
-			$data['thumb'] = $this->model_tool_image->resize($product_info['image'], 100, 100);
+			$data['thumb'] = HTTPS_CATALOG . 'image/' . $product_info['image'];
 		} else {
-			$data['thumb'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+			$data['thumb'] = HTTPS_CATALOG . 'image/no_image.webp';
 		}
 
-		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+		$data['placeholder'] = HTTPS_CATALOG . 'image/no_image.webp';
 
 		// Images
 		if (isset($this->request->post['product_image'])) {
