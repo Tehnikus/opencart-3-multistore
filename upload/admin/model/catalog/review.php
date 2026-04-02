@@ -154,29 +154,72 @@ class ModelCatalogReview extends Model {
 	}
 
 	public function getReviews($data = array()) {
-		$sql = "SELECT r.review_id, pd.name, r.author, r.rating, r.status, r.date_added FROM " . DB_PREFIX . "review r LEFT JOIN " . DB_PREFIX . "product_description pd ON (r.product_id = pd.product_id) WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
 
+		$where = [];
+
+		$where[] = "r1.review_id = r.review_id";
+		$where[] = "pd.store_id = '" . (int) $this->session->data['store_id'] . "'";
+
+		if (!empty($data['filter_language'])) {
+			$where[] = " r1.language_id = '" . (int) $data['filter_language'] . "' ";
+		}
+
+		if (isset($data['filter_store']) && $data['filter_store'] !== '') {
+			$where[] = " r1.store_id = '" . (int) $data['filter_store'] . "' ";
+		}
+		
 		if (!empty($data['filter_product'])) {
-			$sql .= " AND pd.name LIKE '" . $this->db->escape($data['filter_product']) . "%'";
+			$where[] = " pd.name LIKE '%" . $this->db->escape($data['filter_product']) . "%'";
 		}
 
 		if (!empty($data['filter_author'])) {
-			$sql .= " AND r.author LIKE '" . $this->db->escape($data['filter_author']) . "%'";
+			$where[] = " r1.author LIKE '%" . $this->db->escape($data['filter_author']) . "%'";
 		}
 
 		if (isset($data['filter_status']) && $data['filter_status'] !== '') {
-			$sql .= " AND r.status = '" . (int)$data['filter_status'] . "'";
+			$where[] = " r1.status = '" . (int)$data['filter_status'] . "'";
 		}
 
 		if (!empty($data['filter_date_added'])) {
-			$sql .= " AND DATE(r.date_added) = DATE('" . $this->db->escape($data['filter_date_added']) . "')";
+			$where[] = " DATE(r1.date_added) = DATE('" . $this->db->escape($data['filter_date_added']) . "')";
 		}
 
+		$sql = "
+			SELECT 
+				r.review_id, 
+				(
+					SELECT 
+						pd.name 
+					FROM " . DB_PREFIX . "product_description pd 
+					WHERE pd.product_id = r.product_id 
+					ORDER BY 
+						FIELD(pd.store_id, '" . (int) $this->session->data['store_id'] ."') DESC,
+						FIELD(pd.language_id, '" . (int) $this->config->get('config_language_id') . "') DESC
+						LIMIT 1
+				) AS `name`,
+				r.author, 
+				r.rating, 
+				r.status, 
+				r.store_id,
+				r.language_id,
+				r.date_added 
+			FROM " . DB_PREFIX . "review r 
+			WHERE EXISTS (
+				SELECT 1
+				FROM " . DB_PREFIX . "review r1
+				JOIN " . DB_PREFIX . "product_description pd
+					ON pd.product_id = r1.product_id
+				WHERE " . implode(' AND ', $where) . "
+			)
+		";
+
 		$sort_data = array(
-			'pd.name',
+			'name',
 			'r.author',
 			'r.rating',
 			'r.status',
+			'r.language_id',
+			'r.store_id',
 			'r.date_added'
 		);
 
