@@ -1,5 +1,70 @@
 <?php
 class ModelCatalogProduct extends Model {
+
+	public $sortOrders = [];
+	public $facetTypes = [];
+	public function __construct($registry) {
+		parent::__construct($registry);
+		/**
+		 * Allowed sort orders and corresponding SQL queries
+		 * Main table to sort products is facet_sort
+		 */ 
+		$this->sortOrders = [
+			'sort_order'			=> 'pst.`sort_order` ASC',
+			'sales'						=> 'pst.`orders` DESC',
+			'rating'					=> '(CASE WHEN pst.`rating_avg` THEN pst.`rating_avg` ELSE pst.`sort_order` END) DESC',
+			'views'						=> 'pst.`views` DESC',
+			'date_added'			=> 'pst.`date_added` DESC',
+			'available'				=> 'pst.`is_available` DESC',
+			'featured'				=> 'pst.`is_featured` DESC',
+			'price_asc'				=> '(CASE WHEN pst.`current_price` IS NOT NULL THEN pst.`current_price` ELSE pst.`sort_order` END) ASC',
+			'price_desc'			=> '(CASE WHEN pst.`current_price` IS NOT NULL THEN pst.`current_price` ELSE pst.`sort_order` END) DESC',
+			'discounts'				=> 'pst.`has_discount` DESC',
+			'trends_all_time' => 'LOG(pst.`orders` + 1) * 4 + COALESCE(pst.`rating_avg`, 0) * LOG(pst.`review_count` + 1) * 2 + LOG(pst.`views` + 1)',
+			'trends_by_date'  => '
+				LOG(pst.`orders` + 1) * EXP(-0.01 * DATEDIFF(NOW(), COALESCE(pst.`date_last_order`, NOW())))
+				+ LOG(pst.`views` + 1) * EXP(-0.005 * DATEDIFF(NOW(), COALESCE(pst.`date_last_view`, NOW())))
+				+ (pst.`rating_avg` * LOG(pst.`review_count` + 1)) * EXP(-0.02 * DATEDIFF(NOW(), COALESCE(pst.`date_last_review`, NOW()))) DESC, 
+				pst.`sort_order` ASC
+			',
+			// 'name'						=> 'pd.`name` ASC',
+			// 'quantity'				=> 'p.`quantity` > p.`minimum` DESC, pst.`sort_order` ASC',
+		];
+
+		/**
+		 * Allowed facet types 
+		 * Integers correspond facet type in ENUM column `facet_type` in DB without 'filter_' prefix 
+		 */
+		$this->facetTypes = [
+			'filter_category_id'   		=> 1,
+			'filter_filter'        		=> 2,
+			'filter_option'        		=> 3,
+			'filter_attribute'     		=> 4,
+			'filter_manufacturer_id'	=> 5,
+			'filter_tag_id'           => 6,
+			'filter_supplier_id'      => 7,
+			'filter_is_available'  		=> 8,
+			'filter_has_discount'  		=> 9,
+			'filter_is_featured'   		=> 10,
+		];
+	}
+
+	/**
+	 * Return array of allowed sort order for external modules
+	 * @return array
+	 */
+	public function getSortOrders() : array {
+		return $this->sortOrders;
+	}
+
+	/**
+	 * Return array of allowed facet types foe external modules
+	 * @return array
+	 */
+	public function getFacetTypes() : array {
+		return $this->facetTypes;
+	}
+
 	public function updateViewed($product_id) {
 		$this->db->query("UPDATE " . DB_PREFIX . "product SET viewed = (viewed + 1) WHERE product_id = '" . (int)$product_id . "'");
 	}
