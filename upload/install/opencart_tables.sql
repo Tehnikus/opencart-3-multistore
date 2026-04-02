@@ -7466,6 +7466,7 @@ DROP TABLE IF EXISTS `oc_seo_filter_page_to_store`;
 CREATE TABLE `oc_seo_filter_page_to_store` (
   `filter_page_id`      INT NOT NULL,
   `store_id`            INT NOT NULL,
+  `date_modified`       DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY (`filter_page_id`, `store_id`)
 ) ENGINE=InnoDB;
 
@@ -7484,7 +7485,6 @@ CREATE TABLE `oc_seo_filter_page_descciption` (
   `faq`                 TEXT NOT NULL,
   `how_to`              TEXT NOT NULL,
   `footer`              TEXT NOT NULL,
-  `date_modified`       DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY (`filter_page_id`, `language_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
