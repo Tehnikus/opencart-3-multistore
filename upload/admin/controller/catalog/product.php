@@ -1367,4 +1367,40 @@ class ControllerCatalogProduct extends Controller {
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
 	}
+
+	// Set product status with JS
+	public function fetchSetProductStatus() : void {
+		$productId 			= (int) $this->request->post['product_id'];
+		$currentStatus 	= (int) $this->request->post['status'];
+		$newStatus 			= 0;
+
+		if ($currentStatus === 0) {
+			$newStatus = 1;
+		}
+
+		$this->load->model('catalog/product');
+		$newStatus = $this->model_catalog_product->setProductStatus($productId, $newStatus);
+		$json = ['productId' => $productId, 'newStatus' => $newStatus];
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	// Set product availability with JS
+	public function fetchSetProductIsAvailable() : void {
+		$productId 			= (int) $this->request->post['product_id'];
+		$currentIsAvailable 	= (int) $this->request->post['is_available'];
+		$newIsAvailable 			= 0;
+
+		if ($currentIsAvailable === 0) {
+			$newIsAvailable = 1;
+		}
+
+		$this->load->model('catalog/product');
+		$newIsAvailable = $this->model_catalog_product->setProductIsAvailable($productId, $newIsAvailable);
+		$json = ['productId' => $productId, 'newIsAvailable' => $newIsAvailable];
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
 }
