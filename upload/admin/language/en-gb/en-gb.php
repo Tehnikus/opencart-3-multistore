@@ -216,14 +216,21 @@ $_['error_no_parent']               = 'No parent category';
 // Left column menu
 $_['text_seo'] = 'SEO';
 
-$_['text_seo_pages']          = 'SEO pages';
-$_['text_meta_editor']        = 'Meta editor';
-$_['text_seo_tags']           = 'Tags';
-$_['text_seo_keywords']       = 'Keywords';
-$_['text_sitemap_generator']  = 'Sitemap generator';
-$_['text_seo_url']            = 'SEO URLs';
-$_['text_seo_url_setting']    = 'SEO URLs settings';
-$_['text_facet_filter']       = 'Facet filter';
+$_['text_seo_pages']                = 'SEO pages';
+$_['text_meta_editor']              = 'Meta editor';
+$_['text_seo_tags']                 = 'Tags';
+$_['text_seo_keywords']             = 'Keywords';
+$_['text_sitemap_generator']        = 'Sitemap generator';
+$_['text_seo_url']                  = 'SEO URLs';
+$_['text_seo_url_setting']          = 'SEO URLs settings';
+$_['text_facet_filter']             = 'Facet filter';
+
+// Input helper buttons
+$_['button_create_seo_url']         = 'Create SEO URL';
+$_['button_copy_to_meta_title']     = 'Copy to Meta title';
+$_['button_copy_to_h1']             = 'Copy to H1';
+$_['button_translate']              = 'Translate from default language';
+$_['button_add_lang_postfix']       = 'Add language postfix to URL';
 
 /* When doing translations only include the matching language code */
 
