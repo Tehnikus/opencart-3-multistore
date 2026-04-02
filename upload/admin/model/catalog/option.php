@@ -87,41 +87,148 @@ class ModelCatalogOption extends Model {
 
 	}
 
-	public function editOption($option_id, $data) {
-		$this->db->query("UPDATE `" . DB_PREFIX . "option` SET type = '" . $this->db->escape($data['type']) . "', sort_order = '" . (int)$data['sort_order'] . "' WHERE option_id = '" . (int)$option_id . "'");
+	public function editOption($option_id, $data) : int {
 
-		$this->db->query("DELETE FROM " . DB_PREFIX . "option_description WHERE option_id = '" . (int)$option_id . "'");
+		$this->db->query("START TRANSACTION");
 
-		foreach ($data['option_description'] as $language_id => $value) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "option_description SET option_id = '" . (int)$option_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "'");
-		}
+		try {
+			
+			$this->db->query("
+				UPDATE `" . DB_PREFIX . "option` 
+				SET 
+					`type` 					= '" . $this->db->escape($data['type']) . "', 
+					`sort_order` 		= '" . (int) $data['sort_order'] . "' 
+				WHERE `option_id` = '" . (int) $option_id . "'
+			");
 
-		$this->db->query("DELETE FROM " . DB_PREFIX . "option_value WHERE option_id = '" . (int)$option_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "option_value_description WHERE option_id = '" . (int)$option_id . "'");
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "option_description 
+				WHERE `option_id` = '" . (int) $option_id . "'
+					AND `store_id` 	= '" . (int) $this->session->data['store_id'] . "'
+			");
 
-		if (isset($data['option_value'])) {
-			foreach ($data['option_value'] as $option_value) {
-				if ($option_value['option_value_id']) {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "option_value SET option_value_id = '" . (int)$option_value['option_value_id'] . "', option_id = '" . (int)$option_id . "', image = '" . $this->db->escape(html_entity_decode($option_value['image'], ENT_QUOTES, 'UTF-8')) . "', sort_order = '" . (int)$option_value['sort_order'] . "'");
-				} else {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "option_value SET option_id = '" . (int)$option_id . "', image = '" . $this->db->escape(html_entity_decode($option_value['image'], ENT_QUOTES, 'UTF-8')) . "', sort_order = '" . (int)$option_value['sort_order'] . "'");
-				}
+			foreach ($data['option_description'] as $language_id => $value) {
+				$this->db->query("
+					INSERT INTO " . DB_PREFIX . "option_description 
+					SET 		
+						`option_id` 	= '" . (int) $option_id . "', 
+						`language_id` = '" . (int) $language_id . "',
+						`store_id` 		= '" . (int) $this->session->data['store_id'] . "',
+						`name` 				= '" . $this->db->escape($value['name']) . "'
+				");
+			}
 
-				$option_value_id = $this->db->getLastId();
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "option_value 
+				WHERE `option_id` = '" . (int) $option_id . "'
+					AND `store_id` 	= '" . (int) $this->session->data['store_id'] . "'
+			");
 
-				foreach ($option_value['option_value_description'] as $language_id => $option_value_description) {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "option_value_description SET option_value_id = '" . (int)$option_value_id . "', language_id = '" . (int)$language_id . "', option_id = '" . (int)$option_id . "', name = '" . $this->db->escape($option_value_description['name']) . "'");
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "option_value_description 
+				WHERE `option_id` = '" . (int) $option_id . "'
+					AND `store_id` 	= '" . (int) $this->session->data['store_id'] . "'
+			");
+
+			if (isset($data['option_value'])) {
+				foreach ($data['option_value'] as $option_value) {
+					if (isset($option_value['option_value_id'])) {
+						$option_value_id = (int)$option_value['option_value_id'];
+						$this->db->query("
+							INSERT INTO " . DB_PREFIX . "option_value SET 
+								`option_value_id` = '" . $option_value_id . "', 
+								`option_id`       = '" . (int) $option_id . "', 
+								`store_id`        = '" . (int) $this->session->data['store_id'] . "',
+								`image`           = '" . $this->db->escape(html_entity_decode($option_value['image'], ENT_QUOTES, 'UTF-8')) . "', 
+								`sort_order`      = '" . (int) $option_value['sort_order'] . "'
+						");
+				
+						$this->deleteCache($option_value_id);
+					
+					} else {
+						$this->db->query("
+							INSERT INTO " . DB_PREFIX . "option_value SET 
+								`option_id`   = '" . (int) $option_id . "', 
+								`store_id`    = '" . (int) $this->session->data['store_id'] . "',
+								`image`       = '" . $this->db->escape(html_entity_decode($option_value['image'], ENT_QUOTES, 'UTF-8')) . "', 
+								`sort_order`  = '" . (int) $option_value['sort_order'] . "'
+						");
+					
+						$option_value_id = $this->db->getLastId();
+					}
+
+					foreach ($option_value['option_value_description'] as $language_id => $option_value_description) {
+						$this->db->query("
+							INSERT INTO " . DB_PREFIX . "option_value_description 
+							SET 
+								`option_value_id` = '" . (int)$option_value_id . "', 
+								`language_id` 		= '" . (int)$language_id . "', 
+								`option_id` 			= '" . (int)$option_id . "', 
+								`store_id`				= '" . (int) $this->session->data['store_id'] . "',
+								`name` 						= '" . $this->db->escape($option_value_description['name']) . "'
+						");
+					}
 				}
 			}
+			
+			// Stores association
+			// Remove all unselected stores
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "option_to_store 
+				WHERE `option_id` = '" . (int) $option_id . "'
+					AND `store_id` NOT IN (" . implode(',', array_map('intval', $data['stores_association'])) . ")
+			");
+
+			// Remove only current store no matter if it's selected
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "option_to_store 
+				WHERE option_id = '" . (int) $option_id . "'
+					AND store_id 	= '" . (int) $this->session->data['store_id'] . "'
+			");
+			
+			// Write store association and store related data
+			if (isset($data['stores_association']) && !empty($data['stores_association'])) {
+				foreach ($data['stores_association'] as $store_id) {
+					if (((int) $store_id) === ((int) $this->session->data['store_id'])) {
+						// Set data for current store
+						$this->db->query("
+							INSERT INTO " . DB_PREFIX . "option_to_store
+							SET
+								`option_id` 		= '" . (int) $option_id . "', 
+								`store_id` 			= '" . (int) $store_id . "',
+								`sort_order` 		= '" . (int) $data['sort_order'] . "'
+						");
+					} else {
+						// Skip if data for other stores already exists
+						$this->db->query("
+							INSERT IGNORE INTO " . DB_PREFIX . "option_to_store
+							SET
+								`option_id` 		= '" . (int) $option_id . "', 
+								`store_id` 			= '" . (int) $store_id . "',
+								`sort_order` 		= '" . (int) $data['sort_order'] . "'
+						");
+					}
+				}
+			}			
+
+			$this->db->query("COMMIT");
+
+			// Rebuild facet indexes
+			$this->load->model('catalog/facet');
+			$store_id = (int) $this->session->data['store_id'];
+			$this->model_catalog_facet->buildFacetNames(facet_group_id: $option_id, facet_type: 3, store_id: $store_id);
+			$this->model_catalog_facet->buildFacetIndex(facet_group_id: $option_id, facet_type: 3, store_id: $store_id);
+
+			return (int) $option_id;
+
+		} catch (\Throwable $e) {
+			
+			$this->db->query("ROLLBACK");
+			
+			throw $e;
 
 		}
 	}
-
-	public function deleteOption($option_id) {
-		$this->db->query("DELETE FROM `" . DB_PREFIX . "option` WHERE option_id = '" . (int)$option_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "option_description WHERE option_id = '" . (int)$option_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "option_value WHERE option_id = '" . (int)$option_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "option_value_description WHERE option_id = '" . (int)$option_id . "'");
 	}
 
 	public function getOption($option_id) {
