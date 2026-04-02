@@ -107,11 +107,13 @@
                     <tr>
                       <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
                       <td class="text-left">{% if sort == 'pd.name' %} <a href="{{ sort_product }}" class="{{ order|lower }}">{{ column_product }}</a> {% else %} <a href="{{ sort_product }}">{{ column_product }}</a> {% endif %}</td>
-                      <td class="text-left">{% if sort == 'r.author' %} <a href="{{ sort_author }}" class="{{ order|lower }}">{{ column_author }}</a> {% else %} <a href="{{ sort_author }}">{{ column_author }}</a> {% endif %}</td>
-                      <td class="text-right">{% if sort == 'r.rating' %} <a href="{{ sort_rating }}" class="{{ order|lower }}">{{ column_rating }}</a> {% else %} <a href="{{ sort_rating }}">{{ column_rating }}</a> {% endif %}</td>
-                      <td class="text-left">{% if sort == 'r.status' %} <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
-                      <td class="text-left">{% if sort == 'r.date_added' %} <a href="{{ sort_date_added }}" class="{{ order|lower }}">{{ column_date_added }}</a> {% else %} <a href="{{ sort_date_added }}">{{ column_date_added }}</a> {% endif %}</td>
-                      <td class="text-right">{{ column_action }}</td>
+                      <td style="width: 150px"  class="text-center"> <a href="{{ sort_language }}" {% if sort == 'r.language_id' %} class="{{ order|lower }}" {% endif %} >{{ column_language }}</a></td>
+                      <td style="width: 150px"  class="text-center"> <a href="{{ sort_store }}" {% if sort == 'r.store_id' %} class="{{ order|lower }}" {% endif %} >{{ column_store }}</a></td>
+                      <td style="width: 150px"  class="text-center">{% if sort == 'r.author' %} <a href="{{ sort_author }}" class="{{ order|lower }}">{{ column_author }}</a> {% else %} <a href="{{ sort_author }}">{{ column_author }}</a> {% endif %}</td>
+                      <td style="width: 50px"   class="text-center">{% if sort == 'r.rating' %} <a href="{{ sort_rating }}" class="{{ order|lower }}">{{ column_rating }}</a> {% else %} <a href="{{ sort_rating }}">{{ column_rating }}</a> {% endif %}</td>
+                      <td style="width: 100px"  class="text-center">{% if sort == 'r.date_added' %} <a href="{{ sort_date_added }}" class="{{ order|lower }}">{{ column_date_added }}</a> {% else %} <a href="{{ sort_date_added }}">{{ column_date_added }}</a> {% endif %}</td>
+                      <td style="width: 50px"   class="text-center">{% if sort == 'r.status' %} <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
+                      <td style="width: 50px"   class="text-center">{{ column_action }}</td>
                     </tr>
                   </thead>
                   <tbody>
@@ -124,17 +126,19 @@
                       {% else %}
                       <input type="checkbox" name="selected[]" value="{{ review.review_id }}" />
                       {% endif %}</td>
-                    <td class="text-left">{{ review.name }}</td>
-                    <td class="text-left">{{ review.author }}</td>
-                    <td class="text-right">{{ review.rating }}</td>
-                    <td class="text-left">{{ review.status }}</td>
-                    <td class="text-left">{{ review.date_added }}</td>
-                    <td class="text-right"><a href="{{ review.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+                    <td class="text-left"><b>{{ review.name }}</b></td>
+                    <td class="text-center"><b>{% for language in languages %}{% if language.language_id == review.language_id %}{{ language.name }}{% endif %}{% endfor %}</b></td>
+                    <td class="text-center"><b>{{ stores[review.store_id].name }}</b></td>
+                    <td class="text-center"><b>{{ review.author }}</b></td>
+                    <td class="text-center"><b>{{ review.rating }}</b></td>
+                    <td class="text-center"><b>{{ review.date_added }}</b></td>
+                    <td class="text-center"><b>{% if review.status == '1' %}<i class="fa fa-check text-success"></i>{% else %}<i class="fa fa-times text-danger"></i>{% endif %}</b></td>
+                    <td class="text-center"><a href="{{ review.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
                   </tr>
                   {% endfor %}
                   {% else %}
                   <tr>
-                    <td class="text-center" colspan="7">{{ text_no_results }}</td>
+                    <td class="text-center" colspan="9">{{ text_no_results }}</td>
                   </tr>
                   {% endif %}
                     </tbody>
