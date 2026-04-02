@@ -984,6 +984,37 @@
 	  }
   });
 
+  // Default parent category fo SEO URLs
+  $('input[name=\'path\']').autocomplete({
+    'source': function(request, response) {
+      $.ajax({
+        url: 'index.php?route=catalog/category/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+        dataType: 'json',
+        success: function(json) {
+          json.unshift({
+            category_id: 0,
+            name: '{{ text_none }}'
+          });
+
+          response($.map(json, function(item) {
+            return {
+              label: item['name'],
+              value: item['category_id']
+            }
+          }));
+        }
+      });
+    },
+    'select': function(item) {
+      // Select parent_id category
+      $('input[name=\'path\']').val(item['label']);
+      $('input[name=\'parent_id\']').val(item['value']);
+      // Also add parent_id category to product category list
+      $('#product-category' + item['value']).remove();
+		  $('#product-category').append('<div id="product-category' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="product_category[]" value="' + item['value'] + '" /></div>');
+    }
+  });
+
   // Category
   $('input[name=\'category\']').autocomplete({
 	  'source': function(request, response) {
