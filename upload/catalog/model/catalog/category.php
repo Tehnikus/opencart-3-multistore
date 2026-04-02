@@ -101,43 +101,72 @@ class ModelCatalogCategory extends Model {
 		return $query->rows ?? [];
 	}
 
+	// Only used in upload\catalog\controller\extension\module\filter.php
 	public function getCategoryFilters($category_id) {
-		$implode = array();
 
-		$query = $this->db->query("SELECT filter_id FROM " . DB_PREFIX . "category_filter WHERE category_id = '" . (int)$category_id . "'");
+		$sql = "
+			SELECT 
+				f.filter_id,
+				fd.name AS filter_name,
+				f.filter_group_id,
+				f.sort_order AS filter_sort,
+				fg2s.sort_order AS group_sort,
+				fgd.name AS group_name
+			FROM " . DB_PREFIX . "category_filter cf
+			
+			INNER JOIN " . DB_PREFIX . "filter f 
+				ON cf.filter_id = f.filter_id 
+				AND f.store_id = cf.store_id
 
-		foreach ($query->rows as $result) {
-			$implode[] = (int)$result['filter_id'];
-		}
+			INNER JOIN oc_filter_group fg
+				ON fg.filter_group_id = f.filter_group_id
 
-		$filter_group_data = array();
+			INNER JOIN " . DB_PREFIX . "filter_description fd 
+				ON 	f.filter_id 		= fd.filter_id 
+				AND fd.language_id 	= '" . (int) $this->config->get('config_language_id') . "'
+				AND fd.store_id 		= cf.store_id 
 
-		if ($implode) {
-			$filter_group_query = $this->db->query("SELECT DISTINCT f.filter_group_id, fgd.name, fg.sort_order FROM " . DB_PREFIX . "filter f LEFT JOIN " . DB_PREFIX . "filter_group fg ON (f.filter_group_id = fg.filter_group_id) LEFT JOIN " . DB_PREFIX . "filter_group_description fgd ON (fg.filter_group_id = fgd.filter_group_id) WHERE f.filter_id IN (" . implode(',', $implode) . ") AND fgd.language_id = '" . (int)$this->config->get('config_language_id') . "' GROUP BY f.filter_group_id ORDER BY fg.sort_order, LCASE(fgd.name)");
+			INNER JOIN " . DB_PREFIX . "filter_group_to_store fg2s
+				ON f.filter_group_id 	= fg2s.filter_group_id 
+				AND fg2s.store_id 		= cf.store_id
 
-			foreach ($filter_group_query->rows as $filter_group) {
-				$filter_data = array();
+			INNER JOIN " . DB_PREFIX . "filter_group_description fgd
+				ON  f.filter_group_id  	= fgd.filter_group_id
+				AND fgd.language_id 		= '" . (int) $this->config->get('config_language_id') . "'
+				AND fgd.store_id 				= cf.store_id
 
-				$filter_query = $this->db->query("SELECT DISTINCT f.filter_id, fd.name FROM " . DB_PREFIX . "filter f LEFT JOIN " . DB_PREFIX . "filter_description fd ON (f.filter_id = fd.filter_id) WHERE f.filter_id IN (" . implode(',', $implode) . ") AND f.filter_group_id = '" . (int)$filter_group['filter_group_id'] . "' AND fd.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY f.sort_order, LCASE(fd.name)");
+			WHERE cf.category_id 	= '" . (int) $category_id . "'
+				AND cf.store_id 		= '" . (int) $this->config->get('config_store_id') . "'
 
-				foreach ($filter_query->rows as $filter) {
-					$filter_data[] = array(
-						'filter_id' => $filter['filter_id'],
-						'name'      => $filter['name']
-					);
-				}
+			ORDER BY fg2s.sort_order, 
+				LCASE(group_name),
+				f.sort_order,
+				LCASE(filter_name)
+		";
 
-				if ($filter_data) {
-					$filter_group_data[] = array(
-						'filter_group_id' => $filter_group['filter_group_id'],
-						'name'            => $filter_group['name'],
-						'filter'          => $filter_data
-					);
-				}
+		$query = $this->db->query($sql);
+
+		$filter_group_data = [];
+
+		foreach ($query->rows as $row) {
+			$group_id = $row['filter_group_id'];
+
+			if (!isset($filter_group_data[$group_id])) {
+				$filter_group_data[$group_id] = array(
+					'filter_group_id' => $group_id,
+					'name'            => $row['group_name'],
+					'filter'          => []
+				);
 			}
+
+			$filter_group_data[$group_id]['filter'][] = array(
+				'filter_id' => $row['filter_id'],
+				'name'      => $row['filter_name']
+			);
 		}
 
-		return $filter_group_data;
+		// Reset keys to start from zero
+		return array_values($filter_group_data);
 	}
 
 	public function getCategoryLayoutId($category_id) {
