@@ -377,7 +377,15 @@ class ControllerCatalogOption extends Controller {
 			);
 		}
 
-		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
+		$data['placeholder'] = HTTPS_CATALOG . 'image/no_image.webp';
+
+		// Option group to store association
+		$this->load->model('setting/store');
+		$data['stores'] = $this->model_setting_store->getMultistores();
+		// Current store_id to check current store checkbox in stores list
+		$data['currentStore'] = $this->session->data['store_id'];
+		$data['stores_association'] = $this->request->post['stores_association'] ?? $this->model_catalog_option->getStoresAssociation($this->request->get['option_id'] ?? null) ?? [];
+		// End store association
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
