@@ -452,12 +452,12 @@ class ControllerCatalogOption extends Controller {
 
 			$this->load->model('catalog/option');
 
-			$this->load->model('tool/image');
-
 			$filter_data = array(
-				'filter_name' => $this->request->get['filter_name'],
-				'start'       => 0,
-				'limit'       => 5
+				'filter_name' 							=> $this->request->get['filter_name'],
+				'store_id'									=> (int) $this->session->data['store_id'],
+				'start'      								=> 0,
+				'has_values' 								=> true, // Filter by option value count to hide options that have values in one store and don't have values in other stores 
+				'limit'      								=> 20
 			);
 
 			$options = $this->model_catalog_option->getOptions($filter_data);
@@ -469,11 +469,7 @@ class ControllerCatalogOption extends Controller {
 					$option_values = $this->model_catalog_option->getOptionValues($option['option_id']);
 
 					foreach ($option_values as $option_value) {
-						if (is_file(DIR_IMAGE . $option_value['image'])) {
-							$image = $this->model_tool_image->resize($option_value['image'], 50, 50);
-						} else {
-							$image = $this->model_tool_image->resize('no_image.png', 50, 50);
-						}
+						$image = ($option_value['image'] && is_file(DIR_IMAGE . $option_value['image'])) ? HTTPS_CATALOG . 'image/' . $option_value['image'] : HTTPS_CATALOG . 'image/no_image.webp';
 
 						$option_value_data[] = array(
 							'option_value_id' => $option_value['option_value_id'],
