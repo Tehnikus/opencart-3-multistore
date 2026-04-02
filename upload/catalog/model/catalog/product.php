@@ -481,20 +481,121 @@ class ModelCatalogProduct extends Model {
 		});
 		return $product;
 	}
-			}
 
-			$product_option_data[] = array(
-				'product_option_id'    => $product_option['product_option_id'],
-				'product_option_value' => $product_option_value_data,
-				'option_id'            => $product_option['option_id'],
-				'name'                 => $product_option['name'],
-				'type'                 => $product_option['type'],
-				'value'                => $product_option['value'],
-				'required'             => $product_option['required']
-			);
+	public function getProducts($data = []) : array {
+		$data 			= array_filter($data); // Remove empty array entries 
+		$store_id 	= (int) $this->config->get('config_store_id');
+		$filters 		= [];
+		$facets 		= [];
+		$where 			= [];
+		$order 			= '';
+		$limit			= '';
+		$products 	= [];
+		$sortOrders = $this->getSortOrders(); // Allowed sort orders
+
+		// Facet filters
+		foreach ($data as $filterKey => $filterData) {
+			if (str_starts_with($filterKey, 'filter_') && !empty($filterData)) {
+				$filters[$filterKey] = $filterData;
+			}
 		}
 
-		return $product_option_data;
+		foreach ($filters as $filterKey => $filter) {
+			
+			// Sanitize and unique facet ids
+			$filterIds = array_values(array_unique(array_map('intval', explode(',', $filter))));
+
+			if ($filterKey === 'filter_category_id') {
+				$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 1)";
+			}
+			if ($filterKey === 'filter_filter') {
+				$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 2)";
+			}
+			if ($filterKey === 'filter_option') {
+				$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 3)";
+			}
+			if ($filterKey === 'filter_attribute') {
+				$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 4)";
+			}
+			if ($filterKey === 'filter_manufacturer_id') {
+				$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 5)";
+			}
+			if ($filterKey === 'filter_tag') {
+				$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 6)";
+			}
+			if ($filterKey === 'filter_supplier') {
+				$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 7)";
+			}
+			if ($filterKey === 'filter_is_available') {
+				$facets[] = "(facet_value_id = 1 AND facet_type = 8)";
+			}
+			if ($filterKey === 'filter_has_discount') {
+				$facets[] = "(facet_value_id = 1 AND facet_type = 9)";
+			}
+			if ($filterKey === 'filter_is_featured') {
+				$facets[] = "(facet_value_id = 1 AND facet_type = 10)";
+			}
+		}
+
+		$where[] = "(" . implode(" OR ", $facets) . ")";
+		$where[] = "store_id = {$store_id}";
+
+		// Sort order
+		$sortOrder = $data['sort'] ?? $this->config->get('config_default_product_sort') ?? 'sort_order';
+		if (in_array($sortOrder, array_keys($sortOrders))) {
+			$order = $sortOrders[$sortOrder];
+		} else {
+			$order = 'sort_order';
+		}
+
+		if (isset($data['start']) || isset($data['limit'])) {
+			if (!isset($data['start']) || $data['start'] < 0) {
+				$data['start'] = 0;
+			}
+
+			if (!isset($data['limit']) || $data['limit'] < 1) {
+				$data['limit'] = 20;
+			}
+
+			$limit = " LIMIT " . (int) $data['start'] . "," . (int) $data['limit'];
+		}
+
+		// Main query. Get product ids, sort, limit
+		$sql = "
+			WITH facet_temp (`product_id`, `facet_type`, `facet_group_id`) AS (
+				SELECT
+					`product_id`, `facet_type`, `facet_group_id`
+				FROM " . DB_PREFIX . "facet_index
+				WHERE " . implode(" AND ", $where) . "
+				ORDER BY NULL
+			),
+
+			group_count AS (
+				SELECT COUNT(DISTINCT `facet_type`, `facet_group_id`) AS cnt
+				FROM `facet_temp`
+				ORDER BY NULL
+			)
+
+			SELECT 
+				f.`product_id`
+			FROM facet_temp f
+			LEFT JOIN " . DB_PREFIX . "facet_sort pst
+				ON  pst.`product_id` = f.`product_id`
+				AND pst.`store_id` 	 = {$store_id}
+
+			GROUP BY f.`product_id`
+			HAVING COUNT(DISTINCT f.`facet_type`, f.`facet_group_id`) = (SELECT `cnt` FROM group_count)
+			ORDER BY {$order}
+			{$limit}
+		";
+
+		$productRows = $this->db->query($sql)->rows;
+		foreach ($productRows as $row) {
+			$products[] = $this->getProduct((int) $row['product_id']);
+		}
+
+		return $products;
+	}
 	}
 
 	public function getProductDiscounts($product_id) {
