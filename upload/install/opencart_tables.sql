@@ -2329,7 +2329,7 @@ CREATE TABLE `oc_product_option_value` (
   `weight_prefix`           VARCHAR(1) NOT NULL,
   PRIMARY KEY (`product_option_value_id`),
   KEY `getProduct` (`product_id`, `product_option_id`, `store_id`),
-  KEY `getProducts` (`product_id`, `option_id`, `option_value_id`, `store_id`) -- TODO Maybe needs UNINQUE, needs testing
+  KEY `getProducts` (`product_id`, `option_id`, `option_value_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
