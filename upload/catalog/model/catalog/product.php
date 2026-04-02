@@ -787,6 +787,7 @@ class ModelCatalogProduct extends Model {
 		}
 	}
 
+	// Some strange check that product is associated to category in case if SEO URLs is turned off?
 	public function checkProductCategory($product_id, $category_ids) {
 		
 		$implode = array();
