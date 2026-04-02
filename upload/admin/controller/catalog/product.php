@@ -684,7 +684,7 @@ class ControllerCatalogProduct extends Controller {
 		} elseif (isset($this->request->get['product_id'])) {
 			$data['product_store'] = $this->model_catalog_product->getProductStores($this->request->get['product_id']);
 		} else {
-			$data['product_store'] = array(0);
+			$data['product_store'] = array();
 		}
 
 		if (isset($this->request->post['shipping'])) {
