@@ -1405,10 +1405,22 @@ class ModelCatalogProduct extends Model {
 		return $product_filter_data;
 	}
 
-	public function getProductAttributes($product_id) {
-		$product_attribute_data = array();
+	// Get product associated attributes and attribute descriptions
+	// Used in admin/controller/catalog/product/getForm() to show product form data 
+	// and in admin/model/catalog/copyProduct() to duplicate product
+	// Should always rely on store_id context
+	// Returns all languages data, so no lang context needed here
+	public function getProductAttributes($product_id) : array {
+		$product_attribute_data = [];
 
-		$product_attribute_query = $this->db->query("SELECT attribute_id FROM " . DB_PREFIX . "product_attribute WHERE product_id = '" . (int)$product_id . "' GROUP BY attribute_id");
+		$product_attribute_query = $this->db->query("
+			SELECT 
+				`attribute_id` 
+			FROM " . DB_PREFIX . "product_attribute 
+			WHERE `product_id`  = '" . (int)$product_id . "' 
+				AND `store_id` 		= '" . (int) $this->session->data['store_id'] . "'
+			GROUP BY `attribute_id`
+		");
 
 		foreach ($product_attribute_query->rows as $product_attribute) {
 			$product_attribute_description_data = array();
