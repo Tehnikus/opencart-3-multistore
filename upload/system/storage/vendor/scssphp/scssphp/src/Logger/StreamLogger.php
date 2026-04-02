@@ -49,6 +49,7 @@ final class StreamLogger implements LoggerInterface
 
     public function warn(string $message, ?Deprecation $deprecation = null, ?FileSpan $span = null, ?Trace $trace = null): void
     {
+        return;
         $prefix = ($deprecation !== null ? 'DEPRECATION ' : '') . 'WARNING';
 
         if ($span === null) {
