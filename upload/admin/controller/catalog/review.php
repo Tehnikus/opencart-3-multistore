@@ -519,6 +519,14 @@ class ControllerCatalogReview extends Controller {
 			$review_info = $this->model_catalog_review->getReview($this->request->get['review_id']);
 		}
 
+		$this->load->model('setting/store');
+		$data['stores'] = $this->model_setting_store->getMultistores();
+
+		$this->load->model('localisation/language');
+		$data['languages'] = $this->model_localisation_language->getLanguages();
+
+		$data['currentStore'] = $this->session->data['store_id'];
+
 		$data['user_token'] = $this->session->data['user_token'];
 
 		$this->load->model('catalog/product');
