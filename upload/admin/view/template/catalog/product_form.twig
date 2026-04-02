@@ -90,6 +90,7 @@
                   </div>
                 {% endfor %}</div>
             </div>
+
             <div class="tab-pane" id="tab-data">
               <div class="form-group required">
                 <label class="col-sm-2 control-label" for="input-model">{{ entry_model }}</label>
@@ -546,12 +547,12 @@
                               <thead>
                                 <tr>
                                   <td class="text-left">{{ entry_option_value }}</td>
-                                  <td class="text-right">{{ entry_quantity }}</td>
-                                  <td class="text-left">{{ entry_subtract }}</td>
-                                  <td class="text-right">{{ entry_price }}</td>
-                                  <td class="text-right">{{ entry_option_points }}</td>
-                                  <td class="text-right">{{ entry_weight }}</td>
-                                  <td></td>
+                                  <td style="width: 150px" class="text-center">{{ entry_quantity }}</td>
+                                  <td style="width: 150px" class="text-center">{{ entry_subtract }}</td>
+                                  <td style="width: 150px" class="text-center">{{ entry_price }}</td>
+                                  <td style="width: 150px" class="text-center">{{ entry_option_points }}</td>
+                                  <td style="width: 150px" class="text-center">{{ entry_weight }}</td>
+                                  <td style="width: 50px"></td>
                                 </tr>
                               </thead>
                               <tbody>
@@ -1263,13 +1264,13 @@
 			  html += '  <table id="option-value' + option_row + '" class="table table-striped table-bordered table-hover">';
 			  html += '  	 <thead>';
 			  html += '      <tr>';
-			  html += '        <td class="text-left">{{ entry_option_value }}</td>';
-			  html += '        <td class="text-right">{{ entry_quantity }}</td>';
-			  html += '        <td class="text-left">{{ entry_subtract }}</td>';
-			  html += '        <td class="text-right">{{ entry_price }}</td>';
-			  html += '        <td class="text-right">{{ entry_option_points }}</td>';
-			  html += '        <td class="text-right">{{ entry_weight }}</td>';
-			  html += '        <td></td>';
+			  html += '        <td class="text-center">{{ entry_option_value }}</td>';
+			  html += '        <td style="width: 150px" class="text-center">{{ entry_quantity }}</td>';
+			  html += '        <td style="width: 150px" class="text-center">{{ entry_subtract }}</td>';
+			  html += '        <td style="width: 150px" class="text-center">{{ entry_price }}</td>';
+			  html += '        <td style="width: 150px" class="text-center">{{ entry_option_points }}</td>';
+			  html += '        <td style="width: 150px" class="text-center">{{ entry_weight }}</td>';
+			  html += '        <td style="width: 50px"></td>';
 			  html += '      </tr>';
 			  html += '  	 </thead>';
 			  html += '  	 <tbody>';
