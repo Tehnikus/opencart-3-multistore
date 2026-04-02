@@ -128,6 +128,74 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			// SEO
+			$seo = array();
+			if ($this->user->hasPermission('access', 'seo/filter_page')) {
+				$seo[] = array(
+					'name'	   => $this->language->get('text_seo_pages'),
+					'href'     => $this->url->link('seo/filter_page', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'seo/meta_editor')) {
+				$seo[] = array(
+					'name'	   => $this->language->get('text_meta_editor'),
+					'href'     => $this->url->link('seo/meta_editor/getProductsList', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'seo/tags')) {
+				$seo[] = array(
+					'name'	   => $this->language->get('text_seo_tags'),
+					'href'     => $this->url->link('seo/tags/getList', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'seo/keyword')) {
+				$seo[] = array(
+					'name'	   => $this->language->get('text_seo_keywords'),
+					'href'     => $this->url->link('seo/keyword', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'seo/sitemap_generator')) {
+				$seo[] = array(
+					'name'	   => $this->language->get('text_sitemap_generator'),
+					'href'     => $this->url->link('seo/sitemap_generator', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'design/seo_url')) {
+				$seo[] = array(
+					'name'	   => $this->language->get('text_seo_url'),
+					'href'     => $this->url->link('design/seo_url', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'seo/seo_url_setting')) {
+				$seo[] = array(
+					'name'	   => $this->language->get('text_seo_url_setting'),
+					'href'     => $this->url->link('seo/seo_url_setting', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($seo) {
+				$data['menus'][] = array(
+					'id'       => 'menu-design',
+					'icon'	   => 'fa-link',
+					'name'	   => $this->language->get('text_seo'),
+					'href'     => '',
+					'children' => $seo
+				);
+			}
+
 			// Extension
 			$marketplace = array();
 
@@ -212,14 +280,6 @@ class ControllerCommonColumnLeft extends Controller {
 				$design[] = array(
 					'name'	   => $this->language->get('text_banner'),
 					'href'     => $this->url->link('design/banner', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
-			if ($this->user->hasPermission('access', 'design/seo_url')) {
-				$design[] = array(
-					'name'	   => $this->language->get('text_seo_url'),
-					'href'     => $this->url->link('design/seo_url', 'user_token=' . $this->session->data['user_token'], true),
 					'children' => array()
 				);
 			}
