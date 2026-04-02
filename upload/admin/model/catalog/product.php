@@ -1827,4 +1827,59 @@ class ModelCatalogProduct extends Model {
 		return (int) $newStatus;
 	}
 
+	// Set product is available for order
+	public function setProductIsAvailable($product_id, $is_available) : int {
+
+		// Check if product is assocated with current store
+		$productIsAssociated = $this->db->query("
+			SELECT
+				`product_id`
+			FROM " . DB_PREFIX . "product_to_store
+			WHERE `product_id` = '" . (int) $product_id . "'
+				AND `store_id` = '" . (int) $this->session->data['store_id'] . "'
+		")->row;
+
+		if (!isset($productIsAssociated['product_id'])) {
+			return 0;
+		}
+
+		$this->db->query("
+			UPDATE " . DB_PREFIX . "product_to_store
+				SET 
+					`is_available` = '" . (int) $is_available . "',
+					`date_modified` = NOW()
+			WHERE `product_id` = '" . (int) $product_id . "'
+				AND `store_id` = '" . (int) $this->session->data['store_id'] . "'
+		");
+
+		$this->db->query("
+			UPDATE " . DB_PREFIX . "product
+				SET 
+					`is_available` = '" . (int) $is_available . "',
+					`date_modified` = NOW()
+			WHERE `product_id` = '" . (int) $product_id . "'
+		");
+
+		$query = $this->db->query("
+			SELECT p2s.`is_available` 
+			FROM " . DB_PREFIX . "product_to_store p2s
+			JOIN " . DB_PREFIX . "product p
+				ON p2s.`product_id` = p.`product_id`
+			WHERE p2s.`product_id` 	= '" . (int) $product_id . "'
+				AND p2s.`store_id` 		= '" . (int) $this->session->data['store_id'] . "'
+			LIMIT 1
+		")->row;
+
+		$newIsAvailable = $query['is_available'];
+
+		// Delete cache
+		$this->deleteCache($product_id, (int) $this->session->data['store_id']);
+		
+		// Add product to facet filter index
+		$this->load->model('catalog/facet');
+		$this->model_catalog_facet->buildFacetIndex(product_id: (int) $product_id, store_id: (int) $this->session->data['store_id']);
+		$this->model_catalog_facet->buildFacetSorts(product_id: (int) $product_id, store_id: (int) $this->session->data['store_id']);
+
+		return (int) $newIsAvailable;
+	}
 }
