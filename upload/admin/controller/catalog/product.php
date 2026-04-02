@@ -883,9 +883,23 @@ class ControllerCatalogProduct extends Controller {
 			$data['manufacturer'] = '';
 		}
 
+		
 		// Categories
 		$this->load->model('catalog/category');
 
+		// Default parent category fo SEO URLs
+		if (isset($this->request->post['parent_id'])) {
+			$data['parent_id'] = $this->request->post['parent_id'];
+		} elseif (!empty($product_info)) {
+			$data['parent_id'] = $product_info['parent_id'];
+		} else {
+			$data['parent_id'] = 0;
+		}
+
+		$data['path'] = $this->model_catalog_category->getCategory($data['parent_id']);
+		// End default parent category fo SEO URLs
+
+		// Other associated categories
 		if (isset($this->request->post['product_category'])) {
 			$categories = $this->request->post['product_category'];
 		} elseif (isset($this->request->get['product_id'])) {
