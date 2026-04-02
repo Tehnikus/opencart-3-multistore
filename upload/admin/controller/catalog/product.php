@@ -361,17 +361,29 @@ class ControllerCatalogProduct extends Controller {
 					break;
 				}
 			}
+		$this->load->model('setting/store');
+		$data['stores'] = $this->model_setting_store->getMultistores();
+		// Get current store context
+		$data['currentStore'] = $this->session->data['store_id'];
 
 			$data['products'][] = array(
-				'product_id' => $result['product_id'],
-				'image'      => $image,
-				'name'       => $result['name'],
-				'model'      => $result['model'],
-				'price'      => $this->currency->format($result['price'], $this->config->get('config_currency')),
-				'special'    => $special,
-				'quantity'   => $result['quantity'],
-				'status'     => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
-				'edit'       => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $result['product_id'] . $url, true)
+				'product_id' 					=> $result['product_id'],
+				'image'      					=> $image,
+				'name'       					=> $result['name'],
+				'parent_id' 					=> $result['parent_id'],
+				'parent_name' 				=> $result['parent_name'],
+				'stores'		 					=> $result['stores'],
+				'model'      					=> $result['model'],
+				'product_filters' 		=> $result['product_filters'],
+				'product_options' 		=> $result['product_options'],
+				'product_attributes' 	=> $result['product_attributes'],
+				'price'      					=> $this->currency->format($result['price'], $this->config->get('config_currency')),
+				'special'    					=> $special,
+				'quantity'   					=> $result['quantity'],
+				'status'     					=> $result['status'],
+				'is_available'     		=> $result['is_available'],
+				'status_to_store'     => $result['status_to_store'],
+				'edit'       					=> $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $result['product_id'] . $url, true)
 			);
 		}
 
