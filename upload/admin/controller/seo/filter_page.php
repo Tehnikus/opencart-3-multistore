@@ -6,57 +6,23 @@ class ControllerSeoFilterPage extends Controller {
 
   public function __construct($registry) {
 		parent::__construct($registry);
-    $this->language->load('seo/filter_page');
-    $userToken = (string) $this->session->data['user_token'];
-    $this->facetTypes = [
-      // Autocomplete
-      'category' => [
-        'type'            => 1,
-        'required'        => true,
-        'columnId'        => 'category_id',
-        'title'           => $this->language->get('autocomplete_filter_page_category'),
-        'autocompleteUrl' => $this->url->link('catalog/category/autocomplete', 'user_token=' . $userToken, true),
-      ],
-      'filter' => [
-        'type'            => 2,
-        'required'        => false,
-        'columnId'        => 'filter_id',
-        'title'           => $this->language->get('autocomplete_filter_page_filter'),
-        'autocompleteUrl' => $this->url->link('catalog/filter/autocomplete', 'user_token=' . $userToken, true),
-      ],
-      'option' => [
-        'type'            => 3,
-        'required'        => false,
-        'columnId'        => 'option_value_id',
-        'title'           => $this->language->get('autocomplete_filter_page_option'),
-        'autocompleteUrl' => $this->url->link('catalog/option/autocomplete', 'user_token=' . $userToken, true),
-      ],
-      'attribute' => [
-        'type'            => 4,
-        'required'        => false,
-        'columnId'        => 'attribute_id',
-        'title'           => $this->language->get('autocomplete_filter_page_attribute'),
-        'autocompleteUrl' => $this->url->link('catalog/attribute/autocomplete', 'user_token=' . $userToken, true),
-      ],
-      'manufacturer' => [
-        'type'            => 5,
-        'required'        => false,
-        'columnId'        => 'manufacturer_id',
-        'title'           => $this->language->get('autocomplete_filter_page_manufacturer'),
-        'autocompleteUrl' => $this->url->link('catalog/manufacturer/autocomplete', 'user_token=' . $userToken, true),
-      ],
-      // No autocomplete
-      'has_discount' => [
-        'type'            => 9,
-        'required'        => false,
-        'title'           => $this->language->get('autocomplete_filter_page_has_discount'),
-      ],
-      'is_featured' => [
-        'type'            => 10,
-        'required'        => false,
-        'title'           => $this->language->get('autocomplete_filter_page_is_featured'),
-      ],
-    ];
+    $this->language->load('seo/filter_page');$this->load->model('catalog/facet');
+    $facetTypes = $this->model_catalog_facet->grtFacetTypes();
+    foreach ($facetTypes as $key => $value) {
+      $this->facetTypes[$key] = [
+        'title'      => $this->language->get($key),
+        'facetType'  => $value,
+        'required'   => false,
+        'searchType' => 'autocomplete'
+      ];
+      if ($value == 1) {
+        $this->facetTypes[$key]['required'] = true;
+      }
+      // Set searchType to checkbox to facets that have only boolean value - 1 or 0
+      if (in_array($value, [8,9,10])) {
+        $this->facetTypes[$key]['searchType'] = 'checkbox';
+      }
+    }
 	}
 
   public function index() {
