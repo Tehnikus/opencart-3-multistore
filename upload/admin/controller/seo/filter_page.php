@@ -235,4 +235,13 @@ class ControllerSeoFilterPage extends Controller {
 
 		return !$this->error;
 	}
+
+  public function autocomplete() : void {
+    $filters = json_decode(html_entity_decode($this->request->post['filters']) ?? '[]', true);
+    $this->load->model('catalog/facet');
+    $facets = $this->model_catalog_facet->getFacets($filters);
+
+    $this->response->addHeader('Content-Type: application/json');
+    $this->response->setOutput(json_encode($facets));
+  }
 }
