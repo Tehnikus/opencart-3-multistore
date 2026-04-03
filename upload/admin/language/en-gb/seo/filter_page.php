@@ -32,11 +32,14 @@ $_['tab_general']               = 'General';
 $_['tab_description']           = 'Description';
 
 // Autocomplete
-$_['autocomplete_filter_page_category']     = 'Parent category';
-$_['autocomplete_filter_page_filter']       = 'Filters';
-$_['autocomplete_filter_page_option']       = 'Options';
-$_['autocomplete_filter_page_attribute']    = 'Attributes';
-$_['autocomplete_filter_page_manufacturer'] = 'Manufacturer';
-$_['autocomplete_filter_page_has_discount'] = 'Has discount';
-$_['autocomplete_filter_page_is_featured']  = 'Is featured';
+$_['filter_category_id']      = 'Category';
+$_['filter_filter']           = 'Filter';
+$_['filter_option']           = 'Option';
+$_['filter_attribute']        = 'Attribute';
+$_['filter_manufacturer_id']  = 'Manufacturer';
+$_['filter_tag_id']           = 'Tag';
+$_['filter_supplier_id']      = 'Supplier';
+$_['filter_is_available']     = 'Is available';
+$_['filter_has_discount']     = 'Has discount';
+$_['filter_is_featured']      = 'Is featured';
 
