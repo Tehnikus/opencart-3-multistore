@@ -80,6 +80,9 @@ class ControllerSeoFilterPage extends Controller {
       'user_token'    => (string) $this->session->data['user_token'],
     ];
 
+    // Merge with errors array to hihlight faulty inputs
+    $data = [...$data, ...$this->error];
+
     $this->response->setOutput($this->load->view('seo/filter_page_form', $data));
   }
 
@@ -188,14 +191,34 @@ class ControllerSeoFilterPage extends Controller {
 
   protected function validateForm() {
 		if (!$this->user->hasPermission('modify', 'seo/filter_page')) {
-			$this->error['warning'] = $this->language->get('error_permission');
+			$this->error['warning'] = $this->language->get('e_permission');
 		}
 
 		foreach ($this->request->post['filter_page_description'] as $language_id => $value) {
 			if ((utf8_strlen($value['name']) < 1) || (utf8_strlen($value['name']) > 255)) {
-				$this->error['name'][$language_id] = $this->language->get('error_name');
+				$this->error['error_name'][$language_id] = $this->language->get('e_name');
 			}
 		}
+
+    // Check if parent category is selected
+    if (!isset($this->request->post['filter_page_facet'][1])) {
+      $this->error['error_select_category'] = $this->language->get('e_select_category');
+    }
+
+    if (!isset($this->request->post['filter_page_facet'])) {
+      $this->error['error_select_one_facet'] = $this->language->get('e_select_one_facet');
+    } else {
+      $checkFacetsNotEmpty = [];
+      foreach ($this->request->post['filter_page_facet'] as $key => $facetType) {
+        if ($key == 1) {
+          continue;
+        }
+        $checkFacetsNotEmpty[$key] = $facetType;
+      }
+      if (empty(array_filter($checkFacetsNotEmpty))) {
+        $this->error['error_select_one_facet'] = $this->language->get('e_select_one_facet');
+      }
+    }
 
 		// if ($this->request->post['filter_page_seo_url']) {
 		// 	$this->load->model('design/seo_url');
@@ -222,7 +245,7 @@ class ControllerSeoFilterPage extends Controller {
 		// }
 
 		if ($this->error && !isset($this->error['warning'])) {
-			$this->error['warning'] = $this->language->get('error_warning');
+			$this->error['warning'] = $this->language->get('e_warning');
 		}
 
 		return !$this->error;
