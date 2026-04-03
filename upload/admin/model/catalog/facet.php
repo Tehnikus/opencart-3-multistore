@@ -663,4 +663,79 @@ Class ModelCatalogFacet extends Model {
       $storeWhere
     ");
   }
+
+  public function getFacets($filters = []) : array {
+    $storeId       = (int) $this->session->data['store_id'];
+    $languageId    = (int) $this->config->get('config_language_id');
+    $whereFacet    = [];
+    $whereCategory = [];
+
+    // Dummy fallback for facet search so request doen't fail if no filter provided
+    $whereFacet[] = '1'; 
+    // Dummy fallback for facet filter by category. 
+    // Not really necessary, because it should no happen when category is not selected
+    // But let it be here to keep code similarity and  just in case
+    $whereCategory[] = "p.`product_id` = i.`product_id`"; 
+
+    foreach ($filters as $filter) {
+      // Category filter
+      if ($filter['facet_type'] == 1 && isset($filter['facet_value_id'])) {
+        $whereCategory[] = "p.`product_id` = i.`product_id`";
+        $whereCategory[] = "p.`facet_type` = 1"; // type = category
+        $whereCategory[] = "p.`facet_value_id` = " . (int) $filter['facet_value_id'] . ""; // category_id
+        $whereCategory[] = "p.`store_id` = {$storeId}";
+      }
+      // Facet filter
+      if ($filter['facet_type'] !== 1) {
+        $whereFacet[] = "f.facet_type = " . (int) $filter['facet_type'] . "";
+        if (isset($filter['name'])) {
+          $whereFacet[] = "(
+            n.`name` LIKE '%" . $this->db->escape($filter['name']) . "%'
+            OR n.`group_name` LIKE '%" . $this->db->escape($filter['name']) . "%'
+          )";
+        }
+      }
+    }
+
+		$sql = "
+      WITH facet AS (
+        -- 2. Get all facets of current category products
+        SELECT
+          i.`facet_value_id`,
+          i.`facet_type`,
+          i.`facet_group_id`,
+          i.`store_id`,
+          COUNT(DISTINCT(i.`product_id`)) AS count_product
+        FROM oc_facet_index i
+        WHERE EXISTS(
+          -- 1. Get all products from current category
+          SELECT
+            1
+          FROM oc_facet_index p
+          WHERE " . implode(" AND ", $whereCategory) . "
+        )
+        AND i.`store_id` = {$storeId}
+        GROUP BY i.facet_type, i.facet_group_id, i.facet_value_id
+      )
+      
+      SELECT 
+        f.`facet_value_id`, 
+        f.`facet_type`, 
+        f.`facet_group_id`,
+        f.`count_product`,
+        n.`name`,
+        n.`group_name`
+      FROM facet f
+      LEFT JOIN oc_facet_name n
+        ON  n.`facet_value_id` = f.`facet_value_id`
+        AND n.`facet_type` = f.`facet_type`
+        AND n.`facet_group_id` = f.`facet_group_id`
+        AND n.`store_id` = f.`store_id`
+        AND n.`language_id` = {$languageId}
+      -- 3. Filter facets by type and name  
+      WHERE " . implode(" AND ", $whereFacet) . "
+    ";
+
+    return $this->db->query($sql)->rows ?? [];
+	}
 }
