@@ -7456,10 +7456,11 @@ CREATE TABLE `oc_blog_category_image_description` (
 DROP TABLE IF EXISTS `oc_seo_filter_page_facet_index`;
 CREATE TABLE `oc_seo_filter_page_facet_index` (
   `filter_page_id`      INT NOT NULL,
-  `type`                TINYINT NOT NULL,
-  `value`               INT NOT NULL,
-  PRIMARY KEY (`filter_page_id`, `type`, `value`),
-  KEY (`type`, `value`)
+  `facet_type`          TINYINT NOT NULL,
+  `facet_value_id`      INT NOT NULL,
+  `facet_group_id`      INT NOT NULL,
+  `store_id`            INT NOT NULL,
+  PRIMARY KEY (`filter_page_id`, `facet_value_id`, `facet_group_id`, `facet_type`, `store_id`)
 ) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS `oc_seo_filter_page_to_store`;
