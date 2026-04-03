@@ -1,5 +1,29 @@
 <?php
 Class ModelCatalogFacet extends Model {
+
+  public $facetTypes = [];
+
+  public function __construct($registry) {
+    parent::__construct($registry);
+
+    $this->facetTypes = [
+			'filter_category_id'   		=> 1,
+			'filter_filter'        		=> 2,
+			'filter_option'        		=> 3,
+			'filter_attribute'     		=> 4,
+			'filter_manufacturer_id'	=> 5,
+			'filter_tag_id'           => 6,
+			'filter_supplier_id'      => 7,
+			'filter_is_available'  		=> 8,
+			'filter_has_discount'  		=> 9,
+			'filter_is_featured'   		=> 10,
+		];
+  }
+
+  public function getFacetTypes() : array {
+    return $this->facetTypes;
+  }
+
   public function buildFacetIndex($product_id = null, $facet_value_id = null, $facet_group_id = null, $facet_type = null, $store_id = null) : void {
     $where = [];
     $where[] = "1";
