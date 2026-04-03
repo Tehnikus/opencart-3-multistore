@@ -7,7 +7,7 @@ class ControllerSeoFilterPage extends Controller {
   public function __construct($registry) {
 		parent::__construct($registry);
     $this->language->load('seo/filter_page');$this->load->model('catalog/facet');
-    $facetTypes = $this->model_catalog_facet->grtFacetTypes();
+    $facetTypes = $this->model_catalog_facet->getFacetTypes();
     foreach ($facetTypes as $key => $value) {
       $this->facetTypes[$key] = [
         'title'      => $this->language->get($key),
