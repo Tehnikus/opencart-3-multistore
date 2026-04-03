@@ -26,24 +26,27 @@
           </ul>
           <div class="tab-content">
             <div class="tab-pane active" id="tab-general">
-              {% for ket, facetType in facetTypes %}
+              {% for key, facetType in facetTypes %}
                 <div class="form-group  {% if facetType.required %}required{% endif %}">
-                  <label class="col-sm-2 control-label" for="{{ key }}Autocomplete">{{ facetType.title }}</label>
+                  <label class="col-sm-2 control-label" for="{{ key }}">{{ facetType.title }}</label>
                   <div class="col-sm-10">
-                    {% if facetType.autocompleteUrl %}
+                    {% if facetType.searchType == 'autocomplete' %}
                       <div class="niftySelected">
+
                       </div>
                       <input 
-                        id="{{ key }}Autocomplete" 
+                        id="{{ key }}" 
                         type="text" 
                         class="form-control niftyAutocomplete" 
                         placeholder="{{ facetType.title }}" 
-                        data-autocomplete-url="{{ facetType.autocompleteUrl }}" 
-                        data-column-id="{{ facetType.columnId }}"
-                        data-facet-type="{{ facetType.type }}"
+                        {# data-autocomplete-url="{{ facetType.autocompleteUrl }}" 
+                        data-column-id="{{ facetType.columnId }}" #}
+                        data-facet-type="{{ facetType.facetType }}"
                       />
-                    {% else %}
-                      <input type="checkbox" name="{{ key }}" value="1" />
+                    {% endif %}
+
+                    {% if facetType.searchType == 'checkbox' %}
+                      <input style="all: revert" type="checkbox" name="{{ key }}" value="1" />
                     {% endif %}
                     
                   </div>
@@ -70,20 +73,33 @@
         const autocomplete = new niftyAutocomplete({
           input,
           selectedItemsBox: input.previousElementSibling,
-          idKey: input.dataset.columnId,
+          idKey: 'facet_value_id',
           request: {
-            url: input.dataset.autocompleteUrl,
+            url: `${location.protocol}${location.host}/admin/index.php?route=seo/filter_page/autocomplete`,
+            // Set GET params
             getParams: {
-              filter_name: () => input.value,
+              user_token: userToken,
+            },
+            // Set POST params of autocomplete
+            postParams: {
+              filters: () => {
+                const filters = [];
+                filters.push({'facet_type': input.dataset.facetType, 'name': input.value ?? ''})
+                // If current input is not a category, add facet_type = category and facet_value_id = category_id into search request to filter facets by current category
+                if (input.dataset.facetType !== '1') {
+                  filters.push({'facet_type': 1, 'facet_value_id': document.querySelector('[name="filter_page_facet[1][]"]')?.value ?? 0});
+                }
+                return JSON.stringify(filters);
+              }
             }
           },
           item: {
             searchTemplate: (row) => `<div class="niftyItemData"><p><b>${row.name}</b></p></div>`,
             selectTemplate: (row) => `
-              <div class="niftyItem" data-id="${row[input.dataset.columnId]}">
+              <div class="niftyItem" data-id="${row.facet_value_id}">
                 <span><b>${row.name}</b></span>
                 <button style="padding: 5px 8px;" type="button" class="btn btn-danger niftyItemDelete"><i class="fa fa-times"></i></button>
-                <input name="filter_page_facet[${input.dataset.facetType}][]" value="${row[input.dataset.columnId]}" />
+                <input hidden name="filter_page_facet[${input.dataset.facetType}][]" value="${row.facet_value_id}" />
               </div>
             `,
           },
