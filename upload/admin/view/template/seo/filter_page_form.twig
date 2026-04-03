@@ -39,14 +39,22 @@
                         type="text" 
                         class="form-control niftyAutocomplete" 
                         placeholder="{{ facetType.title }}" 
-                        {# data-autocomplete-url="{{ facetType.autocompleteUrl }}" 
-                        data-column-id="{{ facetType.columnId }}" #}
                         data-facet-type="{{ facetType.facetType }}"
                       />
+                      {% if error_select_category and facetType.facetType == 1 %}
+                        <div class="text-danger">{{ error_select_category }}</div>
+                      {% endif %}
+                      {% if error_select_one_facet and facetType.facetType !== 1 %}
+                        <div class="text-danger">{{ error_select_one_facet }}</div>
+                      {% endif %}
+                      
                     {% endif %}
 
                     {% if facetType.searchType == 'checkbox' %}
                       <input style="all: revert" type="checkbox" name="{{ key }}" value="1" />
+                      {% if error_select_one_facet and facetType.facetType !== 1 %}
+                        <div class="text-danger">{{ error_select_one_facet }}</div>
+                      {% endif %}
                     {% endif %}
                     
                   </div>
