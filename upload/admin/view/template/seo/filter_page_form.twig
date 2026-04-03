@@ -95,7 +95,7 @@
                 filters.push({'facet_type': input.dataset.facetType, 'name': input.value ?? ''})
                 // If current input is not a category, add facet_type = category and facet_value_id = category_id into search request to filter facets by current category
                 if (input.dataset.facetType !== '1') {
-                  filters.push({'facet_type': 1, 'facet_value_id': document.querySelector('[name="filter_page_facet[1][]"]')?.value ?? 0});
+                  filters.push({'facet_type': 1, 'facet_value_id': document.querySelector('[name="filter_page_facet[1][facet_value_id]"]')?.value ?? 0});
                 }
                 return JSON.stringify(filters);
               }
@@ -105,9 +105,10 @@
             searchTemplate: (row) => `<div class="niftyItemData"><p><b>${row.name}</b></p></div>`,
             selectTemplate: (row) => `
               <div class="niftyItem" data-id="${row.facet_value_id}">
-                <span><b>${row.name}</b></span>
-                <button style="padding: 5px 8px;" type="button" class="btn btn-danger niftyItemDelete"><i class="fa fa-times"></i></button>
-                <input hidden name="filter_page_facet[${input.dataset.facetType}][]" value="${row.facet_value_id}" />
+                <span style="flex: 1"><b>${row.name}</b></span>
+                <button style="padding: 0; line-height: 0; width: 25px; height: 25px;" type="button" class="btn btn-danger niftyItemDelete"><i class="fa fa-times"></i></button>
+                <input  name="filter_page_facet[${input.dataset.facetType}][facet_value_id]" value="${row.facet_value_id}" />
+                <input  name="filter_page_facet[${input.dataset.facetType}][facet_group_id]" value="${row.facet_group_id}" />
               </div>
             `,
           },
