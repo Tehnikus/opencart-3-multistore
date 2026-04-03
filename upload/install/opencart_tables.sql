@@ -7475,6 +7475,7 @@ DROP TABLE IF EXISTS `oc_seo_filter_page_descciption`;
 CREATE TABLE `oc_seo_filter_page_descciption` (
   `filter_page_id`      INT AUTO_INCREMENT,
   `language_id`         INT NOT NULL,
+  `store_id`            INT NOT NULL,
   `name`                VARCHAR(255) NOT NULL,
   `h1`                  VARCHAR(255) NOT NULL,
   `meta_title`          VARCHAR(255) NOT NULL,
@@ -7486,7 +7487,7 @@ CREATE TABLE `oc_seo_filter_page_descciption` (
   `faq`                 TEXT NOT NULL,
   `how_to`              TEXT NOT NULL,
   `footer`              TEXT NOT NULL,
-  PRIMARY KEY (`filter_page_id`, `language_id`)
+  PRIMARY KEY (`filter_page_id`, `language_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `oc_seo_filter_page_image_description`;
@@ -7494,8 +7495,9 @@ CREATE TABLE `oc_seo_filter_page_image_description` (
   `image_id`            INT NOT NULL,
   `filter_page_id`      INT NOT NULL,
   `language_id`         INT NOT NULL,
+  `store_id`            INT NOT NULL,
   `description`         TEXT NOT NULL,
-  PRIMARY KEY (`filter_page_id`, `language_id`)
+  PRIMARY KEY (`filter_page_id`, `language_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `oc_search_page_image_description`;
