@@ -4,17 +4,17 @@ $_['text_no_results']           = 'No results';
 $_['text_confirm']              = 'This will delete selected pages! Are you sure?';
 
 // Buttons
-$_['button_add']                = 'Add new filter page';
+$_['button_add']                = 'Add new SEO filter page';
 $_['button_delete']             = 'Delete';
 
 // Columns
 $_['column_name']               = 'Name';
 
 // Errors
-$_['e_name']                    = 'Set filter page name';
+$_['e_name']                    = 'Set SEO filter page name';
 $_['e_unique']                  = 'Filter page SEO URL is not unique';
-$_['e_permission']              = 'You are not permitted to edit filter page';
-$_['e_warning']                 = 'Error while saving filter page';
+$_['e_permission']              = 'You are not permitted to edit SEO filter page';
+$_['e_warning']                 = 'Error while saving SEO filter page';
 $_['e_select_category']         = 'Select parent category';
 $_['e_select_one_facet']        = 'Select at least one facet';
 $_['e_facet_not_unique']        = 'This facet combination already exists';
