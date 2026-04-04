@@ -157,6 +157,59 @@ class ModelSeoFilterPage extends Model {
     return $result ?? [];
   }
 
+  /**
+   * Check if filter page with selected facets already exists
+   * @param array $filters selected facets
+   * @return array of filter page ids
+   */
+  public function getExistingPage($filters) : array {
+    
+    $flat  = [];
+    $where = [];
+
+    // Build flat list fo facets
+    foreach ($filters as $facetType => $groups) {
+      foreach ($groups as $groupId => $values) {
+        foreach ($values as $valueId) {
+          $flat[] = [
+            'facet_type'     => (int)$facetType,
+            'facet_group_id' => (int)$groupId,
+            'facet_value_id' => (int)$valueId,
+          ];
+        }
+      }
+    }
+
+    // Build WHERE conditions
+    foreach ($flat as $f) {
+      $where[] = "(
+        facet_type = {$f['facet_type']} AND
+        facet_group_id = {$f['facet_group_id']} AND
+        facet_value_id = {$f['facet_value_id']}
+      )";
+    }
+
+    $sql = "
+      SELECT 
+        filter_page_id
+      FROM oc_seo_filter_page_facet_index
+      WHERE " . implode(" OR ", $where) . "
+      GROUP BY filter_page_id
+
+      HAVING 
+        COUNT(*) = " . count($flat) . " -- Requested facet_value_id count
+        AND COUNT(*) = (
+          SELECT COUNT(*) -- Actual page facet_value_id count
+          FROM oc_seo_filter_page_facet_index fi2
+          WHERE fi2.filter_page_id = oc_seo_filter_page_facet_index.filter_page_id
+        )
+    ";
+
+    $result = $this->db->query($sql);
+
+    return $result->rows;
+  }
+
   public function getFilterPageTotal() : int {
     $storeId = (int) $this->session->data['store_id'];
     $query = $this->db->query("
