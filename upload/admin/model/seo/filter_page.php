@@ -101,17 +101,29 @@ class ModelSeoFilterPage extends Model {
     
     return $this->db->query($sql)->rows ?? [];
   }
+  
   public function getFilterPageFacets($pageId) : array {
+    $result = [];
+    if ($pageId === null) {
+      return $result;
+    }
     $pageId = (int) $pageId;
+    $storeId = (int) $this->session->data['store_id'];
 
     $sql = "
       SELECT
         *
       FROM " . DB_PREFIX . "seo_filter_page_facet_index
       WHERE filter_page_id = {$pageId}
+        AND store_id = {$storeId}
     ";
+
+    foreach ($this->db->query($sql)->rows ?? [] as $row) {
+      $result[$row['facet_type']][$row['facet_group_id']][$row['facet_value_id']] = $row['facet_value_id'];
+    }
     
-    return $this->db->query($sql)->rows ?? [];
+    return $result;
+  }
   }
 
   public function getFilterPageTotal() : int {
