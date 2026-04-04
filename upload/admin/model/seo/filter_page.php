@@ -34,16 +34,20 @@ class ModelSeoFilterPage extends Model {
         ");
       }
 
-      foreach ($data['filter_page_facet'] ?? [] as $facet_type => $facet_data) {
-        $this->db->query("
-          INSERT INTO " . DB_PREFIX . "seo_filter_page_facet_index
-          SET
-            `filter_page_id`    = " . (int) $filter_page_id . ",
-            `facet_type`        = " . (int) $facet_type . ",
-            `facet_value_id`    = " . (int) $facet_data['facet_value_id'] . "
-            `facet_group_id`    = " . (int) $facet_data['facet_group_id'] . "
-            `store_id`          = " . (int) $this->session->data['store_id'] . "
-        ");
+      foreach ($data['filter_page_facet'] ?? [] as $facet_type => $facet_group) {
+        foreach ($facet_group as $facet_group_id => $facet_value) {
+          foreach ($facet_value as $facet_value_id) {
+            $this->db->query("
+              INSERT INTO " . DB_PREFIX . "seo_filter_page_facet_index
+              SET
+                `filter_page_id`    = " . (int) $filter_page_id . ",
+                `facet_type`        = " . (int) $facet_type . ",
+                `facet_value_id`    = " . (int) $facet_value_id . ",
+                `facet_group_id`    = " . (int) $facet_group_id . ",
+                `store_id`          = " . (int) $this->session->data['store_id'] . "
+            ");
+          }
+        }
       }
 
       // Save URL
