@@ -137,6 +137,24 @@ class ModelSeoFilterPage extends Model {
     
     return $result;
   }
+
+  public function getFacetName($facetTypeId, $facetGroupId, $facetValueId) : array {
+    $storeId = (int) $this->session->data['store_id'];
+    $languageId = (int) $this->config->get('config_language_id');
+    
+    $result = $this->db->query("
+      SELECT
+        `name`,
+        `group_name`
+      FROM " . DB_PREFIX . "facet_name
+      WHERE `facet_type`     = " . (int) $facetTypeId . "
+        AND `facet_value_id` = " . (int) $facetValueId . "
+        AND `facet_group_id` = " . (int) $facetGroupId . "
+        AND `language_id`    = " . (int) $languageId . "
+        AND `store_id`       = " . (int) $storeId . "
+    ")->row;
+
+    return $result ?? [];
   }
 
   public function getFilterPageTotal() : int {
