@@ -72,6 +72,86 @@ class ModelSeoFilterPage extends Model {
       throw $e;
     }
   }
+  public function editFilterPage($filter_page_id, $data) {
+    
+    $this->db->query("START TRANSACTION");
+
+    try {
+
+      // Update main table
+      $this->db->query("
+        UPDATE " . DB_PREFIX . "seo_filter_page_to_store 
+        SET
+          `date_modified`  = NOW()
+        WHERE filter_page_id = " . (int) $filter_page_id . "
+      ");
+
+      // Update descriptions
+      $this->db->query("
+        DELETE FROM " . DB_PREFIX . "seo_filter_page_description
+        WHERE filter_page_id = " . (int) $filter_page_id . "
+      ");
+
+      foreach ($data['filter_page_description'] as $language_id => $value) {
+        $this->db->query("
+          INSERT INTO " . DB_PREFIX . "seo_filter_page_description 
+          SET 
+            `filter_page_id` 		= '" . (int) $filter_page_id . "', 
+            `language_id` 			= '" . (int) $language_id . "', 
+            `store_id` 					= '" . (int) $this->session->data['store_id'] . "',
+            `name` 							= '" . $this->db->escape($value['name']) . "', 
+            `h1`                = '" . $this->db->escape($value['h1']) . "', 
+            `description` 			= '" . $this->db->escape($value['description']) . "', 
+            `meta_title` 				= '" . $this->db->escape($value['meta_title']) . "', 
+            `meta_description` 	= '" . $this->db->escape($value['meta_description']) . "', 
+            `meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "'
+        ");
+      }
+
+      // Update facet list
+      $this->db->query("
+        DELETE FROM " . DB_PREFIX . "seo_filter_page_facet_index
+        WHERE filter_page_id = " . (int) $filter_page_id . "
+      ");
+
+      foreach ($data['filter_page_facet'] ?? [] as $facet_type => $facet_group) {
+        foreach ($facet_group as $facet_group_id => $facet_value) {
+          foreach ($facet_value as $facet_value_id) {
+            $this->db->query("
+              INSERT INTO " . DB_PREFIX . "seo_filter_page_facet_index
+              SET
+                `filter_page_id`    = " . (int) $filter_page_id . ",
+                `facet_type`        = " . (int) $facet_type . ",
+                `facet_value_id`    = " . (int) $facet_value_id . ",
+                `facet_group_id`    = " . (int) $facet_group_id . ",
+                `store_id`          = " . (int) $this->session->data['store_id'] . "
+            ");
+          }
+        }
+      }
+
+      // Save URL
+      // foreach ($data['seo_url'] ?? [] as $language_id => $keyword) {
+      //   if (!empty($keyword)) {
+      //     $this->db->query("
+      //       INSERT INTO " . DB_PREFIX . "seo_url 
+      //       SET 
+      //         store_id    = '" . (int) $this->session->data['store_id'] . "',
+      //         language_id = '" . (int) $language_id . "', 
+      //         query       = '', 
+      //         keyword     = '" . $this->db->escape($keyword) . "'
+      //     ");
+      //   }
+      // }
+      
+      $this->db->query("COMMIT");
+      return $filter_page_id;
+      
+    } catch (\Throwable $e) {
+      $this->db->query("ROLLBACK");
+      throw $e;
+    }
+  }
 
   public function getList($filter) : array {
     $result = [];
