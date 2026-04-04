@@ -86,20 +86,28 @@ class ModelSeoFilterPage extends Model {
     return $result;
   }
 
-  public function getFilterPageDescriptions($pageId) : array {
+  public function getFilterPageDescription($pageId) : array {
+    $result = [];
+    if ($pageId === null) {
+      return $result;
+    }
     $pageId = (int) $pageId;
     $storeId = (int) $this->session->data['store_id'];
     $sql = "
       SELECT
         *
-      FROM " . DB_PREFIX . "seo_filter_page_descciption pd
+      FROM " . DB_PREFIX . "seo_filter_page_desciption pd
       JOIN " . DB_PREFIX . "seo_filter_page_to_store p2s
         ON p2s.filter_page_id = pd.filter_page_id
         AND p2s.store_id = {$storeId}
       WHERE pd.filter_page_id = {$pageId}
     ";
+
+    foreach($this->db->query($sql)->rows ?? [] as $row) {
+      $result[$row['language_id']] = $row;
+    }
     
-    return $this->db->query($sql)->rows ?? [];
+    return $result ?? [];
   }
   
   public function getFilterPageFacets($pageId) : array {
