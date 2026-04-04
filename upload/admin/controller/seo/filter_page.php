@@ -49,8 +49,8 @@ class ControllerSeoFilterPage extends Controller {
       'footer'        => $this->load->controller('common/footer'),
       'header'        => $this->load->controller('common/header'),
       'breadcrumbs'   => $this->displayBreadcrumbs(),
-      'pagination'    => $this->getPaginamtion()['pagination'],
-      'results'       => $this->getPaginamtion()['results'],
+      'pagination'    => $this->getPagination()['pagination'],
+      'results'       => $this->getPagination()['results'],
       'user_token'    => $user_token,
       'add'           => $this->url->link('seo/filter_page/add', 'user_token=' . $user_token, true),
       'delete'        => $this->url->link('seo/filter_page/delete', 'user_token=' . $user_token, true),
@@ -192,7 +192,7 @@ class ControllerSeoFilterPage extends Controller {
     return $breadcrumbs;
   }
 
-  public function getPaginamtion() {
+  public function getPagination() {
     $this->load->model('seo/filter_page');
     $total = $this->model_seo_filter_page->getFilterPageTotal();
     $page = (int) ($this->request->get['page'] ?? 1);

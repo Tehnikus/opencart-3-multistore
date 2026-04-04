@@ -80,14 +80,12 @@ class ModelSeoFilterPage extends Model {
     $sql = "
       SELECT
         *
-      FROM " . DB_PREFIX . "seo_filter_page_descciption pd
+      FROM " . DB_PREFIX . "seo_filter_page_desciption pd
       JOIN " . DB_PREFIX . "seo_filter_page_to_store p2s
         ON p2s.filter_page_id = pd.filter_page_id
         AND p2s.store_id = {$storeId}
     ";
-
-    $this->db->query($sql);
-
+    $result = $this->db->query($sql)->rows ?? [];
     return $result;
   }
 
@@ -114,7 +112,7 @@ class ModelSeoFilterPage extends Model {
     
     return $result ?? [];
   }
-  
+
   public function getFilterPageFacets($pageId) : array {
     $result = [];
     if ($pageId === null) {
