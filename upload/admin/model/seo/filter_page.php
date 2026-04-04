@@ -76,7 +76,7 @@ class ModelSeoFilterPage extends Model {
   public function getList($filter) : array {
     $result = [];
     $storeId = (int) $this->session->data['store_id'];
-
+    $languageId = (int) $this->config->get('config_language_id');
     $sql = "
       SELECT
         pd.filter_page_id,
@@ -84,26 +84,51 @@ class ModelSeoFilterPage extends Model {
         (
           SELECT JSON_ARRAYAGG(
             JSON_OBJECT(
-              'name', fn.name,
-              'group_name', fn.group_name
+              'facet_type',     fi.facet_type,
+              'facet_group_id', fi.facet_group_id,
+              'facet_value_id', fi.facet_value_id,
+              'name',           fn.name,
+              'group_name',     fn.group_name
             )
           )
           FROM oc_seo_filter_page_facet_index fi
-          JOIN oc_facet_name fn
+          LEFT JOIN oc_facet_name fn
             ON  fn.facet_type     = fi.facet_type
             AND fn.facet_group_id = fi.facet_group_id
             AND fn.facet_value_id = fi.facet_value_id
           WHERE fi.filter_page_id = pd.filter_page_id
-        ) AS facets
-      
+        ) AS facets,
+        (
+          SELECT COUNT(*)
+          FROM (
+            SELECT p.product_id
+            FROM oc_facet_index p
+            JOIN oc_seo_filter_page_facet_index fi
+              ON fi.filter_page_id = pd.filter_page_id
+              AND fi.facet_type = p.facet_type
+              AND fi.facet_group_id = p.facet_group_id
+              AND fi.facet_value_id = p.facet_value_id
+            WHERE p.store_id = {$storeId}
+            GROUP BY p.product_id
+            HAVING COUNT(*) = (
+              SELECT COUNT(*)
+              FROM oc_seo_filter_page_facet_index fi2
+              WHERE fi2.filter_page_id = pd.filter_page_id
+            )
+          ) t
+        ) AS product_count,
+        (SELECT fi.facet_value_id FROM oc_seo_filter_page_facet_index fi WHERE fi.filter_page_id = pd.filter_page_id AND fi.facet_type = 1) AS category_id
       FROM oc_seo_filter_page_description pd
       JOIN oc_seo_filter_page_to_store p2s
         ON p2s.filter_page_id = pd.filter_page_id
         AND p2s.store_id = {$storeId}
+      WHERE pd.language_id = {$languageId}
     ";
 
     foreach($this->db->query($sql)->rows ?? [] as $row) {
       $row['facets'] = json_decode($row['facets'], true);
+      // Sort facets, so parent category (facet_type == 1) is always first
+      usort($row['facets'], fn($a, $b) => $a['facet_type'] <=> $b['facet_type']);
       $result[] = $row;
     }
 
@@ -120,7 +145,7 @@ class ModelSeoFilterPage extends Model {
     $sql = "
       SELECT
         *
-      FROM " . DB_PREFIX . "seo_filter_page_desciption pd
+      FROM " . DB_PREFIX . "seo_filter_page_description pd
       JOIN " . DB_PREFIX . "seo_filter_page_to_store p2s
         ON p2s.filter_page_id = pd.filter_page_id
         AND p2s.store_id = {$storeId}
@@ -234,7 +259,7 @@ class ModelSeoFilterPage extends Model {
     $query = $this->db->query("
       SELECT
         COUNT(*) AS pages_count
-      FROM " . DB_PREFIX . "seo_filter_page_desciption pd
+      FROM " . DB_PREFIX . "seo_filter_page_description pd
       JOIN " . DB_PREFIX . "seo_filter_page_to_store p2s
         ON p2s.filter_page_id = pd.filter_page_id
         AND p2s.store_id = {$storeId}
