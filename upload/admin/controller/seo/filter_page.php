@@ -98,7 +98,9 @@ class ControllerSeoFilterPage extends Controller {
     $formData['filter_page_description'] = $this->model_seo_filter_page->getFilterPageDescription($filter_page_id);
     $formData['filter_page_facet']       = $this->model_seo_filter_page->getFilterPageFacets($filter_page_id);
     // Replace actual data with POST data
-    $formData = array_replace_recursive($formData, $this->request->post);
+    if ($this->request->server['REQUEST_METHOD'] == 'POST') {
+      $formData = $this->request->post;
+    }
     
     foreach ($formData['filter_page_facet'] ?? [] as $facetTypeId => $facetType) {
       foreach ($facetType as $facetGroupId => $facetGroup) {
