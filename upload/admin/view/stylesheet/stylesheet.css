@@ -1075,8 +1075,10 @@ table td p {
         font-weight: normal;
         padding: 3px 7px;
     }
+    &.strong {
+        font-weight: bold;
+    }
 }
-
 
 .has-error .well {
     border-color: #e3503e;
