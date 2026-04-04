@@ -7465,15 +7465,15 @@ CREATE TABLE `oc_seo_filter_page_facet_index` (
 
 DROP TABLE IF EXISTS `oc_seo_filter_page_to_store`;
 CREATE TABLE `oc_seo_filter_page_to_store` (
-  `filter_page_id`      INT NOT NULL,
+  `filter_page_id`      INT AUTO_INCREMENT,
   `store_id`            INT NOT NULL,
   `date_modified`       DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY (`filter_page_id`, `store_id`)
 ) ENGINE=InnoDB;
 
-DROP TABLE IF EXISTS `oc_seo_filter_page_descciption`;
-CREATE TABLE `oc_seo_filter_page_descciption` (
-  `filter_page_id`      INT AUTO_INCREMENT,
+DROP TABLE IF EXISTS `oc_seo_filter_page_desciption`;
+CREATE TABLE `oc_seo_filter_page_desciption` (
+  `filter_page_id`      INT NOT NULL,
   `language_id`         INT NOT NULL,
   `store_id`            INT NOT NULL,
   `name`                VARCHAR(255) NOT NULL,
