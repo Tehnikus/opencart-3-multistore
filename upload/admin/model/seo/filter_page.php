@@ -162,7 +162,7 @@ class ModelSeoFilterPage extends Model {
     $query = $this->db->query("
       SELECT
         COUNT(*) AS pages_count
-      FROM " . DB_PREFIX . "seo_filter_page_descciption pd
+      FROM " . DB_PREFIX . "seo_filter_page_desciption pd
       JOIN " . DB_PREFIX . "seo_filter_page_to_store p2s
         ON p2s.filter_page_id = pd.filter_page_id
         AND p2s.store_id = {$storeId}
