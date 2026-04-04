@@ -97,17 +97,16 @@ class ControllerSeoFilterPage extends Controller {
     // Get actual data
     $formData['filter_page_description'] = $this->model_seo_filter_page->getFilterPageDescription($filter_page_id);
     $formData['filter_page_facet']       = $this->model_seo_filter_page->getFilterPageFacets($filter_page_id);
-    // REplace actual data with POST data
+    // Replace actual data with POST data
     $formData = array_replace_recursive($formData, $this->request->post);
     
     foreach ($formData['filter_page_facet'] ?? [] as $facetTypeId => $facetType) {
       foreach ($facetType as $facetGroupId => $facetGroup) {
         foreach ($facetGroup as $facetValueId => $facetValue) {
           $facetNames = $this->model_seo_filter_page->getFacetName($facetTypeId, $facetGroupId, $facetValue);
-          // echo '<pre>' . htmlspecialchars(print_r($facetNames, true)) . '</pre>';
           $formData['filter_page_facet'][$facetTypeId][$facetGroupId][$facetValueId] = [
-            'name'           => $facetNames['name'],
-            'group_name'     => $facetNames['group_name'],
+            'name'           => $facetNames['name'] ?? '',
+            'group_name'     => $facetNames['group_name'] ?? '',
             'facet_type'     => $facetTypeId,
             'facet_group_id' => $facetGroupId,
             'facet_value_id' => $facetValueId,
