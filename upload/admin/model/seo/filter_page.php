@@ -20,12 +20,13 @@ class ModelSeoFilterPage extends Model {
       // Save descriptions
       foreach ($data['filter_page_description'] as $language_id => $value) {
         $this->db->query("
-          INSERT INTO " . DB_PREFIX . "seo_filter_page_descciption 
+          INSERT INTO " . DB_PREFIX . "seo_filter_page_desciption 
           SET 
             `filter_page_id` 		= '" . (int) $filter_page_id . "', 
             `language_id` 			= '" . (int) $language_id . "', 
             `store_id` 					= '" . (int) $this->session->data['store_id'] . "',
             `name` 							= '" . $this->db->escape($value['name']) . "', 
+            `h1`                = '" . $this->db->escape($value['h1']) . "', 
             `description` 			= '" . $this->db->escape($value['description']) . "', 
             `meta_title` 				= '" . $this->db->escape($value['meta_title']) . "', 
             `meta_description` 	= '" . $this->db->escape($value['meta_description']) . "', 
