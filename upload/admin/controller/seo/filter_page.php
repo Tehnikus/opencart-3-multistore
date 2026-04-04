@@ -68,8 +68,6 @@ class ControllerSeoFilterPage extends Controller {
 
     $data = [
       'facetTypes'    => $this->facetTypes,
-      'description'   => $this->model_seo_filter_page->getFilterPageDescriptions($id),
-      'facet'         => $this->model_seo_filter_page->getFilterPageFacets($id),
       'column_left'   => $this->load->controller('common/column_left'),
       'footer'        => $this->load->controller('common/footer'),
       'header'        => $this->load->controller('common/header'),
@@ -80,10 +78,39 @@ class ControllerSeoFilterPage extends Controller {
       'user_token'    => (string) $this->session->data['user_token'],
     ];
 
-    // Merge with errors array to hihlight faulty inputs
-    $data = [...$data, ...$this->error];
+    // Merge with errors array to hihlight faulty inputs. Merge saved data, POST data, errors and interface
+    $data = [...$data, ...$this->error, ...$this->getFormData()];
 
     $this->response->setOutput($this->load->view('seo/filter_page_form', $data));
+  }
+
+  public function getFormData() : array {
+    $formData       = [];
+    $filter_page_id = $this->request->get['filter_page_id'] ?? null;
+    $this->load->model('seo/filter_page');
+    // Get actual data
+    $formData['filter_page_description'] = $this->model_seo_filter_page->getFilterPageDescription($filter_page_id);
+    $formData['filter_page_facet']       = $this->model_seo_filter_page->getFilterPageFacets($filter_page_id);
+    // REplace actual data with POST data
+    $formData = array_replace_recursive($formData, $this->request->post);
+    
+    foreach ($formData['filter_page_facet'] ?? [] as $facetTypeId => $facetType) {
+      foreach ($facetType as $facetGroupId => $facetGroup) {
+        foreach ($facetGroup as $facetValueId => $facetValue) {
+          $facetNames = $this->model_seo_filter_page->getFacetName($facetTypeId, $facetGroupId, $facetValue);
+          // echo '<pre>' . htmlspecialchars(print_r($facetNames, true)) . '</pre>';
+          $formData['filter_page_facet'][$facetTypeId][$facetGroupId][$facetValueId] = [
+            'name'           => $facetNames['name'],
+            'group_name'     => $facetNames['group_name'],
+            'facet_type'     => $facetTypeId,
+            'facet_group_id' => $facetGroupId,
+            'facet_value_id' => $facetValueId,
+          ];
+        }
+      }
+    }
+
+    return $formData;
   }
 
   public function add() {
