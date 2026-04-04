@@ -79,13 +79,34 @@ class ModelSeoFilterPage extends Model {
 
     $sql = "
       SELECT
-        *
-      FROM " . DB_PREFIX . "seo_filter_page_desciption pd
-      JOIN " . DB_PREFIX . "seo_filter_page_to_store p2s
+        pd.filter_page_id,
+        pd.`name`,
+        (
+          SELECT JSON_ARRAYAGG(
+            JSON_OBJECT(
+              'name', fn.name,
+              'group_name', fn.group_name
+            )
+          )
+          FROM oc_seo_filter_page_facet_index fi
+          JOIN oc_facet_name fn
+            ON  fn.facet_type     = fi.facet_type
+            AND fn.facet_group_id = fi.facet_group_id
+            AND fn.facet_value_id = fi.facet_value_id
+          WHERE fi.filter_page_id = pd.filter_page_id
+        ) AS facets
+      
+      FROM oc_seo_filter_page_description pd
+      JOIN oc_seo_filter_page_to_store p2s
         ON p2s.filter_page_id = pd.filter_page_id
         AND p2s.store_id = {$storeId}
     ";
-    $result = $this->db->query($sql)->rows ?? [];
+
+    foreach($this->db->query($sql)->rows ?? [] as $row) {
+      $row['facets'] = json_decode($row['facets'], true);
+      $result[] = $row;
+    }
+
     return $result;
   }
 
