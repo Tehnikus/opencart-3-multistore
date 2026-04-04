@@ -36,16 +36,31 @@
                     <tr>
                       <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
                       <td class="text-left"><a href="{{ sort_name }}" {% if sort == 'name' %}class="{{ order|lower }}"{% endif %}>{{ column_name }}</a></td>
+                      <td class="text-left"><a href="{{ sort_category }}" {% if sort == 'category' %}class="{{ order|lower }}"{% endif %}>{{ column_category }}</a>/{{ column_filters }}</td>
+                      <td class="text-center" style="width: 60px"><a href="{{ sort_category }}" {% if sort == 'product_count' %}class="{{ order|lower }}"{% endif %}>{{ column_product_count }}</a></td>
                       <td style="width: 60px"></td>
                     </tr>
                   </thead>
                   <tbody>
-                    {% if seo_filter_pages %}
-                      {% for seo_filter_page in seo_filter_pages %}
+                    {% if items %}
+                      {% for filter_page in items %}
                         <tr>
-                          <td class="text-center"><input type="checkbox" name="selected[]" value="{{ seo_filter_page.filter_page_id }}" {% if seo_filter_page.filter_page_id in selected %}checked="checked"{% endif %} /></td>
-                          <td class="text-left">{{ seo_filter_page.name }}</td>
-                          <td class="text-center"><a href="{{ seo_filter_page.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+                          <td class="text-center"><input type="checkbox" name="selected[]" value="{{ filter_page.filter_page_id }}" {% if filter_page.filter_page_id in selected %}checked="checked"{% endif %} /></td>
+                          <td class="text-left"><b>{{ filter_page.name }}</b></td>
+                          <td class="text-left">
+                            <div>
+                              {% for facet in filter_page.facets %}
+                                <span class="badge badge-sm {% if facet.facet_type == 1 %}strong alert-success{% endif %}">
+                                  {{ facet.name }}
+                                  {% if facet.facet_type == 8 %}{{ filter_is_available }}{% endif %}
+                                  {% if facet.facet_type == 9 %}{{ filter_has_discount }}{% endif %}
+                                  {% if facet.facet_type == 10 %}{{ filter_is_featured }}{% endif %}
+                                </span>
+                              {% endfor %}
+                            </div>
+                          </td>
+                          <td class="text-center">{{ filter_page.product_count }}</td>
+                          <td class="text-center"><a href="{{ filter_page.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
                         </tr>
                       {% endfor %}
                     {% else %}
