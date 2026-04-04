@@ -232,17 +232,19 @@ class ControllerSeoFilterPage extends Controller {
       $this->error['error_select_category'] = $this->language->get('e_select_category');
     }
 
+    // Check if at least one facet selected
     if (!isset($this->request->post['filter_page_facet'])) {
       $this->error['error_select_one_facet'] = $this->language->get('e_select_one_facet');
     } else {
-      $checkFacetsNotEmpty = [];
-      foreach ($this->request->post['filter_page_facet'] as $key => $facetType) {
-        if ($key == 1) {
-          continue;
+      $hasSelected = false;
+      foreach (($this->request->post['filter_page_facet'] ?? []) as $facetType => $facetGroup) {
+        if ($facetType == 1) continue;
+        if (!empty(array_filter($facetGroup))) {
+          $hasSelected = true;
+          break;
         }
-        $checkFacetsNotEmpty[$key] = $facetType;
       }
-      if (empty(array_filter($checkFacetsNotEmpty))) {
+      if (!$hasSelected) {
         $this->error['error_select_one_facet'] = $this->language->get('e_select_one_facet');
       }
     }
