@@ -30,10 +30,22 @@
                 <div class="form-group  {% if facetType.required %}required{% endif %}">
                   <label class="col-sm-2 control-label" for="{{ key }}">{{ facetType.title }}</label>
                   <div class="col-sm-10">
-                    {% if facetType.searchType == 'autocomplete' %}
-                      <div class="niftySelected">
 
+                    {# Autocomplete type #}
+                    {% if facetType.searchType == 'autocomplete' %}
+                      {# Selected items #}
+                      <div class="niftySelected">
+                        {% for facetGroups in filter_page_facet[facetType.facetType] %}
+                          {% for row in facetGroups %}
+                            <div class="niftyItem" data-id="{{ row.facet_value_id }}">
+                              <span style="flex: 1"><b>{{ row.name }}</b> {% if row.group_name %} &#9656; {{ row.group_name }}{% endif %}</span>
+                              <button style="padding: 0; line-height: 0; width: 25px; height: 25px;" type="button" class="btn btn-danger niftyItemDelete" onclick="this.closest('.niftyItem').remove()"><i class="fa fa-times"></i></button>
+                              <input  name="filter_page_facet[{{ facetType.facetType }}][{{ row.facet_group_id }}][{{ row.facet_value_id }}]" value="{{ row.facet_value_id }}" />
+                            </div>
+                          {% endfor %}
+                        {% endfor %}
                       </div>
+                      {# Autocomplete input #}
                       <input 
                         id="{{ key }}" 
                         type="text" 
@@ -41,17 +53,18 @@
                         placeholder="{{ facetType.title }}" 
                         data-facet-type="{{ facetType.facetType }}"
                       />
+                      {# Errors #}
                       {% if error_select_category and facetType.facetType == 1 %}
                         <div class="text-danger">{{ error_select_category }}</div>
                       {% endif %}
                       {% if error_select_one_facet and facetType.facetType !== 1 %}
                         <div class="text-danger">{{ error_select_one_facet }}</div>
                       {% endif %}
-                      
                     {% endif %}
 
+                    {# Checkbox type #}
                     {% if facetType.searchType == 'checkbox' %}
-                      <input style="all: revert" type="checkbox" name="{{ key }}" value="1" />
+                      <input style="all: revert" type="checkbox" name="filter_page_facet[{{ facetType.facetType }}][0][1]" {% if filter_page_facet[facetType.facetType] %}checked{% endif %} value="1" />
                       {% if error_select_one_facet and facetType.facetType !== 1 %}
                         <div class="text-danger">{{ error_select_one_facet }}</div>
                       {% endif %}
