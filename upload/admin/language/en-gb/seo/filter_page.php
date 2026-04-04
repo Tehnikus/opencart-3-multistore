@@ -9,7 +9,9 @@ $_['button_delete']             = 'Delete';
 
 // Columns
 $_['column_name']               = 'Name';
-
+$_['column_category']           = 'Category';
+$_['column_filters']            = 'Filters';
+$_['column_product_count']      = 'Product count';
 // Errors
 $_['e_name']                    = 'Set SEO filter page name';
 $_['e_unique']                  = 'Filter page SEO URL is not unique';
