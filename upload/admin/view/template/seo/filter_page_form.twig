@@ -53,21 +53,26 @@
                         placeholder="{{ facetType.title }}" 
                         data-facet-type="{{ facetType.facetType }}"
                       />
-                      {# Errors #}
-                      {% if error_select_category and facetType.facetType == 1 %}
-                        <div class="text-danger">{{ error_select_category }}</div>
-                      {% endif %}
-                      {% if error_select_one_facet and facetType.facetType !== 1 %}
-                        <div class="text-danger">{{ error_select_one_facet }}</div>
-                      {% endif %}
+
                     {% endif %}
 
                     {# Checkbox type #}
                     {% if facetType.searchType == 'checkbox' %}
                       <input style="all: revert" type="checkbox" name="filter_page_facet[{{ facetType.facetType }}][0][1]" {% if filter_page_facet[facetType.facetType] %}checked{% endif %} value="1" />
-                      {% if error_select_one_facet and facetType.facetType !== 1 %}
-                        <div class="text-danger">{{ error_select_one_facet }}</div>
-                      {% endif %}
+                    {% endif %}
+                    
+                    {# Errors #}
+                    {# Error if category is not selected #}
+                    {% if error_select_category and facetType.facetType == 1 %}
+                      <div class="text-danger">{{ error_select_category }}</div>
+                    {% endif %}
+                    {# Error if no facet selected #}
+                    {% if error_select_one_facet and facetType.facetType !== 1 %}
+                      <div class="text-danger">{{ error_select_one_facet }}</div>
+                    {% endif %}
+                    {# Error if facet combination is not unique #}
+                    {% if error_facet_not_unique and facetType.facetType !== 1 and filter_page_facet[facetType.facetType] %}
+                      <div class="text-danger">{{ error_facet_not_unique }}</div>
                     {% endif %}
                     
                   </div>

@@ -238,7 +238,7 @@ class ControllerSeoFilterPage extends Controller {
     }
 
     // Check if at least one facet selected
-    if (!isset($this->request->post['filter_page_facet'])) {
+    if (!isset($this->request->post['filter_page_facet']) || empty($this->request->post['filter_page_facet'])) {
       $this->error['error_select_one_facet'] = $this->language->get('e_select_one_facet');
     } else {
       $hasSelected = false;
@@ -252,6 +252,11 @@ class ControllerSeoFilterPage extends Controller {
       if (!$hasSelected) {
         $this->error['error_select_one_facet'] = $this->language->get('e_select_one_facet');
       }
+    }
+
+    // Check if filter page with selected facets already exists
+    if (!empty($this->request->post['filter_page_facet']) && $this->model_seo_filter_page->getExistingPage($this->request->post['filter_page_facet'])) {
+      $this->error['error_facet_not_unique'] = $this->language->get('e_facet_not_unique');
     }
 
 		// if ($this->request->post['filter_page_seo_url']) {
