@@ -95,20 +95,21 @@
                 filters.push({'facet_type': input.dataset.facetType, 'name': input.value ?? ''})
                 // If current input is not a category, add facet_type = category and facet_value_id = category_id into search request to filter facets by current category
                 if (input.dataset.facetType !== '1') {
-                  filters.push({'facet_type': 1, 'facet_value_id': document.querySelector('[name="filter_page_facet[1][facet_value_id]"]')?.value ?? 0});
+                  if (document.querySelector('[name="filter_page_facet[1][facet_value_id]"]')) {
+                    filters.push({'facet_type': 1, 'facet_value_id': document.querySelector('[name="filter_page_facet[1][facet_value_id]"]').value});
+                  }
                 }
                 return JSON.stringify(filters);
               }
             }
           },
           item: {
-            searchTemplate: (row) => `<div class="niftyItemData"><p><b>${row.name}</b></p></div>`,
+            searchTemplate: (row) => `<div class="niftyItemData"><p><b>${row.name}${row.group_name ? " &#9656; " + row.group_name : ""}</b></p></div>`,
             selectTemplate: (row) => `
               <div class="niftyItem" data-id="${row.facet_value_id}">
-                <span style="flex: 1"><b>${row.name}</b></span>
+                <span style="flex: 1"><b>${row.name}${row.group_name ? " &#9656; " + row.group_name : ""}</b></span>
                 <button style="padding: 0; line-height: 0; width: 25px; height: 25px;" type="button" class="btn btn-danger niftyItemDelete"><i class="fa fa-times"></i></button>
-                <input  name="filter_page_facet[${input.dataset.facetType}][facet_value_id]" value="${row.facet_value_id}" />
-                <input  name="filter_page_facet[${input.dataset.facetType}][facet_group_id]" value="${row.facet_group_id}" />
+                <input  name="filter_page_facet[${input.dataset.facetType}][${row.facet_group_id}][${row.facet_value_id}]" value="${row.facet_value_id}" />
               </div>
             `,
           },
