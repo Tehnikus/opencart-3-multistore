@@ -38,7 +38,13 @@ class ControllerSeoFilterPage extends Controller {
     $this->load->model('seo/filter_page');
     $user_token = $this->session->data['user_token'];
 
+    $items = $this->model_seo_filter_page->getList([]);
+    foreach ($items as $key => $item) {
+      $items[$key]['edit'] = $this->url->link('seo/filter_page/edit', 'filter_page_id=' . $item['filter_page_id'] . '&user_token=' . $user_token, true);
+    }
+
     $data = [
+      'items'         => $items,
       'column_left'   => $this->load->controller('common/column_left'),
       'footer'        => $this->load->controller('common/footer'),
       'header'        => $this->load->controller('common/header'),
