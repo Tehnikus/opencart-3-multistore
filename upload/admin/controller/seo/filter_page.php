@@ -54,7 +54,7 @@ class ControllerSeoFilterPage extends Controller {
       'user_token'    => $user_token,
       'add'           => $this->url->link('seo/filter_page/add', 'user_token=' . $user_token, true),
       'delete'        => $this->url->link('seo/filter_page/delete', 'user_token=' . $user_token, true),
-      'success'       => (string) $this->session->data['success']
+      'success'       => $this->session->data['success'] ?? false,
     ];
 
     $this->response->setOutput($this->load->view('seo/filter_page_list', $data));
