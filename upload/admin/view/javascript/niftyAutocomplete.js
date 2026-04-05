@@ -115,8 +115,21 @@ class niftyAutocomplete {
       if (this.request.postParams) {
         const formData = new FormData();
         for (const key in this.request.postParams) {
-          formData.append(key, (typeof this.request.postParams[key] == 'function') ? this.request.postParams[key]() : this.request.postParams[key]);
+          let value = this.request.postParams[key];
+          // Check if [key] is function. If so, then run function and get result, else just accept result as is
+          value = (typeof value === 'function') ? value() : value;
+          // Check if value is instance of FormData. If so, iterate throug key => value pairs and append them to POSTed form data
+          if (value instanceof FormData) {
+            for (let [subKey, v] of value.entries()) {
+              formData.append(`${key}[${subKey}]`, v);
+            }
+          } else {
+            formData.append(key, value);
+          }
         }
+        formData.forEach((value, key) => {
+          console.log(`${key}: ${value}`);
+        });
         fetchParams = {method: 'POST', body: formData}
       }
 
