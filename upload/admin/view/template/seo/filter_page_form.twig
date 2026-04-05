@@ -23,6 +23,7 @@
           <ul class="nav nav-tabs">
             <li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a></li>
             <li><a href="#tab-description" data-toggle="tab">{{ tab_description }}</a></li>
+            <li><a href="#tab-images" data-toggle="tab">{{ tab_image }}</a></li>
           </ul>
           <div class="tab-content">
             <div class="tab-pane active" id="tab-general">
@@ -83,6 +84,9 @@
             {% set name_prefix = 'filter_page_description' %}
             <div class="tab-pane" id="tab-description">
               {% include "common/tab_description.twig" %}
+            </div>
+            <div class="tab-pane" id="tab-images">
+              {% include "common/tab_images.twig"  with {name_prefix: 'filter_page_images'} %}
             </div>
           </div>
         </form>
