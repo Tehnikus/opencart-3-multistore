@@ -171,8 +171,8 @@ class ModelSeoFilterPage extends Model {
               'group_name',     fn.group_name
             )
           )
-          FROM oc_seo_filter_page_facet_index fi
-          LEFT JOIN oc_facet_name fn
+          FROM " . DB_PREFIX . "seo_filter_page_facet_index fi
+          LEFT JOIN " . DB_PREFIX . "facet_name fn
             ON  fn.facet_type     = fi.facet_type
             AND fn.facet_group_id = fi.facet_group_id
             AND fn.facet_value_id = fi.facet_value_id
@@ -182,8 +182,8 @@ class ModelSeoFilterPage extends Model {
           SELECT COUNT(*)
           FROM (
             SELECT p.product_id
-            FROM oc_facet_index p
-            JOIN oc_seo_filter_page_facet_index fi
+            FROM " . DB_PREFIX . "facet_index p
+            JOIN " . DB_PREFIX . "seo_filter_page_facet_index fi
               ON fi.filter_page_id = pd.filter_page_id
               AND fi.facet_type = p.facet_type
               AND fi.facet_group_id = p.facet_group_id
@@ -192,14 +192,14 @@ class ModelSeoFilterPage extends Model {
             GROUP BY p.product_id
             HAVING COUNT(*) = (
               SELECT COUNT(*)
-              FROM oc_seo_filter_page_facet_index fi2
+              FROM " . DB_PREFIX . "seo_filter_page_facet_index fi2
               WHERE fi2.filter_page_id = pd.filter_page_id
             )
           ) t
         ) AS product_count,
-        (SELECT fi.facet_value_id FROM oc_seo_filter_page_facet_index fi WHERE fi.filter_page_id = pd.filter_page_id AND fi.facet_type = 1) AS category_id
-      FROM oc_seo_filter_page_description pd
-      JOIN oc_seo_filter_page_to_store p2s
+        (SELECT fi.facet_value_id FROM " . DB_PREFIX . "seo_filter_page_facet_index fi WHERE fi.filter_page_id = pd.filter_page_id AND fi.facet_type = 1) AS category_id
+      FROM " . DB_PREFIX . "seo_filter_page_description pd
+      JOIN " . DB_PREFIX . "seo_filter_page_to_store p2s
         ON p2s.filter_page_id = pd.filter_page_id
         AND p2s.store_id = {$storeId}
       WHERE pd.language_id = {$languageId}
@@ -316,7 +316,7 @@ class ModelSeoFilterPage extends Model {
     $sql = "
       SELECT 
         filter_page_id
-      FROM oc_seo_filter_page_facet_index
+      FROM " . DB_PREFIX . "seo_filter_page_facet_index
       WHERE " . implode(" OR ", $where) . "
       GROUP BY filter_page_id
 
@@ -324,8 +324,8 @@ class ModelSeoFilterPage extends Model {
         COUNT(*) = " . count($flat) . " -- Requested facet_value_id count
         AND COUNT(*) = (
           SELECT COUNT(*) -- Actual page facet_value_id count
-          FROM oc_seo_filter_page_facet_index fi2
-          WHERE fi2.filter_page_id = oc_seo_filter_page_facet_index.filter_page_id
+          FROM " . DB_PREFIX . "seo_filter_page_facet_index fi2
+          WHERE fi2.filter_page_id = " . DB_PREFIX . "seo_filter_page_facet_index.filter_page_id
         )
     ";
 
