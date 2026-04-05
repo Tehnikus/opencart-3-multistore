@@ -258,8 +258,16 @@ class ControllerSeoFilterPage extends Controller {
     }
 
     // Check if filter page with selected facets already exists
-    if (!empty($this->request->post['filter_page_facet']) && $this->model_seo_filter_page->getExistingPage($this->request->post['filter_page_facet'])) {
-      $this->error['error_facet_not_unique'] = $this->language->get('e_facet_not_unique');
+    if (!empty($this->request->post['filter_page_facet'])) {
+      $currentId = $this->request->get['filter_page_id'];
+      $existingPages = $this->model_seo_filter_page->getExistingPage($this->request->post['filter_page_facet']);
+      $isDuplicate = $existingPages && (
+        !$currentId ||
+        !in_array($currentId, array_column($existingPages, 'filter_page_id'))
+      );
+      if ($isDuplicate) {
+        $this->error['error_facet_not_unique'] = $this->language->get('e_facet_not_unique');
+      }
     }
 
 		// if ($this->request->post['filter_page_seo_url']) {
