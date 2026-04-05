@@ -688,37 +688,49 @@ Class ModelCatalogFacet extends Model {
     ");
   }
 
-  public function getFacets($filters = []) : array {
-    $storeId       = (int) $this->session->data['store_id'];
-    $languageId    = (int) $this->config->get('config_language_id');
-    $whereFacet    = [];
-    $whereCategory = [];
+  public function getFacets($search = [], $selectedFacets = []) : array {
+    $storeId          = (int) $this->session->data['store_id'];
+    $languageId       = (int) $this->config->get('config_language_id');
+    $searchRequest    = [];
+    $prefilterFacets  = [];
+
+    $prefilterFacets[] = "i.`store_id` = {$storeId}";
+
+    $currentFacetType = (int)($search['facet_type'] ?? 0);
+
+    foreach ($selectedFacets ?? [] as $facetType => $groups) {
+      if ((int)$facetType === $currentFacetType) continue;
+
+      foreach ($groups as $groupId => $values) {
+        $values = array_filter(array_map('intval', $values));
+        if (!$values) continue;
+
+        $prefilterFacets[] = "
+          EXISTS (
+            SELECT 1
+            FROM " . DB_PREFIX . "facet_index f
+            WHERE f.product_id = i.product_id
+              AND f.facet_type = " . (int)$facetType . "
+              AND f.facet_group_id = " . (int)$groupId . "
+              AND f.facet_value_id IN (" . implode(',', $values) . ")
+          )
+        ";
+      }
+    }
 
     // Dummy fallback for facet search so request doen't fail if no filter provided
-    $whereFacet[] = '1'; 
-    // Dummy fallback for facet filter by category. 
-    // Not really necessary, because it should no happen when category is not selected
-    // But let it be here to keep code similarity and  just in case
-    $whereCategory[] = "p.`product_id` = i.`product_id`"; 
-
-    foreach ($filters as $filter) {
-      // Category filter
-      if ($filter['facet_type'] == 1 && isset($filter['facet_value_id'])) {
-        $whereCategory[] = "p.`product_id` = i.`product_id`";
-        $whereCategory[] = "p.`facet_type` = 1"; // type = category
-        $whereCategory[] = "p.`facet_value_id` = " . (int) $filter['facet_value_id'] . ""; // category_id
-        $whereCategory[] = "p.`store_id` = {$storeId}";
-      }
-      // Facet filter
-      if ($filter['facet_type'] !== 1) {
-        $whereFacet[] = "f.facet_type = " . (int) $filter['facet_type'] . "";
-        if (isset($filter['name'])) {
-          $whereFacet[] = "(
-            n.`name` LIKE '%" . $this->db->escape($filter['name']) . "%'
-            OR n.`group_name` LIKE '%" . $this->db->escape($filter['name']) . "%'
-          )";
-        }
-      }
+    $searchRequest[] = '1'; 
+    // Filter facets by name and group
+    if (isset($search['facet_type'])) {
+      $searchRequest[] = "(
+        n.`facet_type` = " . (int) $search['facet_type'] . "
+      )";
+    }
+    if (isset($search['name'])) {
+      $searchRequest[] = "(
+        n.`name` LIKE '%" . $this->db->escape($search['name']) . "%'
+        OR n.`group_name` LIKE '%" . $this->db->escape($search['name']) . "%'
+      )";
     }
 
 		$sql = "
@@ -730,15 +742,8 @@ Class ModelCatalogFacet extends Model {
           i.`facet_group_id`,
           i.`store_id`,
           COUNT(DISTINCT(i.`product_id`)) AS count_product
-        FROM oc_facet_index i
-        WHERE EXISTS(
-          -- 1. Get all products from current category
-          SELECT
-            1
-          FROM oc_facet_index p
-          WHERE " . implode(" AND ", $whereCategory) . "
-        )
-        AND i.`store_id` = {$storeId}
+        FROM " . DB_PREFIX . "facet_index i
+        WHERE " . implode(" AND ", $prefilterFacets) . "
         GROUP BY i.facet_type, i.facet_group_id, i.facet_value_id
       )
       
@@ -750,14 +755,15 @@ Class ModelCatalogFacet extends Model {
         n.`name`,
         n.`group_name`
       FROM facet f
-      LEFT JOIN oc_facet_name n
+      LEFT JOIN " . DB_PREFIX . "facet_name n
         ON  n.`facet_value_id` = f.`facet_value_id`
         AND n.`facet_type` = f.`facet_type`
         AND n.`facet_group_id` = f.`facet_group_id`
         AND n.`store_id` = f.`store_id`
         AND n.`language_id` = {$languageId}
       -- 3. Filter facets by type and name  
-      WHERE " . implode(" AND ", $whereFacet) . "
+      WHERE " . implode(" AND ", $searchRequest) . "
+      LIMIT " . ((int) $this->config->get('config_limit_admin')) ?? 20 . "
     ";
 
     return $this->db->query($sql)->rows ?? [];
