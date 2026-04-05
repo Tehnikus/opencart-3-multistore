@@ -40,8 +40,8 @@
           >
             H1
           </span>
-          {% include "common/button_translate.twig"      with {sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][name]' } %}
           {% include "common/button_create_seo_url.twig" with {seo_url_input: 'seo_url[' ~ language.language_id ~ ']' } %}
+          {% include "common/button_translate.twig"      with {sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][name]' } %}
           <input 
             type="text" 
             name="{{ name_prefix }}[{{ language.language_id }}][name]" 
