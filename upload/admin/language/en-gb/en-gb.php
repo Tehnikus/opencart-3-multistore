@@ -120,7 +120,7 @@ $_['tab_ftp']                       = 'FTP';
 $_['tab_ip']                        = 'IP Addresses';
 $_['tab_links']                     = 'Links';
 $_['tab_log']                       = 'Log';
-$_['tab_image']                     = 'Image';
+$_['tab_image']                     = 'Images';
 $_['tab_option']                    = 'Option';
 $_['tab_server']                    = 'Server';
 $_['tab_seo']                       = 'SEO';
@@ -179,9 +179,13 @@ $_['entry_seo_page_type']           = 'SEO page type';
 $_['entry_name']                    = 'Name';
 $_['warning_keyword']               = 'Do not use spaces, instead replace spaces with - and make sure the SEO URL is globally unique.';
 
-// Filter form => filter_form.twig
-$_['entry_request']                 = 'Request';
-
+// Additional image tab => tab_images.twig
+$_['entry_image']                   = 'Image';
+$_['entry_additional_image']        = 'Additional Images';
+$_['entry_sort_order']              = 'Sort order';
+$_['entry_image_descriptions']      = 'Image descriptions';
+$_['entry_image_title']             = 'Image title';
+$_['entry_main_image']              = 'Main';
 
 // List entries
 $_['edit_filter_group']             = 'Edit %s filter group';
@@ -214,8 +218,7 @@ $_['error_parent']                  = 'Select parent category';
 $_['error_no_parent']               = 'No parent category';
 
 // Left column menu
-$_['text_seo'] = 'SEO';
-
+$_['text_seo']                      = 'SEO';
 $_['text_seo_pages']                = 'SEO pages';
 $_['text_meta_editor']              = 'Meta editor';
 $_['text_seo_tags']                 = 'Tags';
