@@ -41,7 +41,7 @@
                             <div class="niftyItem" data-id="{{ row.facet_value_id }}">
                               <span style="flex: 1"><b>{{ row.name }}</b> {% if row.group_name %} &#9656; {{ row.group_name }}{% endif %}</span>
                               <button style="padding: 0; line-height: 0; width: 25px; height: 25px;" type="button" class="btn btn-danger niftyItemDelete" onclick="this.closest('.niftyItem').remove()"><i class="fa fa-times"></i></button>
-                              <input  name="filter_page_facet[{{ facetType.facetType }}][{{ row.facet_group_id }}][{{ row.facet_value_id }}]" value="{{ row.facet_value_id }}" />
+                              <input hidden name="filter_page_facet[{{ facetType.facetType }}][{{ row.facet_group_id }}][{{ row.facet_value_id }}]" value="{{ row.facet_value_id }}" />
                             </div>
                           {% endfor %}
                         {% endfor %}
@@ -131,7 +131,7 @@
               <div class="niftyItem" data-id="${row.facet_value_id}">
                 <span style="flex: 1"><b>${row.name}${row.group_name ? " &#9656; " + row.group_name : ""}</b></span>
                 <button style="padding: 0; line-height: 0; width: 25px; height: 25px;" type="button" class="btn btn-danger niftyItemDelete"><i class="fa fa-times"></i></button>
-                <input  name="filter_page_facet[${input.dataset.facetType}][${row.facet_group_id}][${row.facet_value_id}]" value="${row.facet_value_id}" />
+                <input hidden name="filter_page_facet[${input.dataset.facetType}][${row.facet_group_id}][${row.facet_value_id}]" value="${row.facet_value_id}" />
               </div>
             `,
           },
