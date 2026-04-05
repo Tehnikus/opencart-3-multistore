@@ -121,15 +121,12 @@ class niftyAutocomplete {
           // Check if value is instance of FormData. If so, iterate throug key => value pairs and append them to POSTed form data
           if (value instanceof FormData) {
             for (let [subKey, v] of value.entries()) {
-              formData.append(`${key}[${subKey}]`, v);
+              formData.append(subKey, v);
             }
           } else {
             formData.append(key, value);
           }
         }
-        formData.forEach((value, key) => {
-          console.log(`${key}: ${value}`);
-        });
         fetchParams = {method: 'POST', body: formData}
       }
 
