@@ -1,0 +1,223 @@
+{# Make image dir URL #}
+
+{% set dir_app = constant('DIR_APPLICATION')|replace({'\\':'/'}) %}
+{% set dir_img = constant('DIR_IMAGE')|replace({'\\':'/'}) %}
+
+{% set app_parts = dir_app|split('/') %}
+{% set img_parts = dir_img|split('/') %}
+{% set common_path = [] %}
+
+{% for key, item in app_parts %}
+  {% if img_parts[key] != app_parts[key] %}
+    {% set common_path = common_path|merge([img_parts[key]]) %}
+  {% endif %}
+{% endfor %}
+
+{% set image_dir = constant('HTTPS_CATALOG') ~ (common_path|join('/')|trim('/')) ~ '/' %}
+
+{# Main image #}
+{% if mainImage %}
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered table-hover">
+      <thead>
+        <tr>
+          <td class="text-left">{{ entry_image }}</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="text-center">
+            <a href="" id="thumb-image" data-toggle="image" class="img-thumbnail">
+              <img 
+                loading="lazy"
+                src="{% if image %}{{ image_dir }}{{ image }}{% else %}{{ image_dir }}no_image.webp{% endif %}" 
+                alt="" 
+                title="" 
+                data-placeholder="{{ image_dir }}no_image.webp"
+                width="350px"
+                height="auto"
+              />
+            </a>
+            <input type="hidden" name="image" value="{{ image }}" id="input-image"/>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+
+{# Additional images #}
+<div class="table-responsive">
+  <table id="images" class="table table-striped table-bordered table-hover additionalImages">
+    <thead>
+      <tr>
+        <td class="text-center" style="width: 350px">{{ entry_additional_image }}</td>
+        {% if languages %}
+        <td class="text-center">{{ entry_image_descriptions }}</td>
+        {% endif %}
+        <td class="text-center" style="width: 50px">{{ entry_main_image }}</td>
+        <td class="text-center" style="width: 100px">{{ entry_sort_order }}</td>
+        <td class="text-center" style="width: 50px"></td>
+      </tr>
+    </thead>
+    <tbody>
+      {% if images %}
+        {% set image_row = 0 %}
+        {% for image in images %}
+          <tr id="image-row{{ image_row }}" data-row-index="{{ image_row }}">
+            <td class="text-center">
+              <a href="" id="thumb-image_{{ image_row }}" data-toggle="image" class="img-thumbnail">
+                <img 
+                  loading="lazy" 
+                  width="100%" 
+                  height="auto" 
+                  src="{% if image.image %}{{ image_dir }}{{ image.image }}{% endif %}" 
+                  alt="" 
+                  title="" 
+                  data-placeholder="{{ image_dir }}no_image.webp"
+                />
+              </a>
+              <input 
+                type="hidden" 
+                name="{{ name_prefix }}[{{ image_row }}][image]"
+                data-nameprefix="{{ name_prefix }}"
+                value="{{ image.image }}" 
+                id="input-image_{{ image_row }}"
+              />
+            </td>
+            {% if languages %}
+              <td>
+                {% for language in languages %}
+                  <div class="input-group">
+                    <span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}"/></span>
+                    <input 
+                      type="text" 
+                      name="{{ name_prefix }}[{{ image_row }}][description][{{ language.language_id }}]" 
+                      data-nameprefix="{{ name_prefix }}"
+                      value="{{ image.description[language.language_id] }}" 
+                      placeholder="{{ entry_image_title }}" 
+                      class="form-control"
+                    />
+                  </div>
+                {% endfor %}
+              </td>
+            {% endif %}
+            <td class="text-center">
+              <input 
+                type="radio"
+                name="{{ name_prefix }}[{{ image_row }}][main]"
+                data-nameprefix="{{ name_prefix }}"
+                value="1"
+                class="mainImage"
+              />
+            </td>
+            <td class="text-right">
+              <input 
+                type="text" 
+                name="{{ name_prefix }}[{{ image_row }}][sort_order]" 
+                data-nameprefix="{{ name_prefix }}"
+                value="{% if not image.sort_order %}{{ image_row }}{% else %}{{ image.sort_order }}{% endif %}" 
+                placeholder="{{ entry_sort_order }}" 
+                class="form-control text-right sort_order"
+              />
+            </td>
+            <td class="text-center">
+              <button 
+                type="button" 
+                onclick="removeRow2(this, '.additionalImages')" 
+                title="{{ button_remove }}" 
+                class="btn btn-danger"
+              >
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </td>
+          </tr>
+          {% set image_row = image_row + 1 %}
+        {% endfor %}
+      {% else %}
+        <tr id="image-row0" data-row-index="0">
+            <td class="text-center">
+              <a href="" id="thumb-image_0" data-toggle="image" class="img-thumbnail">
+                <img 
+                  loading="lazy" 
+                  width="100%" 
+                  height="auto" 
+                  src="{{ image_dir }}no_image.webp" 
+                  alt="" 
+                  title="" 
+                  data-placeholder="{{ image_dir }}no_image.webp"
+                />
+              </a>
+              <input 
+                type="hidden" 
+                name="{{ name_prefix }}[0][image]" 
+                data-nameprefix="{{ name_prefix }}"
+                value="" 
+                id="input-image_0"
+              />
+            </td>
+            {% if languages %}
+              <td>
+                {% for language in languages %}
+                  <div class="input-group">
+                    <span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}"/></span>
+                    <input 
+                      type="text" 
+                      name="{{ name_prefix }}[0][description][{{ language.language_id }}]" 
+                      data-nameprefix="{{ name_prefix }}"
+                      value="" 
+                      placeholder="{{ entry_image_title }}" 
+                      class="form-control"
+                    />
+                  </div>
+                {% endfor %}
+              </td>
+            {% endif %}
+            <td class="text-center">
+              <input 
+                type="radio"
+                name="{{ name_prefix }}[0][main]"
+                data-nameprefix="{{ name_prefix }}"
+                value="1"
+                class="mainImage"
+              />
+            </td>
+            <td class="text-right">
+              <input 
+                type="text" 
+                name="{{ name_prefix }}[0][sort_order]" 
+                data-nameprefix="{{ name_prefix }}"
+                value="0" 
+                placeholder="{{ entry_sort_order }}" 
+                class="form-control text-right sort_order"
+              />
+            </td>
+            <td class="text-center">
+              <button 
+                type="button" 
+                onclick="removeRow2(this, '.additionalImages')"  
+                title="{{ button_remove }}" 
+                class="btn btn-danger"
+              >
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </td>
+        </tr>
+      {% endif %}
+    
+    </tbody>
+
+    <tfoot>
+      <tr>
+        <td colspan="4"></td>
+        <td class="text-left">
+          <button type="button" onclick="addRow2(this, '.additionalImages', '[data-row-index]', ['sort_order', 'mainImage'])" data-toggle="tooltip" title="{{ button_image_add }}" class="btn btn-primary">
+            <i class="fa fa-plus-circle"></i>
+          </button>
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+
