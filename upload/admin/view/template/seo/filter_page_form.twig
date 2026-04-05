@@ -113,15 +113,16 @@
             // Set POST params of autocomplete
             postParams: {
               filters: () => {
-                const filters = [];
-                filters.push({'facet_type': input.dataset.facetType, 'name': input.value ?? ''})
-                // If current input is not a category, add facet_type = category and facet_value_id = category_id into search request to filter facets by current category
-                if (input.dataset.facetType !== '1') {
-                  if (document.querySelector('[name="filter_page_facet[1][facet_value_id]"]')) {
-                    filters.push({'facet_type': 1, 'facet_value_id': document.querySelector('[name="filter_page_facet[1][facet_value_id]"]').value});
-                  }
+                const selectedFacets = document.querySelectorAll('input[name^=filter_page_facet]');
+                const formData = new FormData();
+                if (selectedFacets.length) {
+                  selectedFacets.forEach(facet => {
+                    formData.append(facet.name, facet.value);
+                  });
                 }
-                return JSON.stringify(filters);
+                formData.append('search[name]', input.value ?? '');
+                formData.append('search[facet_type]', input.dataset.facetType);
+                return formData;
               }
             }
           },
