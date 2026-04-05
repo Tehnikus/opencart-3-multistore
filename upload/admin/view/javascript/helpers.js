@@ -214,3 +214,23 @@ function addRow2(button, tableSelector = '.cloneRowsTable', rowSelector = '[data
   targetRow.insertAdjacentElement('afterend', newRow);
 }
 
+/**
+   * Remove row from target table
+   * Pairs with addRow2() function
+   * @param {Element} button Button inside row that should be removed
+   * @param {String} tableSelector Table selector where rows will be interacted
+   * @param {String} rowSelector Optional row selector
+   */
+function removeRow2(button, tableSelector = '.cloneRowsTable', rowSelector = '[data-row-index]') {
+  const row = button.closest(rowSelector);
+  const matchingRows = document.querySelector(tableSelector).querySelectorAll(rowSelector);
+  // Clear last row values instead of deleting
+  if (matchingRows.length <= 1) {
+    row.querySelectorAll('input, select, textarea, img')?.forEach(el => {
+      if (el.value) el.value = '';
+      if (el.src && el.dataset.placeholder) el.src = el.dataset.placeholder;
+    });
+    return;
+  }
+  row.remove();
+}
