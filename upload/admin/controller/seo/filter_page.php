@@ -310,9 +310,21 @@ class ControllerSeoFilterPage extends Controller {
 	}
 
   public function autocomplete() : void {
-    $filters = json_decode(html_entity_decode($this->request->post['filters']) ?? '[]', true);
+    $post = $this->request->post;
+    $selectedFacets = $post['filter_page_facet'] ?? [];
+    $search = $post['search'] ?? [];
+    
     $this->load->model('catalog/facet');
-    $facets = $this->model_catalog_facet->getFacets($filters);
+    $facets = $this->model_catalog_facet->getFacets($search, $selectedFacets);
+
+    $this->response->addHeader('Content-Type: application/json');
+    $this->response->setOutput(json_encode($facets));
+  }
+
+  public function fetchCheckExistingPage() : void {
+    $filters = json_decode($this->request->post['filters'] ?? '[]', true);
+    $this->load->model('catalog/facet');
+    $facets = $this->model_catalog_facet->getExistingPage($filters);
 
     $this->response->addHeader('Content-Type: application/json');
     $this->response->setOutput(json_encode($facets));
