@@ -142,3 +142,75 @@ async function googleTranslate(text, targetLang = 'en', sourceLang = 'auto', att
     return null;
   }
 }
+
+/**
+ * Add cloned row to target table
+ * Used to add rows in tables like: tab_image_list.twig, tab_faq_list.twig, tab_how_to_list.twig, tab_footer_list.twig, filter_form.twig, meta_editor_list.twig and more
+ * @param {Element} button Button in tfoot of table, where rows should be cloned
+ * @param {String} tableSelector Optional table selector, where rows will be cloned and added
+ * @param {String} rowSelector Optional row selector
+ * @param {Array} excludedInputClasses An array of classes of inputs which values would not be cleared. E.g. some hidden inputs with some crucial ids 
+ * @returns 
+ */
+function addRow2(button, tableSelector = '.cloneRowsTable', rowSelector = '[data-row-index]', excludedInputClasses = []) {
+  const table = button.closest(tableSelector);
+  if (!table) return;
+
+  const rows = table.querySelectorAll(rowSelector);
+  if (!rows.length) return;
+
+  const targetRow = rows[rows.length - 1];
+  const oldRowIndex = targetRow.dataset.rowIndex;
+  const newRowIndex = Number(oldRowIndex) + 1;
+
+  const newRow = targetRow.cloneNode(true);
+  newRow.dataset.rowIndex = newRowIndex;
+
+  // Element [data-nameprefix] is a constant string which avoids row increment
+  // Needed to keep [store_id] and [language_id] unchanged
+  // Example: 
+  // name="category_description[0][1][faq][0][question]"
+  // data-nameprefix="category_description[0][1]"
+  // In this case only [0] in [faq][0][question] will be incremented
+  newRow.querySelectorAll('input, select, textarea, a, img, [data-source-input]').forEach(el => {
+    // Name elements - all kind of inputs
+    if (el.name) {
+      if (el.dataset.nameprefix) {
+        const oldName = targetRow.querySelector(`[name="${el.name}"]`).name;
+        el.name = `${el.dataset.nameprefix}${oldName.replace(el.dataset.nameprefix, '').replace(`[${oldRowIndex}]`, `[${newRowIndex}]`)}`
+      } else {
+        el.name = el.name.replace(`[${oldRowIndex}]`, `[${newRowIndex}]`);
+      }
+    }
+
+    // Translate buttons
+    if (el.dataset.nameprefix && el.dataset.sourceInput) {
+      const oldSourceInput = el.dataset.sourceInput;
+      el.dataset.sourceInput = `${el.dataset.nameprefix}${oldSourceInput.replace(el.dataset.nameprefix, '').replace(`[${oldRowIndex}]`, `[${newRowIndex}]`)}`
+    }
+
+    // Replace the last occurance of row index
+    // Fixes bug when the id is like "someId_store_0_language_1_rowIndex_0"
+    // For popup with image selector
+    if (el.id) {
+      // el.id = el.id.replace(oldRowIndex, newRowIndex);
+      el.id = el.id.substring(0, el.id.lastIndexOf(oldRowIndex)) + newRowIndex;
+    }
+    if (el.value && !excludedInputClasses.some(excludedClass => Array.from(el.classList).includes(excludedClass)) && !el.name?.includes('sort_order')) {el.value = '';}
+    if (el.src && el.dataset.placeholder) {el.src = el.dataset.placeholder;}
+    if (el.name?.includes('sort_order')) {el.value++;}
+    if (['radio', 'checkbox'].includes(el.type)) {el.checked = false;}
+    el.classList.remove('alert-success', 'alert-danger');
+  });
+
+  newRow.querySelectorAll('.note-editor').forEach(el => {
+    el.remove();
+  });
+
+  newRow.querySelectorAll('[data-toggle="summernote"]').forEach(el => {
+    $(el).summernote(window.summernoteOptions);
+  })
+
+  targetRow.insertAdjacentElement('afterend', newRow);
+}
+
