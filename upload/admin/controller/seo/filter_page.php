@@ -54,6 +54,7 @@ class ControllerSeoFilterPage extends Controller {
       'user_token'    => $user_token,
       'add'           => $this->url->link('seo/filter_page/add', 'user_token=' . $user_token, true),
       'delete'        => $this->url->link('seo/filter_page/delete', 'user_token=' . $user_token, true),
+      'success'       => (string) $this->session->data['success']
     ];
 
     $this->response->setOutput($this->load->view('seo/filter_page_list', $data));
@@ -129,7 +130,7 @@ class ControllerSeoFilterPage extends Controller {
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 			$this->model_seo_filter_page->addFilterPage($this->request->post);
-			$this->session->data['success'] = $this->language->get('text_success');
+			$this->session->data['success'] = $this->language->get('text_filter_page_saved');
       $url = '&' . http_build_query(array_intersect_key($this->request->get, array_flip(['sort', 'order', 'page'])));
 
 			$this->response->redirect($this->url->link('seo/filter_page', 'user_token=' . $this->session->data['user_token'] . $url, true));
@@ -148,7 +149,7 @@ class ControllerSeoFilterPage extends Controller {
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 			$this->model_seo_filter_page->editFilterPage($this->request->get['filter_page_id'], $this->request->post);
 
-			$this->session->data['success'] = $this->language->get('text_success');
+			$this->session->data['success'] = $this->language->get('text_filter_page_saved');
 
       $url = '&' . http_build_query(array_intersect_key($this->request->get, array_flip(['sort', 'order', 'page'])));
 
@@ -170,7 +171,7 @@ class ControllerSeoFilterPage extends Controller {
 				$this->model_seo_filter_page->deleteFilterPage($filter_page_id);
 			}
 
-			$this->session->data['success'] = $this->language->get('text_success_deleted');
+			$this->session->data['success'] = $this->language->get('text_filter_page_deleted');
 
       $url = '&' . http_build_query(array_intersect_key($this->request->get, array_flip(['sort', 'order', 'page'])));
 
