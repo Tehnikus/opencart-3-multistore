@@ -1,5 +1,36 @@
 <?php
 class ModelDesignSeoUrl extends Model {
+
+	public $requestOrder = [];
+	public function __construct($registry) {
+		parent::__construct($registry);
+		$this->requestOrder = [
+			// Catalog
+			'category_id',
+			'tag',
+			'product_id',
+			'filter',
+			'option',
+			'attribute',
+			'manufacturer_id',
+			'tag_id',
+			'supplier_id',
+			'is_available',
+			'has_discount',
+			'is_featured',
+			// BLog
+			'tag',
+			'article',
+			// Common
+			'sort',
+			'page',
+		];
+	}
+
+	public function getRequestOrder() : array {
+		return $this->requestOrder;
+	}
+
 	public function addSeoUrl($data) {
 		$this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET store_id = '" . (int)$data['store_id'] . "', language_id = '" . (int)$data['language_id'] . "', query = '" . $this->db->escape($data['query']) . "', keyword = '" . $this->db->escape($data['keyword']) . "'");
 	}
