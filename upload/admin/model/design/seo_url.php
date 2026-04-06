@@ -162,5 +162,49 @@ class ModelDesignSeoUrl extends Model {
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "seo_url` WHERE keyword = '" . $this->db->escape($keyword) . "' AND seo_url_id != '" . (int)$seo_url_id . "'");
 
 		return $query->rows;
-	}	
+	}
+
+	public function checkUrlDuplicate($url, $languageId, $storeId) : array {
+		$result 		= [];
+		$languageId = (int) $languageId;
+		$storeId 		= (int) $storeId;
+		$url 				= $this->db->escape(strtolower($url));
+
+		$query = $this->db->query("
+			SELECT
+				*
+			FROM " . DB_PREFIX . "seo_url
+			WHERE `keyword` 	= {$url}
+				AND language_id = {$languageId}
+				AND store_id 		= {$storeId}
+		")->rows;
+		
+		foreach ($query as $row) {
+			$result[$row['seo_url_id']] = $row;
+		}
+
+		return $result;
+	}
+
+	public function checkRequestDuplicate($request, $languageId, $storeId) : array {
+		$result 		= [];
+		$languageId = (int) $languageId;
+		$storeId 		= (int) $storeId;
+		$request 		= $this->db->escape(strtolower($request));
+
+		$query = $this->db->query("
+			SELECT
+				*
+			FROM " . DB_PREFIX . "seo_url
+			WHERE `query` 		= {$request}
+				AND language_id = {$languageId}
+				AND store_id 		= {$storeId}
+		")->rows;
+
+		foreach ($query as $row) {
+			$result[$row['seo_url_id']] = $row;
+		}
+
+		return $result;
+	}
 }
