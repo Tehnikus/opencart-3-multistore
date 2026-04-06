@@ -158,17 +158,21 @@ class ModelSeoFilterPage extends Model {
     }
   }
 
-    public function editImages($page_id, $image_data = []) : int {
+  public function editImages($page_id, $image_data = []) : int {
 
     $page_id = (int) $page_id;
     $store_id = (int) $this->session->data['store_id'];
 
     $this->db->query("
-      DELETE FROM `". DB_PREFIX . "seo_filter_page_image` WHERE `filter_page_id` = '" . (int) $page_id . "'
+      DELETE FROM `". DB_PREFIX . "seo_filter_page_image` 
+      WHERE `filter_page_id` = '" . (int) $page_id . "'
+        AND store_id = " . (int) $store_id . "
     ");
 
     $this->db->query("
-      DELETE FROM `". DB_PREFIX . "seo_filter_page_image_description` WHERE `filter_page_id` = '" . (int) $page_id . "'
+      DELETE FROM `". DB_PREFIX . "seo_filter_page_image_description` 
+      WHERE `filter_page_id` = '" . (int) $page_id . "'
+        AND store_id = " . (int) $store_id . "
     ");
 
 
