@@ -38,6 +38,7 @@
                       <td style="width: 70px" class="text-center">{{ column_image }}</td>
                       <td style="width: 200px;" class="text-left"><a href="{{ sort_name }}" {% if sort == 'name' %}class="{{ order|lower }}"{% endif %}>{{ column_name }}</a></td>
                       <td class="text-left"><a href="{{ sort_category }}" {% if sort == 'category' %}class="{{ order|lower }}"{% endif %}>{{ column_category }}</a>/{{ column_filters }}</td>
+                      <td>{{ column_seo }}</td>
                       <td class="text-center" style="width: 60px"><a href="{{ sort_category }}" {% if sort == 'product_count' %}class="{{ order|lower }}"{% endif %}>{{ column_product_count }}</a></td>
                       <td style="width: 60px"></td>
                     </tr>
@@ -58,8 +59,38 @@
                                   {% if facet.facet_type == 9 %}{{ autocomplete_has_discount }}{% endif %}
                                   {% if facet.facet_type == 10 %}{{ autocomplete_is_featured }}{% endif %}
                                 </span>
+                                {% if facet.facet_type == 1 %}<br>{% endif %}
                               {% endfor %}
                             </div>
+                          </td>
+                          <td>
+                            <p>
+                              <span class="badge badge-sm 
+                                {% if filter_page.seo.descriptionLength > 2000 %} alert-success {% elseif filter_page.seo.descriptionLength > 500 %} alert-warning {% else %} alert-danger {% endif %}">
+                                {{ text_description_length }}:&nbsp;{{ filter_page.seo.descriptionLength }}&nbsp;{{ text_characters_count }}
+                                {% if filter_page.seo.descriptionLength > 500 %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
+                              </span>
+                              <br>
+                              <span class="badge badge-sm {% if filter_page.seo.hasFooter %}alert-success{% else %}alert-danger{% endif %}">
+                                {{ tab_footer }}:&nbsp;
+                                {% if filter_page.seo.hasFooter %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
+                              </span>
+
+                              <span class="badge badge-sm {% if filter_page.seo.hasTag %}alert-success{% else %}alert-danger{% endif %}">
+                                {{ tab_tag }}:&nbsp;
+                                {% if filter_page.seo.hasTag %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
+                              </span>
+
+                              <span class="badge badge-sm {% if filter_page.seo.hasFaq %}alert-success{% else %}alert-danger{% endif %}">
+                                {{ tab_faq }}:&nbsp;
+                                {% if filter_page.seo.hasFaq %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
+                              </span>
+
+                              <span class="badge badge-sm {% if filter_page.seo.hasHowTo %}alert-success{% else %}alert-danger{% endif %}">
+                                {{ tab_how_to }}:&nbsp;
+                                {% if filter_page.seo.hasHowTo %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
+                              </span>
+                            </p>
                           </td>
                           <td class="text-center">{{ filter_page.product_count }}</td>
                           <td class="text-center"><a href="{{ filter_page.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>

@@ -305,6 +305,16 @@ class ModelSeoFilterPage extends Model {
             )
           ) t
         ) AS product_count,
+        (
+          SELECT JSON_OBJECT(
+            'descriptionLength',    COALESCE(CHAR_LENGTH(pd.`description`), 0),
+            'seoDescriptionLength', COALESCE(CHAR_LENGTH(pd.`seo_description`), 0),
+            'seoKeywords',          pd.seo_keywords,
+            'hasFooter',            CHAR_LENGTH(COALESCE(pd.`footer`, '')) > 2,
+            'hasFaq',               CHAR_LENGTH(COALESCE(pd.`faq`, '')) > 2,
+            'hasHowTo',             CHAR_LENGTH(COALESCE(pd.`how_to`, '')) > 2
+          )
+        ) AS seo,
         (SELECT fi.facet_value_id FROM " . DB_PREFIX . "seo_filter_page_facet_index fi WHERE fi.filter_page_id = pd.filter_page_id AND fi.facet_type = 1) AS category_id
       FROM " . DB_PREFIX . "seo_filter_page_description pd
       JOIN " . DB_PREFIX . "seo_filter_page_to_store p2s
@@ -316,7 +326,10 @@ class ModelSeoFilterPage extends Model {
 
     foreach($this->db->query($sql)->rows ?? [] as $row) {
       $row['facets'] = json_decode($row['facets'], true);
+      $row['seo'] = json_decode($row['seo'], true);
+      $row['seo']['seoKeywords'] = count(array_filter(explode(',', $row['seo']['seoKeywords'])));
       $row['image'] = $row['image'] ? (HTTPS_CATALOG . 'image/' . $row['image']) : (HTTPS_CATALOG . 'image/no_image.webp');
+
       // Sort facets, so parent category (facet_type == 1) is always first
       usort($row['facets'], fn($a, $b) => $a['facet_type'] <=> $b['facet_type']);
       $result[] = $row;
