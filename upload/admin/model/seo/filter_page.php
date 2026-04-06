@@ -7,11 +7,14 @@ class ModelSeoFilterPage extends Model {
 
     try {
 
+      $requestString = $this->buildFilterPageQuery($data['filter_page_facet']);
+
       // Save main table
       $this->db->query("
         INSERT INTO " . DB_PREFIX . "seo_filter_page_to_store 
         SET
           `store_id` 			 = '" . (isset($data['top']) ? (int)$data['top'] : 0) . "', 
+          `query`          = '" . $this->db->escape($requestString) . "',
           `date_modified`  = NOW()
         ");
 
@@ -54,13 +57,14 @@ class ModelSeoFilterPage extends Model {
 
       // Save URL
       foreach ($data['seo_url'] ?? [] as $language_id => $keyword) {
-        $requestString = $this->buildFilterPageQuery($data['filter_page_facet']);
+        
         $this->db->query("
           DELETE FROM " . DB_PREFIX . "seo_url 
           WHERE query       = '" . $this->db->escape($requestString) . "'
             AND language_id = '" . (int) $language_id . "'
             AND store_id    = '" . (int) $this->session->data['store_id'] . "'
         ");
+
         if (!empty($keyword)) {
           $this->db->query("
             INSERT INTO " . DB_PREFIX . "seo_url 
@@ -88,10 +92,13 @@ class ModelSeoFilterPage extends Model {
 
     try {
 
+      $requestString = $this->buildFilterPageQuery($data['filter_page_facet']);
+
       // Update main table
       $this->db->query("
         UPDATE " . DB_PREFIX . "seo_filter_page_to_store 
         SET
+          `query`          = '" . $this->db->escape($requestString) . "',
           `date_modified`  = NOW()
         WHERE filter_page_id = " . (int) $filter_page_id . "
       ");
@@ -122,6 +129,7 @@ class ModelSeoFilterPage extends Model {
       $this->db->query("
         DELETE FROM " . DB_PREFIX . "seo_filter_page_facet_index
         WHERE filter_page_id = " . (int) $filter_page_id . "
+          AND store_id       = " . (int) $this->session->data['store_id'] . "
       ");
 
       foreach ($data['filter_page_facet'] ?? [] as $facet_type => $facet_group) {
@@ -145,13 +153,14 @@ class ModelSeoFilterPage extends Model {
 
       // Save URL
       foreach ($data['seo_url'] ?? [] as $language_id => $keyword) {
-        $requestString = $this->buildFilterPageQuery($data['filter_page_facet']);
+        
         $this->db->query("
           DELETE FROM " . DB_PREFIX . "seo_url 
           WHERE query       = '" . $this->db->escape($requestString) . "'
             AND language_id = '" . (int) $language_id . "'
             AND store_id    = '" . (int) $this->session->data['store_id'] . "'
         ");
+        
         if (!empty($keyword)) {
           $this->db->query("
             INSERT INTO " . DB_PREFIX . "seo_url 
