@@ -53,18 +53,25 @@ class ModelSeoFilterPage extends Model {
       $this->editImages($filter_page_id, $data['filter_page_images']);
 
       // Save URL
-      // foreach ($data['seo_url'] ?? [] as $language_id => $keyword) {
-      //   if (!empty($keyword)) {
-      //     $this->db->query("
-      //       INSERT INTO " . DB_PREFIX . "seo_url 
-      //       SET 
-      //         store_id    = '" . (int) $this->session->data['store_id'] . "',
-      //         language_id = '" . (int) $language_id . "', 
-      //         query       = '', 
-      //         keyword     = '" . $this->db->escape($keyword) . "'
-      //     ");
-      //   }
-      // }
+      foreach ($data['seo_url'] ?? [] as $language_id => $keyword) {
+        $requestString = $this->buildFilterPageQuery($data['filter_page_facet']);
+        $this->db->query("
+          DELETE FROM " . DB_PREFIX . "seo_url 
+          WHERE query       = '" . $this->db->escape($requestString) . "'
+            AND language_id = '" . (int) $language_id . "'
+            AND store_id    = '" . (int) $this->session->data['store_id'] . "'
+        ");
+        if (!empty($keyword)) {
+          $this->db->query("
+            INSERT INTO " . DB_PREFIX . "seo_url 
+            SET 
+              store_id    = '" . (int) $this->session->data['store_id'] . "',
+              language_id = '" . (int) $language_id . "', 
+              query       = '" . $this->db->escape($requestString) . "', 
+              keyword     = '" . $this->db->escape($keyword) . "'
+          ");
+        }
+      }
       
       $this->db->query("COMMIT");
       return $filter_page_id;
@@ -135,19 +142,27 @@ class ModelSeoFilterPage extends Model {
 
       $this->editImages($filter_page_id, $data['filter_page_images']);
 
+
       // Save URL
-      // foreach ($data['seo_url'] ?? [] as $language_id => $keyword) {
-      //   if (!empty($keyword)) {
-      //     $this->db->query("
-      //       INSERT INTO " . DB_PREFIX . "seo_url 
-      //       SET 
-      //         store_id    = '" . (int) $this->session->data['store_id'] . "',
-      //         language_id = '" . (int) $language_id . "', 
-      //         query       = '', 
-      //         keyword     = '" . $this->db->escape($keyword) . "'
-      //     ");
-      //   }
-      // }
+      foreach ($data['seo_url'] ?? [] as $language_id => $keyword) {
+        $requestString = $this->buildFilterPageQuery($data['filter_page_facet']);
+        $this->db->query("
+          DELETE FROM " . DB_PREFIX . "seo_url 
+          WHERE query       = '" . $this->db->escape($requestString) . "'
+            AND language_id = '" . (int) $language_id . "'
+            AND store_id    = '" . (int) $this->session->data['store_id'] . "'
+        ");
+        if (!empty($keyword)) {
+          $this->db->query("
+            INSERT INTO " . DB_PREFIX . "seo_url 
+            SET 
+              store_id    = '" . (int) $this->session->data['store_id'] . "',
+              language_id = '" . (int) $language_id . "', 
+              query       = '" . $this->db->escape($requestString) . "', 
+              keyword     = '" . $this->db->escape($keyword) . "'
+          ");
+        }
+      }
       
       $this->db->query("COMMIT");
       return $filter_page_id;
