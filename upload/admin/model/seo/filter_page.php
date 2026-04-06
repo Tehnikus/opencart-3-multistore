@@ -20,6 +20,19 @@ class ModelSeoFilterPage extends Model {
 
       $filter_page_id = $this->db->getLastId();
 
+      // Delete remaining parts just in case. Should never happen
+      $this->db->query("
+        DELETE FROM " . DB_PREFIX . "seo_url su
+        WHERE su.`query` = (
+          SELECT
+            fp2s.`query`
+          FROM " . DB_PREFIX . "seo_filter_page_to_store fp2s
+          WHERE fp2s.filter_page_id = " . (int) $filter_page_id . "
+            AND fp2s.store_id = " . (int) $this->session->data['store_id'] . "
+        )
+        AND su.store_id = " . (int) $this->session->data['store_id'] . "
+      ");
+
       // Save descriptions
       foreach ($data['filter_page_description'] as $language_id => $value) {
         $this->db->query("
@@ -57,7 +70,7 @@ class ModelSeoFilterPage extends Model {
 
       // Save URL
       foreach ($data['seo_url'] ?? [] as $language_id => $keyword) {
-        
+        // Mostly safety delete, should never happen
         $this->db->query("
           DELETE FROM " . DB_PREFIX . "seo_url 
           WHERE query       = '" . $this->db->escape($requestString) . "'
@@ -95,6 +108,18 @@ class ModelSeoFilterPage extends Model {
       $this->load->model('design/seo_url');
       $requestString = $this->model_design_seo_url->buildQuery($data['filter_page_facet']);
 
+      // Delete previous URL and request
+      $this->db->query("
+        DELETE FROM " . DB_PREFIX . "seo_url su
+        WHERE su.`query` = (
+          SELECT
+            fp2s.`query`
+          FROM " . DB_PREFIX . "seo_filter_page_to_store fp2s
+          WHERE fp2s.filter_page_id = " . (int) $filter_page_id . "
+            AND fp2s.store_id       = " . (int) $this->session->data['store_id'] . "
+        )
+        AND su.store_id = " . (int) $this->session->data['store_id'] . "
+      ");
 
       // Update main table
       $this->db->query("
@@ -155,7 +180,7 @@ class ModelSeoFilterPage extends Model {
 
       // Save URL
       foreach ($data['seo_url'] ?? [] as $language_id => $keyword) {
-        
+        // Mostly safety delete, should never happen
         $this->db->query("
           DELETE FROM " . DB_PREFIX . "seo_url 
           WHERE query       = '" . $this->db->escape($requestString) . "'
