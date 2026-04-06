@@ -2981,8 +2981,8 @@ CREATE TABLE `oc_seo_url` (
   `query`       VARCHAR(191) NOT NULL,
   `keyword`     VARCHAR(191) NOT NULL,
   PRIMARY KEY (`seo_url_id`),
-  KEY `query` (`query`, `language_id`, `store_id`),
-  KEY `keyword` (`keyword`, `language_id`, `store_id`)
+  UNIQUE KEY `query`   (`query`, `language_id`, `store_id`),
+  UNIQUE KEY `keyword` (`keyword`, `language_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
