@@ -441,9 +441,9 @@ class ModelSeoFilterPage extends Model {
       foreach ($groups as $groupId => $values) {
         foreach ($values as $valueId) {
           $flat[] = [
-            'facet_type'     => (int)$facetType,
-            'facet_group_id' => (int)$groupId,
-            'facet_value_id' => (int)$valueId,
+            'facet_type'     => (int) $facetType,
+            'facet_group_id' => (int) $groupId,
+            'facet_value_id' => (int) $valueId,
           ];
         }
       }
@@ -452,13 +452,12 @@ class ModelSeoFilterPage extends Model {
     // Build WHERE conditions
     foreach ($flat as $f) {
       $where[] = "(
-        facet_type = {$f['facet_type']} AND
-        facet_group_id = {$f['facet_group_id']} AND
-        facet_value_id = {$f['facet_value_id']}
+        facet_type         = {$f['facet_type']} 
+        AND facet_group_id = {$f['facet_group_id']} 
+        AND facet_value_id = {$f['facet_value_id']}
+        AND store_id       = {$store_id}
       )";
     }
-
-    $where[] = "store_id = {$store_id}";
 
     $sql = "
       SELECT 
