@@ -160,7 +160,7 @@ class ModelSeoFilterPage extends Model {
             AND language_id = '" . (int) $language_id . "'
             AND store_id    = '" . (int) $this->session->data['store_id'] . "'
         ");
-        
+
         if (!empty($keyword)) {
           $this->db->query("
             INSERT INTO " . DB_PREFIX . "seo_url 
@@ -241,6 +241,7 @@ class ModelSeoFilterPage extends Model {
       SELECT
         pd.filter_page_id,
         pd.`name`,
+        (SELECT fpi.image FROM " . DB_PREFIX . "seo_filter_page_image fpi WHERE fpi.filter_page_id = p2s.filter_page_id AND fpi.store_id = p2s.store_id ORDER BY fpi.sort_order LIMIT 1) AS image,
         (
           SELECT JSON_ARRAYAGG(
             JSON_OBJECT(
@@ -288,6 +289,7 @@ class ModelSeoFilterPage extends Model {
 
     foreach($this->db->query($sql)->rows ?? [] as $row) {
       $row['facets'] = json_decode($row['facets'], true);
+      $row['image'] = $row['image'] ? (HTTPS_CATALOG . 'image/' . $row['image']) : (HTTPS_CATALOG . 'image/no_image.webp');
       // Sort facets, so parent category (facet_type == 1) is always first
       usort($row['facets'], fn($a, $b) => $a['facet_type'] <=> $b['facet_type']);
       $result[] = $row;

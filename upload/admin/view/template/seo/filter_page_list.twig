@@ -35,7 +35,8 @@
                   <thead>
                     <tr>
                       <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
-                      <td class="text-left"><a href="{{ sort_name }}" {% if sort == 'name' %}class="{{ order|lower }}"{% endif %}>{{ column_name }}</a></td>
+                      <td style="width: 70px" class="text-center">{{ column_image }}</td>
+                      <td style="width: 200px;" class="text-left"><a href="{{ sort_name }}" {% if sort == 'name' %}class="{{ order|lower }}"{% endif %}>{{ column_name }}</a></td>
                       <td class="text-left"><a href="{{ sort_category }}" {% if sort == 'category' %}class="{{ order|lower }}"{% endif %}>{{ column_category }}</a>/{{ column_filters }}</td>
                       <td class="text-center" style="width: 60px"><a href="{{ sort_category }}" {% if sort == 'product_count' %}class="{{ order|lower }}"{% endif %}>{{ column_product_count }}</a></td>
                       <td style="width: 60px"></td>
@@ -46,6 +47,7 @@
                       {% for filter_page in items %}
                         <tr>
                           <td class="text-center"><input type="checkbox" name="selected[]" value="{{ filter_page.filter_page_id }}" {% if filter_page.filter_page_id in selected %}checked="checked"{% endif %} /></td>
+                          <td class="text-center"><img class="img-thumbnail" src="{{ filter_page.image }}" loading="lazy"></td>
                           <td class="text-left"><b>{{ filter_page.name }}</b></td>
                           <td class="text-left">
                             <div>
