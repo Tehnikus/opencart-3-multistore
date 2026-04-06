@@ -118,7 +118,7 @@ class ModelCatalogCategory extends Model {
 				ON cf.filter_id = f.filter_id 
 				AND f.store_id = cf.store_id
 
-			INNER JOIN oc_filter_group fg
+			INNER JOIN " . DB_PREFIX . "filter_group fg
 				ON fg.filter_group_id = f.filter_group_id
 
 			INNER JOIN " . DB_PREFIX . "filter_description fd 

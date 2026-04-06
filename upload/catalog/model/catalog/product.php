@@ -863,11 +863,11 @@ class ModelCatalogProduct extends Model {
 					i.facet_type,
 					i.facet_group_id,
 					COUNT(DISTINCT(i.product_id)) AS base_count
-				FROM oc_facet_index i
+				FROM " . DB_PREFIX . "facet_index i
 				WHERE EXISTS(
 					SELECT
 						1
-					FROM oc_facet_index p
+					FROM " . DB_PREFIX . "facet_index p
 					WHERE p.product_id = i.product_id
 						-- Current base page
 						AND p.facet_type     = {$base_facet_type} 		-- Base page type, category = 1, manufacturer = 5, has_discount = 9, is_featured = 10
@@ -886,7 +886,7 @@ class ModelCatalogProduct extends Model {
 			selected_facets AS (
 				SELECT
 					`facet_type`, `facet_group_id`, facet_value_id
-				FROM oc_facet_index
+				FROM " . DB_PREFIX . "facet_index
 				WHERE (
 					/*
 						Base facet AND selected facets joined with OR, example:
@@ -911,7 +911,7 @@ class ModelCatalogProduct extends Model {
 			facet_temp (`product_id`, `facet_type`, `facet_group_id`) AS (
 				SELECT
 					`product_id`, `facet_type`, `facet_group_id`
-				FROM oc_facet_index
+				FROM " . DB_PREFIX . "facet_index
 				WHERE (
 					{$selected_conditions}
 				) AND store_id = {$store_id}
@@ -937,7 +937,7 @@ class ModelCatalogProduct extends Model {
 			/* Base products */
 			base_products AS (
 				SELECT p.product_id
-				FROM oc_facet_index p
+				FROM " . DB_PREFIX . "facet_index p
 				WHERE p.facet_type = {$base_facet_type}
 				AND p.facet_value_id = {$base_facet_value_id}
 				AND p.store_id = {$store_id}
@@ -953,7 +953,7 @@ class ModelCatalogProduct extends Model {
 			
 				FROM base_facet_list b
 			
-				INNER JOIN oc_facet_index fi 
+				INNER JOIN " . DB_PREFIX . "facet_index fi 
 				-- USE INDEX (PRIMARY)
 					ON  fi.facet_value_id = b.facet_value_id
 					AND fi.facet_type     = b.facet_type
@@ -977,7 +977,7 @@ class ModelCatalogProduct extends Model {
 							NOT (sg.facet_type = b.facet_type AND sg.facet_group_id = b.facet_group_id)
 							AND NOT EXISTS (
 								SELECT 1
-								FROM oc_facet_index fi2
+								FROM " . DB_PREFIX . "facet_index fi2
 			
 								INNER JOIN selected_facets sf
 									ON  sf.facet_type     = fi2.facet_type
@@ -1010,8 +1010,8 @@ class ModelCatalogProduct extends Model {
 					fi.facet_type,
 					fi.facet_group_id
 				FROM current_products cp
-				-- Only facets that satisfy curretn products
-				INNER JOIN oc_facet_index fi
+				-- Only facets that satisfy current products
+				INNER JOIN " . DB_PREFIX . "facet_index fi
 					ON  fi.product_id = cp.product_id
 					AND fi.store_id   = {$store_id}
 				-- Only current page facets
@@ -1045,7 +1045,7 @@ class ModelCatalogProduct extends Model {
 			FROM base_facet_list b
 			
 			-- Facet names table, doesn't affect anything, just displays facet names
-			LEFT JOIN oc_facet_name n
+			LEFT JOIN " . DB_PREFIX . "facet_name n
 				ON n.facet_type      = b.facet_type
 				AND n.facet_group_id = b.facet_group_id
 				AND n.facet_value_id = b.facet_value_id
