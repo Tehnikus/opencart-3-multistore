@@ -6,8 +6,8 @@ class ModelSeoFilterPage extends Model {
     $this->db->query("START TRANSACTION");
 
     try {
-
-      $requestString = $this->buildFilterPageQuery($data['filter_page_facet']);
+      $this->load->model('design/seo_url');
+      $requestString = $this->model_design_seo_url->buildQuery($data['filter_page_facet']);
 
       // Save main table
       $this->db->query("
@@ -92,7 +92,9 @@ class ModelSeoFilterPage extends Model {
 
     try {
 
-      $requestString = $this->buildFilterPageQuery($data['filter_page_facet']);
+      $this->load->model('design/seo_url');
+      $requestString = $this->model_design_seo_url->buildQuery($data['filter_page_facet']);
+
 
       // Update main table
       $this->db->query("
@@ -492,74 +494,4 @@ class ModelSeoFilterPage extends Model {
 
     return (int) ($query->row['pages_count'] ?? 0);
   }
-
-  
-  /**
-   * Build canonical query for filter page
-   * Sorts filter page request params in the same order, avoiding query dublicates
-   * @param array $facets POST data from filter_page_form
-   * @return string sorted query
-   */
-  public function buildFilterPageQuery(array $facets = []) : string {
-
-    $this->load->model('catalog/facet');
-    $this->load->model('design/seo_url');
-    // Load allowed orders
-    $facetTypes   = $this->model_catalog_facet->getFacetTypes(); // name => type
-    $requestOrder = $this->model_design_seo_url->getRequestOrder();
-
-    // Flip type => name
-    $typeToName = array_flip($facetTypes);
-
-    // Get values
-    $grouped = [];
-
-    foreach ($facets as $facetType => $groups) {
-      $facetType = (int)$facetType;
-
-      if (!isset($typeToName[$facetType])) {
-        continue;
-      }
-
-      $name = $typeToName[$facetType];
-
-      foreach ($groups as $groupId => $values) {
-        foreach ($values as $valueId) {
-          $grouped[$name][] = (int)$valueId;
-        }
-      }
-    }
-
-    // Unique and sort values
-    foreach ($grouped as $name => $values) {
-      $values = array_unique($values);
-      sort($values, SORT_NUMERIC);
-      $grouped[$name] = $values;
-    }
-
-    // Order by requestOrder
-    $ordered = [];
-
-    foreach ($requestOrder as $key) {
-      if (isset($grouped[$key])) {
-        $ordered[$key] = $grouped[$key];
-        unset($grouped[$key]);
-      }
-    }
-
-    // In case if some new facet_types are added that are not in requestOrder add those queries to the end
-    foreach ($grouped as $key => $values) {
-      $ordered[$key] = $values;
-    }
-
-    // Assemble query
-    $parts = [];
-
-    foreach ($ordered as $key => $values) {
-      $parts[] = $key . '=' . implode(',', $values);
-    }
-
-    return implode('&', $parts);
-  }
-
 }
