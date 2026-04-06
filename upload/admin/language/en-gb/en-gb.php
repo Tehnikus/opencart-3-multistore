@@ -195,6 +195,8 @@ $_['column_language']               = 'Language';
 $_['column_store']                  = 'Store';
 $_['column_image']                  = 'Image';
 $_['column_product_count']          = 'Product count';
+$_['text_description_length']       = 'Description length';
+$_['text_characters_count']         = 'chars';
 $_['column_status']                 = 'Status';
 $_['column_filters']                = 'Filters';
 $_['column_attributes']             = 'Attributes';
@@ -210,6 +212,38 @@ $_['column_seo']                    = 'SEO Data';
 
 // Tabs
 $_['tab_languages']                 = 'Languages';
+// Faq
+$_['tab_faq']                       = 'FAQ';
+$_['entry_faq_question']            = 'FAQ Question';
+$_['entry_faq_answer']              = 'FAQ Answer';
+$_['button_add_faq']                = 'Add FAQ row';
+$_['button_remove_faq']             = 'Remove FAQ row';
+// HowTo
+$_['tab_how_to']                    = 'HowTo';
+$_['entry_how_to_common_name']      = 'HowTo name';
+$_['entry_how_to_common_text']      = 'HowTo description';
+$_['entry_how_to_time']             = 'Estimated time: PT5M - 5 mins, PT1H30M - 1 hour 30 mins';
+$_['entry_how_cost']                = 'Estimated cost';
+$_['entry_how_currency']            = 'Currency code';
+$_['entry_how_to_steps']            = 'HowTo steps';
+$_['entry_how_to_supplies']         = 'HowTo supplies';
+$_['entry_how_to_tools']            = 'HowTo tools';
+$_['entry_how_to_image']            = 'Image';
+$_['entry_how_to_name']             = 'Step name';
+$_['entry_how_to_tool']             = 'Tool name';
+$_['entry_how_to_supply']           = 'Supply name';
+$_['entry_how_to_text']             = 'Step description';
+// Footer
+$_['tab_footer']                    = 'Footer';
+$_['entry_footer_tabs']             = 'Footer tabs';
+$_['entry_footer_tab_name']         = 'Footer tab name';
+$_['entry_footer_help']             = 'Every row created here will be displayed as a tab in the very bottom in front-end on corresponding page';
+$_['button_add_footer']             = 'Add Footer row';
+$_['button_remove_footer']          = 'Remove Footer row';
+// Tags
+$_['tab_tag']                       = 'Tags';
+$_['tab_selected_tags']             = 'Selected tags';
+$_['tab_available_tags']            = 'Available tags';
 // Errors
 $_['error_language_association']    = 'Select at least one language for this store';
 $_['error_stores_association']      = 'Select at least on store';
