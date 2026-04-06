@@ -8,18 +8,19 @@ class ControllerSeoFilterPage extends Controller {
 		parent::__construct($registry);
     $this->language->load('seo/filter_page');$this->load->model('catalog/facet');
     $facetTypes = $this->model_catalog_facet->getFacetTypes();
-    foreach ($facetTypes as $key => $value) {
+    foreach ($facetTypes as $key => $facet_type) {
       $this->facetTypes[$key] = [
-        'title'      => $this->language->get($key),
-        'facetType'  => $value,
+        'title'      => $this->language->get("autocomplete_" . $key),
+        'facetType'  => $facet_type,
         'required'   => false,
         'searchType' => 'autocomplete'
       ];
-      if ($value == 1) {
+      // Category facet_type === 1, set as required
+      if ($facet_type == 1) {
         $this->facetTypes[$key]['required'] = true;
       }
       // Set searchType to checkbox to facets that have only boolean value - 1 or 0
-      if (in_array($value, [8,9,10])) {
+      if (in_array($facet_type, [8,9,10])) {
         $this->facetTypes[$key]['searchType'] = 'checkbox';
       }
     }

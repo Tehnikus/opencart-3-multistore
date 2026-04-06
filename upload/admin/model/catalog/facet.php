@@ -7,16 +7,16 @@ Class ModelCatalogFacet extends Model {
     parent::__construct($registry);
 
     $this->facetTypes = [
-			'filter_category_id'   		=> 1,
-			'filter_filter'        		=> 2,
-			'filter_option'        		=> 3,
-			'filter_attribute'     		=> 4,
-			'filter_manufacturer_id'	=> 5,
-			'filter_tag_id'           => 6,
-			'filter_supplier_id'      => 7,
-			'filter_is_available'  		=> 8,
-			'filter_has_discount'  		=> 9,
-			'filter_is_featured'   		=> 10,
+			'category_id'   		=> 1,
+			'filter'        		=> 2,
+			'option'        		=> 3,
+			'attribute'     		=> 4,
+			'manufacturer_id'	=> 5,
+			'tag_id'           => 6,
+			'supplier_id'      => 7,
+			'is_available'  		=> 8,
+			'has_discount'  		=> 9,
+			'is_featured'   		=> 10,
 		];
   }
 
