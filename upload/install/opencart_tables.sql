@@ -7491,6 +7491,17 @@ CREATE TABLE `oc_seo_filter_page_description` (
   PRIMARY KEY (`filter_page_id`, `language_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+DROP TABLE IF EXISTS `oc_seo_filter_page_image`;
+CREATE TABLE `oc_seo_filter_page_image` (
+  `image_id`          INT NOT NULL AUTO_INCREMENT,
+  `filter_page_id`    INT NOT NULL,
+  `store_id`          INT NOT NULL DEFAULT '0',
+  `image`             VARCHAR(255) DEFAULT NULL,
+  `sort_order`        INT NOT NULL DEFAULT '0',
+  PRIMARY KEY (`image_id`),
+  KEY (`filter_page_id`, `store_id`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 DROP TABLE IF EXISTS `oc_seo_filter_page_image_description`;
 CREATE TABLE `oc_seo_filter_page_image_description` (
   `image_id`            INT NOT NULL,
@@ -7498,7 +7509,7 @@ CREATE TABLE `oc_seo_filter_page_image_description` (
   `language_id`         INT NOT NULL,
   `store_id`            INT NOT NULL,
   `description`         TEXT NOT NULL,
-  PRIMARY KEY (`filter_page_id`, `language_id`, `store_id`)
+  PRIMARY KEY (`image_id`, `language_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `oc_search_page_image_description`;
