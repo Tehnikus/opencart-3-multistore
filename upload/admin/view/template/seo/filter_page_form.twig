@@ -86,7 +86,7 @@
               {% include "common/tab_description.twig" %}
             </div>
             <div class="tab-pane" id="tab-images">
-              {% include "common/tab_images.twig"  with {name_prefix: 'filter_page_images'} %}
+              {% include "common/tab_images.twig"  with {name_prefix: 'filter_page_images', images: filter_page_images} %}
             </div>
           </div>
         </form>
