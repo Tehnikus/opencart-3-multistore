@@ -215,6 +215,8 @@ $_['error_language_association']    = 'Select at least one language for this sto
 $_['error_stores_association']      = 'Select at least on store';
 $_['error_parent']                  = 'Select parent category';
 $_['error_no_parent']               = 'No parent category';
+$_['e_url_not_unique']              = 'SEO URL is not unique. SEO URLs must be unique per one langauge and per store ';
+$_['e_request_not_unique']          = 'A page with this request already exists. URL: <b>%s</b>';
 
 // Left column menu
 $_['text_seo']                      = 'SEO';
