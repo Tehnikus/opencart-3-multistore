@@ -94,6 +94,12 @@
           {% if error_seo_url[language.language_id] %}
             <div class="text-danger">{{ error_seo_url[language.language_id] }}</div>
           {% endif %}
+          {% if error_url_not_unique[language.language_id] %}
+            <div class="text-danger">{{ error_url_not_unique[language.language_id] }}</div>
+          {% endif %}
+          {% if error_request_not_unique[language.language_id] %}
+            <div class="text-danger">{{ error_request_not_unique[language.language_id] }}</div>
+          {% endif %}
           <br>
           <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ warning_keyword }}</div>
         </div>
