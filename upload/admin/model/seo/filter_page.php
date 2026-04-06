@@ -190,13 +190,13 @@ class ModelSeoFilterPage extends Model {
     $this->db->query("
       DELETE FROM `". DB_PREFIX . "seo_filter_page_image` 
       WHERE `filter_page_id` = '" . (int) $page_id . "'
-        AND store_id = " . (int) $store_id . "
+        AND store_id         = " . (int) $store_id . "
     ");
 
     $this->db->query("
       DELETE FROM `". DB_PREFIX . "seo_filter_page_image_description` 
       WHERE `filter_page_id` = '" . (int) $page_id . "'
-        AND store_id = " . (int) $store_id . "
+        AND store_id         = " . (int) $store_id . "
     ");
 
 
@@ -281,8 +281,9 @@ class ModelSeoFilterPage extends Model {
       FROM " . DB_PREFIX . "seo_filter_page_description pd
       JOIN " . DB_PREFIX . "seo_filter_page_to_store p2s
         ON p2s.filter_page_id = pd.filter_page_id
-        AND p2s.store_id = {$storeId}
       WHERE pd.language_id = {$languageId}
+        AND p2s.store_id   = {$storeId}
+      
     ";
 
     foreach($this->db->query($sql)->rows ?? [] as $row) {
@@ -356,7 +357,7 @@ class ModelSeoFilterPage extends Model {
         *
       FROM " . DB_PREFIX . "seo_filter_page_image pi
       WHERE `filter_page_id` = " . (int) $page_id . "
-      AND store_id = " . (int) $store_id . "
+        AND store_id         = " . (int) $store_id . "
       ORDER BY `sort_order`
     ")->rows;
 
@@ -429,6 +430,7 @@ class ModelSeoFilterPage extends Model {
     
     $flat  = [];
     $where = [];
+    $store_id = (int) $this->session->data['store_id'];
 
     // Build flat list fo facets
     foreach ($filters as $facetType => $groups) {
@@ -451,6 +453,8 @@ class ModelSeoFilterPage extends Model {
         facet_value_id = {$f['facet_value_id']}
       )";
     }
+
+    $where[] = "store_id = {$store_id}";
 
     $sql = "
       SELECT 
