@@ -19,6 +19,8 @@ $_['text_show_category_id']       = 'Subcategories';
 $_['text_show_is_featured']       = 'Featured';
 $_['text_show_is_available']      = 'Available';
 $_['text_show_has_discount']      = 'Has discount';
+$_['text_show_tag']               = 'Tags';
+$_['text_show_supplier_id']       = 'Supplier';
 
 
 $_['text_individual_categories']  = 'Individual category settings';

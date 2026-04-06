@@ -11,9 +11,9 @@ Class ModelCatalogFacet extends Model {
 			'filter'        		=> 2,
 			'option'        		=> 3,
 			'attribute'     		=> 4,
-			'manufacturer_id'	=> 5,
-			'tag_id'           => 6,
-			'supplier_id'      => 7,
+			'manufacturer_id'	  => 5,
+			'tag'               => 6,
+			'supplier_id'       => 7,
 			'is_available'  		=> 8,
 			'has_discount'  		=> 9,
 			'is_featured'   		=> 10,
@@ -732,6 +732,9 @@ Class ModelCatalogFacet extends Model {
         OR n.`group_name` LIKE '%" . $this->db->escape($search['name']) . "%'
       )";
     }
+    // if (isset($search['excludedIds'])) {
+    //   $searchRequest[] = "f.`facet_value_id` NOT IN(" . implode(',', array_map('intval', $search['excludedIds'])) . ")";
+    // }
 
 		$sql = "
       WITH facet AS (

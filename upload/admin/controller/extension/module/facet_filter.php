@@ -10,6 +10,7 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 		$this->document->setTitle($this->language->get('heading_title'));
 
 		$this->load->model('setting/setting');
+		$this->load->model('catalog/facet');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
 			// Save new settings
@@ -27,7 +28,7 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 		$data['module_facet_filter_status'] = $this->request->post['module_facet_filter_status'] ?? $this->config->get('module_facet_filter_status');
 		$data['settings'] 									= $this->request->post['module_facet_filter_settings'] ?? $this->config->get('module_facet_filter_settings');
 		$data['pageTypes'] 								  = ['category', 'manufacturer', 'special', 'search'];
-		$data['facetTypes'] 								= ['category_id', 'filter', 'option', 'attribute', 'manufacturer_id', 'is_available', 'has_discount', 'is_featured']; // Add ['tag_id', 'supplier_id'] when ready
+		$data['facetTypes'] 								= array_flip($this->model_catalog_facet->getFacetTypes());
 		$data['user_token'] 								= $this->session->data['user_token'];
 
 		// Get category name for saved categories
