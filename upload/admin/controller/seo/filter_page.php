@@ -273,29 +273,38 @@ class ControllerSeoFilterPage extends Controller {
       }
     }
 
-		// if ($this->request->post['filter_page_seo_url']) {
-		// 	$this->load->model('design/seo_url');
+		if ($this->request->post['seo_url']) {
 
-		// 	foreach ($this->request->post['filter_page_seo_url'] as $store_id => $language) {
-		// 		foreach ($language as $language_id => $keyword) {
-		// 			if (!empty($keyword)) {
-		// 				if (count(array_keys($language, $keyword)) > 1) {
-		// 					$this->error['keyword'][$store_id][$language_id] = $this->language->get('error_unique');
-		// 				}
+			$this->load->model('design/seo_url');
+      $storeId = (int) $this->session->data['store_id'];
 
-		// 				$seo_urls = $this->model_design_seo_url->getSeoUrlsByKeyword($keyword);
+      foreach ($this->request->post['seo_url'] as $langId => $currentUrl) {
 
-		// 				foreach ($seo_urls as $seo_url) {
-		// 					if (($seo_url['store_id'] == $store_id) && (!isset($this->request->get['filter_page_id']) || ($seo_url['query'] != 'filter_page_id=' . $this->request->get['filter_page_id']))) {
-		// 						$this->error['keyword'][$store_id][$language_id] = $this->language->get('error_keyword');
+        $currentUrl = trim(mb_strtolower($currentUrl));
+        if (!$currentUrl) continue;
 
-		// 						break;
-		// 					}
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// }
+        $pageRequest = $this->model_design_seo_url->buildQuery(
+          $this->request->post['filter_page_facet'] ?? []
+        );
+
+        $isUrlExists = $this->model_design_seo_url->checkUrlDuplicate($currentUrl, $langId, $storeId);
+        $isRequestExists = $this->model_design_seo_url->checkRequestDuplicate($pageRequest, $langId, $storeId);
+
+        foreach ($isUrlExists ?? [] as $row) {
+          if ($row['query'] !== $pageRequest) {
+            $this->error['error_url_not_unique'][$langId] = $this->language->get('e_url_not_unique');
+            break;
+          }
+        }
+
+        foreach ($isRequestExists ?? [] as $row) {
+          if ($row['keyword'] !== $currentUrl) {
+            $this->error['error_request_not_unique'][$langId] = sprintf($this->language->get('e_request_not_unique'), $row['keyword']);
+            break;
+          }
+        }
+      }
+		}
 
 		if ($this->error && !isset($this->error['warning'])) {
 			$this->error['warning'] = $this->language->get('e_warning');
