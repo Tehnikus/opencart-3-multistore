@@ -52,9 +52,9 @@
                               {% for facet in filter_page.facets %}
                                 <span class="badge badge-sm {% if facet.facet_type == 1 %}strong alert-success{% endif %}">
                                   {{ facet.name }}
-                                  {% if facet.facet_type == 8 %}{{ filter_is_available }}{% endif %}
-                                  {% if facet.facet_type == 9 %}{{ filter_has_discount }}{% endif %}
-                                  {% if facet.facet_type == 10 %}{{ filter_is_featured }}{% endif %}
+                                  {% if facet.facet_type == 8 %}{{ autocomplete_is_available }}{% endif %}
+                                  {% if facet.facet_type == 9 %}{{ autocomplete_has_discount }}{% endif %}
+                                  {% if facet.facet_type == 10 %}{{ autocomplete_is_featured }}{% endif %}
                                 </span>
                               {% endfor %}
                             </div>
