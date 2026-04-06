@@ -262,7 +262,7 @@ class ControllerSeoFilterPage extends Controller {
 
     // Check if filter page with selected facets already exists
     if (!empty($this->request->post['filter_page_facet'])) {
-      $currentId = $this->request->get['filter_page_id'];
+      $currentId = $this->request->get['filter_page_id'] ?? null;
       $existingPages = $this->model_seo_filter_page->getExistingPage($this->request->post['filter_page_facet']);
       $isDuplicate = $existingPages && (
         !$currentId ||
