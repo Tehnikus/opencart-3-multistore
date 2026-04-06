@@ -7468,9 +7468,10 @@ DROP TABLE IF EXISTS `oc_seo_filter_page_to_store`;
 CREATE TABLE `oc_seo_filter_page_to_store` (
   `filter_page_id`      INT AUTO_INCREMENT,
   `store_id`            INT NOT NULL,
+  `query`               VARCHAR(191) NOT NULL,
   `date_modified`       DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY (`filter_page_id`, `store_id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `oc_seo_filter_page_description`;
 CREATE TABLE `oc_seo_filter_page_description` (
