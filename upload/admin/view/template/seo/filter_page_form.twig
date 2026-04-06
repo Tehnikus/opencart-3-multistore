@@ -118,10 +118,17 @@
                 const formData = new FormData();
                 if (selectedFacets.length) {
                   selectedFacets.forEach(facet => {
-                    formData.append(facet.name, facet.value);
+                    if (facet.type === 'text') {
+                      formData.append(facet.name, facet.value);
+                      formData.append('search[excludedIds][]', facet.value ?? '');
+                    }
+                    if (facet.type === 'checkbox' && facet.checked) {
+                      formData.append(facet.name, facet.value);
+                    }
                   });
                 }
                 formData.append('search[name]', input.value ?? '');
+                
                 formData.append('search[facet_type]', input.dataset.facetType);
                 return formData;
               }
