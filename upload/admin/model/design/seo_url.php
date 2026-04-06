@@ -174,7 +174,7 @@ class ModelDesignSeoUrl extends Model {
 			SELECT
 				*
 			FROM " . DB_PREFIX . "seo_url
-			WHERE `keyword` 	= {$url}
+			WHERE `keyword` 	= '{$url}'
 				AND language_id = {$languageId}
 				AND store_id 		= {$storeId}
 		")->rows;
@@ -196,7 +196,7 @@ class ModelDesignSeoUrl extends Model {
 			SELECT
 				*
 			FROM " . DB_PREFIX . "seo_url
-			WHERE `query` 		= {$request}
+			WHERE `query` 		= '{$request}'
 				AND language_id = {$languageId}
 				AND store_id 		= {$storeId}
 		")->rows;
