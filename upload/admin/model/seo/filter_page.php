@@ -74,6 +74,7 @@ class ModelSeoFilterPage extends Model {
       throw $e;
     }
   }
+
   public function editFilterPage($filter_page_id, $data) {
     
     $this->db->query("START TRANSACTION");
@@ -288,6 +289,36 @@ class ModelSeoFilterPage extends Model {
     }
     
     return $result ?? [];
+  }
+
+  public function getImages($page_id) : array {
+    $result = [];
+    $store_id = (int) $this->session->data['store_id'];
+    $images = $this->db->query("
+      SELECT
+        *
+      FROM " . DB_PREFIX . "seo_filter_page_image pi
+      WHERE `filter_page_id` = " . (int) $page_id . "
+      AND store_id = " . (int) $store_id . "
+      ORDER BY `sort_order`
+    ")->rows;
+
+    foreach ($images as $row) {
+      $descriptions = $this->db->query("
+        SELECT
+          `language_id`,
+          `description`
+        FROM " . DB_PREFIX . "seo_filter_page_image_description
+        WHERE image_id = " . (int) $row['image_id'] . "
+          AND store_id = " . (int) $store_id . "
+      ")->rows;
+      foreach ($descriptions as $description) {
+        $row['description'][$description['language_id']] = $description['description'];
+      }
+      $result[] = $row;
+    }
+
+    return $result;
   }
 
   public function getFilterPageFacets($pageId) : array {
