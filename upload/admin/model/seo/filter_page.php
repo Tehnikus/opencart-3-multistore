@@ -310,6 +310,35 @@ class ModelSeoFilterPage extends Model {
     return $result ?? [];
   }
 
+  public function getSeoUrl($filter_page_id = null) : array {
+    $result   = [];
+    $store_id = (int) $this->session->data['store_id'];
+
+    if ($filter_page_id === null) {
+      return $result;
+    }
+
+    $query = $this->db->query("
+      SELECT
+        *
+      FROM " . DB_PREFIX . "seo_url su
+      WHERE su.`query` = (
+        SELECT 
+          fp2s.`query`
+        FROM " . DB_PREFIX . "seo_filter_page_to_store fp2s
+        WHERE fp2s.filter_page_id = " . (int) $filter_page_id . "
+          AND fp2s.store_id = " . $store_id . "
+      )
+      AND su.`store_id` = " . $store_id . "
+    ")->rows;
+
+    foreach ($query as $row) {
+      $result[$row['language_id']] = $row['keyword'];
+    }
+
+    return $result;
+  }
+
   public function getImages($page_id) : array {
     $result = [];
     $store_id = (int) $this->session->data['store_id'];

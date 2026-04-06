@@ -100,6 +100,7 @@ class ControllerSeoFilterPage extends Controller {
     $formData['filter_page_description'] = $this->model_seo_filter_page->getFilterPageDescription($filter_page_id);
     $formData['filter_page_facet']       = $this->model_seo_filter_page->getFilterPageFacets($filter_page_id);
     $formData['filter_page_images']      = $this->model_seo_filter_page->getImages($filter_page_id);
+    $formData['seo_url']                 = $this->model_seo_filter_page->getSeoUrl($filter_page_id);
     // Replace actual data with POST data
     if ($this->request->server['REQUEST_METHOD'] == 'POST') {
       $formData = $this->request->post;
