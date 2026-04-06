@@ -72,7 +72,7 @@
                       {% endfor %}
                       
                       {# Individual category settings #}
-                      <tr><td colspan="9" class="text-center"><b>{{ text_individual_categories }}</b></td></tr>
+                      <tr><td colspan="11" class="text-center"><b>{{ text_individual_categories }}</b></td></tr>
                       {% for id, category in settings.distinct_categories %}
                         <tr class="niftyItem" data-id="{{ id }}">
                           <td>
@@ -92,7 +92,7 @@
                     </tbody>
                     <tfoot>
                       <tr>
-                        <td colspan="9">
+                        <td colspan="11">
                           <input id="categoryAutocomplete" type="text" class="form-control niftyAutocomplete" placeholder="{{ text_add_category }}" />
                         </td>
                       </tr>
