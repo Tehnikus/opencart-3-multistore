@@ -185,7 +185,6 @@ $_['entry_additional_image']        = 'Additional Images';
 $_['entry_sort_order']              = 'Sort order';
 $_['entry_image_descriptions']      = 'Image descriptions';
 $_['entry_image_title']             = 'Image title';
-$_['entry_main_image']              = 'Main';
 
 // List entries
 $_['edit_filter_group']             = 'Edit %s filter group';

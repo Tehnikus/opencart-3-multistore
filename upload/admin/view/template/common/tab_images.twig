@@ -55,7 +55,6 @@
         {% if languages %}
         <td class="text-center">{{ entry_image_descriptions }}</td>
         {% endif %}
-        <td class="text-center" style="width: 50px">{{ entry_main_image }}</td>
         <td class="text-center" style="width: 100px">{{ entry_sort_order }}</td>
         <td class="text-center" style="width: 50px"></td>
       </tr>
@@ -102,15 +101,6 @@
                 {% endfor %}
               </td>
             {% endif %}
-            <td class="text-center">
-              <input 
-                type="radio"
-                name="{{ name_prefix }}[{{ image_row }}][main]"
-                data-nameprefix="{{ name_prefix }}"
-                value="1"
-                class="mainImage"
-              />
-            </td>
             <td class="text-right">
               <input 
                 type="text" 
@@ -173,15 +163,6 @@
                 {% endfor %}
               </td>
             {% endif %}
-            <td class="text-center">
-              <input 
-                type="radio"
-                name="{{ name_prefix }}[0][main]"
-                data-nameprefix="{{ name_prefix }}"
-                value="1"
-                class="mainImage"
-              />
-            </td>
             <td class="text-right">
               <input 
                 type="text" 
@@ -209,9 +190,9 @@
 
     <tfoot>
       <tr>
-        <td colspan="4"></td>
+        <td colspan="3"></td>
         <td class="text-left">
-          <button type="button" onclick="addRow2(this, '.additionalImages', '[data-row-index]', ['sort_order', 'mainImage'])" data-toggle="tooltip" title="{{ button_image_add }}" class="btn btn-primary">
+          <button type="button" onclick="addRow2(this, '.additionalImages', '[data-row-index]', ['sort_order'])" data-toggle="tooltip" title="{{ button_image_add }}" class="btn btn-primary">
             <i class="fa fa-plus-circle"></i>
           </button>
         </td>
