@@ -1,0 +1,85 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="button" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-success saveRobots"><i class="fa fa-floppy-o"></i> {{ button_save }}</button>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
+          </div>
+          <div class="panel-body">
+            <form action="{{ save }}" method="post" enctype="multipart/form-data" id="form_robots">
+              <textarea name="robots">{{ robots }}</textarea>
+            </form>
+            <div class="row">
+              <div class="col-sm-6 text-left">{{ pagination }}</div>
+              <div class="col-sm-6 text-right">{{ results }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const textarea = document.querySelector('textarea[name="robots"]');
+    const userToken = "{{ user_token }}";
+    var codemirror = CodeMirror.fromTextArea(textarea, {
+      mode: 'text/html',
+      height: '500px',
+      lineNumbers: true,
+      autofocus: true,
+      theme: 'monokai'
+    });
+    codemirror.setValue(textarea.value);
+
+
+    document.querySelector('.saveRobots').addEventListener('click', () => {
+      const text = codemirror.getValue();
+      data = new FormData();
+      data.append('robots', text);
+
+      fetch(`index.php?route=seo/robots_editor/fetchSave&user_token=${userToken}`, {method: "POST", body: data})
+      .then(r => r.json())
+      .then(r => {
+        console.log(r)
+      })
+    })
+  })
+</script>
+
+<style>
+  #form_robots .CodeMirror {
+    height: 80vh;
+    max-height: 80vh
+  }
+</style>
+
+<link href="view/javascript/codemirror/lib/codemirror.css" rel="stylesheet" />
+<link href="view/javascript/codemirror/theme/monokai.css" rel="stylesheet" />
+<script type="text/javascript" src="view/javascript/codemirror/lib/codemirror.js"></script> 
+<script type="text/javascript" src="view/javascript/codemirror/lib/xml.js"></script> 
+<script type="text/javascript" src="view/javascript/codemirror/lib/formatting.js"></script> 
+{{ footer }}
