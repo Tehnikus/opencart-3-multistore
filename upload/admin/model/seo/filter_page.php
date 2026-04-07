@@ -244,6 +244,9 @@ class ModelSeoFilterPage extends Model {
         $image_id = $this->db->getLastId();
 
         foreach ($image['description'] as $language_id => $image_description) {
+          if (!$image_description) {
+            continue;
+          }
           $this->db->query("
             INSERT INTO `". DB_PREFIX . "seo_filter_page_image_description`
             SET
