@@ -194,6 +194,14 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			if ($this->user->hasPermission('access', 'seo/robots_editor')) {
+				$seo[] = array(
+					'name'	   => $this->language->get('text_seo_robots_editor'),
+					'href'     => $this->url->link('seo/robots_editor', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
 			if ($seo) {
 				$data['menus'][] = array(
 					'id'       => 'menu-design',
