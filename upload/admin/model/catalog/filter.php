@@ -13,6 +13,19 @@ class ModelCatalogFilter extends Model {
 			");
 	
 			$filter_group_id = $this->db->getLastId();
+
+			// Cleanup previous URLs just in case, should never happen
+			$this->db->query("
+				DELETE su
+				FROM " . DB_PREFIX . "seo_url su
+				WHERE su.`store_id` = " . (int )$this->session->data['store_id'] . "
+					AND su.`query` IN (
+						SELECT CONCAT('filter=', f.`filter_id`)
+						FROM `" . DB_PREFIX . "filter` f
+						WHERE f.`filter_group_id` = " . (int) $filter_group_id . "
+							AND f.`store_id` 				= " . (int) $this->session->data['store_id'] . "
+					)
+      ");
 	
 			foreach ($data['filter_group_description'] as $language_id => $value) {
 				$this->db->query("
@@ -48,13 +61,6 @@ class ModelCatalogFilter extends Model {
 								filter_group_id = '" . (int) $filter_group_id . "', 
 								store_id 				= '" . (int) $this->session->data['store_id'] . "', 
 								name 						= '" . $this->db->escape($filter_description['name']) . "'
-						");
-	
-						$this->db->query("
-							DELETE FROM " . DB_PREFIX . "seo_url
-							WHERE `query` 			= 'filter=" . (int) $filter_id . "'
-								AND `language_id` = '" . (int) $language_id . "'
-								AND `store_id` 		= '" . (int) $this->session->data['store_id'] . "'
 						");
 	
 						if (isset($filter_description['url']) && !empty($filter_description['url'])) {
@@ -107,6 +113,20 @@ class ModelCatalogFilter extends Model {
 		$this->db->query("START TRANSACTION");
 
 		try {
+
+			// Cleanup previous URLs
+			$this->db->query("
+				DELETE su
+				FROM " . DB_PREFIX . "seo_url su
+				WHERE su.`store_id` = " . (int )$this->session->data['store_id'] . "
+					AND su.`query` IN (
+						SELECT CONCAT('filter=', f.`filter_id`)
+						FROM `" . DB_PREFIX . "filter` f
+						WHERE f.`filter_group_id` = " . (int) $filter_group_id . "
+							AND f.`store_id` 				= " . (int) $this->session->data['store_id'] . "
+					)
+      ");
+
 			$this->db->query("
 				UPDATE `" . DB_PREFIX . "filter_group` 
 				SET 
@@ -176,13 +196,6 @@ class ModelCatalogFilter extends Model {
 								store_id 				= '" . $this->session->data['store_id'] . "', 
 								filter_group_id = '" . (int) $filter_group_id . "', 
 								name = '" . $this->db->escape($filter_description['name']) . "'
-						");
-	
-						$this->db->query("
-							DELETE FROM " . DB_PREFIX . "seo_url
-							WHERE `query` 			= 'filter=" . (int) $filter_id . "'
-								AND `language_id` = '" . (int) $language_id . "'
-								AND `store_id` 		= '" . (int) $this->session->data['store_id'] . "'
 						");
 	
 						if (isset($filter_description['url']) && !empty($filter_description['url'])) {
