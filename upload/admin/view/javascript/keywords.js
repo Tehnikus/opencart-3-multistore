@@ -420,7 +420,7 @@ function renderSelect(options, datasetAttr) {
 function addRow(keywordTable, newRow) {
   const newData = {};
   let returnFlag = false;
-  newRow.querySelectorAll('input, select').forEach(element => {
+  newRow.querySelectorAll('input[type="text"], select').forEach(element => {
     if (element.tagName === 'INPUT' && element.value === '') {
       element.classList.add('alert-danger');
       returnFlag = true;
