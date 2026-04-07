@@ -267,6 +267,9 @@ class ModelSeoFilterPage extends Model {
     $result = [];
     $storeId = (int) $this->session->data['store_id'];
     $languageId = (int) $this->config->get('config_language_id');
+    $start  = max(0, (int) ($filter['start'] ?? 0));
+    $limit  = max(1, (int) ($filter['limit'] ?? $this->config->get('config_limit_admin') ?? 20));
+    $limits = " LIMIT {$start}, {$limit}";
     $sql = "
       SELECT
         pd.filter_page_id,
@@ -324,7 +327,7 @@ class ModelSeoFilterPage extends Model {
         ON p2s.filter_page_id = pd.filter_page_id
       WHERE pd.language_id = {$languageId}
         AND p2s.store_id   = {$storeId}
-      
+      {$limits}
     ";
 
     foreach($this->db->query($sql)->rows ?? [] as $row) {
