@@ -287,6 +287,18 @@ class ModelCatalogOption extends Model {
 
 		try {
 
+			$this->db->query("
+				DELETE su
+				FROM " . DB_PREFIX . "seo_url su
+				WHERE su.`store_id` = " . (int) $this->session->data['store_id'] . "
+					AND su.`query` IN (
+						SELECT CONCAT('option=', o.`option_value_id`)
+						FROM `" . DB_PREFIX . "option_value` o
+						WHERE o.`option_id` = " . (int) $option_id . "
+							AND o.`store_id` 	= " . (int) $this->session->data['store_id'] . "
+					)
+      ");
+
 			// Tables list to delete option from 
 			$tables = [
 				'option_value',
