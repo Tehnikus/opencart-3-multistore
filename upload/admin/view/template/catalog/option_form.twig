@@ -191,26 +191,81 @@ $('select[name=\'type\']').on('change', function() {
 
 $('select[name=\'type\']').trigger('change');
 
-var option_value_row = {{ option_value_row }};
+let option_value_row = {{ option_value_row }};
 
 function addOptionValue() {
+  const languages = {{ languages|json_encode() }};
   const sortOrder = option_value_row + 1;
-	html  = '<tr id="option-value-row' + option_value_row + '">';
-    html += '  <td class="text-left"><input type="hidden" name="option_value[' + option_value_row + '][option_value_id]" value="" />';
-	{% for language in languages %}
-	html += '    <div class="input-group">';
-	html += '      <span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span><input type="text" name="option_value[' + option_value_row + '][option_value_description][{{ language.language_id }}][name]" value="" placeholder="{{ entry_option_value }}" class="form-control" />';
-    html += '    </div>';
-	{% endfor %}
-	html += '  </td>';
-  html += '  <td style="width: 80px;" class="text-center"><a href="" id="thumb-image' + option_value_row + '" data-toggle="image" class="img-thumbnail"><img src="{{ placeholder }}" alt="" title="" data-placeholder="{{ placeholder }}" width="120"/></a><input type="hidden" name="option_value[' + option_value_row + '][image]" value="" id="input-image' + option_value_row + '" /></td>';
-	html += '  <td class="text-right"><input type="text" name="option_value[' + option_value_row + '][sort_order]" value="' + sortOrder + '" placeholder="{{ entry_sort_order }}" class="form-control" /></td>';
-	html += '  <td class="text-right"><button type="button" onclick="$(\'#option-value-row' + option_value_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
-	html += '</tr>';
 
-	$('#option-value tbody').append(html);
+  const btnCreateUrl = `{% include 'common/button_create_seo_url.twig' with {
+    seo_url_input: 'option_value[__row__][option_value_description][__lang__][url]'
+  } %}`;
 
-	option_value_row++;
+  let html = `
+    <tr id="option-value-row${option_value_row}">
+      <td class="text-left">
+        <input type="hidden" name="option_value[${option_value_row}][option_value_id]" value="" />
+  `;
+
+  for (const key in languages) {
+    const language = languages[key];
+
+    let btn = btnCreateUrl
+      .replace(/__row__/g, option_value_row)
+      .replace(/__lang__/g, language.language_id);
+
+    html += `
+      <div class="input-group">
+        <span class="input-group-addon">
+          <img src="language/${language.code}/${language.code}.png" title="${language.name}" />
+        </span>
+        ${btn}
+        <input type="text" 
+          name="option_value[${option_value_row}][option_value_description][${language.language_id}][name]" 
+          value="" 
+          placeholder="{{ entry_option_value }}" 
+          class="form-control" />
+        <input type="text" 
+          name="option_value[${option_value_row}][option_value_description][${language.language_id}][url]" 
+          value="" 
+          placeholder="{{ entry_keyword }}" 
+          class="form-control" />
+      </div>
+    `;
+  }
+
+  html += `
+      </td>
+      <td style="width: 80px;" class="text-center">
+        <a href="" id="thumb-image${option_value_row}" data-toggle="image" class="img-thumbnail">
+          <img src="{{ placeholder }}" alt="" title="" data-placeholder="{{ placeholder }}" width="120"/>
+        </a>
+        <input type="hidden" 
+          name="option_value[${option_value_row}][image]" 
+          value="" 
+          id="input-image${option_value_row}" />
+      </td>
+      <td class="text-right">
+        <input type="text" 
+          name="option_value[${option_value_row}][sort_order]" 
+          value="${sortOrder}" 
+          placeholder="{{ entry_sort_order }}" 
+          class="form-control" />
+      </td>
+      <td class="text-right">
+        <button type="button" 
+          onclick="this.closest('tr').remove()" 
+          title="{{ button_remove }}" 
+          class="btn btn-danger">
+          <i class="fa fa-minus-circle"></i>
+        </button>
+      </td>
+    </tr>
+  `;
+
+  document.querySelector('#option-value tbody').insertAdjacentHTML('beforeend', html);
+
+  option_value_row++;
 }
 //--></script></div>
 {{ footer }} 
