@@ -263,6 +263,62 @@ class ModelSeoFilterPage extends Model {
     return $this->db->countAffected();
   }
 
+  public function deleteFilterPage($filter_page_id) : void {
+    $this->db->query("START TRANSACTION");
+
+    try {
+      $tables = [
+        'seo_filter_page_facet_index',
+        'seo_filter_page_to_store',
+        'seo_filter_page_description',
+        'seo_filter_page_image',
+        'seo_filter_page_image_description',
+      ];
+
+      // Delete URL
+      $this->db->query("
+        DELETE su
+        FROM " . DB_PREFIX . "seo_url su
+        JOIN " . DB_PREFIX . "seo_filter_page_to_store fp2s
+          ON fp2s.`query` = su.`query`
+        WHERE fp2s.filter_page_id = " . (int)$filter_page_id . "
+          AND fp2s.store_id = " . (int)$this->session->data['store_id'] . "
+          AND su.store_id = " . (int)$this->session->data['store_id'] . "
+      ");
+
+      // Delete data
+      foreach ($tables as $table) {
+        $this->db->query("
+          DELETE FROM " . DB_PREFIX . $table . "
+          WHERE filter_page_id = " . (int) $filter_page_id . "
+            AND store_id       = " . (int) $this->session->data['store_id'] . "
+        ");
+      }
+
+      $otherStores = $this->db->query("
+        SELECT 1
+        FROM " . DB_PREFIX . "seo_filter_page_to_store
+        WHERE filter_page_id = " . (int)$filter_page_id . "
+          AND store_id      <> " . (int) $this->session->data['store_id'] . "
+        LIMIT 1
+      ")->num_rows;
+
+      if (!$otherStores) {
+        foreach ($tables as $table) {
+          $this->db->query("
+            DELETE FROM " . DB_PREFIX . $table . "
+            WHERE filter_page_id = " . (int)$filter_page_id . "
+          ");
+        }
+      }
+
+      $this->db->query("COMMIT");
+    } catch (\Throwable $e) {
+      $this->db->query("ROLLBACK");
+      throw $e;
+    }
+  }
+
   public function getList($filter) : array {
     $result = [];
     $storeId = (int) $this->session->data['store_id'];
