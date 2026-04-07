@@ -513,7 +513,7 @@ class ModelCatalogOption extends Model {
 
 		$query = $this->db->query("
 			SELECT 
-				* 
+				*
 			FROM " . DB_PREFIX . "option_description 
 			WHERE option_id = '" . (int) $option_id . "'
 				AND store_id 	= '" . (int) $this->session->data['store_id'] . "'
@@ -526,10 +526,14 @@ class ModelCatalogOption extends Model {
 		return $option_data;
 	}
 
+	/**
+	 * Used to get option values list in product form in admin panel
+	 * @param mixed $option_value_id
+	 */
 	public function getOptionValue($option_value_id) {
 		$query = $this->db->query("
 			SELECT 
-				* 
+				*
 			FROM " . DB_PREFIX . "option_value ov 
 			LEFT JOIN " . DB_PREFIX . "option_value_description ovd 
 				ON (ov.option_value_id = ovd.option_value_id) 
