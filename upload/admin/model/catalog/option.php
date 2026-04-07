@@ -14,6 +14,19 @@ class ModelCatalogOption extends Model {
 			");
 	
 			$option_id = $this->db->getLastId();
+
+			// Cleanup previous URLs just in case, should never happen
+			$this->db->query("
+				DELETE su
+				FROM " . DB_PREFIX . "seo_url su
+				WHERE su.`store_id` = " . (int )$this->session->data['store_id'] . "
+					AND su.`query` IN (
+						SELECT CONCAT('option=', o.`option_value_id`)
+						FROM `" . DB_PREFIX . "option_value` o
+						WHERE o.`option_id` = " . (int) $option_id . "
+							AND o.`store_id` 	= " . (int) $this->session->data['store_id'] . "
+					)
+      ");
 	
 			foreach ($data['option_description'] as $language_id => $value) {
 				$this->db->query("
@@ -92,6 +105,18 @@ class ModelCatalogOption extends Model {
 		$this->db->query("START TRANSACTION");
 
 		try {
+
+			$this->db->query("
+				DELETE su
+				FROM " . DB_PREFIX . "seo_url su
+				WHERE su.`store_id` = " . (int )$this->session->data['store_id'] . "
+					AND su.`query` IN (
+						SELECT CONCAT('option=', o.`option_value_id`)
+						FROM `" . DB_PREFIX . "option_value` o
+						WHERE o.`option_id` = " . (int) $option_id . "
+							AND o.`store_id` 	= " . (int) $this->session->data['store_id'] . "
+					)
+      ");
 			
 			$this->db->query("
 				UPDATE `" . DB_PREFIX . "option` 
