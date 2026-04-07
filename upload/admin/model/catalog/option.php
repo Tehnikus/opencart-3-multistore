@@ -157,7 +157,7 @@ class ModelCatalogOption extends Model {
 
 			if (isset($data['option_value'])) {
 				foreach ($data['option_value'] as $option_value) {
-					if (isset($option_value['option_value_id'])) {
+					if (!empty($option_value['option_value_id'])) {
 						$option_value_id = (int)$option_value['option_value_id'];
 						$this->db->query("
 							INSERT INTO " . DB_PREFIX . "option_value SET 
