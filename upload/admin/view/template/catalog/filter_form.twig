@@ -83,7 +83,9 @@
               <tr id="filter-row{{ filter_row }}">
                 <td class="text-center" style="width: auto"><input type="hidden" name="filter[{{ filter_row }}][filter_id]" value="{{ filter.filter_id }}" />
                   {% for language in languages %}
-                    <div class="input-group"><span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
+                    <div class="input-group">
+                      <span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
+                      {% include "common/button_create_seo_url.twig" with {seo_url_input: 'filter[' ~ filter_row ~ '][filter_description][' ~ language.language_id ~ '][url]' } %}
                       <input type="text" name="filter[{{ filter_row }}][filter_description][{{ language.language_id }}][name]"  value="{{ filter.filter_description[language.language_id].name }}"  placeholder="{{ entry_name }}"    class="form-control" />
                       <input type="text" name="filter[{{ filter_row }}][filter_description][{{ language.language_id }}][url]"   value="{{ filter.filter_description[language.language_id].url }}"   placeholder="{{ entry_keyword }}" class="form-control" />
                     </div>
