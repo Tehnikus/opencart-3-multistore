@@ -95,7 +95,7 @@
                   {% endfor %}
                 </td>
                 <td class="text-center" style="width: 100px"><input type="text" name="filter[{{ filter_row }}][sort_order]" value="{{ filter.sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control text-right" /></td>
-                <td class="text-center" style="width: 60px"><button type="button" onclick="$('#filter-row{{ filter_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
+                <td class="text-center" style="width: 60px"><button type="button" onclick="this.closest('tr').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
               </tr>
               {% set filter_row = filter_row + 1 %}
               {% endfor %}
@@ -113,30 +113,58 @@
       </div>
     </div>
   </div>
-  <script type="text/javascript"><!--
-var filter_row = {{ filter_row }};
+  <script>
+    let filter_row = {{ filter_row }};
 
-function addFilterRow() {
-	html  = '<tr id="filter-row' + filter_row + '">';
-    html += '  <td class="text-center" style="width: auto"><input type="hidden" name="filter[' + filter_row + '][filter_id]" value="" />';
-	{% for language in languages %}
-	html += '  <div class="input-group">';
-	html += `
-    <span class="input-group-addon">
-      <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" />
-    </span>
-    <input type="text" name="filter[${filter_row}][filter_description][{{ language.language_id }}][name]" value="" placeholder="{{ entry_name }}" class="form-control" />
-    <input type="text" name="filter[${filter_row}][filter_description][{{ language.language_id }}][url]" value=""  placeholder="{{ entry_url }}" class="form-control" />`;
-    html += '  </div>';
-	{% endfor %}
-	html += '  </td>';
-	html += '  <td class="text-right" style="width: 100px"><input type="text" name="filter[' + filter_row + '][sort_order]" value="' + (filter_row + 1) + '" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control text-right" /></td>';
-	html += '  <td class="text-right" style="width: 60px"><button type="button" onclick="$(\'#filter-row' + filter_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
-	html += '</tr>';
+    function addFilterRow() {
+      const languages = {{ languages|json_encode() }};
+      const btnCreateUrl = `{% include "common/button_create_seo_url.twig" with {seo_url_input: 'filter[__filterRow__][filter_description][__langId__][url]' } %}`;
+      html  = `<tr id="filter-row${filter_row}"><td class="text-center" style="width: auto"><input type="hidden" name="filter[${filter_row}][filter_id]" value="" />`;
+      
+      for (const key in languages) {
+        const language = languages[key];
+        let btn = btnCreateUrl;
 
-	$('#filter tbody').append(html);
+        btn = btn.replace(/__filterRow__/g, filter_row);
+        btn = btn.replace(/__langId__/g, language.language_id);
 
-	filter_row++;
-}
-//--></script></div>
+        html += `
+          <div class="input-group">
+            <span class="input-group-addon">
+              <img src="language/${language.code}/${language.code}.png" title="${language.name}" />
+            </span>
+            ${btn}
+            <input type="text" name="filter[${filter_row}][filter_description][${language.language_id}][name]" value="" placeholder="{{ entry_name }}" class="form-control" />
+            <input type="text" name="filter[${filter_row}][filter_description][${language.language_id}][url]" value=""  placeholder="{{ entry_url }}" class="form-control" />
+          </div>
+        `;
+      }
+       
+      html += `  
+        </td>
+        <td class="text-right" style="width: 100px">
+          <input type="text" 
+            name="filter[${filter_row}][sort_order]" 
+            value="${filter_row + 1}" 
+            placeholder="{{ entry_sort_order }}" 
+            class="form-control text-right" />
+        </td>
+        <td class="text-right" style="width: 60px">
+          <button type="button" 
+            onclick="this.closest('tr').remove()" 
+            title="{{ button_remove }}" 
+            class="btn btn-danger">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </td>
+        </tr>
+      `;
+
+      document.querySelector('#filter tbody').insertAdjacentHTML('beforeend', html);
+
+      filter_row++;
+    }
+
+  </script>
+</div>
 {{ footer }} 
