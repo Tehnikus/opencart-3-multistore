@@ -19,7 +19,7 @@ class ModelCatalogOption extends Model {
 			$this->db->query("
 				DELETE su
 				FROM " . DB_PREFIX . "seo_url su
-				WHERE su.`store_id` = " . (int )$this->session->data['store_id'] . "
+				WHERE su.`store_id` = " . (int) $this->session->data['store_id'] . "
 					AND su.`query` IN (
 						SELECT CONCAT('option=', o.`option_value_id`)
 						FROM `" . DB_PREFIX . "option_value` o
@@ -63,6 +63,19 @@ class ModelCatalogOption extends Model {
 								`option_id` 				= '" . (int) $option_id . "', 
 								`name` 							= '" . $this->db->escape($option_value_description['name']) . "'
 						");
+
+						// Save URLs
+						if (isset($option_value_description['url']) && !empty($option_value_description['url'])) {
+							$this->db->query("
+								INSERT INTO " . DB_PREFIX . "seo_url
+								SET
+									`query` 			= 'option=" . (int) $option_value_id . "', 
+									`keyword` 		= '" . $this->db->escape($option_value_description['url']) . "', 
+									`language_id` = '" . (int) $language_id . "', 
+									`store_id` 		= '" . (int) $this->session->data['store_id'] . "'
+							");
+						}
+
 					}
 				}
 			}
@@ -109,7 +122,7 @@ class ModelCatalogOption extends Model {
 			$this->db->query("
 				DELETE su
 				FROM " . DB_PREFIX . "seo_url su
-				WHERE su.`store_id` = " . (int )$this->session->data['store_id'] . "
+				WHERE su.`store_id` = " . (int) $this->session->data['store_id'] . "
 					AND su.`query` IN (
 						SELECT CONCAT('option=', o.`option_value_id`)
 						FROM `" . DB_PREFIX . "option_value` o
@@ -192,6 +205,19 @@ class ModelCatalogOption extends Model {
 								`store_id`				= '" . (int) $this->session->data['store_id'] . "',
 								`name` 						= '" . $this->db->escape($option_value_description['name']) . "'
 						");
+
+						// Save URLs
+						if (isset($option_value_description['url']) && !empty($option_value_description['url'])) {
+							$this->db->query("
+								INSERT INTO " . DB_PREFIX . "seo_url
+								SET
+									`query` 			= 'option=" . (int) $option_value_id . "', 
+									`keyword` 		= '" . $this->db->escape($option_value_description['url']) . "', 
+									`language_id` = '" . (int) $language_id . "', 
+									`store_id` 		= '" . (int) $this->session->data['store_id'] . "'
+							");
+						}
+
 					}
 				}
 			}
