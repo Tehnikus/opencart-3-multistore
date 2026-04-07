@@ -1,19 +1,6 @@
 {# Make image dir URL #}
 
-{% set dir_app = constant('DIR_APPLICATION')|replace({'\\':'/'}) %}
-{% set dir_img = constant('DIR_IMAGE')|replace({'\\':'/'}) %}
-
-{% set app_parts = dir_app|split('/') %}
-{% set img_parts = dir_img|split('/') %}
-{% set common_path = [] %}
-
-{% for key, item in app_parts %}
-  {% if img_parts[key] != app_parts[key] %}
-    {% set common_path = common_path|merge([img_parts[key]]) %}
-  {% endif %}
-{% endfor %}
-
-{% set image_dir = constant('HTTPS_CATALOG') ~ (common_path|join('/')|trim('/')) ~ '/' %}
+{% set image_dir = constant('HTTPS_CATALOG') ~ 'image/' %}
 
 {# Main image #}
 {% if mainImage %}
@@ -30,12 +17,12 @@
             <a href="" id="thumb-image" data-toggle="image" class="img-thumbnail">
               <img 
                 loading="lazy"
-                src="{% if image %}{{ image_dir }}{{ image }}{% else %}{{ image_dir }}no_image.webp{% endif %}" 
+                src="{{ image ? image_dir ~ image : image_dir ~ 'no_image.webp' }}"
                 alt="" 
                 title="" 
                 data-placeholder="{{ image_dir }}no_image.webp"
-                width="350px"
-                height="auto"
+                width="350"
+                style="width: 350px height: auto"
               />
             </a>
             <input type="hidden" name="image" value="{{ image }}" id="input-image"/>
@@ -68,9 +55,9 @@
               <a href="" id="thumb-image_{{ image_row }}" data-toggle="image" class="img-thumbnail">
                 <img 
                   loading="lazy" 
-                  width="100%" 
-                  height="auto" 
-                  src="{% if image.image %}{{ image_dir }}{{ image.image }}{% endif %}" 
+                  width="350"
+                  style="width: 350px; height: auto"
+                  src="{{ image.image ? image_dir ~ image.image : image_dir ~ 'no_image.webp' }}"
                   alt="" 
                   title="" 
                   data-placeholder="{{ image_dir }}no_image.webp"
@@ -130,8 +117,8 @@
               <a href="" id="thumb-image_0" data-toggle="image" class="img-thumbnail">
                 <img 
                   loading="lazy" 
-                  width="100%" 
-                  height="auto" 
+                  width="350"
+                  style="width: 350px; height: auto"
                   src="{{ image_dir }}no_image.webp" 
                   alt="" 
                   title="" 
