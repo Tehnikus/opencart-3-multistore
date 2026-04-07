@@ -591,14 +591,26 @@ class ModelCatalogOption extends Model {
 
 			$option_value_description_query = $this->db->query("
 				SELECT 
-					* 
-				FROM " . DB_PREFIX . "option_value_description 
-				WHERE option_value_id = '" . (int)$option_value['option_value_id'] . "'
-					AND store_id 				= '" . (int) $this->session->data['store_id']. "'
+					*,
+					(	
+						SELECT 
+							`keyword` 
+						FROM " . DB_PREFIX . "seo_url 
+						WHERE `query` 		= 'option=" . (int)$option_value['option_value_id'] . "' 
+							AND store_id 		=  ovd.store_id
+							AND language_id =  ovd.language_id
+						LIMIT 1
+					) AS url
+				FROM " . DB_PREFIX . "option_value_description ovd
+				WHERE ovd.option_value_id = '" . (int)$option_value['option_value_id'] . "'
+					AND ovd.store_id 				= '" . (int) $this->session->data['store_id']. "'
 			");
 
 			foreach ($option_value_description_query->rows as $option_value_description) {
-				$option_value_description_data[$option_value_description['language_id']] = array('name' => $option_value_description['name']);
+				$option_value_description_data[$option_value_description['language_id']] = [
+					'name' => $option_value_description['name'],
+					'url' => $option_value_description['url'],
+				];
 			}
 
 			$option_value_data[] = array(
