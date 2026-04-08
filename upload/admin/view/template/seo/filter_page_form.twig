@@ -22,9 +22,10 @@
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-filter-page" class="form-horizontal">
           <ul class="nav nav-tabs">
             <li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a></li>
-            <li><a href="#tab-description" data-toggle="tab">{{ tab_description }}</a></li>
-            <li><a href="#tab-images" data-toggle="tab">{{ tab_image }}</a></li>
-            <li><a href="#tab-footer"  data-toggle="tab">{{ tab_footer }}</a></li>
+            <li><a href="#tab-description"  data-toggle="tab">{{ tab_description }}</a></li>
+            <li><a href="#tab-images"       data-toggle="tab">{{ tab_image }}</a></li>
+            <li><a href="#tab-faq"          data-toggle="tab">{{ tab_faq }}</a></li>
+            <li><a href="#tab-footer"       data-toggle="tab">{{ tab_footer }}</a></li>
           </ul>
           <div class="tab-content">
             <div class="tab-pane active" id="tab-general">
@@ -81,6 +82,7 @@
                 </div>
               {% endfor %}
             </div>
+
             {% set data        =  filter_page_description  %}
             {% set name_prefix = 'filter_page_description' %}
             <div class="tab-pane" id="tab-description">
@@ -92,6 +94,10 @@
             <div class="tab-pane" id="tab-footer">
               {% include "common/tab_footer.twig" %}
             </div>
+            <div class="tab-pane" id="tab-faq">
+              {% include "common/tab_faq.twig" %}
+            </div>
+
           </div>
         </form>
       </div>
