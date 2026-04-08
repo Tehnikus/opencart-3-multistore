@@ -19,6 +19,14 @@ class ControllerCommonColumnLeft extends Controller {
 			// Catalog
 			$catalog = array();
 
+			if ($this->user->hasPermission('access', 'catalog/product')) {
+				$catalog[] = array(
+					'name'	   => $this->language->get('text_product'),
+					'href'     => $this->url->link('catalog/product', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+			
 			if ($this->user->hasPermission('access', 'catalog/category')) {
 				$catalog[] = array(
 					'name'	   => $this->language->get('text_category'),
@@ -27,34 +35,10 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
-			if ($this->user->hasPermission('access', 'catalog/product')) {
-				$catalog[] = array(
-					'name'	   => $this->language->get('text_product'),
-					'href'     => $this->url->link('catalog/product', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
-			if ($this->user->hasPermission('access', 'catalog/recurring')) {
-				$catalog[] = array(
-					'name'	   => $this->language->get('text_recurring'),
-					'href'     => $this->url->link('catalog/recurring', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
 			if ($this->user->hasPermission('access', 'catalog/filter')) {
 				$catalog[] = array(
 					'name'	   => $this->language->get('text_filter'),
 					'href'     => $this->url->link('catalog/filter', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
-			if ($this->user->hasPermission('access', 'extension/module/facet_filter')) {
-				$catalog[] = array(
-					'name'	   => $this->language->get('text_facet_filter'),
-					'href'     => $this->url->link('extension/module/facet_filter', 'user_token=' . $this->session->data['user_token'], true),
 					'children' => array()
 				);
 			}
@@ -102,10 +86,26 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			if ($this->user->hasPermission('access', 'extension/module/facet_filter')) {
+				$catalog[] = array(
+					'name'	   => $this->language->get('text_facet_filter'),
+					'href'     => $this->url->link('extension/module/facet_filter', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
 			if ($this->user->hasPermission('access', 'catalog/download')) {
 				$catalog[] = array(
 					'name'	   => $this->language->get('text_download'),
 					'href'     => $this->url->link('catalog/download', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'catalog/recurring')) {
+				$catalog[] = array(
+					'name'	   => $this->language->get('text_recurring'),
+					'href'     => $this->url->link('catalog/recurring', 'user_token=' . $this->session->data['user_token'], true),
 					'children' => array()
 				);
 			}
@@ -118,14 +118,6 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
-			if ($this->user->hasPermission('access', 'catalog/information')) {
-				$catalog[] = array(
-					'name'	   => $this->language->get('text_information'),
-					'href'     => $this->url->link('catalog/information', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
 			if ($catalog) {
 				$data['menus'][] = array(
 					'id'       => 'menu-catalog',
@@ -133,6 +125,50 @@ class ControllerCommonColumnLeft extends Controller {
 					'name'	   => $this->language->get('text_catalog'),
 					'href'     => '',
 					'children' => $catalog
+				);
+			}
+
+			// Blog
+			$blog = array();
+			if ($this->user->hasPermission('access', 'blog/article')) {
+				$blog[] = array(
+					'name'	   => $this->language->get('text_blog_articles'),
+					'href'     => $this->url->link('blog/article', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'blog/tag')) {
+				$blog[] = array(
+					'name'	   => $this->language->get('text_blog_tags'),
+					'href'     => $this->url->link('blog/tag', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'blog/settings')) {
+				$blog[] = array(
+					'name'	   => $this->language->get('text_blog_settings'),
+					'href'     => $this->url->link('blog/settings', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'catalog/information')) {
+				$blog[] = array(
+					'name'	   => $this->language->get('text_information'),
+					'href'     => $this->url->link('catalog/information', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($blog) {
+				$data['menus'][] = array(
+					'id'       => 'menu-design',
+					'icon'	   => 'fa-newspaper-o',
+					'name'	   => $this->language->get('text_blog'),
+					'href'     => '',
+					'children' => $blog
 				);
 			}
 
