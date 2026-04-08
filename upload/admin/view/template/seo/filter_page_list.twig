@@ -39,6 +39,7 @@
                       <td style="width: 200px;" class="text-left"><a href="{{ sort_name }}" {% if sort == 'name' %}class="{{ order|lower }}"{% endif %}>{{ column_name }}</a></td>
                       <td class="text-left"><a href="{{ sort_category }}" {% if sort == 'category' %}class="{{ order|lower }}"{% endif %}>{{ column_category }}</a> / {{ column_filters }}</td>
                       <td>{{ column_seo }}</td>
+                      <td class="text-center" style="width: 60px"><a href="{{ sort_date_modified }}" {% if sort == 'date_modified' %}class="{{ order|lower }}"{% endif %}>{{ column_date_modified }}</a></td>
                       <td class="text-center" style="width: 60px"><a href="{{ sort_product_count }}" {% if sort == 'product_count' %}class="{{ order|lower }}"{% endif %}>{{ column_product_count }}</a></td>
                       <td style="width: 60px"></td>
                     </tr>
@@ -92,6 +93,7 @@
                               </span>
                             </p>
                           </td>
+                          <td class="text-center">{{ filter_page.date_modified }}</td>
                           <td class="text-center">{{ filter_page.product_count }}</td>
                           <td class="text-center"><a href="{{ filter_page.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
                         </tr>

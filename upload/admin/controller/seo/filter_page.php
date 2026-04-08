@@ -41,7 +41,7 @@ class ControllerSeoFilterPage extends Controller {
     $url = '&' . http_build_query(array_intersect_key($this->request->get, array_flip(['page'])));
 
     $filter_data = array(
-			'sort'  => $this->request->get['sort'] ?? 'date_added',
+			'sort'  => $this->request->get['sort'] ?? 'date_modified',
 			'order' => $this->request->get['order'] ?? 'DESC',
 			'start' => (($this->request->get['page'] ?? 1) - 1) * $this->config->get('config_limit_admin'),
 			'limit' => $this->config->get('config_limit_admin')
@@ -69,11 +69,11 @@ class ControllerSeoFilterPage extends Controller {
       'delete'             => $this->url->link('seo/filter_page/delete', 'user_token=' . $user_token, true),
       'success'            => $this->session->data['success'] ?? false,
       // Sorts and orders
-      'sort'               => $this->request->get['sort'] ?? 'date_added',
+      'sort'               => $this->request->get['sort'] ?? 'date_modified',
       'order'              => $this->request->get['order'] ?? 'DESC',
       'sort_name'          => $this->url->link('seo/filter_page', 'user_token=' . $user_token . $this->getSortOrder('name') . $url, true),
       'sort_category'      => $this->url->link('seo/filter_page', 'user_token=' . $user_token . $this->getSortOrder('category') . $url, true),
-      'sort_date_added'    => $this->url->link('seo/filter_page', 'user_token=' . $user_token . $this->getSortOrder('date_added') . $url, true),
+      'sort_date_modified' => $this->url->link('seo/filter_page', 'user_token=' . $user_token . $this->getSortOrder('date_modified') . $url, true),
       'sort_product_count' => $this->url->link('seo/filter_page', 'user_token=' . $user_token . $this->getSortOrder('product_count') . $url, true),
     ];
 
