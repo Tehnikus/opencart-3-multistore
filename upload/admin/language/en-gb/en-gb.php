@@ -263,7 +263,13 @@ $_['text_seo_keywords']             = 'Keywords';
 $_['text_sitemap_generator']        = 'Sitemap generator';
 $_['text_seo_url']                  = 'SEO URLs';
 $_['text_seo_url_setting']          = 'SEO URLs settings';
-$_['text_facet_filter']             = 'Facet filter';
+$_['text_facet_filter']             = 'Filter settings';
+$_['text_seo_robots_editor']        = 'Edit robots.txt';
+// BLog
+$_['text_blog']                     = 'Blog';
+$_['text_blog_articles']            = 'Articles';
+$_['text_blog_tags']                = 'Tags';
+$_['text_blog_settings']            = 'Settings';
 
 // Input helper buttons
 $_['button_create_seo_url']         = 'Create SEO URL';
