@@ -20,7 +20,7 @@ class ModelSeoFilterPage extends Model {
       $this->db->query("
         INSERT INTO " . DB_PREFIX . "seo_filter_page_to_store 
         SET
-          `store_id` 			 = '" . (isset($data['top']) ? (int)$data['top'] : 0) . "', 
+          `store_id` 			 = '" . (int) $this->session->data['store_id'] . "', 
           `query`          = '" . $this->db->escape($requestString) . "',
           `date_modified`  = NOW()
         ");
