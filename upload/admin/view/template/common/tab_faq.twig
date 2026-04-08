@@ -41,8 +41,8 @@
                 {% 
                   include "common/button_translate.twig" 
                   with {
-                    sourceInput: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ '][faq][mainEntity][' ~ key ~ '][name]',
-                    nameprefix: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ ']'
+                    sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][faq][mainEntity][' ~ key ~ '][name]',
+                    nameprefix: name_prefix ~ '[' ~ defaultLanguage.language_id ~ ']'
                   } 
                 %}
                 <input 
@@ -67,8 +67,8 @@
                 {% 
                   include "common/button_translate.twig" 
                   with {
-                    sourceInput: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ '][faq][mainEntity][' ~ key ~ '][acceptedAnswer][text]',
-                    namePrefix: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ ']' 
+                    sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][faq][mainEntity][' ~ key ~ '][acceptedAnswer][text]',
+                    namePrefix: name_prefix ~ '[' ~ defaultLanguage.language_id ~ ']' 
                   } 
                 %}
                 <input 
@@ -100,8 +100,8 @@
                 {% 
                   include "common/button_translate.twig" 
                   with {
-                    sourceInput: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ '][faq][mainEntity][0][name]',
-                    namePrefix: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ ']' 
+                    sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][faq][mainEntity][0][name]',
+                    namePrefix: name_prefix ~ '[' ~ defaultLanguage.language_id ~ ']' 
                   } 
                 %}
                 <input 
@@ -126,8 +126,8 @@
                   {% 
                     include "common/button_translate.twig" 
                     with {
-                      sourceInput: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ '][faq][mainEntity][0][acceptedAnswer][text]', 
-                      namePrefix: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~']'
+                      sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][faq][mainEntity][0][acceptedAnswer][text]', 
+                      namePrefix: name_prefix ~ '[' ~ defaultLanguage.language_id ~']'
                     } 
                   %}
                   <input 

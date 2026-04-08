@@ -26,8 +26,8 @@
                 {% 
                   include "common/button_translate.twig" 
                   with {
-                    sourceInput: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ '][footer][' ~ key ~ '][name]',
-                    namePrefix: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ ']' 
+                    sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][footer][' ~ key ~ '][name]',
+                    namePrefix: name_prefix ~ '[' ~ defaultLanguage.language_id ~ ']' 
                   }
                 %}
                 <input 
@@ -59,8 +59,8 @@
             {% 
               include "common/button_translate.twig" 
               with {
-                sourceInput: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ '][footer][0][name]',
-                namePrefix: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ ']' 
+                sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][footer][0][name]',
+                namePrefix: name_prefix ~ '[' ~ defaultLanguage.language_id ~ ']' 
               }
             %}
             <input 
