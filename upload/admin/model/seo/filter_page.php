@@ -54,7 +54,8 @@ class ModelSeoFilterPage extends Model {
             `meta_title` 				= '" . $this->db->escape($value['meta_title']) . "', 
             `meta_description` 	= '" . $this->db->escape($value['meta_description']) . "', 
             `meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "',
-            `footer`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['footer'] ?? []), JSON_UNESCAPED_UNICODE)) . "'
+            `footer`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['footer'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
+            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? []), JSON_UNESCAPED_UNICODE)) . "'
         ");
       }
 
@@ -157,7 +158,8 @@ class ModelSeoFilterPage extends Model {
             `meta_title` 				= '" . $this->db->escape($value['meta_title']) . "', 
             `meta_description` 	= '" . $this->db->escape($value['meta_description']) . "', 
             `meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "',
-            `footer`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['footer'] ?? []), JSON_UNESCAPED_UNICODE)) . "'
+            `footer`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['footer'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
+            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? []), JSON_UNESCAPED_UNICODE)) . "'
         ");
       }
 
@@ -440,6 +442,7 @@ class ModelSeoFilterPage extends Model {
 
     foreach($this->db->query($sql)->rows ?? [] as $row) {
       $row['footer'] = json_decode($row['footer'] ?? '[]', true);
+      $row['faq']    = json_decode($row['faq'] ?? '[]', true);
       $result[$row['language_id']] = $row;
     }
     
