@@ -1,6 +1,13 @@
 <?php
 class ModelSeoFilterPage extends Model {
 
+  private $sortOrders = [
+    'name'          => 'pd.`name`',
+    'date_modified' => 'p2s.`date_modified`',
+    'product_count' => '`product_count`',
+    'category'      => '`category`',
+  ];
+
   public function addFilterPage($data) {
 
     $this->db->query("START TRANSACTION");
@@ -323,13 +330,24 @@ class ModelSeoFilterPage extends Model {
     $result = [];
     $storeId = (int) $this->session->data['store_id'];
     $languageId = (int) $this->config->get('config_language_id');
-    $start  = max(0, (int) ($filter['start'] ?? 0));
+    
+    // Orders
+    $ordering = '';
+    $ordering = "ORDER BY " . ($this->sortOrders[$filter['sort']] ?? 'p2s.`date_modified`');
+    if (!empty($filter['order']) && in_array($filter['order'], ['ASC', 'DESC'])) {
+      $ordering .= " " . $filter['order'];
+    }
+      
+    // Limits
     $limit  = max(1, (int) ($filter['limit'] ?? $this->config->get('config_limit_admin') ?? 20));
+    $start  = max(0, (int) ($filter['start'] ?? 0));
     $limits = " LIMIT {$start}, {$limit}";
+
     $sql = "
       SELECT
-        pd.filter_page_id,
+        pd.`filter_page_id`,
         pd.`name`,
+        p2s.`date_modified`,
         (SELECT fpi.image FROM " . DB_PREFIX . "seo_filter_page_image fpi WHERE fpi.filter_page_id = p2s.filter_page_id AND fpi.store_id = p2s.store_id ORDER BY fpi.sort_order LIMIT 1) AS image,
         (
           SELECT JSON_ARRAYAGG(
@@ -383,6 +401,7 @@ class ModelSeoFilterPage extends Model {
         ON p2s.filter_page_id = pd.filter_page_id
       WHERE pd.language_id = {$languageId}
         AND p2s.store_id   = {$storeId}
+      {$ordering}
       {$limits}
     ";
 
