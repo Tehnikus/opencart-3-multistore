@@ -35,16 +35,61 @@
                   <thead>
                     <tr>
                       <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
-                      <td class="text-left"><a href="{{ sort_name }}" {% if sort == 'name' %}class="{{ order|lower }}"{% endif %}>{{ column_name }}</a></td>
+                      <td style="width: 70px" class="text-center">{{ column_image }}</td>
+                      <td style="width: 200px;" class="text-left"><a href="{{ sort_name }}" {% if sort == 'name' %}class="{{ order|lower }}"{% endif %}>{{ column_name }}</a></td>
+                      <td class="text-left"><a href="{{ sort_category }}" {% if sort == 'category' %}class="{{ order|lower }}"{% endif %}>{{ column_category }}</a> / {{ column_filters }}</td>
+                      <td>{{ column_seo }}</td>
+                      <td class="text-center" style="width: 60px"><a href="{{ sort_date_modified }}" {% if sort == 'date_modified' %}class="{{ order|lower }}"{% endif %}>{{ column_date_modified }}</a></td>
                       <td style="width: 60px"></td>
                     </tr>
                   </thead>
                   <tbody>
-                    {% if articles %}
-                      {% for article in articles %}
+                    {% if items %}
+                      {% for article in items %}
                         <tr>
                           <td class="text-center"><input type="checkbox" name="selected[]" value="{{ article.article_id }}" {% if article.article_id in selected %}checked="checked"{% endif %} /></td>
-                          <td class="text-left">{{ article.name }}</td>
+                          <td class="text-center"><img class="img-thumbnail" src="{{ article.image }}" loading="lazy"></td>
+                          <td class="text-left"><b>{{ article.name }}</b></td>
+                          <td class="text-left">
+                            <div>
+                              {% for tag in article.tags %}
+                                <span class="badge badge-sm {% if tag.is_main == 1 %}strong alert-success{% endif %}">
+                                  {{ tag.name }}
+                                </span>
+                                {% if tag.is_main == 1 %}<br>{% endif %}
+                              {% endfor %}
+                            </div>
+                          </td>
+                          <td>
+                            <p>
+                              <span class="badge badge-sm 
+                                {% if article.seo.descriptionLength > 2000 %} alert-success {% elseif article.seo.descriptionLength > 500 %} alert-warning {% else %} alert-danger {% endif %}">
+                                {{ text_description_length }}:&nbsp;{{ article.seo.descriptionLength }}&nbsp;{{ text_characters_count }}
+                                {% if article.seo.descriptionLength > 500 %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
+                              </span>
+                              <br>
+                              <span class="badge badge-sm {% if article.seo.hasFooter %}alert-success{% else %}alert-danger{% endif %}">
+                                {{ tab_footer }}:&nbsp;
+                                {% if article.seo.hasFooter %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
+                              </span>
+
+                              <span class="badge badge-sm {% if article.seo.hasTag %}alert-success{% else %}alert-danger{% endif %}">
+                                {{ tab_tag }}:&nbsp;
+                                {% if article.seo.hasTag %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
+                              </span>
+
+                              <span class="badge badge-sm {% if article.seo.hasFaq %}alert-success{% else %}alert-danger{% endif %}">
+                                {{ tab_faq }}:&nbsp;
+                                {% if article.seo.hasFaq %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
+                              </span>
+
+                              <span class="badge badge-sm {% if article.seo.hasHowTo %}alert-success{% else %}alert-danger{% endif %}">
+                                {{ tab_how_to }}:&nbsp;
+                                {% if article.seo.hasHowTo %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
+                              </span>
+                            </p>
+                          </td>
+                          <td class="text-center">{{ article.date_modified }}</td>
                           <td class="text-center"><a href="{{ article.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
                         </tr>
                       {% endfor %}
