@@ -7,10 +7,10 @@ class ModelBlogArticle extends Model {
     $sql = "
       SELECT
         *
-      FROM " . DB_PREFIX . "blog_article_description bad
-      JOIN " . DB_PREFIX . "blog_article_to_store ba2s
-        ON ba2s.article_id = bad.article_id
-        AND ba2s.store_id = {$storeId}
+      FROM " . DB_PREFIX . "article_description ad
+      JOIN " . DB_PREFIX . "article_to_store a2s
+        ON a2s.article_id = ad.article_id
+        AND a2s.store_id = {$storeId}
     ";
 
     $this->db->query($sql);
@@ -24,11 +24,11 @@ class ModelBlogArticle extends Model {
     $sql = "
       SELECT
         *
-      FROM " . DB_PREFIX . "blog_article_description bad
-      JOIN " . DB_PREFIX . "blog_article_to_store ba2s
-        ON ba2s.article_id = bad.article_id
-        AND ba2s.store_id = {$storeId}
-      WHERE bad.article_id = {$pageId}
+      FROM " . DB_PREFIX . "article_description ad
+      JOIN " . DB_PREFIX . "article_to_store a2s
+        ON a2s.article_id = ad.article_id
+        AND a2s.store_id = {$storeId}
+      WHERE ad.article_id = {$pageId}
     ";
     
     return $this->db->query($sql)->rows ?? [];
@@ -39,10 +39,10 @@ class ModelBlogArticle extends Model {
     $query = $this->db->query("
       SELECT
         COUNT(*) AS pages_count
-      FROM " . DB_PREFIX . "blog_article_description bad
-      JOIN " . DB_PREFIX . "blog_article_to_store ba2s
-        ON ba2s.article_id = bad.article_id
-        AND ba2s.store_id = {$storeId}
+      FROM " . DB_PREFIX . "article_description ad
+      JOIN " . DB_PREFIX . "article_to_store a2s
+        ON a2s.article_id = ad.article_id
+        AND a2s.store_id = {$storeId}
     ");
 
     return (int) ($query->row['pages_count'] ?? 0);
