@@ -1,0 +1,100 @@
+<ul class="nav nav-tabs" id="footer_language">
+  {% for language in languages %}
+    <li {% if loop.first %}class="active"{% endif %}>
+      <a href="#footer_language_{{ language.language_id }}" data-toggle="tab" data-tab-language-id="{{ language.language_id }}">
+        <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}"/>
+        {{ language.name }}
+      </a>
+    </li>
+  {% endfor %}
+</ul>
+
+<div class="tab-content">
+  {% for language in languages %}
+    <div class="tab-pane {% if loop.first %}active{% endif %}" id="footer_language_{{ language.language_id }}">
+      <table id="tableFooter_lang_{{ language.language_id }}" class="table table-bordered table-hover table-striped table_footer">
+      <thead>
+        <th>{{ entry_footer_tabs }}</th>
+        <th style="width: 55px"></th>
+      </thead>
+      <tbody>
+      {% if data and data[language.language_id].footer is not empty %}
+        {% for key, row in data[language.language_id].footer %}
+          <tr data-row-index="{{key}}">
+            <td>
+              <div class="input-group flex">
+                {% 
+                  include "common/button_translate.twig" 
+                  with {
+                    sourceInput: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ '][footer][' ~ key ~ '][name]',
+                    namePrefix: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ ']' 
+                  }
+                %}
+                <input 
+                  value="{{ row.name }}"
+                  placeholder="{{ entry_footer_tab_name }}"
+                  type="text" 
+                  class="form-control" 
+                  name="{{ name_prefix }}[{{ language.language_id }}][footer][{{key}}][name]"
+                  data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                />
+              </div>
+              <div style="padding-top: 9px">
+                <textarea
+                  name="{{ name_prefix }}[{{ language.language_id }}][footer][{{key}}][description]"
+                  data-toggle="summernote" 
+                  data-lang="{{ summernote }}"
+                >{{ row.description|trim() }}</textarea>
+              </div>
+            </td>
+            <td>
+              <button type="button" onclick="removeRow2(this, '#tableFooter_lang_{{ language.language_id }}')" class="btn btn-danger remove_row" title="{{ button_remove_footer }}"><i class="fa fa-times"></i></button>
+            </td>
+          </tr>
+        {% endfor %}
+      {% else %}
+        <tr data-row-index="0">
+          <td>
+            <div class="input-group flex">
+            {% 
+              include "common/button_translate.twig" 
+              with {
+                sourceInput: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ '][footer][0][name]',
+                namePrefix: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ ']' 
+              }
+            %}
+            <input 
+              value="{{ row.name }}"
+              placeholder="{{ entry_footer_tab_name }}"
+              type="text" 
+              class="form-control" 
+              name="{{ name_prefix }}[{{ language.language_id }}][footer][0][name]"
+              data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+            />
+            </div>
+
+            <div style="padding-top: 9px">
+              <textarea
+                name="{{ name_prefix }}[{{ language.language_id }}][footer][0][description]"
+                data-toggle="summernote" 
+                data-lang="{{ summernote }}"
+                data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+              ></textarea>
+            </div>
+          </td>
+          <td>
+            <button type="button" onclick="removeRow2(this, '#tableFooter_lang_{{ language.language_id }}')" class="btn btn-danger remove_row" title="{{ button_remove_footer }}"><i class="fa fa-times"></i></button>
+          </td>
+        </tr>
+      {% endif %}
+        <tr>
+          <td></td>
+          <td class="text-right"><button type="button" onclick="addRow2(this, '#tableFooter_lang_{{ language.language_id }}')" class="btn btn-primary add_row" title="{{ button_add_footer }}"><i class="fa fa-plus-circle"></button></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  {% endfor %}
+</div>
+
+
