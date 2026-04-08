@@ -38,8 +38,16 @@ class ControllerSeoFilterPage extends Controller {
     $this->load->model('localisation/language');
     $this->load->model('seo/filter_page');
     $user_token = $this->session->data['user_token'];
+    $url = '&' . http_build_query(array_intersect_key($this->request->get, array_flip(['page'])));
 
-    $items = $this->model_seo_filter_page->getList([]);
+    $filter_data = array(
+			'sort'  => $this->request->get['sort'] ?? 'date_added',
+			'order' => $this->request->get['order'] ?? 'DESC',
+			'start' => (($this->request->get['page'] ?? 1) - 1) * $this->config->get('config_limit_admin'),
+			'limit' => $this->config->get('config_limit_admin')
+		);
+
+    $items = $this->model_seo_filter_page->getList($filter_data);
     foreach ($items as $key => $item) {
       $items[$key]['edit'] = $this->url->link('seo/filter_page/edit', 'filter_page_id=' . $item['filter_page_id'] . '&user_token=' . $user_token, true);
     }
