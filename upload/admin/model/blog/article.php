@@ -230,7 +230,7 @@ class ModelBlogArticle extends Model {
     return $result;
   }
 
-  public function getArticleDescriptions($pageId) : array {
+  public function getArticleDescription($pageId) : array {
     $pageId = (int) $pageId;
     $storeId = (int) $this->session->data['store_id'];
     $sql = "
@@ -260,4 +260,46 @@ class ModelBlogArticle extends Model {
     return (int) ($query->row['pages_count'] ?? 0);
   }
 
+  
+  /**
+   * Filter array recursively and remove empty key => value pairs
+   * @param array $array The array to be affected
+   * @param array $deletedKeys The array of keys that will be treated as empty if all other keys are empty on this level 
+   * @return array
+   */
+  public function filterArrayRecursively(array $array = [], array $deletedKeys = []): array {
+    $filtered = [];
+
+    foreach ($array as $key => $value) {
+      if (is_array($value)) {
+        $value = $this->filterArrayRecursively($value, $deletedKeys);
+        if (!empty($value)) {
+          $filtered[$key] = $value;
+        }
+      // $value !== '&lt;p&gt;&lt;br&gt;&lt;/p&gt;' is a workaround for empty Summernote editor which always places this string: '<p><br></p>'
+      } elseif (trim((string) $value) !== '' && $value !== '&lt;p&gt;&lt;br&gt;&lt;/p&gt;') {
+        $filtered[$key] = $value;
+      }
+    }
+
+    // If result array is not empty, but only includes deletedKeys - then clear them also
+    if (!empty($filtered)) {
+      $nonDeletedKeys = array_diff(array_keys($filtered), $deletedKeys);
+
+      // Check recursively
+      $hasMeaningfulData = !empty($nonDeletedKeys);
+      foreach ($filtered as $key => $value) {
+        if (is_array($value) && !empty($value)) {
+          $hasMeaningfulData = true;
+          break;
+        }
+      }
+
+      if (!$hasMeaningfulData) {
+        return [];
+      }
+    }
+
+    return $filtered;
+  }
 }
