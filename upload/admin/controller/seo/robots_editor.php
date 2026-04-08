@@ -41,7 +41,7 @@ class ControllerSeoRobotsEditor extends Controller {
     $path = dirname(DIR_CATALOG) . '/robots.txt';
 
     if (!is_writable(dirname($path))) {
-        return false;
+      return false;
     }
 
     return file_put_contents($path, $content, LOCK_EX) !== false;
@@ -49,7 +49,11 @@ class ControllerSeoRobotsEditor extends Controller {
   
   public function fetchSave() {
     $this->load->language('seo/robots_editor');
-    $json['success'] = $this->saveRobots($this->request->post['robots']);
+    $result = $this->saveRobots(html_entity_decode($this->request->post['robots']));
+    $json = [
+      'success' => $result,
+      'message' => $result ? $this->language->get('message_robots_saved') : $this->language->get('message_robots_not_writable')
+    ]; 
     $this->response->addHeader('Content-Type: application/json');
     $this->response->setOutput(json_encode($json));
   }
