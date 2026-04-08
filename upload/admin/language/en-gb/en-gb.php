@@ -172,6 +172,7 @@ $_['entry_is_available']            = 'Availble for order';
 $_['entry_h1']                      = 'H1 tag';
 $_['entry_keyword']                 = 'SEO URL';
 $_['entry_description']             = 'Description';
+$_['entry_seo_description']         = 'SEO description';
 $_['entry_meta_title']              = 'Meta title';
 $_['entry_meta_description']        = 'Meta description';
 $_['entry_meta_keyword']            = 'Meta keywords';
@@ -209,6 +210,7 @@ $_['column_bottom']                 = 'Show in footer';
 $_['column_route']                  = 'Route';
 $_['column_modules']                = 'Modules';
 $_['column_seo']                    = 'SEO Data';
+$_['column_date_modified']          = 'Date modified';
 
 // Tabs
 $_['tab_languages']                 = 'Languages';
@@ -273,6 +275,7 @@ $_['button_add_lang_postfix']       = 'Add language postfix to URL';
 /* When doing translations only include the matching language code */
 
 // Summernote
+$_['summernote']                    = 'en-gb';
 //$_['summernote']                    = 'ar-AR';
 //$_['summernote']                    = 'bg-BG';
 //$_['summernote']                    = 'ca-ES';
