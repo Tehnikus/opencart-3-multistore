@@ -57,7 +57,11 @@ class ModelCatalogProduct extends Model {
 						`tag` 							= '" . $this->db->escape($value['tag']) . "', 
 						`meta_title` 				= '" . $this->db->escape($value['meta_title']) . "', 
 						`meta_description` 	= '" . $this->db->escape($value['meta_description']) . "', 
-						`meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "'
+						`meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "',
+						`seo_description` 	= '" . $this->db->escape($value['seo_description']) . "',
+            `footer`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['footer'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
+            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? [], ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "',
+            `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? [], ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "'
 				");
 			}
 	
@@ -420,15 +424,19 @@ class ModelCatalogProduct extends Model {
 				$this->db->query("
 					INSERT INTO " . DB_PREFIX . "product_description 
 					SET 
-						product_id 				= '" . (int) $product_id . "', 
-						language_id 			= '" . (int) $language_id . "', 
-						store_id 					= '" . (int) $this->session->data['store_id'] . "',
-						name 							= '" . $this->db->escape($value['name']) . "', 
-						description 			= '" . $this->db->escape($value['description']) . "', 
-						tag 							= '" . $this->db->escape($value['tag']) . "', 
-						meta_title 				= '" . $this->db->escape($value['meta_title']) . "', 
-						meta_description 	= '" . $this->db->escape($value['meta_description']) . "', 
-						meta_keyword 			= '" . $this->db->escape($value['meta_keyword']) . "'
+						`product_id` 				= '" . (int) $product_id . "', 
+						`language_id` 			= '" . (int) $language_id . "', 
+						`store_id` 					= '" . (int) $this->session->data['store_id'] . "',
+						`name` 							= '" . $this->db->escape($value['name']) . "', 
+						`description` 			= '" . $this->db->escape($value['description']) . "', 
+						`tag` 							= '" . $this->db->escape($value['tag']) . "', 
+						`meta_title` 				= '" . $this->db->escape($value['meta_title']) . "', 
+						`meta_description` 	= '" . $this->db->escape($value['meta_description']) . "', 
+						`meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "',
+						`seo_description` 	= '" . $this->db->escape($value['seo_description']) . "',
+            `footer`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['footer'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
+            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? [], ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "',
+            `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? [], ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "'
 				");
 			}
 	
@@ -1297,9 +1305,9 @@ class ModelCatalogProduct extends Model {
 				'tag'              	=> $result['tag'],
 				'seo_keywords'     	=> $result['seo_keywords'],
 				'seo_description'  	=> $result['seo_description'],
-				'faq'              	=> $result['faq'],
-				'how_to'           	=> $result['how_to'],
-				'footer'           	=> $result['footer'],
+				'footer' 					  => json_decode($result['footer'] ?? '[]', true),
+				'faq'    					  => json_decode($result['faq'] ?? '[]', true),
+				'how_to' 					  => json_decode($result['how_to'] ?? '[]', true),
 			];
 		}
 
@@ -1944,4 +1952,46 @@ class ModelCatalogProduct extends Model {
 			$this->cache->delete($urlCacheName);
 		}
 	}
+
+	/**
+   * Filter array recursively and remove empty key => value pairs
+   * @param array $array The array to be affected
+   * @param array $deletedKeys The array of keys that will be treated as empty if all other keys are empty on this level 
+   * @return array
+   */
+  public function filterArrayRecursively(array $array = [], array $deletedKeys = []): array {
+    $filtered = [];
+
+    foreach ($array as $key => $value) {
+      if (is_array($value)) {
+        $value = $this->filterArrayRecursively($value, $deletedKeys);
+        if (!empty($value)) {
+          $filtered[$key] = $value;
+        }
+      // $value !== '&lt;p&gt;&lt;br&gt;&lt;/p&gt;' is a workaround for empty Summernote editor which always places this string: '<p><br></p>'
+      } elseif (trim((string) $value) !== '' && $value !== '&lt;p&gt;&lt;br&gt;&lt;/p&gt;') {
+        $filtered[$key] = $value;
+      }
+    }
+
+    // If result array is not empty, but only includes deletedKeys - then clear them also
+    if (!empty($filtered)) {
+      $nonDeletedKeys = array_diff(array_keys($filtered), $deletedKeys);
+
+      // Check recursively
+      $hasMeaningfulData = !empty($nonDeletedKeys);
+      foreach ($filtered as $key => $value) {
+        if (is_array($value) && !empty($value)) {
+          $hasMeaningfulData = true;
+          break;
+        }
+      }
+
+      if (!$hasMeaningfulData) {
+        return [];
+      }
+    }
+
+    return $filtered;
+  }
 }
