@@ -53,20 +53,44 @@ class ControllerSeoFilterPage extends Controller {
     }
 
     $data = [
-      'items'         => $items,
-      'column_left'   => $this->load->controller('common/column_left'),
-      'footer'        => $this->load->controller('common/footer'),
-      'header'        => $this->load->controller('common/header'),
-      'breadcrumbs'   => $this->displayBreadcrumbs(),
-      'pagination'    => $this->getPagination()['pagination'],
-      'results'       => $this->getPagination()['results'],
-      'user_token'    => $user_token,
-      'add'           => $this->url->link('seo/filter_page/add', 'user_token=' . $user_token, true),
-      'delete'        => $this->url->link('seo/filter_page/delete', 'user_token=' . $user_token, true),
-      'success'       => $this->session->data['success'] ?? false,
+      // Items list
+      'items'              => $items,
+      // Common interface
+      'column_left'        => $this->load->controller('common/column_left'),
+      'footer'             => $this->load->controller('common/footer'),
+      'header'             => $this->load->controller('common/header'),
+      // Form interface
+      'breadcrumbs'        => $this->displayBreadcrumbs(),
+      'pagination'         => $this->getPagination()['pagination'],
+      'results'            => $this->getPagination()['results'],
+      'user_token'         => $user_token,
+      // Form actions
+      'add'                => $this->url->link('seo/filter_page/add', 'user_token=' . $user_token, true),
+      'delete'             => $this->url->link('seo/filter_page/delete', 'user_token=' . $user_token, true),
+      'success'            => $this->session->data['success'] ?? false,
+      // Sorts and orders
+      'sort'               => $this->request->get['sort'] ?? 'date_added',
+      'order'              => $this->request->get['order'] ?? 'DESC',
+      'sort_name'          => $this->url->link('seo/filter_page', 'user_token=' . $user_token . $this->getSortOrder('name') . $url, true),
+      'sort_category'      => $this->url->link('seo/filter_page', 'user_token=' . $user_token . $this->getSortOrder('category') . $url, true),
+      'sort_date_added'    => $this->url->link('seo/filter_page', 'user_token=' . $user_token . $this->getSortOrder('date_added') . $url, true),
+      'sort_product_count' => $this->url->link('seo/filter_page', 'user_token=' . $user_token . $this->getSortOrder('product_count') . $url, true),
     ];
 
     $this->response->setOutput($this->load->view('seo/filter_page_list', $data));
+  }
+
+  private function getSortOrder(string $column): string {
+    $currentSort  = $this->request->get['sort'] ?? '';
+    $currentOrder = $this->request->get['order'] ?? 'ASC';
+
+    if ($currentSort === $column) {
+      $order = ($currentOrder === 'ASC') ? 'DESC' : 'ASC';
+    } else {
+      $order = 'ASC';
+    }
+
+    return '&sort=' . $column . '&order=' . $order;
   }
 
   public function getForm() : void {
