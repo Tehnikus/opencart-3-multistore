@@ -213,19 +213,54 @@ class ModelBlogArticle extends Model {
   }
 
   public function getList($filter) : array {
-    $result = [];
-    $storeId = (int) $this->session->data['store_id'];
+    $result     = [];
+    $storeId    = (int) $this->session->data['store_id'];
+    $languageId = (int) $this->config->get('config_language_id');
+    
+    // Orders
+    $ordering = '';
+    $ordering = "ORDER BY " . ($this->sortOrders[$filter['sort']] ?? 'a2s.`date_modified`');
+    if (!empty($filter['order']) && in_array($filter['order'], ['ASC', 'DESC'])) {
+      $ordering .= " " . $filter['order'];
+    }
+      
+    // Limits
+    $limit  = max(1, (int) ($filter['limit'] ?? $this->config->get('config_limit_admin') ?? 20));
+    $start  = max(0, (int) ($filter['start'] ?? 0));
+    $limits = " LIMIT {$start}, {$limit}";
 
     $sql = "
       SELECT
-        *
+        ad.`article_id`,
+        ad.`name`,
+        a2s.`date_modified`,
+        (SELECT fpi.image FROM " . DB_PREFIX . "article_image fpi WHERE fpi.article_id = a2s.article_id AND fpi.store_id = a2s.store_id ORDER BY fpi.sort_order LIMIT 1) AS image,
+        (
+          SELECT JSON_OBJECT(
+            'descriptionLength',    COALESCE(CHAR_LENGTH(ad.`description`), 0),
+            'seoDescriptionLength', COALESCE(CHAR_LENGTH(ad.`seo_description`), 0),
+            'seoKeywords',          ad.seo_keywords,
+            'hasFooter',            CHAR_LENGTH(COALESCE(ad.`footer`, '')) > 2,
+            'hasFaq',               CHAR_LENGTH(COALESCE(ad.`faq`, '')) > 2,
+            'hasHowTo',             CHAR_LENGTH(COALESCE(ad.`how_to`, '')) > 2
+          )
+        ) AS seo
       FROM " . DB_PREFIX . "article_description ad
       JOIN " . DB_PREFIX . "article_to_store a2s
         ON a2s.article_id = ad.article_id
-        AND a2s.store_id = {$storeId}
+      WHERE ad.language_id = {$languageId}
+        AND a2s.store_id   = {$storeId}
+      {$ordering}
+      {$limits}
     ";
 
-    $this->db->query($sql);
+    foreach($this->db->query($sql)->rows ?? [] as $row) {
+      $row['seo'] = json_decode($row['seo'], true);
+      $row['seo']['seoKeywords'] = count(array_filter(explode(',', $row['seo']['seoKeywords'])));
+      $row['image'] = $row['image'] ? (HTTPS_CATALOG . 'image/' . $row['image']) : (HTTPS_CATALOG . 'image/no_image.webp');
+
+      $result[] = $row;
+    }
 
     return $result;
   }
