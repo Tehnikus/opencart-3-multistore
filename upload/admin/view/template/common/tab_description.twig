@@ -194,6 +194,21 @@
           </div>
         </div>
       </div>
+
+      {# SEO description input #}
+      <div class="form-group">
+        <label class="col-sm-2 control-label" for="input-description{{ language.language_id }}">{{ entry_seo_description }}</label>
+        <div class="col-sm-10">
+          <textarea 
+            name="{{ name_prefix }}[{{ language.language_id }}][seo+description]" 
+            placeholder="{{ entry_description }}" 
+            id="input-description_{{ language.language_id }}" 
+            data-toggle="summernote" 
+            data-lang="{{ summernote }}" 
+            class="form-control">{{ data[language.language_id].seo_description }}</textarea>
+        </div>
+      </div>
+
     </div>
   {% endfor %}
 </div>
