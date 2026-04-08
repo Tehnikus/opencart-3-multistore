@@ -25,6 +25,7 @@
             <li><a href="#tab-description"  data-toggle="tab">{{ tab_description }}</a></li>
             <li><a href="#tab-images"       data-toggle="tab">{{ tab_image }}</a></li>
             <li><a href="#tab-faq"          data-toggle="tab">{{ tab_faq }}</a></li>
+            <li><a href="#tab-how_to"        data-toggle="tab">{{ tab_how_to }}</a></li>
             <li><a href="#tab-footer"       data-toggle="tab">{{ tab_footer }}</a></li>
           </ul>
           <div class="tab-content">
@@ -85,18 +86,11 @@
 
             {% set data        =  filter_page_description  %}
             {% set name_prefix = 'filter_page_description' %}
-            <div class="tab-pane" id="tab-description">
-              {% include "common/tab_description.twig" %}
-            </div>
-            <div class="tab-pane" id="tab-images">
-              {% include "common/tab_images.twig"  with {name_prefix: 'filter_page_images', images: filter_page_images} %}
-            </div>
-            <div class="tab-pane" id="tab-footer">
-              {% include "common/tab_footer.twig" %}
-            </div>
-            <div class="tab-pane" id="tab-faq">
-              {% include "common/tab_faq.twig" %}
-            </div>
+            <div class="tab-pane" id="tab-description">{% include "common/tab_description.twig" %}</div>
+            <div class="tab-pane" id="tab-images">{% include "common/tab_images.twig"  with {name_prefix: 'filter_page_images', images: filter_page_images} %}</div>
+            <div class="tab-pane" id="tab-footer">{% include "common/tab_footer.twig" %}</div>
+            <div class="tab-pane" id="tab-faq">{% include "common/tab_faq.twig" %}</div>
+            <div class="tab-pane" id="tab-how_to">{% include "common/tab_how_to.twig" %}</div>
 
           </div>
         </form>
