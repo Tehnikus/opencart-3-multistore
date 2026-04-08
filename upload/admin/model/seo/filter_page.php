@@ -54,9 +54,10 @@ class ModelSeoFilterPage extends Model {
             `meta_title` 				= '" . $this->db->escape($value['meta_title']) . "', 
             `meta_description` 	= '" . $this->db->escape($value['meta_description']) . "', 
             `meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "',
+            `seo_description` 	= '" . $this->db->escape($value['seo_description']) . "', 
             `footer`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['footer'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
-            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "',
-            `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "'
+            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? [], ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "',
+            `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? [], ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "'
         ");
       }
 
@@ -159,9 +160,10 @@ class ModelSeoFilterPage extends Model {
             `meta_title` 				= '" . $this->db->escape($value['meta_title']) . "', 
             `meta_description` 	= '" . $this->db->escape($value['meta_description']) . "', 
             `meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "',
+            `seo_description` 	= '" . $this->db->escape($value['seo_description']) . "', 
             `footer`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['footer'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
-            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "',
-            `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "'
+            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? [], ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "',
+            `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? [], ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "'
         ");
       }
 
