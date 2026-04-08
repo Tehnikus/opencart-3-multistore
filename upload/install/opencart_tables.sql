@@ -7525,7 +7525,7 @@ DROP TABLE IF EXISTS `oc_article_to_store`;
 CREATE TABLE `oc_article_to_store` (
   `article_id`          INT NOT NULL AUTO_INCREMENT,
   `store_id`            INT NOT NULL,
-  `query`               VARCHAR(191) NOT NULL,
+  `date_added`          DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   `date_modified`       DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY (`article_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -7576,6 +7576,6 @@ CREATE TABLE `oc_article_stats` (
   `article_id`          INT NOT NULL,
   `language_id`         INT NOT NULL,
   `store_id`            INT NOT NULL,
-  `views`               INT NOT NULL,
+  `views`               INT NOT NULL DEFAULT '0',
   `date_added`          DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
