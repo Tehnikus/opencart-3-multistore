@@ -12,6 +12,7 @@ class ModelBlogArticle extends Model {
         INSERT INTO " . DB_PREFIX . "article_to_store 
         SET
           `store_id` 			 = '" . (int) $this->session->data['store_id'] . "', 
+          `date_added`     = NOW(),
           `date_modified`  = NOW()
         ");
 
@@ -76,19 +77,6 @@ class ModelBlogArticle extends Model {
     $this->db->query("START TRANSACTION");
 
     try {
-
-      // Delete previous URL and request
-      $this->db->query("
-        DELETE FROM " . DB_PREFIX . "seo_url su
-        WHERE su.`query` = (
-          SELECT
-            fp2s.`query`
-          FROM " . DB_PREFIX . "article_to_store fp2s
-          WHERE fp2s.article_id = " . (int) $article_id . "
-            AND fp2s.store_id       = " . (int) $this->session->data['store_id'] . "
-        )
-        AND su.store_id = " . (int) $this->session->data['store_id'] . "
-      ");
 
       // Update main table
       $this->db->query("
