@@ -7434,26 +7434,6 @@ CREATE TABLE `oc_product_image_description` (
   PRIMARY KEY (`product_id`, `language_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `oc_blog_article_image_description`;
-CREATE TABLE `oc_blog_article_image_description` (
-  `image_id`                INT NOT NULL,
-  `blog_article_id`         INT NOT NULL,
-  `language_id`             INT NOT NULL,
-  `store_id`                INT NOT NULL,
-  `description`             TEXT NOT NULL,
-  PRIMARY KEY (`blog_article_id`, `language_id`, `store_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-DROP TABLE IF EXISTS `oc_blog_category_image_description`;
-CREATE TABLE `oc_blog_category_image_description` (
-  `image_id`                INT NOT NULL,
-  `blog_category_id`        INT NOT NULL,
-  `language_id`             INT NOT NULL,
-  `store_id`                INT NOT NULL,
-  `description`             TEXT NOT NULL,
-  PRIMARY KEY (`blog_category_id`, `language_id`, `store_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 DROP TABLE IF EXISTS `oc_seo_filter_page_facet_index`;
 CREATE TABLE `oc_seo_filter_page_facet_index` (
   `filter_page_id`      INT NOT NULL,
@@ -7466,7 +7446,7 @@ CREATE TABLE `oc_seo_filter_page_facet_index` (
 
 DROP TABLE IF EXISTS `oc_seo_filter_page_to_store`;
 CREATE TABLE `oc_seo_filter_page_to_store` (
-  `filter_page_id`      INT AUTO_INCREMENT,
+  `filter_page_id`      INT NOT NULL AUTO_INCREMENT,
   `store_id`            INT NOT NULL,
   `query`               VARCHAR(191) NOT NULL,
   `date_modified`       DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
@@ -7539,4 +7519,63 @@ CREATE TABLE `oc_seo_keyword_group` (
   `keyword_group_id`    INT NOT NULL AUTO_INCREMENT,
   `keyword_group_name`  VARCHAR(255) NOT NULL,
   PRIMARY KEY (`keyword_group_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `oc_article_to_store`;
+CREATE TABLE `oc_article_to_store` (
+  `article_id`          INT NOT NULL AUTO_INCREMENT,
+  `store_id`            INT NOT NULL,
+  `query`               VARCHAR(191) NOT NULL,
+  `date_modified`       DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  PRIMARY KEY (`article_id`, `store_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `oc_article_description`;
+CREATE TABLE `oc_article_description` (
+  `article_id`          INT NOT NULL,
+  `language_id`         INT NOT NULL,
+  `store_id`            INT NOT NULL,
+  `name`                VARCHAR(255) NOT NULL,
+  `h1`                  VARCHAR(255) NOT NULL,
+  `meta_title`          VARCHAR(255) NOT NULL,
+  `meta_description`    VARCHAR(255) NOT NULL,
+  `meta_keyword`        VARCHAR(255) NOT NULL,
+  `description`         TEXT NOT NULL,
+  `seo_keywords`        TEXT NOT NULL,
+  `seo_description`     TEXT NOT NULL,
+  `faq`                 TEXT NOT NULL,
+  `how_to`              TEXT NOT NULL,
+  `footer`              TEXT NOT NULL,
+  `date_modified`       DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  PRIMARY KEY (`article_id`, `language_id`, `store_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `oc_article_image`;
+CREATE TABLE `oc_article_image` (
+  `image_id`            INT NOT NULL AUTO_INCREMENT,
+  `article_id`          INT NOT NULL,
+  `store_id`            INT NOT NULL DEFAULT '0',
+  `image`               VARCHAR(255) DEFAULT NULL,
+  `sort_order`          INT NOT NULL DEFAULT '0',
+  PRIMARY KEY (`image_id`),
+  KEY (`article_id`, `store_id`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `oc_article_image_description`;
+CREATE TABLE `oc_article_image_description` (
+  `image_id`            INT NOT NULL,
+  `article_id`          INT NOT NULL,
+  `language_id`         INT NOT NULL,
+  `store_id`            INT NOT NULL,
+  `description`         TEXT NOT NULL,
+  PRIMARY KEY (`image_id`, `language_id`, `store_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `oc_article_stats`;
+CREATE TABLE `oc_article_stats` (
+  `article_id`          INT NOT NULL,
+  `language_id`         INT NOT NULL,
+  `store_id`            INT NOT NULL,
+  `views`               INT NOT NULL,
+  `date_added`          DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
