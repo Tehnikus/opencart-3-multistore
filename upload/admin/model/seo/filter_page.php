@@ -55,7 +55,8 @@ class ModelSeoFilterPage extends Model {
             `meta_description` 	= '" . $this->db->escape($value['meta_description']) . "', 
             `meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "',
             `footer`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['footer'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
-            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? []), JSON_UNESCAPED_UNICODE)) . "'
+            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "',
+            `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "'
         ");
       }
 
@@ -159,7 +160,8 @@ class ModelSeoFilterPage extends Model {
             `meta_description` 	= '" . $this->db->escape($value['meta_description']) . "', 
             `meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "',
             `footer`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['footer'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
-            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? []), JSON_UNESCAPED_UNICODE)) . "'
+            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "',
+            `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "'
         ");
       }
 
@@ -443,6 +445,7 @@ class ModelSeoFilterPage extends Model {
     foreach($this->db->query($sql)->rows ?? [] as $row) {
       $row['footer'] = json_decode($row['footer'] ?? '[]', true);
       $row['faq']    = json_decode($row['faq'] ?? '[]', true);
+      $row['how_to'] = json_decode($row['how_to'] ?? '[]', true);
       $result[$row['language_id']] = $row;
     }
     
@@ -619,7 +622,7 @@ class ModelSeoFilterPage extends Model {
     return (int) ($query->row['pages_count'] ?? 0);
   }
 
-    /**
+  /**
    * Filter array recursively and remove empty key => value pairs
    * @param array $array The array to be affected
    * @param array $deletedKeys The array of keys that will be treated as empty if all other keys are empty on this level 
