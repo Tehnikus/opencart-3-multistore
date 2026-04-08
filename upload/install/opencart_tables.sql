@@ -7577,5 +7577,25 @@ CREATE TABLE `oc_article_stats` (
   `language_id`         INT NOT NULL,
   `store_id`            INT NOT NULL,
   `views`               INT NOT NULL DEFAULT '0',
-  `date_added`          DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+  `date_added`          DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  PRIMARY KEY (`article_id`, `language_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `oc_article_product`;
+CREATE TABLE `oc_article_product` (
+  `article_id`          INT NOT NULL,
+  `language_id`         INT NOT NULL,
+  `store_id`            INT NOT NULL,
+  `product_id`          INT NOT NULL,
+  PRIMARY KEY (`article_id`, `language_id`, `store_id`, `product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `oc_article_tag`;
+CREATE TABLE `oc_article_tag` (
+  `article_id`          INT NOT NULL,
+  `language_id`         INT NOT NULL,
+  `store_id`            INT NOT NULL,
+  `tag_id`              INT NOT NULL,
+  PRIMARY KEY (`article_id`, `language_id`, `store_id`, `tag_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
