@@ -1,0 +1,163 @@
+<ul class="nav nav-tabs" id="faq_language">
+  {% for language in languages %}
+    <li {% if loop.first %}class="active"{% endif %}>
+      <a href="#faq_language{{ language.language_id }}" data-toggle="tab" data-tab-language-id="{{ language.language_id }}">
+        <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}"/> {{ language.name }}
+      </a>
+    </li>
+  {% endfor %}
+</ul>
+
+<div class="tab-content">
+  {% for language in languages %}
+    <div class="tab-pane {% if loop.first %}active{% endif %}" id="faq_language{{ language.language_id }}">
+      <table id="tableFaq_language_{{ language.language_id }}" class="table table-bordered table-hover table-striped table_faq">
+      <thead>
+        <td style="width: 33%">{{ entry_faq_question }}</td>
+        <td style="width: 67%">{{ entry_faq_answer }}</td>
+        <td></td>
+      </thead>
+      <tbody>
+        <input 
+          type="hidden"
+          value="https://schema.org"
+          name="{{ name_prefix }}[{{ language.language_id }}][faq][@context]" 
+          class="excluded" 
+          data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+        />
+        <input 
+          type="hidden"
+          value="FAQPage"
+          name="{{ name_prefix }}[{{ language.language_id }}][faq][@type]" 
+          class="excluded" 
+          data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+        />
+
+        {% if data and data[language.language_id].faq.mainEntity is not empty %}
+          {% for key, row in data[language.language_id].faq.mainEntity %}
+            <tr data-row-index="{{key}}">
+              <td style="width: 33%">
+                <div class="input-group flex">
+                {% 
+                  include "common/button_translate.twig" 
+                  with {
+                    sourceInput: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ '][faq][mainEntity][' ~ key ~ '][name]',
+                    nameprefix: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ ']'
+                  } 
+                %}
+                <input 
+                  value="{{ row.name }}"
+                  placeholder="{{ entry_faq_question }}"
+                  type="text" 
+                  class="form-control" 
+                  name="{{ name_prefix }}[{{ language.language_id }}][faq][mainEntity][{{key}}][name]"
+                  data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                />
+                </div>
+                <input 
+                  type="hidden"
+                  value="Question"
+                  name="{{ name_prefix }}[{{ language.language_id }}][faq][mainEntity][{{key}}][@type]" 
+                  class="excluded" 
+                  data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                />
+              </td>
+              <td style="width: 67%">
+                <div class="input-group flex">
+                {% 
+                  include "common/button_translate.twig" 
+                  with {
+                    sourceInput: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ '][faq][mainEntity][' ~ key ~ '][acceptedAnswer][text]',
+                    namePrefix: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ ']' 
+                  } 
+                %}
+                <input 
+                  value="{{ row.acceptedAnswer.text }}"
+                  placeholder="{{ entry_faq_answer }}"
+                  type="text" 
+                  class="form-control" 
+                  name="{{ name_prefix }}[{{ language.language_id }}][faq][mainEntity][{{key}}][acceptedAnswer][text]"
+                  data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                />
+                </div>
+                <input 
+                  type="hidden"
+                  value="Answer"
+                  name="{{ name_prefix }}[{{ language.language_id }}][faq][mainEntity][{{key}}][acceptedAnswer][@type]" 
+                  class="excluded" 
+                  data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                />
+              </td>
+              <td>
+                <button type="button" onclick="removeRow2(this, '#tableFaq_language_{{ language.language_id }}')" class="btn btn-danger remove_row" title="{{ button_remove_faq }}"><i class="fa fa-times"></i></button>
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr data-row-index="0">
+              <td style="width: 33%">
+                <div class="input-group flex">
+                {% 
+                  include "common/button_translate.twig" 
+                  with {
+                    sourceInput: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ '][faq][mainEntity][0][name]',
+                    namePrefix: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ ']' 
+                  } 
+                %}
+                <input 
+                  value=""
+                  placeholder="{{ entry_faq_question }}"
+                  type="text" 
+                  class="form-control" 
+                  name="{{ name_prefix }}[{{ language.language_id }}][faq][mainEntity][0][name]"
+                  data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                />
+                </div>
+                <input 
+                  type="hidden"
+                  value="Question"
+                  name="{{ name_prefix }}[{{ language.language_id }}][faq][mainEntity][0][@type]" 
+                  class="excluded" 
+                  data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                />
+              </td>
+              <td style="width: 67%">
+                <div class="input-group flex">
+                  {% 
+                    include "common/button_translate.twig" 
+                    with {
+                      sourceInput: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~ '][faq][mainEntity][0][acceptedAnswer][text]', 
+                      namePrefix: name_prefix ~ '[' ~ store.store_id ~ '][' ~ defaultLanguage.language_id ~']'
+                    } 
+                  %}
+                  <input 
+                    value=""
+                    placeholder="{{ entry_faq_answer }}"
+                    type="text" 
+                    class="form-control" 
+                    name="{{ name_prefix }}[{{ language.language_id }}][faq][mainEntity][0][acceptedAnswer][text]"
+                    data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                  />
+                </div>
+                <input 
+                  type="hidden"
+                  value="Answer"
+                  name="{{ name_prefix }}[{{ language.language_id }}][faq][mainEntity][0][acceptedAnswer][@type]"
+                  class="excluded" 
+                  data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                />
+              </td>
+            <td>
+              <button type="button" onclick="removeRow2(this, '#tableFaq_language_{{ language.language_id }}')" class="btn btn-danger remove_row" title="{{ button_remove_faq }}"><i class="fa fa-times"></i></button>
+            </td>
+          </tr>
+        {% endif %}
+        <tr>
+          <td colspan="2"></td>
+          <td class="text-right"><button type="button" onclick="addRow2(this, '#tableFaq_language_{{ language.language_id }}')" class="btn btn-primary add_row" title="{{ button_add_faq }}"><i class="fa fa-plus-circle"></button></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  {% endfor %}
+</div>
