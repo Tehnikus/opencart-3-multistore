@@ -77,6 +77,11 @@ class ControllerSeoFilterPage extends Controller {
       'sort_product_count' => $this->url->link('seo/filter_page', 'user_token=' . $user_token . $this->getSortOrder('product_count') . $url, true),
     ];
 
+    // Remove previous success message
+    if (isset($this->session->data['success'])) {
+      unset($this->session->data['success']);
+    }
+
     $this->response->setOutput($this->load->view('seo/filter_page_list', $data));
   }
 
