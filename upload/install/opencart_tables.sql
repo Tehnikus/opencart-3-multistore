@@ -7599,3 +7599,52 @@ CREATE TABLE `oc_article_tag` (
   PRIMARY KEY (`article_id`, `language_id`, `store_id`, `tag_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+DROP TABLE IF EXISTS `oc_blog_tag_to_store`;
+CREATE TABLE `oc_blog_tag_to_store` (
+  `blog_tag_id`         INT NOT NULL AUTO_INCREMENT,
+  `store_id`            INT NOT NULL,
+  `date_added`          DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  `date_modified`       DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  PRIMARY KEY (`blog_tag_id`, `store_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `oc_blog_tag_description`;
+CREATE TABLE `oc_blog_tag_description` (
+  `blog_tag_id`         INT NOT NULL,
+  `language_id`         INT NOT NULL,
+  `store_id`            INT NOT NULL,
+  `name`                VARCHAR(255) NOT NULL,
+  `h1`                  VARCHAR(255) NOT NULL,
+  `meta_title`          VARCHAR(255) NOT NULL,
+  `meta_description`    VARCHAR(255) NOT NULL,
+  `meta_keyword`        VARCHAR(255) NOT NULL,
+  `description`         TEXT NOT NULL,
+  `seo_keywords`        TEXT NOT NULL,
+  `seo_description`     TEXT NOT NULL,
+  `faq`                 TEXT NOT NULL,
+  `how_to`              TEXT NOT NULL,
+  `footer`              TEXT NOT NULL,
+  `date_modified`       DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  PRIMARY KEY (`blog_tag_id`, `language_id`, `store_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `oc_blog_tag_image`;
+CREATE TABLE `oc_blog_tag_image` (
+  `image_id`            INT NOT NULL AUTO_INCREMENT,
+  `blog_tag_id`         INT NOT NULL,
+  `store_id`            INT NOT NULL DEFAULT '0',
+  `image`               VARCHAR(255) DEFAULT NULL,
+  `sort_order`          INT NOT NULL DEFAULT '0',
+  PRIMARY KEY (`image_id`),
+  KEY (`blog_tag_id`, `store_id`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `oc_blog_tag_image_description`;
+CREATE TABLE `oc_blog_tag_image_description` (
+  `image_id`            INT NOT NULL,
+  `blog_tag_id`         INT NOT NULL,
+  `language_id`         INT NOT NULL,
+  `store_id`            INT NOT NULL,
+  `description`         TEXT NOT NULL,
+  PRIMARY KEY (`image_id`, `language_id`, `store_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
