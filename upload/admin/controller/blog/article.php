@@ -21,7 +21,7 @@ class ControllerBlogArticle extends Controller {
     $filter_data = array(
       'sort'  => $this->request->get['sort'] ?? 'date_added',
       'order' => $this->request->get['order'] ?? 'DESC',
-      'start' => ($this->request->get['page'] - 1) * $this->config->get('config_limit_admin'),
+      'start' => (($this->request->get['page'] ?? 1) - 1) * $this->config->get('config_limit_admin'),
       'limit' => $this->config->get('config_limit_admin')
     );
     $items = $this->model_blog_article->getList($filter_data);
@@ -78,7 +78,7 @@ class ControllerBlogArticle extends Controller {
     $formData       = [];
     $article_id = $this->request->get['article_id'] ?? null;
     $this->load->model('blog/article');
-    $formData['article_description'] = $this->model_model_blog_article->getArticleDescription($article_id);
+    $formData['article_description'] = $this->model_blog_article->getArticleDescription($article_id);
     // Replace actual data with POST data
     if ($this->request->server['REQUEST_METHOD'] == 'POST') {
       $formData = $this->request->post;
