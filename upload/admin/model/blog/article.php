@@ -157,6 +157,61 @@ class ModelBlogArticle extends Model {
       throw $e;
     }
   }
+
+  public function editImages($page_id, $image_data = []) : int {
+
+    $page_id = (int) $page_id;
+    $store_id = (int) $this->session->data['store_id'];
+
+    $this->db->query("
+      DELETE FROM `". DB_PREFIX . "article_image` 
+      WHERE `article_id`    = '" . (int) $page_id . "'
+        AND store_id        = " . (int) $store_id . "
+    ");
+
+    $this->db->query("
+      DELETE FROM `". DB_PREFIX . "article_image_description` 
+      WHERE `article_id`    = '" . (int) $page_id . "'
+        AND store_id        = " . (int) $store_id . "
+    ");
+
+
+    foreach ($image_data as $image) {
+
+      // Check if image actually exists
+      if (!empty($image['image'])) {
+        $this->db->query("
+          INSERT INTO `". DB_PREFIX . "article_image`
+          SET 
+            `article_id` 	      = '" . (int) $page_id . "', 
+            `image` 				    = '" . $this->db->escape($image['image']) . "', 
+            `sort_order` 		    = '" . (int) $image['sort_order'] . "',
+            `store_id`          = '" . $store_id . "'
+        ");
+
+        // Add multilang multistore image descriptions
+        $image_id = $this->db->getLastId();
+
+        foreach ($image['description'] as $language_id => $image_description) {
+          if (!$image_description) {
+            continue;
+          }
+          $this->db->query("
+            INSERT INTO `". DB_PREFIX . "article_image_description`
+            SET
+              `image_id` 	      = '" . (int) $image_id . "',
+              `article_id` 	    = '" . (int) $page_id . "',
+              `language_id` 		= '" . (int) $language_id . "',
+              `store_id` 				= '" . (int) $store_id . "',
+              `description` 		= '" . $this->db->escape($image_description) ."'
+          ");
+        }
+      }
+    }
+
+    return $this->db->countAffected();
+  }
+
   public function getList($filter) : array {
     $result = [];
     $storeId = (int) $this->session->data['store_id'];
