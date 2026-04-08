@@ -40,7 +40,10 @@ class ModelCatalogCategory extends Model {
 						`description` 			= '" . $this->db->escape($value['description']) . "', 
 						`meta_title` 				= '" . $this->db->escape($value['meta_title']) . "', 
 						`meta_description` 	= '" . $this->db->escape($value['meta_description']) . "', 
-						`meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "'
+						`meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "',
+            `footer`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['footer'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
+            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
+            `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? []), JSON_UNESCAPED_UNICODE)) . "'
 				");
 			}
 	
@@ -216,7 +219,10 @@ class ModelCatalogCategory extends Model {
 						`description` 			= '" . $this->db->escape($value['description']) . "',
 						`meta_title` 				= '" . $this->db->escape($value['meta_title']) . "', 
 						`meta_description` 	= '" . $this->db->escape($value['meta_description']) . "', 
-						`meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "'
+						`meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "',
+            `footer`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['footer'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
+            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
+            `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? []), JSON_UNESCAPED_UNICODE)) . "'
 				");
 			}
 	
@@ -975,4 +981,46 @@ class ModelCatalogCategory extends Model {
 			$this->cache->delete($urlCacheName);
 		}
 	}
+
+	/**
+   * Filter array recursively and remove empty key => value pairs
+   * @param array $array The array to be affected
+   * @param array $deletedKeys The array of keys that will be treated as empty if all other keys are empty on this level 
+   * @return array
+   */
+  public function filterArrayRecursively(array $array = [], array $deletedKeys = []): array {
+    $filtered = [];
+
+    foreach ($array as $key => $value) {
+      if (is_array($value)) {
+        $value = $this->filterArrayRecursively($value, $deletedKeys);
+        if (!empty($value)) {
+          $filtered[$key] = $value;
+        }
+      // $value !== '&lt;p&gt;&lt;br&gt;&lt;/p&gt;' is a workaround for empty Summernote editor which always places this string: '<p><br></p>'
+      } elseif (trim((string) $value) !== '' && $value !== '&lt;p&gt;&lt;br&gt;&lt;/p&gt;') {
+        $filtered[$key] = $value;
+      }
+    }
+
+    // If result array is not empty, but only includes deletedKeys - then clear them also
+    if (!empty($filtered)) {
+      $nonDeletedKeys = array_diff(array_keys($filtered), $deletedKeys);
+
+      // Check recursively
+      $hasMeaningfulData = !empty($nonDeletedKeys);
+      foreach ($filtered as $key => $value) {
+        if (is_array($value) && !empty($value)) {
+          $hasMeaningfulData = true;
+          break;
+        }
+      }
+
+      if (!$hasMeaningfulData) {
+        return [];
+      }
+    }
+
+    return $filtered;
+  }
 }
