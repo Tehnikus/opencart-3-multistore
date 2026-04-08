@@ -1,0 +1,440 @@
+{# Make image dir URL #}
+{% set image_dir = constant('HTTPS_CATALOG') ~ 'image/' %}
+
+<ul class="nav nav-tabs" id="how_to_language">
+  {% for language in languages %}
+    <li {% if loop.first %}class="active"{% endif %}>
+      <a href="#how_to_language_{{ language.language_id }}" data-toggle="tab" data-tab-language-id="{{ language.language_id }}">
+        <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}"/> {{ language.name }}
+      </a>
+    </li>
+  {% endfor %}
+</ul>
+<div class="tab-content">
+  {% for language in languages %}
+    <div class="tab-pane {% if loop.first %}active{% endif %}" id="how_to_language_{{ language.language_id }}">
+      <table id="howToDescriptionTable_language_{{ language.language_id }}" class="table table-bordered table-hover table-striped">
+        <thead>
+          <td style="width: 30%">{{ entry_how_to_name }}</td>
+          <td style="width: 70%">{{ entry_how_to_text }}<button type="button" onclick="this.closest('table').querySelectorAll('input, textarea').forEach(e => e.value = '')" class="pull-right btn btn-danger"><i class="fa fa-times"></i></button></td>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="input-group flex">
+                {% 
+                  include "common/button_translate.twig" 
+                  with {
+                    sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][how_to][name]',
+                    namePrefix: name_prefix ~ '[' ~ defaultLanguage.language_id ~ ']' 
+                  } 
+                %}
+                <input 
+                  value="{{ data[language.language_id].how_to.name }}"
+                  placeholder="{{ entry_how_to_common_name }}"
+                  type="text" 
+                  class="form-control" 
+                  name="{{ name_prefix }}[{{ language.language_id }}][how_to][name]"
+                  data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                />
+              </div>
+              <div class="input-group flex">
+                <input 
+                  value="{{ data[language.language_id].how_to.totalTime }}"
+                  placeholder="{{ entry_how_to_time }}"
+                  type="text" 
+                  class="form-control" 
+                  name="{{ name_prefix }}[{{ language.language_id }}][how_to][totalTime]"
+                  data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                />
+              </div>
+              <div class="input-group flex">
+                <input 
+                  value="{{ data[language.language_id].how_to.estimatedCost.value }}"
+                  placeholder="{{ entry_how_cost }}"
+                  type="text" 
+                  class="form-control" 
+                  name="{{ name_prefix }}[{{ language.language_id }}][how_to][estimatedCost][value]"
+                  data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                />
+              </div>
+              <div class="input-group flex">
+                <input 
+                  value="{{ data[language.language_id].how_to.estimatedCost.currency }}"
+                  placeholder="{{ entry_how_currency }}"
+                  type="text" 
+                  class="form-control" 
+                  name="{{ name_prefix }}[{{ language.language_id }}][how_to][estimatedCost][currency]"
+                  data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                />
+              </div>
+              <input 
+                type="hidden" 
+                value="MonetaryAmount"
+                name="{{ name_prefix }}[{{ language.language_id }}][how_to][estimatedCost][@type]"
+                class="excluded" 
+                data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+              />
+              <input 
+                type="hidden"
+                value="HowTo"
+                name="{{ name_prefix }}[{{ language.language_id }}][how_to][@type]" 
+                class="excluded" 
+                data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+              />
+              <input 
+                type="hidden"
+                value="https://schema.org"
+                name="{{ name_prefix }}[{{ language.language_id }}][how_to][@context]" 
+                class="excluded" 
+                data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+              />
+            </td>
+            <td>
+              <div class="input-group flex">
+                {% 
+                  include "common/button_translate.twig" 
+                  with {
+                    sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][how_to][description]',
+                    namePrefix: name_prefix ~ '[' ~ defaultLanguage.language_id ~ ']' 
+                  } 
+                %}
+                <textarea 
+                  rows="4"
+                  placeholder="{{ entry_how_to_common_text }}"
+                  type="text" 
+                  class="form-control" 
+                  name="{{ name_prefix }}[{{ language.language_id }}][how_to][description]"
+                  data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                >{{ data[language.language_id].how_to.description }}</textarea>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      {# HowTo supplies #}
+      <table id="howToSupplyTable_language_{{ language.language_id }}" class="table table-bordered table-hover table-striped">
+        <thead>
+          <td style="width: 100%">{{ entry_how_to_supplies }}</td>
+          <td></td>
+        </thead>
+        <tbody>
+          {% if data[language.language_id].how_to.supply %}
+            {% for key, row in data[language.language_id].how_to.supply %}
+              <tr data-row-index="{{ key }}">
+                <td>
+                  <div class="input-group flex">
+                    {% 
+                      include "common/button_translate.twig" 
+                      with {
+                        sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][how_to][supply][' ~ key ~ '][name]',
+                        namePrefix: name_prefix ~ '[' ~ defaultLanguage.language_id ~ ']' 
+                      } 
+                    %}
+                    <input 
+                      value="{{ row.name }}"
+                      placeholder="{{ entry_how_to_supply }}"
+                      type="text" 
+                      class="form-control" 
+                      name="{{ name_prefix }}[{{ language.language_id }}][how_to][supply][{{ key }}][name]"
+                      data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                    />
+                  </div>
+                  <input 
+                    type="hidden"
+                    value="HowToSupply"
+                    name="{{ name_prefix }}[{{ language.language_id }}][how_to][supply][{{ key }}][@type]" 
+                    class="excluded" 
+                    data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                  />
+                </td>
+                <td>
+                  <button type="button" onclick="removeRow2(this, '#howToSupplyTable_language_{{ language.language_id }}')" class="btn btn-danger remove_row" title="{{ button_remove_row }}"><i class="fa fa-times"></i></button>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr data-row-index="0">
+              <td>
+              <div class="input-group flex">
+                  {% 
+                    include "common/button_translate.twig" 
+                    with {
+                      sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][how_to][supply][0][name]',
+                      namePrefix: name_prefix ~ '[' ~ defaultLanguage.language_id ~ ']' 
+                    } 
+                  %}
+                  <input 
+                    value=""
+                    placeholder="{{ entry_how_to_name }}"
+                    type="text" 
+                    class="form-control" 
+                    name="{{ name_prefix }}[{{ language.language_id }}][how_to][supply][0][name]"
+                    data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                  />
+                </div>
+                <input 
+                  type="hidden"
+                  value="HowToSupply"
+                  name="{{ name_prefix }}[{{ language.language_id }}][how_to][supply][0][@type]" 
+                  class="excluded" 
+                  data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                />
+              </td>
+              <td>
+                <button type="button" onclick="removeRow2(this, '#howToSupplyTable_language_{{ language.language_id }}')" class="btn btn-danger remove_row" title="{{ button_remove_row }}"><i class="fa fa-times"></i></button>
+              </td>
+            </tr>
+          {% endif %}
+          <tr>
+            <td></td>
+            <td class="text-right"><button type="button" onclick="addRow2(this, '#howToSupplyTable_language_{{ language.language_id }}', '[data-row-index]', ['excluded'])" class="btn btn-primary add_row" title="{{ button_add_row }}"><i class="fa fa-plus-circle"></button></td>
+          </tr>
+        </tbody>
+      </table>
+
+      {# HowTo tools #}
+      <table id="howToToolsTable_language_{{ language.language_id }}" class="table table-bordered table-hover table-striped">
+        <thead>
+          <td style="width: 100%">{{ entry_how_to_tools }}</td>
+          <td></td>
+        </thead>
+        <tbody>
+          {% if data[language.language_id].how_to.tool %}
+            {% for key, row in data[language.language_id].how_to.tool %}
+              <tr data-row-index="{{ key }}">
+                <td>
+                  <div class="input-group flex">
+                    {% 
+                      include "common/button_translate.twig" 
+                      with {
+                        sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][how_to][tool][' ~ key ~ '][name]',
+                        namePrefix: name_prefix ~ '[' ~ defaultLanguage.language_id ~ ']' 
+                      } 
+                    %}
+                    <input 
+                      value="{{ row.name }}"
+                      placeholder="{{ entry_how_to_tool }}"
+                      type="text" 
+                      class="form-control" 
+                      name="{{ name_prefix }}[{{ language.language_id }}][how_to][tool][{{ key }}][name]"
+                      data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                    />
+                  </div>
+                  <input 
+                    type="hidden"
+                    value="HowToTool"
+                    name="{{ name_prefix }}[{{ language.language_id }}][how_to][tool][{{ key }}][@type]" 
+                    class="excluded" 
+                    data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                  />
+                </td>
+                <td>
+                  <button type="button" onclick="removeRow2(this, '#howToToolsTable_language_{{ language.language_id }}')" class="btn btn-danger remove_row" title="{{ button_remove_row }}"><i class="fa fa-times"></i></button>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr data-row-index="0">
+              <td>
+                <div class="input-group flex">
+                  {% 
+                    include "common/button_translate.twig" 
+                    with {
+                      sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][how_to][tool][0][name]',
+                      namePrefix: name_prefix ~ '[' ~ defaultLanguage.language_id ~ ']' 
+                    } 
+                  %}
+                  <input 
+                    value=""
+                    placeholder="{{ entry_how_to_tool }}"
+                    type="text" 
+                    class="form-control" 
+                    name="{{ name_prefix }}[{{ language.language_id }}][how_to][tool][0][name]"
+                    data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                  />
+                </div>
+                <input 
+                  type="hidden"
+                  value="HowToTool"
+                  name="{{ name_prefix }}[{{ language.language_id }}][how_to][tool][{{ key }}][@type]" 
+                  class="excluded" 
+                  data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                />
+              </td>
+              <td>
+                <button type="button" onclick="removeRow2(this, '#howToToolsTable_language_{{ language.language_id }}')" class="btn btn-danger remove_row" title="{{ button_remove_row }}"><i class="fa fa-times"></i></button>
+              </td>
+            </tr>
+          {% endif %}
+          <tr>
+            <td></td>
+            <td class="text-right"><button type="button" onclick="addRow2(this, '#howToToolsTable_language_{{ language.language_id }}', '[data-row-index]', ['excluded'])" class="btn btn-primary add_row" title="{{ button_add_row }}"><i class="fa fa-plus-circle"></button></td>
+          </tr>
+        </tbody>
+      </table>
+
+      {# HowTo steps #}
+      <table id="howToStepsTable_language_{{ language.language_id }}" class="table table-bordered table-hover table-striped">
+        <thead>
+          <td colspan="3" style="width: 100%">{{ entry_how_to_steps }}</td>
+          <td></td>
+        </thead>
+        <tbody>
+          {% if data[language.language_id].how_to.step %}
+            {% for key, row in data[language.language_id].how_to.step %}
+              <tr data-row-index="{{ key }}">
+                <td style="width: 15%" class="text-center">
+                  <a href="" id="thumb-image_how_to_{{ language.language_id }}_{{ key }}" data-toggle="image" class="img-thumbnail">
+                    <img 
+                      loading="lazy" 
+                      width="100%" 
+                      height="auto" 
+                      src="{{ image_dir }}{% if row.image %}{{ row.image }}{% else %}no_image.webp{% endif %}" 
+                      alt="" 
+                      title="" 
+                      data-placeholder="{{ image_dir }}no_image.webp"
+                    />
+                  </a>
+                  <input 
+                    type="hidden" 
+                    name="{{ name_prefix }}[{{ language.language_id }}][how_to][step][{{ key }}][image]" 
+                    value="{{ row.image }}" 
+                    id="input-image_how_to_{{ language.language_id }}_{{ key }}"
+                    data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                  />
+                </td>
+                <td>
+                  <div class="input-group flex">
+                    {% 
+                      include "common/button_translate.twig" 
+                      with {
+                        sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][how_to][step][' ~ key ~ '][name]',
+                        namePrefix: name_prefix ~ '[' ~ defaultLanguage.language_id ~ ']' 
+                      } 
+                    %}
+                    <input 
+                      value="{{ row.name }}"
+                      placeholder="{{ entry_how_to_name }}"
+                      type="text" 
+                      class="form-control" 
+                      name="{{ name_prefix }}[{{ language.language_id }}][how_to][step][{{ key }}][name]"
+                      data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                    />
+                  </div>
+                  <input 
+                    type="hidden"
+                    value="HowToStep"
+                    name="{{ name_prefix }}[{{ language.language_id }}][how_to][step][{{ key }}][@type]" 
+                    class="excluded" 
+                    data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                  />
+                </td>
+                <td>
+                  <div class="input-group flex">
+                    {% 
+                      include "common/button_translate.twig" 
+                      with {
+                        sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][how_to][step][' ~ key ~ '][text]',
+                        namePrefix: name_prefix ~ '[' ~ defaultLanguage.language_id ~ ']' 
+                      } 
+                    %}
+                    <textarea 
+                      rows="4"
+                      placeholder="{{ entry_how_to_text }}"
+                      type="text" 
+                      class="form-control" 
+                      name="{{ name_prefix }}[{{ language.language_id }}][how_to][step][{{ key }}][text]"
+                      data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                    >{{ row.text }}</textarea>
+                  </div>
+                </td>
+                <td>
+                  <button type="button" onclick="removeRow2(this, '#howToStepsTable_language_{{ language.language_id }}')" class="btn btn-danger remove_row" title="{{ button_remove_row }}"><i class="fa fa-times"></i></button>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr data-row-index="0">
+              <td style="width: 15%" class="text-center">
+                <a href="" id="thumb-image_how_to_{{ language.language_id }}_0" data-toggle="image" class="img-thumbnail">
+                  <img 
+                    loading="lazy" 
+                    width="100%" 
+                    height="auto" 
+                    src="{{ image_dir }}{% if row.image %}{{ row.image }}{% else %}no_image.webp{% endif %}" 
+                    alt="" 
+                    title="" 
+                    data-placeholder="{{ image_dir }}no_image.webp"
+                  />
+                </a>
+                <input 
+                  type="hidden" 
+                  name="{{ name_prefix }}[{{ language.language_id }}][how_to][step][0][image]" 
+                  value="" 
+                  id="input-image_how_to_{{ language.language_id }}_0"
+                  data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                />
+              </td>
+              <td style="width: 35%">
+                <div class="input-group flex">
+                  {% 
+                    include "common/button_translate.twig" 
+                    with {
+                      sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][how_to][step][0][name]',
+                      namePrefix: name_prefix ~ '[' ~ defaultLanguage.language_id ~ ']' 
+                    } 
+                  %}
+                  <input 
+                    value=""
+                    placeholder="{{ entry_how_to_name }}"
+                    type="text" 
+                    class="form-control" 
+                    name="{{ name_prefix }}[{{ language.language_id }}][how_to][step][0][name]"
+                    data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                  />
+                </div>
+                <input 
+                  type="hidden"
+                  value="HowToStep"
+                  name="{{ name_prefix }}[{{ language.language_id }}][how_to][step][0][@type]" 
+                  class="excluded" 
+                  data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                />
+              </td>
+              <td style="width: 50%">
+                <div class="input-group flex">
+                  {% 
+                    include "common/button_translate.twig" 
+                    with {
+                      sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][how_to][step][0][text]',
+                      namePrefix: name_prefix ~ '[' ~ defaultLanguage.language_id ~ ']' 
+                    } 
+                  %}
+                  <textarea 
+                    rows="4"
+                    placeholder="{{ entry_how_to_text }}"
+                    type="text" 
+                    class="form-control" 
+                    name="{{ name_prefix }}[{{ language.language_id }}][how_to][step][0][text]"
+                    data-nameprefix="{{ name_prefix }}[{{ language.language_id }}]"
+                  ></textarea>
+                </div>
+              </td>
+              <td>
+                <button type="button" onclick="removeRow2(this, '#howToStepsTable_language_{{ language.language_id }}')" class="btn btn-danger remove_row" title="{{ button_remove_row }}"><i class="fa fa-times"></i></button>
+              </td>
+            </tr>
+          {% endif %}
+          <tr>
+            <td colspan="3"></td>
+            <td class="text-right"><button type="button" onclick="addRow2(this, '#howToStepsTable_language_{{ language.language_id }}', '[data-row-index]', ['excluded'])" class="btn btn-primary add_row" title="{{ button_add_row }}"><i class="fa fa-plus-circle"></button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  {% endfor %}
+</div>
+
+
