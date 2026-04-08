@@ -41,9 +41,10 @@ class ModelCatalogCategory extends Model {
 						`meta_title` 				= '" . $this->db->escape($value['meta_title']) . "', 
 						`meta_description` 	= '" . $this->db->escape($value['meta_description']) . "', 
 						`meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "',
+						`seo_description` 	= '" . $this->db->escape($value['seo_description']) . "', 
             `footer`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['footer'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
-            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
-            `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? []), JSON_UNESCAPED_UNICODE)) . "'
+            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "',
+            `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "'
 				");
 			}
 	
@@ -220,9 +221,10 @@ class ModelCatalogCategory extends Model {
 						`meta_title` 				= '" . $this->db->escape($value['meta_title']) . "', 
 						`meta_description` 	= '" . $this->db->escape($value['meta_description']) . "', 
 						`meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "',
+						`seo_description` 	= '" . $this->db->escape($value['seo_description']) . "',
             `footer`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['footer'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
-            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
-            `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? []), JSON_UNESCAPED_UNICODE)) . "'
+            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "',
+            `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "'
 				");
 			}
 	
@@ -814,7 +816,11 @@ class ModelCatalogCategory extends Model {
 				'meta_title'       => $result['meta_title'],
 				'meta_description' => $result['meta_description'],
 				'meta_keyword'     => $result['meta_keyword'],
-				'description'      => $result['description']
+				'description'      => $result['description'],
+				'seo_description'  => $result['seo_description'],
+				'footer' 					 => json_decode($result['footer'] ?? '[]', true),
+				'faq'    					 => json_decode($result['faq'] ?? '[]', true),
+				'how_to' 					 => json_decode($result['how_to'] ?? '[]', true),
 			);
 		}
 
