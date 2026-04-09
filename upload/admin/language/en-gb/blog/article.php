@@ -9,12 +9,15 @@ $_['button_delete']             = 'Delete';
 
 // Columns
 $_['column_name']               = 'Name';
+$_['entry_parent_tag']          = 'Parent tags';
 
 // Errors
 $_['e_name']                    = 'Set article name';
 $_['e_unique']                  = 'SEO URL is not unique';
 $_['e_permission']              = 'You are not permitted to edit blog articles';
 $_['e_warning']                 = 'Error while saving article';
+$_['e_select_tag']              = 'Select at least one tag for this article';
+$_['e_select_main_tag']         = 'Select main tag, it\'s required for correct URL routing';
 
 // Messages
 $_['text_success']              = 'Blog article saved';

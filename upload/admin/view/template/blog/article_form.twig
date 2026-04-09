@@ -35,7 +35,41 @@
           <div class="tab-content">
             {% set data        =  article_description  %}
             {% set name_prefix = 'article_description' %}
-            <div class="tab-pane active" id="tab-description">{% include "common/tab_description.twig" %}</div>
+            <div class="tab-pane active" id="tab-description">
+              {# Parent tag autocomplete #}
+              <div class="form-group required">
+                <label class="col-sm-2 control-label" for="parent_tag">{{ entry_parent_tag }}</label>
+                <div class="col-sm-10">
+
+                  {# Selected items #}
+                  <div class="niftySelected">
+                    {% for row in article_tags %}
+                      <div class="niftyItem" data-id="{{ row.blog_tag_id }}">
+                        <span style="flex: 1"><b>{{ row.name }}</b></span>
+                        <input type="radio" style="all: revert" name="is_main" value="{{ row.blog_tag_id }}" {% if row.is_main %}checked{% endif %} />
+                        <button style="padding: 0; line-height: 0; width: 25px; height: 25px;" type="button" class="btn btn-danger niftyItemDelete" onclick="this.closest('.niftyItem').remove()"><i class="fa fa-times"></i></button>
+                        <input hidden name="article_tags[]" value="{{ row.blog_tag_id }}" />
+                      </div>
+                    {% endfor %}
+                  </div>
+
+                  {# Autocomplete input #}
+                  <input 
+                    id="parent_tag" 
+                    type="text" 
+                    class="form-control niftyAutocomplete" 
+                    placeholder="{{ entry_parent_tag }}" 
+                  />
+
+                  {# Error if parent tag is not selected #}
+                  {% if error_select_parent %}
+                    <div class="text-danger">{{ error_select_parent }}</div>
+                  {% endif %}
+                  
+                </div>
+              </div>
+              {% include "common/tab_description.twig" %}
+            </div>
             <div class="tab-pane" id="tab-images">{% include "common/tab_images.twig"  with {name_prefix: 'article_images', images: article_images} %}</div>
             <div class="tab-pane" id="tab-footer">{% include "common/tab_footer.twig" %}</div>
             <div class="tab-pane" id="tab-faq">{% include "common/tab_faq.twig" %}</div>
@@ -73,10 +107,12 @@
             <div class="niftyItem" data-id="${row.blog_tag_id}">
               <span style="flex: 1">
                 <b>${row.name}</b>
-                <input type="radio" name="article_main_tag[] value="${row.blog_tag_id}">
+                <span>
+                  <input ${!document.querySelector('[name="is_main"]:checked') ? 'checked' : ''} type="radio" style="all: revert" name="is_main" value="${row.blog_tag_id}">
+                </span>
               </span>
               <button style="padding: 0; line-height: 0; width: 25px; height: 25px;" type="button" class="btn btn-danger niftyItemDelete"><i class="fa fa-times"></i></button>
-              <input hidden name="article_tags[${row.blog_tag_id}]" value="${row.blog_tag_id}" />
+              <input hidden name="article_tags[]" value="${row.blog_tag_id}" />
             </div>
           `,
         },

@@ -67,6 +67,7 @@ class ControllerBlogArticle extends Controller {
       'stores'        => $this->model_setting_store->getMultistores(),
       'action'        => $id ? $this->url->link('blog/article/edit', 'user_token=' . $user_token . '&article_id=' . $id . $url, true) : $this->url->link('blog/article/add', 'user_token=' . $user_token . $url, true),
       'cancel'        => $this->url->link('blog/article', 'user_token=' . $user_token . $url, true),
+      'user_token'    => $user_token,
     ];
     
     // Merge with errors array to hihlight faulty inputs. Merge saved data, POST data, errors and interface
@@ -86,6 +87,17 @@ class ControllerBlogArticle extends Controller {
     if ($this->request->server['REQUEST_METHOD'] == 'POST') {
       $formData = $this->request->post;
     }
+
+    // Set tags data structure
+    if (!empty($formData['article_tags'])) {
+      $mainIndex = $formData['article_main_tag'] ?? null;
+
+      foreach ($formData['article_tags'] as $i => &$tag) {
+        $tag['is_main'] = ((string)$i === (string)$mainIndex) ? 1 : 0;
+      }
+      unset($tag);
+    }
+
     return $formData;
   }
   
