@@ -39,7 +39,7 @@ class ModelBlogTag extends Model {
         ");
       }
 
-      $this->editImages($blog_tag_id, $data['tag_images']);
+      $this->editImages($blog_tag_id, $data['blog_tag_images']);
 
       // Save URL
       foreach ($data['seo_url'] ?? [] as $language_id => $keyword) {
@@ -112,7 +112,7 @@ class ModelBlogTag extends Model {
         ");
       }
 
-      $this->editImages($blog_tag_id, $data['tag_images']);
+      $this->editImages($blog_tag_id, $data['blog_tag_images']);
 
 
       // Save URL
@@ -297,6 +297,36 @@ class ModelBlogTag extends Model {
     }
     
     return $result ?? [];
+  }
+
+  public function getImages($page_id) : array {
+    $result = [];
+    $store_id = (int) $this->session->data['store_id'];
+    $images = $this->db->query("
+      SELECT
+        *
+      FROM " . DB_PREFIX . "blog_tag_image
+      WHERE `blog_tag_id` = " . (int) $page_id . "
+        AND store_id         = " . (int) $store_id . "
+      ORDER BY `sort_order`
+    ")->rows;
+
+    foreach ($images as $row) {
+      $descriptions = $this->db->query("
+        SELECT
+          `language_id`,
+          `description`
+        FROM " . DB_PREFIX . "blog_tag_image_description
+        WHERE image_id = " . (int) $row['image_id'] . "
+          AND store_id = " . (int) $store_id . "
+      ")->rows;
+      foreach ($descriptions as $description) {
+        $row['description'][$description['language_id']] = $description['description'];
+      }
+      $result[] = $row;
+    }
+
+    return $result;
   }
 
   public function getTagTotal() : int {
