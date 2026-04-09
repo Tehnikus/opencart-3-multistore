@@ -250,4 +250,15 @@ class ControllerBlogTag extends Controller {
     }
     return !$this->error;
   }
+
+  public function autocomplete() : void {
+    $post = $this->request->post;
+    // $search = $post['search'] ?? [];
+    
+    $this->load->model('blog/tag');
+    $tags = $this->model_blog_tag->getList($post);
+
+    $this->response->addHeader('Content-Type: application/json');
+    $this->response->setOutput(json_encode($tags));
+  }
 }
