@@ -46,7 +46,7 @@ class ModelBlogArticle extends Model {
         // Mostly safety delete, should never happen
         $this->db->query("
           DELETE FROM " . DB_PREFIX . "seo_url 
-          WHERE query       = 'article=" . $article_id . "'
+          WHERE query       = 'article_id=" . $article_id . "'
             AND language_id = '" . (int) $language_id . "'
             AND store_id    = '" . (int) $this->session->data['store_id'] . "'
         ");
@@ -57,7 +57,7 @@ class ModelBlogArticle extends Model {
             SET 
               store_id    = '" . (int) $this->session->data['store_id'] . "',
               language_id = '" . (int) $language_id . "', 
-              query       = 'article=" . $article_id . "', 
+              query       = 'article_id=" . $article_id . "', 
               keyword     = '" . $this->db->escape($keyword) . "'
           ");
         }
@@ -120,7 +120,7 @@ class ModelBlogArticle extends Model {
         // Mostly safety delete, should never happen
         $this->db->query("
           DELETE FROM " . DB_PREFIX . "seo_url 
-          WHERE query       = 'article=" . $article_id . "'
+          WHERE query       = 'article_id=" . $article_id . "'
             AND language_id = '" . (int) $language_id . "'
             AND store_id    = '" . (int) $this->session->data['store_id'] . "'
         ");
@@ -131,7 +131,7 @@ class ModelBlogArticle extends Model {
             SET 
               store_id    = '" . (int) $this->session->data['store_id'] . "',
               language_id = '" . (int) $language_id . "', 
-              query       = 'article=" . $article_id . "', 
+              query       = 'article_id=" . $article_id . "', 
               keyword     = '" . $this->db->escape($keyword) . "'
           ");
         }
@@ -222,7 +222,7 @@ class ModelBlogArticle extends Model {
         ad.`article_id`,
         ad.`name`,
         a2s.`date_modified`,
-        (SELECT fpi.image FROM " . DB_PREFIX . "article_image fpi WHERE fpi.article_id = a2s.article_id AND fpi.store_id = a2s.store_id ORDER BY fpi.sort_order LIMIT 1) AS image,
+        (SELECT ai.image FROM " . DB_PREFIX . "article_image ai WHERE ai.article_id = a2s.article_id AND ai.store_id = a2s.store_id ORDER BY ai.sort_order LIMIT 1) AS image,
         (
           SELECT JSON_OBJECT(
             'descriptionLength',    COALESCE(CHAR_LENGTH(ad.`description`), 0),
