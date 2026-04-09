@@ -176,7 +176,7 @@ a:hover, a:focus {
     position: absolute;
     top: 0px;
     left: -235px;
-    padding-top: 60px;
+    /*! padding-top: 60px; */
     z-index: 10;
 }
 
@@ -217,7 +217,7 @@ a:hover, a:focus {
         left: 0px;
     }
 
-    #column-left + #content, #column-left + #content + #footer {
+    #column-left + #content, #column-left + #content + #footer, #header {
         left: 0px;
         margin-left: 235px;
     }
@@ -279,7 +279,6 @@ a:hover, a:focus {
 #menu > li > a {
     font-size: 14px;
     color: #b3cbdd;
-    padding-left: 20px;
     border-bottom: 0px solid #585858;
 }
 
@@ -307,19 +306,6 @@ a:hover, a:focus {
     color: #7f8a9b;
 }
 
-#menu li li a:before {
-    content: "\f101";
-    font-size: 13px;
-    font-family: FontAwesome;
-    margin-left: 10px;
-    margin-right: 10px;
-    transition: margin ease 0.5s;
-}
-
-#menu li li a:hover:before {
-    margin-right: 20px;
-}
-
 #menu li li a:hover {
     color: #FFFFFF;
     background-color: #242d37;
@@ -330,20 +316,16 @@ a:hover, a:focus {
     background-color: #242d37;
 }
 
-#menu li ul a {
+#menu li li ul a {
     padding-left: 20px;
 }
 
-#menu li li ul a {
+#menu li li li ul a {
     padding-left: 40px;
 }
 
-#menu li li li ul a {
-    padding-left: 60px;
-}
-
 #menu li li li li ul a {
-    padding-left: 80px;
+    padding-left: 60px;
 }
 
 /* footer */
