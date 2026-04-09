@@ -29,6 +29,7 @@ class ControllerBlogArticle extends Controller {
     foreach ($items as $key => $item) {
       $items[$key]['edit'] = $this->url->link('blog/article/edit', 'article_id=' . $item['article_id'] . '&user_token=' . $user_token, true);
     }
+
     $data = [
       'items'         => $items,
       'column_left'   => $this->load->controller('common/column_left'),
@@ -134,7 +135,7 @@ class ControllerBlogArticle extends Controller {
     $this->getList();
   }
   
-  public function displayBreadcrumbs() {
+  public function displayBreadcrumbs() : array {
     $this->load->language('blog/article');
     $breadcrumbs = [];
     $breadcrumbs[] = [
@@ -149,7 +150,7 @@ class ControllerBlogArticle extends Controller {
     return $breadcrumbs;
   }
   
-  public function getPagination() {
+  public function getPagination() : array {
     $this->load->model('blog/article');
     $total = $this->model_blog_article->getArticleTotal();
     $page = (int) ($this->request->get['page'] ?? 1);
@@ -174,7 +175,7 @@ class ControllerBlogArticle extends Controller {
     return $data;
   }
   
-  private function getSortOrder(string $column): string {
+  private function getSortOrder(string $column) : string {
     $currentSort  = $this->request->get['sort'] ?? '';
     $currentOrder = $this->request->get['order'] ?? 'ASC';
     
@@ -203,7 +204,7 @@ class ControllerBlogArticle extends Controller {
     return !$this->error;
   }
   
-  protected function validateDelete() {
+  protected function validateDelete() : bool {
     if (!$this->user->hasPermission('modify', 'blog/article')) {
       $this->error['warning'] = $this->language->get('error_permission');
     }
