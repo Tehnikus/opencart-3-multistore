@@ -216,9 +216,7 @@ class ControllerBlogTag extends Controller {
         $currentUrl = trim(mb_strtolower($currentUrl));
         if (!$currentUrl) continue;
 
-        $pageRequest = $this->model_design_seo_url->buildQuery(
-          $this->request->post['filter_page_facet'] ?? []
-        );
+        $pageRequest = (isset($this->request->get['blog_tag_id'])) ? 'blog_tag_id=' . ((int) $this->request->get['blog_tag_id']) : '';
 
         $isUrlExists = $this->model_design_seo_url->checkUrlDuplicate($currentUrl, $langId, $storeId);
         $isRequestExists = $this->model_design_seo_url->checkRequestDuplicate($pageRequest, $langId, $storeId);
@@ -242,8 +240,6 @@ class ControllerBlogTag extends Controller {
 		if ($this->error && !isset($this->error['warning'])) {
 			$this->error['warning'] = $this->language->get('e_warning');
 		}
-
-    // echo '<pre>' . htmlspecialchars(print_r($this->error, true)) . '</pre>';
 
 		return !$this->error;
 	}
