@@ -45,6 +45,55 @@
       </div>
     </div>
   </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const userToken = "{{ user_token }}";
+      const input = document.getElementById('parent_tag');
+      const autocomplete = new niftyAutocomplete({
+        input,
+        selectedItemsBox: input.previousElementSibling,
+        idKey: 'blog_tag_id',
+        request: {
+          url: `${location.protocol}${location.host}/admin/index.php?route=blog/tag/autocomplete`,
+          // Set GET params
+          getParams: {
+            user_token: userToken,
+          },
+          // Set POST params of autocomplete
+          postParams: {
+            name: () => {
+              return input.value;
+            }
+          }
+        },
+        item: {
+          searchTemplate: (row) => `<div class="niftyItemData"><p><b>${row.name}</p></div>`,
+          selectTemplate: (row) => `
+            <div class="niftyItem" data-id="${row.blog_tag_id}">
+              <span style="flex: 1">
+                <b>${row.name}</b>
+                <input type="radio" name="article_main_tag[] value="${row.blog_tag_id}">
+              </span>
+              <button style="padding: 0; line-height: 0; width: 25px; height: 25px;" type="button" class="btn btn-danger niftyItemDelete"><i class="fa fa-times"></i></button>
+              <input hidden name="article_tags[${row.blog_tag_id}]" value="${row.blog_tag_id}" />
+            </div>
+          `,
+        },
+        behavior: {
+          
+        }
+      });
+    });
+  </script>
+
+  <script type="text/javascript">
+    $('#language a:first').tab('show');
+  </script>
+
+  <script defer type="text/javascript" src="view/javascript/niftyAutocomplete.js"></script>
+  <link href="view/stylesheet/niftyAutocomplete.css" rel="stylesheet" />
+
   <link href="view/javascript/codemirror/lib/codemirror.css" rel="stylesheet" />
   <link href="view/javascript/codemirror/theme/monokai.css" rel="stylesheet" />
   <script type="text/javascript" src="view/javascript/codemirror/lib/codemirror.js"></script> 
@@ -55,11 +104,5 @@
   <link href="view/javascript/summernote/summernote.min.css" rel="stylesheet" />
   <script type="text/javascript" src="view/javascript/summernote/summernote-image-attributes.js"></script>
   <script type="text/javascript" src="view/javascript/summernote/opencart.js"></script>
-  
-  <script></script>
-  
-  <script type="text/javascript">
-    $('#language a:first').tab('show');
-  </script>
 </div>
 {{ footer }}
