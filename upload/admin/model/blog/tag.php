@@ -46,19 +46,19 @@ class ModelBlogTag extends Model {
         // Mostly safety delete, should never happen
         $this->db->query("
           DELETE FROM " . DB_PREFIX . "seo_url 
-          WHERE query       = 'blog_tag_id=" . $blog_tag_id . "'
-            AND language_id = '" . (int) $language_id . "'
-            AND store_id    = '" . (int) $this->session->data['store_id'] . "'
+          WHERE `query`       = 'blog_tag_id=" . $blog_tag_id . "'
+            AND `language_id` = '" . (int) $language_id . "'
+            AND `store_id`    = '" . (int) $this->session->data['store_id'] . "'
         ");
 
         if (!empty($keyword)) {
           $this->db->query("
             INSERT INTO " . DB_PREFIX . "seo_url 
             SET 
-              store_id    = '" . (int) $this->session->data['store_id'] . "',
-              language_id = '" . (int) $language_id . "', 
-              query       = 'blog_tag_id=" . $blog_tag_id . "', 
-              keyword     = '" . $this->db->escape($keyword) . "'
+              `store_id`    = '" . (int) $this->session->data['store_id'] . "',
+              `language_id` = '" . (int) $language_id . "', 
+              `query`       = 'blog_tag_id=" . $blog_tag_id . "', 
+              `keyword`     = '" . $this->db->escape($keyword) . "'
           ");
         }
       }
@@ -89,7 +89,7 @@ class ModelBlogTag extends Model {
       // Update descriptions
       $this->db->query("
         DELETE FROM " . DB_PREFIX . "blog_tag_description
-        WHERE blog_tag_id = " . (int) $blog_tag_id . "
+        WHERE `blog_tag_id` = " . (int) $blog_tag_id . "
       ");
 
       foreach ($data['blog_tag_description'] as $language_id => $value) {
@@ -120,19 +120,19 @@ class ModelBlogTag extends Model {
         // Mostly safety delete, should never happen
         $this->db->query("
           DELETE FROM " . DB_PREFIX . "seo_url 
-          WHERE query       = 'blog_tag_id=" . $blog_tag_id . "'
-            AND language_id = '" . (int) $language_id . "'
-            AND store_id    = '" . (int) $this->session->data['store_id'] . "'
+          WHERE `query`       = 'blog_tag_id=" . $blog_tag_id . "'
+            AND `language_id` = '" . (int) $language_id . "'
+            AND `store_id`    = '" . (int) $this->session->data['store_id'] . "'
         ");
 
         if (!empty($keyword)) {
           $this->db->query("
             INSERT INTO " . DB_PREFIX . "seo_url 
             SET 
-              store_id    = '" . (int) $this->session->data['store_id'] . "',
-              language_id = '" . (int) $language_id . "', 
-              query       = 'blog_tag_id=" . $blog_tag_id . "', 
-              keyword     = '" . $this->db->escape($keyword) . "'
+              `store_id`    = '" . (int) $this->session->data['store_id'] . "',
+              `language_id` = '" . (int) $language_id . "', 
+              `query`       = 'blog_tag_id=" . $blog_tag_id . "', 
+              `keyword`     = '" . $this->db->escape($keyword) . "'
           ");
         }
       }
@@ -153,14 +153,14 @@ class ModelBlogTag extends Model {
 
     $this->db->query("
       DELETE FROM `". DB_PREFIX . "blog_tag_image` 
-      WHERE `blog_tag_id`    = '" . (int) $page_id . "'
-        AND store_id        = " . (int) $store_id . "
+      WHERE `blog_tag_id`   = '" . (int) $page_id . "'
+        AND `store_id`        = " . (int) $store_id . "
     ");
 
     $this->db->query("
       DELETE FROM `". DB_PREFIX . "blog_tag_image_description` 
-      WHERE `blog_tag_id`    = '" . (int) $page_id . "'
-        AND store_id        = " . (int) $store_id . "
+      WHERE `blog_tag_id`   = '" . (int) $page_id . "'
+        AND `store_id`        = " . (int) $store_id . "
     ");
 
 
@@ -171,7 +171,7 @@ class ModelBlogTag extends Model {
         $this->db->query("
           INSERT INTO `". DB_PREFIX . "blog_tag_image`
           SET 
-            `blog_tag_id` 	      = '" . (int) $page_id . "', 
+            `blog_tag_id` 	    = '" . (int) $page_id . "', 
             `image` 				    = '" . $this->db->escape($image['image']) . "', 
             `sort_order` 		    = '" . (int) $image['sort_order'] . "',
             `store_id`          = '" . $store_id . "'
@@ -188,7 +188,7 @@ class ModelBlogTag extends Model {
             INSERT INTO `". DB_PREFIX . "blog_tag_image_description`
             SET
               `image_id` 	      = '" . (int) $image_id . "',
-              `blog_tag_id` 	    = '" . (int) $page_id . "',
+              `blog_tag_id` 	  = '" . (int) $page_id . "',
               `language_id` 		= '" . (int) $language_id . "',
               `store_id` 				= '" . (int) $store_id . "',
               `description` 		= '" . $this->db->escape($image_description) ."'
@@ -222,7 +222,7 @@ class ModelBlogTag extends Model {
         bd.`blog_tag_id`,
         bd.`name`,
         b2s.`date_modified`,
-        (SELECT bi.image FROM " . DB_PREFIX . "blog_tag_image bi WHERE bi.`blog_tag_id` = b2s.`blog_tag_id` AND bi.`store_id` = b2s.`store_id` ORDER BY bi.`sort_order` LIMIT 1) AS `image`,
+        (SELECT bi.`image` FROM " . DB_PREFIX . "blog_tag_image bi WHERE bi.`blog_tag_id` = b2s.`blog_tag_id` AND bi.`store_id` = b2s.`store_id` ORDER BY bi.`sort_order` LIMIT 1) AS `image`,
         (
           SELECT JSON_OBJECT(
             'descriptionLength',    COALESCE(CHAR_LENGTH(bd.`description`), 0),
@@ -265,8 +265,8 @@ class ModelBlogTag extends Model {
       SELECT
         *
       FROM " . DB_PREFIX . "seo_url su
-      WHERE su.`query` = 'blog_tag_id=" . (int) $blog_tag_id . "'
-      AND su.`store_id` = " . $store_id . "
+      WHERE su.`query`    = 'blog_tag_id=" . (int) $blog_tag_id . "'
+        AND su.`store_id` = " . $store_id . "
     ")->rows;
 
     foreach ($query as $row) {
@@ -307,7 +307,7 @@ class ModelBlogTag extends Model {
         *
       FROM " . DB_PREFIX . "blog_tag_image
       WHERE `blog_tag_id` = " . (int) $page_id . "
-        AND store_id         = " . (int) $store_id . "
+        AND `store_id`         = " . (int) $store_id . "
       ORDER BY `sort_order`
     ")->rows;
 
@@ -317,8 +317,8 @@ class ModelBlogTag extends Model {
           `language_id`,
           `description`
         FROM " . DB_PREFIX . "blog_tag_image_description
-        WHERE image_id = " . (int) $row['image_id'] . "
-          AND store_id = " . (int) $store_id . "
+        WHERE `image_id` = " . (int) $row['image_id'] . "
+          AND `store_id` = " . (int) $store_id . "
       ")->rows;
       foreach ($descriptions as $description) {
         $row['description'][$description['language_id']] = $description['description'];
@@ -337,7 +337,7 @@ class ModelBlogTag extends Model {
       FROM " . DB_PREFIX . "blog_tag_description bd
       JOIN " . DB_PREFIX . "blog_tag_to_store b2s
         ON b2s.`blog_tag_id` = bd.`blog_tag_id`
-        AND b2s.store_id = {$storeId}
+        AND b2s.`store_id`  = {$storeId}
     ");
 
     return (int) ($query->row['pages_count'] ?? 0);
