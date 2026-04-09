@@ -10,7 +10,7 @@ class ControllerBlogTag extends Controller {
     $this->getList();
   }
   
-  public function getList() {
+  public function getList() : void {
     $this->load->model('setting/store');
     $this->load->model('localisation/language');
     $this->load->model('blog/tag');
@@ -89,7 +89,7 @@ class ControllerBlogTag extends Controller {
     return $formData;
   }
   
-  public function add() {
+  public function add() : void {
     $this->load->language('blog/tag');
     $this->document->setTitle($this->language->get('heading_title'));
     $this->load->model('blog/tag');
@@ -104,7 +104,7 @@ class ControllerBlogTag extends Controller {
     $this->getForm();
   }
   
-  public function edit() {
+  public function edit() : void {
     $this->load->language('blog/tag');
     $this->document->setTitle($this->language->get('heading_title'));
     $this->load->model('blog/tag');
@@ -119,7 +119,7 @@ class ControllerBlogTag extends Controller {
     $this->getForm();
   }
   
-  public function delete() {
+  public function delete() : void {
     $this->load->language('blog/tag');
     $this->document->setTitle($this->language->get('heading_title'));
     $this->load->model('blog/tag');
@@ -136,7 +136,7 @@ class ControllerBlogTag extends Controller {
     $this->getList();
   }
   
-  public function displayBreadcrumbs() {
+  public function displayBreadcrumbs() : array {
     $this->load->language('blog/tag');
     $breadcrumbs = [];
     $breadcrumbs[] = [
@@ -151,7 +151,7 @@ class ControllerBlogTag extends Controller {
     return $breadcrumbs;
   }
   
-  public function getPagination() {
+  public function getPagination() : array {
     $this->load->model('blog/tag');
     $total = $this->model_blog_tag->getTagTotal();
     $page = (int) ($this->request->get['page'] ?? 1);
@@ -189,7 +189,7 @@ class ControllerBlogTag extends Controller {
     return '&sort=' . $column . '&order=' . $order;
   }
 
-  protected function validateForm() {
+  protected function validateForm() : bool {
 		if (!$this->user->hasPermission('modify', 'blog/tag')) {
 			$this->error['warning'] = $this->language->get('e_permission');
 		}
@@ -244,7 +244,7 @@ class ControllerBlogTag extends Controller {
 		return !$this->error;
 	}
   
-  protected function validateDelete() {
+  protected function validateDelete() : bool {
     if (!$this->user->hasPermission('modify', 'blog/tag')) {
       $this->error['warning'] = $this->language->get('error_permission');
     }
