@@ -79,7 +79,7 @@ class ControllerBlogTag extends Controller {
     $formData       = [];
     $blog_tag_id = $this->request->get['blog_tag_id'] ?? null;
     $this->load->model('blog/tag');
-    $formData['tag_description'] = $this->model_blog_tag->getTagDescription($blog_tag_id);
+    $formData['blog_tag_description'] = $this->model_blog_tag->getTagDescription($blog_tag_id);
     // Replace actual data with POST data
     if ($this->request->server['REQUEST_METHOD'] == 'POST') {
       $formData = $this->request->post;
@@ -192,7 +192,7 @@ class ControllerBlogTag extends Controller {
 			$this->error['warning'] = $this->language->get('e_permission');
 		}
 
-		foreach ($this->request->post['tag_description'] as $language_id => $value) {
+		foreach ($this->request->post['blog_tag_description'] as $language_id => $value) {
 			if ((utf8_strlen($value['name']) < 1) || (utf8_strlen($value['name']) > 255)) {
 				$this->error['error_name'][$language_id] = $this->language->get('e_name');
 			}
