@@ -11,10 +11,10 @@ $_['button_delete']             = 'Delete';
 $_['column_name']               = 'Name';
 
 // Errors
-$_['error_name']                = 'Set article name';
-$_['error_unique']              = 'SEO URL is not unique';
-$_['error_permission']          = 'You are not permitted to edit blog articles';
-$_['error_warning']             = 'Error while saving article';
+$_['e_name']                    = 'Set article name';
+$_['e_unique']                  = 'SEO URL is not unique';
+$_['e_permission']              = 'You are not permitted to edit blog articles';
+$_['e_warning']                 = 'Error while saving article';
 
 // Messages
 $_['text_success']              = 'Blog article saved';
