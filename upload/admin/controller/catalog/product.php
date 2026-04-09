@@ -375,6 +375,7 @@ class ControllerCatalogProduct extends Controller {
 				'product_filters' 		=> $result['product_filters'],
 				'product_options' 		=> $result['product_options'],
 				'product_attributes' 	=> $result['product_attributes'],
+				'seo' 								=> $result['seo'],
 				'price'      					=> $this->currency->format($result['price'], $this->config->get('config_currency')),
 				'special'    					=> $special,
 				'quantity'   					=> $result['quantity'],

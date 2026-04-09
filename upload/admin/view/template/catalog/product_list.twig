@@ -144,7 +144,32 @@
                       </p>
                     </td>
                     <td>
+                      <p>
+                        <span class="badge badge-sm 
+                          {% if product.seo.descriptionLength > 2000 %} alert-success {% elseif product.seo.descriptionLength > 500 %} alert-warning {% else %} alert-danger {% endif %}">
+                          {{ text_description_length }}:&nbsp;{{ product.seo.descriptionLength }}&nbsp;{{ text_characters_count }}
+                          {% if product.seo.descriptionLength > 500 %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
+                        </span>
+                        <span class="badge badge-sm {% if product.seo.hasFooter %}alert-success{% else %}alert-danger{% endif %}">
+                          {{ tab_footer }}:&nbsp;
+                          {% if product.seo.hasFooter %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
+                        </span>
 
+                        <span class="badge badge-sm {% if product.seo.hasTag %}alert-success{% else %}alert-danger{% endif %}">
+                          {{ tab_tag }}:&nbsp;
+                          {% if product.seo.hasTag %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
+                        </span>
+
+                        <span class="badge badge-sm {% if product.seo.hasFaq %}alert-success{% else %}alert-danger{% endif %}">
+                          {{ tab_faq }}:&nbsp;
+                          {% if product.seo.hasFaq %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
+                        </span>
+
+                        <span class="badge badge-sm {% if product.seo.hasHowTo %}alert-success{% else %}alert-danger{% endif %}">
+                          {{ tab_how_to }}:&nbsp;
+                          {% if product.seo.hasHowTo %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
+                        </span>
+                      </p>
                     </td>
                     <td class="text-left">
                       <div style="max-height: 100px; overflow-y: auto">

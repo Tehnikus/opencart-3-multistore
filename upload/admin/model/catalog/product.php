@@ -1191,7 +1191,21 @@ class ModelCatalogProduct extends Model {
 						ON fgd.`filter_group_id` = t.`filter_group_id`
 						AND fgd.`language_id` = '" . (int) $this->config->get('config_language_id') . "'
 						AND fgd.`store_id` 		= '" . (int) $this->session->data['store_id'] . "'
-				) AS product_filters
+				) AS product_filters,
+				(
+          SELECT JSON_OBJECT(
+            'descriptionLength',    COALESCE(CHAR_LENGTH(pd.`description`), 0),
+            'seoDescriptionLength', COALESCE(CHAR_LENGTH(pd.`seo_description`), 0),
+            'seoKeywords',          pd.seo_keywords,
+            'hasFooter',            CHAR_LENGTH(COALESCE(pd.`footer`, '')) > 2,
+            'hasFaq',               CHAR_LENGTH(COALESCE(pd.`faq`, '')) > 2,
+            'hasHowTo',             CHAR_LENGTH(COALESCE(pd.`how_to`, '')) > 2
+          )
+					FROM " . DB_PREFIX . "product_description pd
+					WHERE pd.product_id = p.product_id
+						AND pd.language_id = '" . (int) $this->config->get('config_language_id') . "'
+						AND pd.store_id = '" . (int) $this->session->data['store_id'] . "'
+        ) AS seo
 
 			FROM " . DB_PREFIX . "product p 
 
@@ -1256,6 +1270,7 @@ class ModelCatalogProduct extends Model {
 			$row['status_to_store'] = json_decode($row['status_to_store'] ?? '[]', true);
 			$row['product_filters'] = json_decode($row['product_filters'] ?? '[]', true);
 			$row['product_options'] = json_decode($row['product_options'] ?? '[]', true);
+			$row['seo'] 						= json_decode($row['seo'] ?? '[]', true);
 
 			$result[] = $row;
 		}
