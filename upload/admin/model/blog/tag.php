@@ -253,6 +253,29 @@ class ModelBlogTag extends Model {
     return $result;
   }
 
+  public function getSeoUrl($blog_tag_id = null) : array {
+    $result   = [];
+    $store_id = (int) $this->session->data['store_id'];
+
+    if ($blog_tag_id === null) {
+      return $result;
+    }
+
+    $query = $this->db->query("
+      SELECT
+        *
+      FROM " . DB_PREFIX . "seo_url su
+      WHERE su.`query` = 'blog_tag_id=" . (int) $blog_tag_id . "'
+      AND su.`store_id` = " . $store_id . "
+    ")->rows;
+
+    foreach ($query as $row) {
+      $result[$row['language_id']] = $row['keyword'];
+    }
+
+    return $result;
+  }
+
   public function getTagDescription($pageId) : array {
     $pageId = (int) $pageId;
     $storeId = (int) $this->session->data['store_id'];

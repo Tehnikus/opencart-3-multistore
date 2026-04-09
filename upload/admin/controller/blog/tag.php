@@ -80,6 +80,7 @@ class ControllerBlogTag extends Controller {
     $blog_tag_id = $this->request->get['blog_tag_id'] ?? null;
     $this->load->model('blog/tag');
     $formData['blog_tag_description'] = $this->model_blog_tag->getTagDescription($blog_tag_id);
+    $formData['seo_url']              = $this->model_blog_tag->getSeoUrl($blog_tag_id);
     // Replace actual data with POST data
     if ($this->request->server['REQUEST_METHOD'] == 'POST') {
       $formData = $this->request->post;
