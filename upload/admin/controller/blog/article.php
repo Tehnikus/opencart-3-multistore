@@ -187,22 +187,61 @@ class ControllerBlogArticle extends Controller {
     
     return '&sort=' . $column . '&order=' . $order;
   }
-  protected function validateForm() {
-    if (!$this->user->hasPermission('modify', 'blog/article')) {
-      $this->error['warning'] = $this->language->get('error_permission');
-    }
-    
-    foreach ($this->request->post['article_description'] as $language_id => $value) {
-      if ((utf8_strlen($value['name']) < 1) || (utf8_strlen($value['name']) > 255)) {
-        $this->error['name'][$language_id] = $this->language->get('error_name');
+
+  protected function validateForm() : bool {
+		if (!$this->user->hasPermission('modify', 'blog/article')) {
+			$this->error['warning'] = $this->language->get('e_permission');
+		}
+
+		foreach ($this->request->post['article_description'] as $language_id => $value) {
+			if ((utf8_strlen($value['name']) < 1) || (utf8_strlen($value['name']) > 255)) {
+				$this->error['error_name'][$language_id] = $this->language->get('e_name');
+			}
+		}
+
+    // Check if parent tag is selected
+    // if (!isset($this->request->post['article_tags'])) {
+    //   $this->error['error_select_tag'] = $this->language->get('e_select_tag');
+    // }
+
+
+		if ($this->request->post['seo_url']) {
+
+			$this->load->model('design/seo_url');
+      $storeId = (int) $this->session->data['store_id'];
+
+      foreach ($this->request->post['seo_url'] as $langId => $currentUrl) {
+
+        $currentUrl = trim(mb_strtolower($currentUrl));
+        if (!$currentUrl) continue;
+
+        $pageRequest = (isset($this->request->get['article_id'])) ? 'article_id=' . ((int) $this->request->get['article_id']) : '';
+
+        $isUrlExists = $this->model_design_seo_url->checkUrlDuplicate($currentUrl, $langId, $storeId);
+        $isRequestExists = $this->model_design_seo_url->checkRequestDuplicate($pageRequest, $langId, $storeId);
+
+        foreach ($isUrlExists ?? [] as $row) {
+          if ($row['query'] !== $pageRequest) {
+            $this->error['error_url_not_unique'][$langId] = $this->language->get('e_url_not_unique');
+            break;
+          }
+        }
+
+        foreach ($isRequestExists ?? [] as $row) {
+          if ($row['keyword'] !== $currentUrl) {
+            $this->error['error_request_not_unique'][$langId] = sprintf($this->language->get('e_request_not_unique'), $row['keyword']);
+            break;
+          }
+        }
       }
-    }
-    if ($this->error && !isset($this->error['warning'])) {
-      $this->error['warning'] = $this->language->get('error_warning');
-    }
-    
-    return !$this->error;
-  }
+		}
+
+		if ($this->error && !isset($this->error['warning'])) {
+			$this->error['warning'] = $this->language->get('e_warning');
+		}
+
+		return !$this->error;
+	}
   
   protected function validateDelete() : bool {
     if (!$this->user->hasPermission('modify', 'blog/article')) {
