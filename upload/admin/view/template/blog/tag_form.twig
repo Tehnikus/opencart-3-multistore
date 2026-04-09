@@ -3,7 +3,7 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="pull-right">
-        <button type="submit" form="form-category" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <button type="submit" form="form-tag" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
         <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
       <h1>{{ heading_title }}</h1>
       <ul class="breadcrumb">
@@ -24,14 +24,22 @@
         <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_form }}</h3>
       </div>
       <div class="panel-body">
-        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-category" class="form-horizontal">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-tag" class="form-horizontal">
           <ul class="nav nav-tabs">
-            <li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a></li>
-            <li><a href="#tab-description" data-toggle="tab">{{ tab_description }}</a></li>
+            <li class="active"><a href="#tab-description"  data-toggle="tab">{{ tab_description }}</a></li>
+            <li><a href="#tab-images"       data-toggle="tab">{{ tab_image }}</a></li>
+            <li><a href="#tab-faq"          data-toggle="tab">{{ tab_faq }}</a></li>
+            <li><a href="#tab-how_to"       data-toggle="tab">{{ tab_how_to }}</a></li>
+            <li><a href="#tab-footer"       data-toggle="tab">{{ tab_footer }}</a></li>
           </ul>
           <div class="tab-content">
-            <div class="tab-pane active" id="tab-general"></div>
-            <div class="tab-pane" id="tab-description"></div>
+            {% set data        =  blog_tag_description  %}
+            {% set name_prefix = 'blog_tag_description' %}
+            <div class="tab-pane active" id="tab-description">{% include "common/tab_description.twig" %}</div>
+            <div class="tab-pane" id="tab-images">{% include "common/tab_images.twig"  with {name_prefix: 'tag_images', images: tag_images} %}</div>
+            <div class="tab-pane" id="tab-footer">{% include "common/tab_footer.twig" %}</div>
+            <div class="tab-pane" id="tab-faq">{% include "common/tab_faq.twig" %}</div>
+            <div class="tab-pane" id="tab-how_to">{% include "common/tab_how_to.twig" %}</div>
           </div>
         </form>
       </div>
