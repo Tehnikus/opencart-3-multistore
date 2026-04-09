@@ -1,6 +1,11 @@
 <?php
 class ModelBlogArticle extends Model {
 
+  private $sortOrders = [
+    'name'          => 'ad.`name`',
+    'date_modified' => 'a2s.`date_modified`',
+  ];
+
   public function addArticle($data) {
 
     $this->db->query("START TRANSACTION");
@@ -207,10 +212,18 @@ class ModelBlogArticle extends Model {
     
     // Orders
     $ordering = '';
-    $ordering = "ORDER BY " . ($this->sortOrders[$filter['sort']] ?? 'a2s.`date_modified`');
-    if (!empty($filter['order']) && in_array($filter['order'], ['ASC', 'DESC'])) {
-      $ordering .= " " . $filter['order'];
+    $sortField = 'a2s.`date_modified`';
+
+    if (!empty($filter['sort']) && isset($this->sortOrders[$filter['sort']])) {
+      $sortField = $this->sortOrders[$filter['sort']];
     }
+
+    $orderDirection = 'DESC';
+    if (!empty($filter['order']) && in_array($filter['order'], ['ASC', 'DESC'])) {
+      $orderDirection = $filter['order'];
+    }
+
+    $ordering = "ORDER BY {$sortField} {$orderDirection}";
       
     // Limits
     $limit  = max(1, (int) ($filter['limit'] ?? $this->config->get('config_limit_admin') ?? 20));

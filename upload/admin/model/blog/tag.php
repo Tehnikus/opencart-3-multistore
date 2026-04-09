@@ -1,6 +1,11 @@
 <?php
 class ModelBlogTag extends Model {
 
+  private $sortOrders = [
+    'name'          => 'bd.`name`',
+    'date_modified' => 'b2s.`date_modified`',
+  ];
+
   public function addTag($data) {
 
     $this->db->query("START TRANSACTION");
@@ -23,7 +28,7 @@ class ModelBlogTag extends Model {
         $this->db->query("
           INSERT INTO " . DB_PREFIX . "blog_tag_description 
           SET 
-            `blog_tag_id` 		        = '" . (int) $blog_tag_id . "', 
+            `blog_tag_id` 		  = '" . (int) $blog_tag_id . "', 
             `language_id` 			= '" . (int) $language_id . "', 
             `store_id` 					= '" . (int) $this->session->data['store_id'] . "',
             `name` 							= '" . $this->db->escape($value['name']) . "', 
@@ -96,7 +101,7 @@ class ModelBlogTag extends Model {
         $this->db->query("
           INSERT INTO " . DB_PREFIX . "blog_tag_description 
           SET 
-            `blog_tag_id` 		= '" . (int) $blog_tag_id . "', 
+            `blog_tag_id` 		  = '" . (int) $blog_tag_id . "', 
             `language_id` 			= '" . (int) $language_id . "', 
             `store_id` 					= '" . (int) $this->session->data['store_id'] . "',
             `name` 							= '" . $this->db->escape($value['name']) . "', 
@@ -207,10 +212,18 @@ class ModelBlogTag extends Model {
     
     // Orders
     $ordering = '';
-    $ordering = "ORDER BY " . ($this->sortOrders[$filter['sort']] ?? 'b2s.`date_modified`');
-    if (!empty($filter['order']) && in_array($filter['order'], ['ASC', 'DESC'])) {
-      $ordering .= " " . $filter['order'];
+    $sortField = 'b2s.`date_modified`';
+
+    if (!empty($filter['sort']) && isset($this->sortOrders[$filter['sort']])) {
+      $sortField = $this->sortOrders[$filter['sort']];
     }
+
+    $orderDirection = 'DESC';
+    if (!empty($filter['order']) && in_array($filter['order'], ['ASC', 'DESC'])) {
+      $orderDirection = $filter['order'];
+    }
+
+    $ordering = "ORDER BY {$sortField} {$orderDirection}";
       
     // Limits
     $limit  = max(1, (int) ($filter['limit'] ?? $this->config->get('config_limit_admin') ?? 20));
@@ -238,6 +251,7 @@ class ModelBlogTag extends Model {
         ON b2s.`blog_tag_id` = bd.`blog_tag_id`
       WHERE bd.`language_id` = {$languageId}
         AND b2s.`store_id`   = {$storeId}
+        " . ((isset($filter['name'])) ? "AND bd.name LIKE '%" . $this->db->escape($filter['name']) . "%'" : '') . "
       {$ordering}
       {$limits}
     ";
