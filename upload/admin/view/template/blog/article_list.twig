@@ -37,7 +37,7 @@
                       <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
                       <td style="width: 70px" class="text-center">{{ column_image }}</td>
                       <td style="width: 200px;" class="text-left"><a href="{{ sort_name }}" {% if sort == 'name' %}class="{{ order|lower }}"{% endif %}>{{ column_name }}</a></td>
-                      <td class="text-left"><a href="{{ sort_category }}" {% if sort == 'category' %}class="{{ order|lower }}"{% endif %}>{{ column_category }}</a> / {{ column_filters }}</td>
+                      <td class="text-left"><a href="{{ sort_tags }}" {% if sort == 'tags' %}class="{{ order|lower }}"{% endif %}>{{ column_tags }}</a></td>
                       <td>{{ column_seo }}</td>
                       <td class="text-center" style="width: 60px"><a href="{{ sort_date_modified }}" {% if sort == 'date_modified' %}class="{{ order|lower }}"{% endif %}>{{ column_date_modified }}</a></td>
                       <td style="width: 60px"></td>
@@ -94,7 +94,7 @@
                         </tr>
                       {% endfor %}
                     {% else %}
-                      <tr><td class="text-center" colspan="4">{{ text_no_results }}</td></tr>
+                      <tr><td class="text-center" colspan="7">{{ text_no_results }}</td></tr>
                     {% endif %}
                   </tbody>
                 </table>
