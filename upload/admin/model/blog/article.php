@@ -46,19 +46,19 @@ class ModelBlogArticle extends Model {
         // Mostly safety delete, should never happen
         $this->db->query("
           DELETE FROM " . DB_PREFIX . "seo_url 
-          WHERE query       = 'article_id=" . $article_id . "'
-            AND language_id = '" . (int) $language_id . "'
-            AND store_id    = '" . (int) $this->session->data['store_id'] . "'
+          WHERE `query`       = 'article_id=" . $article_id . "'
+            AND `language_id` = '" . (int) $language_id . "'
+            AND `store_id`    = '" . (int) $this->session->data['store_id'] . "'
         ");
 
         if (!empty($keyword)) {
           $this->db->query("
             INSERT INTO " . DB_PREFIX . "seo_url 
             SET 
-              store_id    = '" . (int) $this->session->data['store_id'] . "',
-              language_id = '" . (int) $language_id . "', 
-              query       = 'article_id=" . $article_id . "', 
-              keyword     = '" . $this->db->escape($keyword) . "'
+              `store_id`    = '" . (int) $this->session->data['store_id'] . "',
+              `language_id` = '" . (int) $language_id . "', 
+              `query`       = 'article_id=" . $article_id . "', 
+              `keyword`     = '" . $this->db->escape($keyword) . "'
           ");
         }
       }
@@ -83,20 +83,20 @@ class ModelBlogArticle extends Model {
         UPDATE " . DB_PREFIX . "article_to_store 
         SET
           `date_modified`  = NOW()
-        WHERE article_id = " . (int) $article_id . "
+        WHERE `article_id` = " . (int) $article_id . "
       ");
 
       // Update descriptions
       $this->db->query("
         DELETE FROM " . DB_PREFIX . "article_description
-        WHERE article_id = " . (int) $article_id . "
+        WHERE `article_id` = " . (int) $article_id . "
       ");
 
       foreach ($data['article_description'] as $language_id => $value) {
         $this->db->query("
           INSERT INTO " . DB_PREFIX . "article_description 
           SET 
-            `article_id` 		= '" . (int) $article_id . "', 
+            `article_id` 		    = '" . (int) $article_id . "', 
             `language_id` 			= '" . (int) $language_id . "', 
             `store_id` 					= '" . (int) $this->session->data['store_id'] . "',
             `name` 							= '" . $this->db->escape($value['name']) . "', 
@@ -120,19 +120,19 @@ class ModelBlogArticle extends Model {
         // Mostly safety delete, should never happen
         $this->db->query("
           DELETE FROM " . DB_PREFIX . "seo_url 
-          WHERE query       = 'article_id=" . $article_id . "'
-            AND language_id = '" . (int) $language_id . "'
-            AND store_id    = '" . (int) $this->session->data['store_id'] . "'
+          WHERE `query`       = 'article_id=" . $article_id . "'
+            AND `language_id` = '" . (int) $language_id . "'
+            AND `store_id`    = '" . (int) $this->session->data['store_id'] . "'
         ");
 
         if (!empty($keyword)) {
           $this->db->query("
             INSERT INTO " . DB_PREFIX . "seo_url 
             SET 
-              store_id    = '" . (int) $this->session->data['store_id'] . "',
-              language_id = '" . (int) $language_id . "', 
-              query       = 'article_id=" . $article_id . "', 
-              keyword     = '" . $this->db->escape($keyword) . "'
+              `store_id`    = '" . (int) $this->session->data['store_id'] . "',
+              `language_id` = '" . (int) $language_id . "', 
+              `query`       = 'article_id=" . $article_id . "', 
+              `keyword`     = '" . $this->db->escape($keyword) . "'
           ");
         }
       }
@@ -222,7 +222,7 @@ class ModelBlogArticle extends Model {
         ad.`article_id`,
         ad.`name`,
         a2s.`date_modified`,
-        (SELECT ai.image FROM " . DB_PREFIX . "article_image ai WHERE ai.article_id = a2s.article_id AND ai.store_id = a2s.store_id ORDER BY ai.sort_order LIMIT 1) AS image,
+        (SELECT ai.`image` FROM " . DB_PREFIX . "article_image ai WHERE ai.`article_id` = a2s.`article_id` AND ai.`store_id` = a2s.`store_id` ORDER BY ai.`sort_order` LIMIT 1) AS `image`,
         (
           SELECT JSON_OBJECT(
             'descriptionLength',    COALESCE(CHAR_LENGTH(ad.`description`), 0),
@@ -235,9 +235,9 @@ class ModelBlogArticle extends Model {
         ) AS seo
       FROM " . DB_PREFIX . "article_description ad
       JOIN " . DB_PREFIX . "article_to_store a2s
-        ON a2s.article_id = ad.article_id
-      WHERE ad.language_id = {$languageId}
-        AND a2s.store_id   = {$storeId}
+        ON a2s.`article_id` = ad.`article_id`
+      WHERE ad.`language_id` = {$languageId}
+        AND a2s.`store_id`   = {$storeId}
       {$ordering}
       {$limits}
     ";
@@ -265,7 +265,7 @@ class ModelBlogArticle extends Model {
       SELECT
         *
       FROM " . DB_PREFIX . "seo_url su
-      WHERE su.`query` = 'article_id=" . (int) $article_id . "'
+      WHERE su.`query`  = 'article_id=" . (int) $article_id . "'
       AND su.`store_id` = " . $store_id . "
     ")->rows;
 
@@ -282,9 +282,9 @@ class ModelBlogArticle extends Model {
     $images = $this->db->query("
       SELECT
         *
-      FROM " . DB_PREFIX . "seo_filter_page_image pi
-      WHERE `filter_page_id` = " . (int) $page_id . "
-        AND store_id         = " . (int) $store_id . "
+      FROM " . DB_PREFIX . "article_image
+      WHERE `article_id`     = " . (int) $page_id . "
+        AND `store_id`         = " . (int) $store_id . "
       ORDER BY `sort_order`
     ")->rows;
 
@@ -293,9 +293,9 @@ class ModelBlogArticle extends Model {
         SELECT
           `language_id`,
           `description`
-        FROM " . DB_PREFIX . "seo_filter_page_image_description
-        WHERE image_id = " . (int) $row['image_id'] . "
-          AND store_id = " . (int) $store_id . "
+        FROM " . DB_PREFIX . "article_image_description
+        WHERE `image_id` = " . (int) $row['image_id'] . "
+          AND `store_id` = " . (int) $store_id . "
       ")->rows;
       foreach ($descriptions as $description) {
         $row['description'][$description['language_id']] = $description['description'];
@@ -314,9 +314,9 @@ class ModelBlogArticle extends Model {
         *
       FROM " . DB_PREFIX . "article_description ad
       JOIN " . DB_PREFIX . "article_to_store a2s
-        ON a2s.article_id = ad.article_id
-        AND a2s.store_id = {$storeId}
-      WHERE ad.article_id = {$pageId}
+        ON a2s.`article_id` = ad.`article_id`
+        AND a2s.`store_id`  = {$storeId}
+      WHERE ad.`article_id` = {$pageId}
     ";
     
     foreach($this->db->query($sql)->rows ?? [] as $row) {
@@ -336,8 +336,8 @@ class ModelBlogArticle extends Model {
         COUNT(*) AS pages_count
       FROM " . DB_PREFIX . "article_description ad
       JOIN " . DB_PREFIX . "article_to_store a2s
-        ON a2s.article_id = ad.article_id
-        AND a2s.store_id = {$storeId}
+        ON a2s.`article_id` = ad.`article_id`
+        AND a2s.`store_id` = {$storeId}
     ");
 
     return (int) ($query->row['pages_count'] ?? 0);
