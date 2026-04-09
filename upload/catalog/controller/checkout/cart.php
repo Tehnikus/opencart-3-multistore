@@ -1,5 +1,6 @@
 <?php
 class ControllerCheckoutCart extends Controller {
+	// Display cart page on index.php?route=checkout/cart 
 	public function index() {
 		$this->load->language('checkout/cart');
 
