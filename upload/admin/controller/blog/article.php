@@ -79,6 +79,7 @@ class ControllerBlogArticle extends Controller {
     $article_id = $this->request->get['article_id'] ?? null;
     $this->load->model('blog/article');
     $formData['article_description'] = $this->model_blog_article->getArticleDescription($article_id);
+    $formData['seo_url']             = $this->model_blog_article->getSeoUrl($article_id);
     // Replace actual data with POST data
     if ($this->request->server['REQUEST_METHOD'] == 'POST') {
       $formData = $this->request->post;

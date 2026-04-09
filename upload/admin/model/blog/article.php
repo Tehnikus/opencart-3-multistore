@@ -253,6 +253,29 @@ class ModelBlogArticle extends Model {
     return $result;
   }
 
+  public function getSeoUrl($article_id = null) : array {
+    $result   = [];
+    $store_id = (int) $this->session->data['store_id'];
+
+    if ($article_id === null) {
+      return $result;
+    }
+
+    $query = $this->db->query("
+      SELECT
+        *
+      FROM " . DB_PREFIX . "seo_url su
+      WHERE su.`query` = 'article_id=" . (int) $article_id . "'
+      AND su.`store_id` = " . $store_id . "
+    ")->rows;
+
+    foreach ($query as $row) {
+      $result[$row['language_id']] = $row['keyword'];
+    }
+
+    return $result;
+  }
+
   public function getArticleDescription($pageId) : array {
     $pageId = (int) $pageId;
     $storeId = (int) $this->session->data['store_id'];
