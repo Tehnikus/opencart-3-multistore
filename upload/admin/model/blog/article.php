@@ -17,6 +17,7 @@ class ModelBlogArticle extends Model {
         INSERT INTO " . DB_PREFIX . "article_to_store 
         SET
           `store_id` 			 = '" . (int) $this->session->data['store_id'] . "', 
+          `status`         = '" . (int) $data['status'] . "',
           `date_added`     = NOW(),
           `date_modified`  = NOW()
         ");
@@ -87,6 +88,7 @@ class ModelBlogArticle extends Model {
       $this->db->query("
         UPDATE " . DB_PREFIX . "article_to_store 
         SET
+          `status`         = '" . (int) $data['status'] . "',
           `date_modified`  = NOW()
         WHERE `article_id` = " . (int) $article_id . "
       ");
@@ -234,6 +236,7 @@ class ModelBlogArticle extends Model {
       SELECT
         ad.`article_id`,
         ad.`name`,
+        a2s.`status`,
         a2s.`date_modified`,
         (SELECT ai.`image` FROM " . DB_PREFIX . "article_image ai WHERE ai.`article_id` = a2s.`article_id` AND ai.`store_id` = a2s.`store_id` ORDER BY ai.`sort_order` LIMIT 1) AS `image`,
         (
