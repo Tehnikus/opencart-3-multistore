@@ -35,19 +35,9 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
-			if ($this->user->hasPermission('access', 'catalog/filter')) {
-				$catalog[] = array(
-					'name'	   => $this->language->get('text_filter'),
-					'href'     => $this->url->link('catalog/filter', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
-			// Attributes
-			$attribute = array();
-
+			$filters = [];
 			if ($this->user->hasPermission('access', 'catalog/attribute')) {
-				$attribute[] = array(
+				$filters[] = array(
 					'name'     => $this->language->get('text_attribute'),
 					'href'     => $this->url->link('catalog/attribute', 'user_token=' . $this->session->data['user_token'], true),
 					'children' => array()
@@ -55,25 +45,37 @@ class ControllerCommonColumnLeft extends Controller {
 			}
 
 			if ($this->user->hasPermission('access', 'catalog/attribute_group')) {
-				$attribute[] = array(
+				$filters[] = array(
 					'name'	   => $this->language->get('text_attribute_group'),
 					'href'     => $this->url->link('catalog/attribute_group', 'user_token=' . $this->session->data['user_token'], true),
 					'children' => array()
 				);
 			}
-
-			if ($attribute) {
-				$catalog[] = array(
-					'name'	   => $this->language->get('text_attribute'),
-					'href'     => '',
-					'children' => $attribute
-				);
-			}
-
 			if ($this->user->hasPermission('access', 'catalog/option')) {
-				$catalog[] = array(
+				$filters[] = array(
 					'name'	   => $this->language->get('text_option'),
 					'href'     => $this->url->link('catalog/option', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+			if ($this->user->hasPermission('access', 'seo/tag')) {
+				$filters[] = array(
+					'name'	   => $this->language->get('text_seo_tags'),
+					'href'     => $this->url->link('seo/tag/getList', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+			if ($this->user->hasPermission('access', 'catalog/filter')) {
+				$filters[] = array(
+					'name'	   => $this->language->get('text_filter'),
+					'href'     => $this->url->link('catalog/filter', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+			if ($this->user->hasPermission('access', 'extension/module/facet_filter')) {
+				$filters[] = array(
+					'name'	   => $this->language->get('text_facet_filter'),
+					'href'     => $this->url->link('extension/module/facet_filter', 'user_token=' . $this->session->data['user_token'], true),
 					'children' => array()
 				);
 			}
@@ -82,14 +84,6 @@ class ControllerCommonColumnLeft extends Controller {
 				$catalog[] = array(
 					'name'	   => $this->language->get('text_manufacturer'),
 					'href'     => $this->url->link('catalog/manufacturer', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
-			if ($this->user->hasPermission('access', 'extension/module/facet_filter')) {
-				$catalog[] = array(
-					'name'	   => $this->language->get('text_facet_filter'),
-					'href'     => $this->url->link('extension/module/facet_filter', 'user_token=' . $this->session->data['user_token'], true),
 					'children' => array()
 				);
 			}
@@ -127,6 +121,14 @@ class ControllerCommonColumnLeft extends Controller {
 					'children' => $catalog
 				);
 			}
+
+			$data['menus'][] = array(
+				'id'       => 'menu-filters',
+				'icon'		=> 'fa-sliders',
+				'name'	   => $this->language->get('text_filter'),
+				'href'     => '',
+				'children' => $filters,
+			);
 
 			// Blog
 			$blog = array();
@@ -186,14 +188,6 @@ class ControllerCommonColumnLeft extends Controller {
 				$seo[] = array(
 					'name'	   => $this->language->get('text_meta_editor'),
 					'href'     => $this->url->link('seo/meta_editor/getProductsList', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
-			if ($this->user->hasPermission('access', 'seo/tag')) {
-				$seo[] = array(
-					'name'	   => $this->language->get('text_seo_tags'),
-					'href'     => $this->url->link('seo/tag/getList', 'user_token=' . $this->session->data['user_token'], true),
 					'children' => array()
 				);
 			}
@@ -538,7 +532,7 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
-			// Localisation
+			// Localization
 			$localisation = array();
 
 			if ($this->user->hasPermission('access', 'localisation/location')) {
