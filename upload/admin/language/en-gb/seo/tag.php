@@ -2,6 +2,17 @@
 $_['heading_title']             = 'Seo tags';
 $_['text_no_results']           = 'No results';
 $_['text_confirm']              = 'This will delete selected seo tags! Are you sure?';
+$_['text_seo_tags_info']        = 'Here you can create tags to group unrelated products together. To use tags as SEO pages, create a "tag+category" combination in the "<b>SEO/Landing Pages</b>" section.';
+$_['text_show_as_flag']         = 'Show as product flag on product miniatures and product pages';
+$_['text_inline_style']         = 'Add inline CSS styles here that will be outputted in <b>style="...your styles..."</b> in frontend';
+$_['text_inline_icon']          = 'Add icon or any small html code here to display before tag name in frontend. Be careful not to brake your page layout';
+$_['text_seo_tag_form']         = 'Tag settings';
+
+// Form
+$_['entry_show_as_flag']        = 'Show as flag';
+$_['entry_inline_style']        = 'Inline CSS style';
+$_['entry_inline_icon']         = 'Inline icon';
+$_['entry_show_as_flag']        = 'Show as flag';
 
 // Buttons
 $_['button_add']                = 'Add new seo tag';
@@ -9,6 +20,8 @@ $_['button_delete']             = 'Delete';
 
 // Columns
 $_['column_name']               = 'Name';
+$_['column_product_count']      = 'Product count';
+$_['column_show_as_flag']       = 'Show as flag';
 
 // Errors
 $_['e_name']                    = 'Set article name';
