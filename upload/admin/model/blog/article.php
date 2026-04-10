@@ -45,6 +45,17 @@ class ModelBlogArticle extends Model {
         ");
       }
 
+      foreach ($data['article_tags'] ?? [] as $tag) {
+        $this->db->query("
+          INSERT INTO ". DB_PREFIX ."article_tag
+          SET
+            `article_id` 		= '" . (int) $article_id . "', 
+            `is_main` 			= '" . ((isset($data['is_main']) && $data['is_main'] == $tag) ? '1' : '0') . "', 
+            `store_id` 			= '" . (int) $this->session->data['store_id'] . "',
+            `tag_id`        = '" . (int) $tag . "'
+        ");
+      }
+
       $this->editImages($article_id, $data['article_images']);
 
       // Save URL
@@ -116,6 +127,23 @@ class ModelBlogArticle extends Model {
             `footer`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['footer'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
             `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? [], ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "',
             `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? [], ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "'
+        ");
+      }
+
+      $this->db->query("
+        DELETE FROM ". DB_PREFIX ."article_tag
+        WHERE `article_id` 		= '" . (int) $article_id . "'
+          AND `store_id` 			= '" . (int) $this->session->data['store_id'] . "'
+      ");
+
+      foreach ($data['article_tags'] ?? [] as $tag) {
+        $this->db->query("
+          INSERT INTO ". DB_PREFIX ."article_tag
+          SET
+            `article_id` 		= '" . (int) $article_id . "', 
+            `is_main` 			= '" . ((isset($data['is_main']) && $data['is_main'] == $tag) ? '1' : '0') . "', 
+            `store_id` 			= '" . (int) $this->session->data['store_id'] . "',
+            `tag_id`        = '" . (int) $tag . "'
         ");
       }
 
