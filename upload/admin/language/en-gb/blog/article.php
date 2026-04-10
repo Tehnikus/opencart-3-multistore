@@ -10,6 +10,7 @@ $_['button_delete']             = 'Delete';
 // Columns
 $_['column_name']               = 'Name';
 $_['entry_parent_tag']          = 'Parent tags';
+$_['is_main_tag']               = 'Main parent';
 
 // Errors
 $_['e_name']                    = 'Set article name';

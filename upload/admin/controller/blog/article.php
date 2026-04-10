@@ -89,13 +89,27 @@ class ControllerBlogArticle extends Controller {
     }
 
     // Set tags data structure
-    if (!empty($formData['article_tags'])) {
-      $mainIndex = $formData['article_main_tag'] ?? null;
+    if (!empty($this->request->post['article_tags'])) {
+      $mainId = $this->request->post['is_main'] ?? null;
+      $normalized = [];
 
-      foreach ($formData['article_tags'] as $i => &$tag) {
-        $tag['is_main'] = ((string)$i === (string)$mainIndex) ? 1 : 0;
+      foreach ($this->request->post['article_tags'] as $tagId) {
+        $normalized[] = [
+          'blog_tag_id' => (int) $tagId,
+          'is_main'     => (((int) $tagId === (int) $mainId)) ? 1 : 0,
+        ];
       }
-      unset($tag);
+
+      $formData['article_tags'] = $normalized;
+    } else {
+      $formData['article_tags'] = $this->model_blog_article->getArticleTags($article_id);
+    }
+
+    // Load tags model
+    $this->load->model('blog/tag');
+    foreach ($formData['article_tags'] as $key => $tag) {
+      $tagData = $this->model_blog_tag->getTagDescription($tag['blog_tag_id']);
+      $formData['article_tags'][$key]['name'] = $tagData[(int) $this->config->get('config_language_id')]['name'];
     }
 
     return $formData;

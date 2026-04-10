@@ -52,7 +52,7 @@ class ModelBlogArticle extends Model {
             `article_id` 		= '" . (int) $article_id . "', 
             `is_main` 			= '" . ((isset($data['is_main']) && $data['is_main'] == $tag) ? '1' : '0') . "', 
             `store_id` 			= '" . (int) $this->session->data['store_id'] . "',
-            `tag_id`        = '" . (int) $tag . "'
+            `blog_tag_id`   = '" . (int) $tag . "'
         ");
       }
 
@@ -143,7 +143,7 @@ class ModelBlogArticle extends Model {
             `article_id` 		= '" . (int) $article_id . "', 
             `is_main` 			= '" . ((isset($data['is_main']) && $data['is_main'] == $tag) ? '1' : '0') . "', 
             `store_id` 			= '" . (int) $this->session->data['store_id'] . "',
-            `tag_id`        = '" . (int) $tag . "'
+            `blog_tag_id`   = '" . (int) $tag . "'
         ");
       }
 
@@ -378,7 +378,7 @@ class ModelBlogArticle extends Model {
 
     $query = $this->db->query("
       SELECT
-        `tag_id`,
+        `blog_tag_id`,
         `is_main`
       FROM " . DB_PREFIX . "article_tag
       WHERE `article_id` = '" . (int) $article_id . "'
