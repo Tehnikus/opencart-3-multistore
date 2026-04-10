@@ -23,10 +23,12 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 
 		// Errors
 		$data['error_warning'] = $this->error['warning'] ?? '';
+		// Get settings by store id
+		$settings = $this->model_setting_setting->getSetting('module_facet_filter', (int) $this->session->data['store_id']);
 
 		// Form data
-		$data['module_facet_filter_status'] = $this->request->post['module_facet_filter_status'] ?? $this->config->get('module_facet_filter_status');
-		$data['settings'] 									= $this->request->post['module_facet_filter_settings'] ?? $this->config->get('module_facet_filter_settings');
+		$data['module_facet_filter_status'] = $this->request->post['module_facet_filter_status'] ?? $settings['module_facet_filter_status'] ?? [];
+		$data['settings'] 									= $this->request->post['module_facet_filter_settings'] ?? $settings['module_facet_filter_settings'] ?? [];
 		$data['pageTypes'] 								  = ['category', 'manufacturer', 'special', 'search'];
 		$data['facetTypes'] 								= array_flip($this->model_catalog_facet->getFacetTypes());
 		$data['user_token'] 								= $this->session->data['user_token'];
