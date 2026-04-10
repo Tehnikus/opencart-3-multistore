@@ -121,6 +121,22 @@
         }
       });
     });
+
+    // Switch main parent tag on autocomplete item remove if previous main (checked) tag was removed
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('.niftyItemDelete');
+      if (!btn) {return;}
+
+      const item = btn.closest('.niftyItem');
+      const isMain = item.querySelector('input[type="radio"]').checked;
+
+      item.remove();
+      // If deleted tag is main check first tag in selected tags list
+      if (isMain) {
+        const first = document.querySelector('.niftyItem input[type="radio"]');
+        if (first) {first.checked = true;}
+      }
+    });
   </script>
 
   <script type="text/javascript">
