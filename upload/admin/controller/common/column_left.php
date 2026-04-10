@@ -190,10 +190,10 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
-			if ($this->user->hasPermission('access', 'seo/tags')) {
+			if ($this->user->hasPermission('access', 'seo/tag')) {
 				$seo[] = array(
 					'name'	   => $this->language->get('text_seo_tags'),
-					'href'     => $this->url->link('seo/tags/getList', 'user_token=' . $this->session->data['user_token'], true),
+					'href'     => $this->url->link('seo/tag/getList', 'user_token=' . $this->session->data['user_token'], true),
 					'children' => array()
 				);
 			}
