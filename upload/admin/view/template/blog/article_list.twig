@@ -36,8 +36,8 @@
                     <tr>
                       <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
                       <td style="width: 70px" class="text-center">{{ column_image }}</td>
-                      <td style="width: 200px;" class="text-left"><a href="{{ sort_name }}" {% if sort == 'name' %}class="{{ order|lower }}"{% endif %}>{{ column_name }}</a></td>
-                      <td class="text-left"><a href="{{ sort_tags }}" {% if sort == 'tags' %}class="{{ order|lower }}"{% endif %}>{{ column_tags }}</a></td>
+                      <td style="width: 300px;" class="text-left"><a href="{{ sort_name }}" {% if sort == 'name' %}class="{{ order|lower }}"{% endif %}>{{ column_name }}</a></td>
+                      <td style="width: 300px;" class="text-left"><a href="{{ sort_tags }}" {% if sort == 'tags' %}class="{{ order|lower }}"{% endif %}>{{ entry_parent_tag }}</a></td>
                       <td>{{ column_seo }}</td>
                       <td class="text-center" style="width: 60px"><a href="{{ sort_date_modified }}" {% if sort == 'date_modified' %}class="{{ order|lower }}"{% endif %}>{{ column_date_modified }}</a></td>
                       <td style="width: 60px"></td>
@@ -56,7 +56,6 @@
                                 <span class="badge badge-sm {% if tag.is_main == 1 %}strong alert-success{% endif %}">
                                   {{ tag.name }}
                                 </span>
-                                {% if tag.is_main == 1 %}<br>{% endif %}
                               {% endfor %}
                             </div>
                           </td>

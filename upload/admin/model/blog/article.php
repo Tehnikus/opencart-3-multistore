@@ -276,7 +276,22 @@ class ModelBlogArticle extends Model {
             'hasFaq',               CHAR_LENGTH(COALESCE(ad.`faq`, '')) > 2,
             'hasHowTo',             CHAR_LENGTH(COALESCE(ad.`how_to`, '')) > 2
           )
-        ) AS seo
+        ) AS seo,
+        (
+          SELECT JSON_ARRAYAGG(
+            JSON_OBJECT(
+              'name',         bt.`name`,
+              'blog_tag_id',  `at`.`blog_tag_id`,
+              'is_main',      `at`.is_main
+            )
+          )
+          FROM " . DB_PREFIX . "article_tag `at`
+          JOIN " . DB_PREFIX . "blog_tag_description bt
+            ON bt.`blog_tag_id` = `at`.`blog_tag_id`
+            AND bt.`store_id` = a2s.`store_id`
+            AND bt.`language_id` = ad.`language_id`
+          WHERE `at`.`article_id` = ad.`article_id`
+        ) as tags
       FROM " . DB_PREFIX . "article_description ad
       JOIN " . DB_PREFIX . "article_to_store a2s
         ON a2s.`article_id` = ad.`article_id`
@@ -287,7 +302,9 @@ class ModelBlogArticle extends Model {
     ";
 
     foreach($this->db->query($sql)->rows ?? [] as $row) {
-      $row['seo'] = json_decode($row['seo'], true);
+      $row['seo'] = json_decode($row['seo'] ?? '[]', true);
+      $row['tags'] = json_decode($row['tags'] ?? '[]', true);
+      usort($row['tags'], fn($a, $b) => $b['is_main'] <=> $a['is_main']);
       $row['seo']['seoKeywords'] = count(array_filter(explode(',', $row['seo']['seoKeywords'])));
       $row['image'] = $row['image'] ? (HTTPS_CATALOG . 'image/' . $row['image']) : (HTTPS_CATALOG . 'image/no_image.webp');
 
