@@ -7594,10 +7594,10 @@ CREATE TABLE `oc_article_product` (
 DROP TABLE IF EXISTS `oc_article_tag`;
 CREATE TABLE `oc_article_tag` (
   `article_id`          INT NOT NULL,
-  `language_id`         INT NOT NULL,
+  `is_main`             TINYINT NOT NULL,
   `store_id`            INT NOT NULL,
-  `tag_id`              INT NOT NULL,
-  PRIMARY KEY (`article_id`, `language_id`, `store_id`, `tag_id`)
+  `blog_tag_id`         INT NOT NULL,
+  PRIMARY KEY (`article_id`, `is_main`, `store_id`, `blog_tag_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `oc_blog_tag_to_store`;
