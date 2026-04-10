@@ -18,11 +18,18 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 			// Show success message
 			$this->session->data['success'] = $this->language->get('text_success');
 			// Redirect to extensions list
-			// $this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true));
+			$this->response->redirect($this->url->link('extension/module/facet_filter', 'user_token=' . $this->session->data['user_token'] . '&type=module', true));
 		}
 
 		// Errors
 		$data['error_warning'] = $this->error['warning'] ?? '';
+
+		// Messages
+		if (isset($this->session->data['success'])) {
+			$data['success_message'] = $this->session->data['success'];
+			unset($this->session->data['success']);
+		}
+
 		// Get settings by store id
 		$settings = $this->model_setting_setting->getSetting('module_facet_filter', (int) $this->session->data['store_id']);
 
