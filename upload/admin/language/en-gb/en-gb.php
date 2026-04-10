@@ -256,7 +256,7 @@ $_['e_request_not_unique']          = 'A page with this request already exists. 
 
 // Left column menu
 $_['text_seo']                      = 'SEO';
-$_['text_seo_pages']                = 'SEO pages';
+$_['text_seo_pages']                = 'Landing pages';
 $_['text_meta_editor']              = 'Meta editor';
 $_['text_seo_tags']                 = 'Tags';
 $_['text_seo_keywords']             = 'Keywords';
