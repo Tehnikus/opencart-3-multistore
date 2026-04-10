@@ -17,13 +17,100 @@
     {% endif %}
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_form }}</h3>
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_seo_tag_form }}</h3>
       </div>
       <div class="panel-body">
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-tag" class="form-horizontal">
           <div class="tab-content">
+            
+            {# Name #}
+            <div class="form-group">
+              <label class="col-sm-2 control-label" for="input-name_{{ language.language_id }}">{{ entry_name }}</label>
+              <div class="col-sm-10">
+                {% for language in languages %}                
+                  <div class="input-group flex">
+                    <span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
+                    {% include "common/button_translate.twig" with {sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][name]' } %}
+                    <input 
+                      type="text" 
+                      name="seo_tag_description[{{ language.language_id }}][name]" 
+                      value="{{ description[language.language_id].name }}" 
+                      placeholder="{{ entry_name }}" 
+                      id="input-name_{{ language.language_id }}" 
+                      class="form-control" 
+                    />
+                    <input 
+                      type="text" 
+                      name="seo_tag_description[{{ language.language_id }}][url]" 
+                      value="{{ description[language.language_id].url }}" 
+                      placeholder="{{ entry_url }}" 
+                      id="input-url_{{ language.language_id }}" 
+                      class="form-control" 
+                    />
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
 
-          </div>
+            {# Inline style #}
+            <div class="form-group">
+              <label class="col-sm-2 control-label" for="input-inline_style">{{ entry_inline_style }}</label>
+              <div class="col-sm-10">
+                <div class="input-group flex">
+                  <input 
+                    type="text" 
+                    name="inline_style" 
+                    value="{{ inline_style }}" 
+                    placeholder="{{ entry_inline_style }}" 
+                    id="input-inline_style" 
+                    class="form-control" 
+                  />
+                </div>
+                <br>
+                <div class="alert alert-info">
+                  {{ text_inline_style }}
+                </div>
+              </div>
+            </div>
+
+            {# Inline icon #}
+            <div class="form-group">
+              <label class="col-sm-2 control-label" for="input-inline_icon">{{ entry_inline_icon }}</label>
+              <div class="col-sm-10">
+                <div class="input-group flex">
+                  <input 
+                    type="text" 
+                    name="inline_icon" 
+                    value="{{ inline_icon }}" 
+                    placeholder="{{ entry_inline_icon }}" 
+                    id="input-inline_icon" 
+                    class="form-control" 
+                  />
+                </div>
+                <br>
+                <div class="alert alert-info">
+                  {{ text_inline_icon }}
+                </div>
+              </div>
+            </div>
+
+            {# Show as flag checkbox #}
+            <div class="form-group">
+              <label class="col-sm-2 control-label">{{ entry_show_as_flag }}</label>
+              <div class="col-sm-10">
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" name="show_as_flag" value="1" {% if tag.show_as_flag %}checked{% endif %} />
+                      {{ entry_yes }}
+                    </label>
+                  </div>
+                  <br>
+                  <div class="alert alert-info">
+                    {{ text_show_as_flag }}
+                  </div>
+                </div>
+              </div>
+            </div>          
         </form>
       </div>
     </div>
