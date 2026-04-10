@@ -7649,3 +7649,34 @@ CREATE TABLE `oc_blog_tag_image_description` (
   `description`         TEXT NOT NULL,
   PRIMARY KEY (`image_id`, `language_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+DROP TABLE IF EXISTS `oc_product_seo_tag`;
+CREATE TABLE `oc_product_tag` (
+  `product_id`          INT NOT NULL,
+  `language_id`         INT NOT NULL,
+  `store_id`            INT NOT NULL,
+  `tag_id`              INT NOT NULL,
+  PRIMARY KEY (`product_id`, `language_id`, `store_id`, `tag_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `oc_seo_tag_to_store`;
+CREATE TABLE `oc_seo_tag_to_store` (
+  `seo_tag_id`         INT NOT NULL AUTO_INCREMENT,
+  `store_id`            INT NOT NULL,
+  `date_added`          DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  `date_modified`       DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  PRIMARY KEY (`seo_tag_id`, `store_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `oc_seo_tag_description`;
+CREATE TABLE `oc_seo_tag_description` (
+  `seo_tag_id`         INT NOT NULL,
+  `language_id`         INT NOT NULL,
+  `store_id`            INT NOT NULL,
+  `name`                VARCHAR(255) NOT NULL,
+  `date_modified`       DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  PRIMARY KEY (`seo_tag_id`, `language_id`, `store_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
