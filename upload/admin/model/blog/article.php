@@ -373,6 +373,25 @@ class ModelBlogArticle extends Model {
     return $result ?? [];
   }
 
+  public function getArticleTags($article_id) : array {
+    $result = [];
+
+    $query = $this->db->query("
+      SELECT
+        `tag_id`,
+        `is_main`
+      FROM " . DB_PREFIX . "article_tag
+      WHERE `article_id` = '" . (int) $article_id . "'
+        AND `store_id`   = '" . (int) $this->session->data['store_id'] . "'
+    ");
+
+    foreach ($query->rows ?? [] as $row) {
+      $result[] = $row;
+    }
+
+    return $result;
+  }
+
   public function getArticleTotal() : int {
     $storeId = (int) $this->session->data['store_id'];
     $query = $this->db->query("
