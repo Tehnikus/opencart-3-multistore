@@ -7653,7 +7653,7 @@ CREATE TABLE `oc_blog_tag_image_description` (
 
 
 DROP TABLE IF EXISTS `oc_product_seo_tag`;
-CREATE TABLE `oc_product_tag` (
+CREATE TABLE `oc_product_seo_tag` (
   `product_id`          INT NOT NULL,
   `language_id`         INT NOT NULL,
   `store_id`            INT NOT NULL,
@@ -7663,16 +7663,19 @@ CREATE TABLE `oc_product_tag` (
 
 DROP TABLE IF EXISTS `oc_seo_tag_to_store`;
 CREATE TABLE `oc_seo_tag_to_store` (
-  `seo_tag_id`         INT NOT NULL AUTO_INCREMENT,
+  `seo_tag_id`          INT NOT NULL AUTO_INCREMENT,
   `store_id`            INT NOT NULL,
+  `inline_style`        TINYTEXT,
+  `inline_icon`         TINYTEXT,
+  `show_as_flag`        TINYINT NOT NULL DEFAULT '0',
   `date_added`          DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   `date_modified`       DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-  PRIMARY KEY (`seo_tag_id`, `store_id`)
+  PRIMARY KEY (`seo_tag_id`, `store_id`, `show_as_flag`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `oc_seo_tag_description`;
 CREATE TABLE `oc_seo_tag_description` (
-  `seo_tag_id`         INT NOT NULL,
+  `seo_tag_id`          INT NOT NULL,
   `language_id`         INT NOT NULL,
   `store_id`            INT NOT NULL,
   `name`                VARCHAR(255) NOT NULL,
