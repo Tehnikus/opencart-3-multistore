@@ -7651,14 +7651,12 @@ CREATE TABLE `oc_blog_tag_image_description` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
-
 DROP TABLE IF EXISTS `oc_product_seo_tag`;
 CREATE TABLE `oc_product_seo_tag` (
   `product_id`          INT NOT NULL,
-  `language_id`         INT NOT NULL,
   `store_id`            INT NOT NULL,
-  `tag_id`              INT NOT NULL,
-  PRIMARY KEY (`product_id`, `language_id`, `store_id`, `tag_id`)
+  `seo_tag_id`          INT NOT NULL,
+  PRIMARY KEY (`product_id`, `store_id`, `seo_tag_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `oc_seo_tag_to_store`;
