@@ -250,7 +250,7 @@ class ControllerSeoTag extends Controller {
         $currentUrl = trim(mb_strtolower($currentUrl));
         if (!$currentUrl) continue;
 
-        $pageRequest = (isset($this->request->get['seo_tag_id'])) ? 'seo_tag_id=' . ((int) $this->request->get['seo_tag_id']) : '';
+        $pageRequest = (isset($this->request->get['seo_tag_id'])) ? 'tag_id=' . ((int) $this->request->get['seo_tag_id']) : '';
 
         $isUrlExists = $this->model_design_seo_url->checkUrlDuplicate($currentUrl, $langId, $storeId);
         $isRequestExists = $this->model_design_seo_url->checkRequestDuplicate($pageRequest, $langId, $storeId);
