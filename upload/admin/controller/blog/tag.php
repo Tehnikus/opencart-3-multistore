@@ -44,6 +44,11 @@ class ControllerBlogTag extends Controller {
       'sort'          => $this->request->get['sort'] ?? 'date_added',
       'sort_name'     => $this->url->link('blog/tag', 'user_token=' . $user_token . $this->getSortOrder('name') . $url, true),
     ];
+
+    if (isset($this->session->data['success'])) {
+      $data['text_success'] = $this->session->data['success'];
+      unset($this->session->data['success']);
+    }
     
     $this->response->setOutput($this->load->view('blog/tag_list', $data));
   }
@@ -96,7 +101,7 @@ class ControllerBlogTag extends Controller {
     
     if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
       $this->model_blog_tag->addTag($this->request->post);
-      $this->session->data['success'] = $this->language->get('text_success');
+      $this->session->data['success'] = $this->language->get('text_success_saved');
       $url = '&' . http_build_query(array_intersect_key($this->request->get, array_flip(['sort', 'order', 'page'])));
       $this->response->redirect($this->url->link('blog/tag', 'user_token=' . $this->session->data['user_token'] . $url, true));
     }
@@ -111,7 +116,7 @@ class ControllerBlogTag extends Controller {
     
     if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
       $this->model_blog_tag->editTag($this->request->get['blog_tag_id'], $this->request->post);
-      $this->session->data['success'] = $this->language->get('text_success');
+      $this->session->data['success'] = $this->language->get('text_success_saved');
       $url = '&' . http_build_query(array_intersect_key($this->request->get, array_flip(['sort', 'order', 'page'])));
       $this->response->redirect($this->url->link('blog/tag', 'user_token=' . $this->session->data['user_token'] . $url, true));
     }
