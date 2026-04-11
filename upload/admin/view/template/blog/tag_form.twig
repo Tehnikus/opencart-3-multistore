@@ -33,6 +33,15 @@
             <li><a href="#tab-footer"       data-toggle="tab">{{ tab_footer }}</a></li>
           </ul>
           <div class="tab-content">
+            <div class="form-group">
+              <label class="col-sm-2 control-label" for="parent_tag">{{ entry_status }}</label>
+              <div class="col-sm-10">
+                <select name="blog_tag[status]" class="form-control">
+                  <option value="1" {% if blog_tag.status == 1 %}selected{% endif %} >{{ option_on }}</option>
+                  <option value="0" {% if blog_tag.status == 0 %}selected{% endif %} >{{ option_off }}</option>
+                </select>
+              </div>
+            </div>          
             {% set data        =  blog_tag_description  %}
             {% set name_prefix = 'blog_tag_description' %}
             <div class="tab-pane active" id="tab-description">{% include "common/tab_description.twig" %}</div>
