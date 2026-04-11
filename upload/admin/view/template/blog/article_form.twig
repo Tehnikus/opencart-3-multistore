@@ -76,8 +76,11 @@
                   />
 
                   {# Error if parent tag is not selected #}
-                  {% if error_select_parent %}
-                    <div class="text-danger">{{ error_select_parent }}</div>
+                  {% if error_select_tag %}
+                    <div class="text-danger">{{ error_select_tag }}</div>
+                  {% endif %}
+                  {% if error_select_main_tag %}
+                    <div class="text-danger">{{ error_select_main_tag }}</div>
                   {% endif %}
                   
                 </div>
