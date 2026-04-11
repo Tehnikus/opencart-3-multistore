@@ -170,6 +170,7 @@ class ModelSeoTag extends Model {
     ];
 
     $this->db->query("START TRANSACTION");
+
     try {
       foreach ($tables as $table) {
         $this->db->query("
@@ -178,6 +179,14 @@ class ModelSeoTag extends Model {
             AND store_id   = '" . (int) $this->session->data['store_id'] . "'
         ");
       }
+
+      // Delete SEO URL
+      $this->db->query("
+        DELETE FROM " . DB_PREFIX . "seo_url su
+        WHERE su.`query`    = 'tag_id=" . (int) $seo_tag_id . "'
+          AND su.`store_id` = '" . (int) $this->session->data['store_id'] . "'
+      ");
+
       $this->db->query("COMMIT");
       return true;
 
