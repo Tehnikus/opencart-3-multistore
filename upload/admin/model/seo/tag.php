@@ -16,9 +16,12 @@ class ModelSeoTag extends Model {
       $this->db->query("
         INSERT INTO " . DB_PREFIX . "seo_tag_to_store 
         SET
-          `store_id` 			 = '" . (int) $this->session->data['store_id'] . "', 
-          `date_added`     = NOW(),
-          `date_modified`  = NOW()
+          `store_id` 			= '" . (int) $this->session->data['store_id'] . "', 
+          `inline_style`  = '" . $this->db->escape($data['inline_style']) . "',
+          `inline_icon`   = '" . $this->db->escape($data['inline_icon']) . "',
+          `show_as_flag`  = '" . ((isset($data['show_as_flag'])) ? '1' : '0') . "',
+          `date_added`    = NOW(),
+          `date_modified` = NOW()
         ");
 
       $seo_tag_id = $this->db->getLastId();
@@ -28,10 +31,10 @@ class ModelSeoTag extends Model {
         $this->db->query("
           INSERT INTO " . DB_PREFIX . "seo_tag_description 
           SET 
-            `seo_tag_id` 		  = '" . (int) $seo_tag_id . "', 
-            `language_id` 			= '" . (int) $language_id . "', 
-            `store_id` 					= '" . (int) $this->session->data['store_id'] . "',
-            `name` 							= '" . $this->db->escape($value['name']) . "' 
+            `seo_tag_id` 	= '" . (int) $seo_tag_id . "', 
+            `language_id` = '" . (int) $language_id . "', 
+            `store_id` 		= '" . (int) $this->session->data['store_id'] . "',
+            `name` 				= '" . $this->db->escape($value['name']) . "' 
         ");
       }
 
@@ -40,7 +43,7 @@ class ModelSeoTag extends Model {
         // Mostly safety delete, should never happen
         $this->db->query("
           DELETE FROM " . DB_PREFIX . "seo_url 
-          WHERE `query`       = 'seo_tag_id=" . $seo_tag_id . "'
+          WHERE `query`       = 'tag_id=" . $seo_tag_id . "'
             AND `language_id` = '" . (int) $language_id . "'
             AND `store_id`    = '" . (int) $this->session->data['store_id'] . "'
         ");
@@ -51,7 +54,7 @@ class ModelSeoTag extends Model {
             SET 
               `store_id`    = '" . (int) $this->session->data['store_id'] . "',
               `language_id` = '" . (int) $language_id . "', 
-              `query`       = 'seo_tag_id=" . $seo_tag_id . "', 
+              `query`       = 'tag_id=" . $seo_tag_id . "', 
               `keyword`     = '" . $this->db->escape($keyword) . "'
           ");
         }
@@ -76,14 +79,19 @@ class ModelSeoTag extends Model {
       $this->db->query("
         UPDATE " . DB_PREFIX . "seo_tag_to_store 
         SET
-          `date_modified`  = NOW()
-        WHERE seo_tag_id = " . (int) $seo_tag_id . "
+          `inline_style`  = '" . $this->db->escape($data['inline_style']) . "',
+          `inline_icon`   = '" . $this->db->escape($data['inline_icon']) . "',
+          `show_as_flag`  = '" . ((isset($data['show_as_flag'])) ? '1' : '0') . "',
+          `date_modified` = NOW()
+        WHERE `seo_tag_id` = " . (int) $seo_tag_id . "
+          AND `store_id` 	 = '" . (int) $this->session->data['store_id'] . "'
       ");
 
       // Update descriptions
       $this->db->query("
         DELETE FROM " . DB_PREFIX . "seo_tag_description
-        WHERE `seo_tag_id` = " . (int) $seo_tag_id . "
+        WHERE `seo_tag_id`  = " . (int) $seo_tag_id . "
+          AND `store_id`    = '" . (int) $this->session->data['store_id'] . "'
       ");
 
       foreach ($data['seo_tag_description'] as $language_id => $value) {
