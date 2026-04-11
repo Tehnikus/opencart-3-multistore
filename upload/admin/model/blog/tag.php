@@ -395,11 +395,36 @@ class ModelBlogTag extends Model {
     return (int) ($query->row['pages_count'] ?? 0);
   }
 
+    // Set tag status
+	public function setTagStatus($blog_tag_id, $status) : int {
+		$this->db->query("
+			UPDATE " . DB_PREFIX . "blog_tag_to_store
+      SET 
+        `status` = '" . (int) $status . "',
+        `date_modified` = NOW()
+			WHERE `blog_tag_id`    = '" . (int) $blog_tag_id . "'
+				AND `store_id`  = '" . (int) $this->session->data['store_id'] . "'
+		");
+
+		$query = $this->db->query("
+			SELECT 
+        b2s.`status` 
+			FROM " . DB_PREFIX . "blog_tag_to_store b2s
+			WHERE b2s.blog_tag_id 	= '" . (int) $blog_tag_id . "'
+				AND b2s.store_id 		= '" . (int) $this->session->data['store_id'] . "'
+			LIMIT 1
+		")->row;
+
+		$newStatus = $query['status'];
+		
+		return (int) $newStatus;
+	}
+
   
   /**
-   * Filter array recursively and remove empty key => value pairs
-   * @param array $array The array to be affected
-   * @param array $deletedKeys The array of keys that will be treated as empty if all other keys are empty on this level 
+   * Filter array recursively and remove empty key => value pairs.
+   * @param array $array The array to be affected.
+   * @param array $deletedKeys The array of keys that will be treated as empty if all other keys are empty on this level .
    * @return array
    */
   public function filterArrayRecursively(array $array = [], array $deletedKeys = []): array {
