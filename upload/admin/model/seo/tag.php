@@ -235,7 +235,7 @@ class ModelSeoTag extends Model {
     return $result;
   }
 
-  public function getSeoUrl($seo_tag_id = null) : array {
+  public function getSeoUrl($seo_tag_id) : array {
     $result   = [];
     $store_id = (int) $this->session->data['store_id'];
 
@@ -258,27 +258,35 @@ class ModelSeoTag extends Model {
     return $result;
   }
 
-  public function getTagData($pageId) : array {
+  public function getTagData($seo_tag_id) : array {
+
+    if ($seo_tag_id === null) {
+      return [];
+    }
 
     $query = $this->db->query("
       SELECT
         *
       FROM " . DB_PREFIX . "seo_tag_to_store
-      WHERE `seo_tag_id` = " . (int) $pageId . "
+      WHERE `seo_tag_id` = " . (int) $seo_tag_id . "
         AND `store_id`   = " . (int) $this->session->data['store_id'] . "
     ");
     
     return $query->row ?? [];
   }
 
-  public function getTagDescription($pageId) : array {
+  public function getTagDescription($seo_tag_id) : array {
+    
+    if ($seo_tag_id === null) {
+      return [];
+    }
 
     $query = $this->db->query("
       SELECT
         *
       FROM " . DB_PREFIX . "seo_tag_description
-        WHERE `seo_tag_id`  = " . (int) $pageId . "
-        AND `store_id`      = " . (int) $this->session->data['store_id'] . "
+      WHERE `seo_tag_id`  = " . (int) $seo_tag_id . "
+        AND `store_id`    = " . (int) $this->session->data['store_id'] . "
     ");
     
     foreach($query->rows ?? [] as $row) {
@@ -287,6 +295,7 @@ class ModelSeoTag extends Model {
 
     return $result ?? [];
   }
+
   public function getProductTags($seo_tag_id) : array {
     
     if ($seo_tag_id === null) {
