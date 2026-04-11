@@ -30,6 +30,7 @@
                 {% for language in languages %}                
                   <div class="input-group flex">
                     <span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
+                    {% include "common/button_create_seo_url.twig" with {seo_url_input: 'seo_tag_description[' ~ language.language_id ~ '][url]' } %}
                     {% include "common/button_translate.twig" with {sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][name]' } %}
                     <input 
                       type="text" 
