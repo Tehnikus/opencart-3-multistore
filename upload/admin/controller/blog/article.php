@@ -128,7 +128,7 @@ class ControllerBlogArticle extends Controller {
     
     if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
       $this->model_blog_article->addArticle($this->request->post);
-      $this->session->data['success'] = $this->language->get('text_success');
+      $this->session->data['success'] = $this->language->get('text_success_saved');
       $url = '&' . http_build_query(array_intersect_key($this->request->get, array_flip(['sort', 'order', 'page'])));
       $this->response->redirect($this->url->link('blog/article', 'user_token=' . $this->session->data['user_token'] . $url, true));
     }
@@ -143,7 +143,7 @@ class ControllerBlogArticle extends Controller {
     
     if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
       $this->model_blog_article->editArticle($this->request->get['article_id'], $this->request->post);
-      $this->session->data['success'] = $this->language->get('text_success');
+      $this->session->data['success'] = $this->language->get('text_success_saved');
       $url = '&' . http_build_query(array_intersect_key($this->request->get, array_flip(['sort', 'order', 'page'])));
       $this->response->redirect($this->url->link('blog/article', 'user_token=' . $this->session->data['user_token'] . $url, true));
     }
