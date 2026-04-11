@@ -43,7 +43,7 @@
                     <input 
                       type="text" 
                       name="seo_tag_description[{{ language.language_id }}][url]" 
-                      value="{{ description[language.language_id].url }}" 
+                      value="{{ url[language.language_id].url }}" 
                       placeholder="{{ entry_url }}" 
                       id="input-url_{{ language.language_id }}" 
                       class="form-control" 
@@ -61,7 +61,7 @@
                   <input 
                     type="text" 
                     name="inline_style" 
-                    value="{{ inline_style }}" 
+                    value="{{ tag.inline_style }}" 
                     placeholder="{{ entry_inline_style }}" 
                     id="input-inline_style" 
                     class="form-control" 
@@ -82,7 +82,7 @@
                   <input 
                     type="text" 
                     name="inline_icon" 
-                    value="{{ inline_icon }}" 
+                    value="{{ tag.inline_icon }}" 
                     placeholder="{{ entry_inline_icon }}" 
                     id="input-inline_icon" 
                     class="form-control" 
