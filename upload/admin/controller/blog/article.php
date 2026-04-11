@@ -286,4 +286,21 @@ class ControllerBlogArticle extends Controller {
     }
     return !$this->error;
   }
+
+  public function fetchSetArticleStatus() : void {
+		$articleId 			= (int) $this->request->post['article_id'];
+		$currentStatus 	= (int) $this->request->post['status'];
+		$newStatus 			= 0;
+
+		if ($currentStatus === 0) {
+			$newStatus = 1;
+		}
+
+		$this->load->model('blog/article');
+		$newStatus = $this->model_catalog_article->setArticleStatus($articleId, $newStatus);
+		$json = ['articleId' => $articleId, 'newStatus' => $newStatus];
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
 }
