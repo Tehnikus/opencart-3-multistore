@@ -7665,8 +7665,8 @@ DROP TABLE IF EXISTS `oc_seo_tag_to_store`;
 CREATE TABLE `oc_seo_tag_to_store` (
   `seo_tag_id`          INT NOT NULL AUTO_INCREMENT,
   `store_id`            INT NOT NULL,
-  `inline_style`        TINYTEXT,
-  `inline_icon`         TINYTEXT,
+  `inline_style`        TEXT,
+  `inline_icon`         TEXT,
   `show_as_flag`        TINYINT NOT NULL DEFAULT '0',
   `date_added`          DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   `date_modified`       DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
