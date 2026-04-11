@@ -206,26 +206,33 @@ class ModelSeoTag extends Model {
     return $result;
   }
 
-  public function getTagDescription($pageId) : array {
-    $pageId = (int) $pageId;
-    $storeId = (int) $this->session->data['store_id'];
-    $sql = "
+  public function getTagData($pageId) : array {
+
+    $query = $this->db->query("
       SELECT
         *
-      FROM " . DB_PREFIX . "seo_tag_description bd
-      JOIN " . DB_PREFIX . "seo_tag_to_store b2s
-        ON b2s.`seo_tag_id` = bd.`seo_tag_id`
-        AND b2s.store_id = {$storeId}
-      WHERE bd.`seo_tag_id` = {$pageId}
-    ";
+      FROM " . DB_PREFIX . "seo_tag_to_store
+      WHERE `seo_tag_id` = " . (int) $pageId . "
+        AND `store_id`   = " . (int) $this->session->data['store_id'] . "
+    ");
     
-    foreach($this->db->query($sql)->rows ?? [] as $row) {
-      $row['footer'] = json_decode($row['footer'] ?? '[]', true);
-      $row['faq']    = json_decode($row['faq'] ?? '[]', true);
-      $row['how_to'] = json_decode($row['how_to'] ?? '[]', true);
+    return $query->row ?? [];
+  }
+
+  public function getTagDescription($pageId) : array {
+
+    $query = $this->db->query("
+      SELECT
+        *
+      FROM " . DB_PREFIX . "seo_tag_description
+        WHERE `seo_tag_id`  = " . (int) $pageId . "
+        AND `store_id`      = " . (int) $this->session->data['store_id'] . "
+    ");
+    
+    foreach($query->rows ?? [] as $row) {
       $result[$row['language_id']] = $row;
     }
-    
+        
     return $result ?? [];
   }
 
