@@ -178,9 +178,9 @@ class ModelSeoTag extends Model {
             AND store_id   = '" . (int) $this->session->data['store_id'] . "'
         ");
       }
-
+      $this->db->query("COMMIT");
       return true;
-      
+
     } catch (\Throwable $e) {
       $this->db->query("ROLLBACK");
       throw $e;
