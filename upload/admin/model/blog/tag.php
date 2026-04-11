@@ -273,6 +273,7 @@ class ModelBlogTag extends Model {
         bd.`blog_tag_id`,
         bd.`name`,
         b2s.`date_modified`,
+        b2s.`status`,
         (SELECT bi.`image` FROM " . DB_PREFIX . "blog_tag_image bi WHERE bi.`blog_tag_id` = b2s.`blog_tag_id` AND bi.`store_id` = b2s.`store_id` ORDER BY bi.`sort_order` LIMIT 1) AS `image`,
         (
           SELECT JSON_OBJECT(
