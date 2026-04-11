@@ -216,7 +216,8 @@ class ModelSeoTag extends Model {
       SELECT
         t2s.*,
         td.`seo_tag_id`,
-        td.`name`
+        td.`name`,
+        (SELECT COUNT(*) FROM " . DB_PREFIX . "product_seo_tag pt WHERE pt.`seo_tag_id` = t2s.`seo_tag_id` AND pt.`store_id` = t2s.`store_id`) AS product_count
       FROM " . DB_PREFIX . "seo_tag_description td
       JOIN " . DB_PREFIX . "seo_tag_to_store t2s
         ON t2s.`seo_tag_id` = td.`seo_tag_id`
