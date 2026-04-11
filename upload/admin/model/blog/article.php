@@ -181,6 +181,46 @@ class ModelBlogArticle extends Model {
     }
   }
 
+  public function deleteArticle($pageId) : bool {
+    $tables = [
+      'article_to_store',
+      'article_description',
+      'article_image',
+      'article_image_description',
+      'article_stats',
+      'article_product',
+      'article_tag',
+    ];
+
+    $this->db->query("START TRANSACTION");
+
+    try {
+      foreach ($tables as $table) {
+
+        $this->db->query("
+          DELETE FROM " . DB_PREFIX . $table . "
+          WHERE article_id = '" . (int) $pageId . "'
+            AND store_id   = '" . (int) $this->session->data['store_id'] . "'
+        ");
+      }
+
+      // Delete SEO URL
+      $this->db->query("
+        DELETE FROM " . DB_PREFIX . "seo_url su
+        WHERE su.`query`    = 'article_id=" . (int) $pageId . "'
+          AND su.`store_id` = '" . (int) $this->session->data['store_id'] . "'
+      ");
+
+      $this->db->query("COMMIT");
+      
+      return true;
+
+    } catch (\Throwable $e) {
+      $this->db->query("ROLLBACK");
+      throw $e;
+    }
+  }
+
   public function editImages($page_id, $image_data = []) : int {
 
     $page_id = (int) $page_id;
