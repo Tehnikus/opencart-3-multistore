@@ -89,9 +89,9 @@ class ModelSeoTag extends Model {
       $this->db->query("
         UPDATE " . DB_PREFIX . "seo_tag_to_store 
         SET
-          `inline_style`  = '" . $this->db->escape($data['inline_style']) . "',
-          `inline_icon`   = '" . $this->db->escape($data['inline_icon']) . "',
-          `show_as_flag`  = '" . ((isset($data['show_as_flag'])) ? '1' : '0') . "',
+          `inline_style`  = '" . $this->db->escape($data['tag']['inline_style'] ?? '') . "',
+          `inline_icon`   = '" . $this->db->escape($data['tag']['inline_icon'] ?? '') . "',
+          `show_as_flag`  = '" . ((isset($data['tag']['show_as_flag'])) ? '1' : '0') . "',
           `date_modified` = NOW()
         WHERE `seo_tag_id` = " . (int) $seo_tag_id . "
           AND `store_id` 	 = '" . (int) $this->session->data['store_id'] . "'

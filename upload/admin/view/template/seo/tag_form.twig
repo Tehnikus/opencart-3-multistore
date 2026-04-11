@@ -35,7 +35,7 @@
                     <input 
                       type="text" 
                       name="seo_tag_description[{{ language.language_id }}][name]" 
-                      value="{{ description[language.language_id].name }}" 
+                      value="{{ seo_tag_description[language.language_id].name }}" 
                       placeholder="{{ entry_name }}" 
                       id="input-name_{{ language.language_id }}" 
                       class="form-control" 
@@ -43,7 +43,7 @@
                     <input 
                       type="text" 
                       name="seo_url[{{ language.language_id }}]" 
-                      value="{{ url[language.language_id] }}" 
+                      value="{{ seo_url[language.language_id] }}" 
                       placeholder="{{ entry_url }}" 
                       id="input-url_{{ language.language_id }}" 
                       class="form-control" 
@@ -75,7 +75,7 @@
                 <div class="input-group flex">
                   <input 
                     type="text" 
-                    name="inline_style" 
+                    name="tag[inline_style]" 
                     value="{{ tag.inline_style }}" 
                     placeholder="{{ entry_inline_style }}" 
                     id="input-inline_style" 
@@ -102,7 +102,7 @@
                 <div class="input-group flex">
                   <input 
                     type="text" 
-                    name="inline_icon" 
+                    name="tag[inline_icon]" 
                     value="{{ tag.inline_icon }}" 
                     placeholder="{{ entry_inline_icon }}" 
                     id="input-inline_icon" 
@@ -128,7 +128,7 @@
               <div class="col-sm-10">
                   <div class="checkbox">
                     <label>
-                      <input type="checkbox" name="show_as_flag" value="1" {% if tag.show_as_flag %}checked{% endif %} />
+                      <input type="checkbox" name="tag[show_as_flag]" value="1" {% if tag.show_as_flag %}checked{% endif %} />
                       {{ entry_yes }}
                     </label>
                   </div>

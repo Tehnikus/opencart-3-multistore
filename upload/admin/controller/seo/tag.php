@@ -88,31 +88,40 @@ class ControllerSeoTag extends Controller {
     $formData       = [];
     $seo_tag_id = $this->request->get['seo_tag_id'] ?? null;
     $this->load->model('seo/tag');
-    $formData['tag']          = $this->model_seo_tag->getTagData($seo_tag_id);
-    $formData['description']  = $this->model_seo_tag->getTagDescription($seo_tag_id);
-    $formData['url']          = $this->model_seo_tag->getSeoUrl($seo_tag_id);
+    $formData['tag'] = $this->model_seo_tag->getTagData($seo_tag_id);
+    $formData['seo_tag_description']  = $this->model_seo_tag->getTagDescription($seo_tag_id);
+    $formData['seo_url'] = $this->model_seo_tag->getSeoUrl($seo_tag_id);
     $formData['product_tags'] = $this->model_seo_tag->getProductTags($seo_tag_id);
-    $formData['icons']        = $this->model_seo_tag->getUsedIcons();
-    $formData['styles']       = $this->model_seo_tag->getUsedStyles();
     
     // Replace actual data with POST data
     if ($this->request->server['REQUEST_METHOD'] == 'POST') {
       $formData = $this->request->post;
     }
 
-    // Get inline icons
-    foreach ($formData['icons'] as $key => $icon) {
-      $formData['icons'][$key] = html_entity_decode($icon['inline_icon'] ?? '');
+    if (isset($this->request->post['product_tags'])) {
+      $formData['product_tags'] = [];
+      foreach ($this->request->post['product_tags'] as $product_id) {
+        $formData['product_tags'][] = [
+          'product_id' => $product_id
+        ];
+      }
     }
 
-    // Get inline styles
+    // Get inline icons. This array is not related to POST so it should be added regardless of POST data
+    $formData['icons'] = $this->model_seo_tag->getUsedIcons();
+    foreach ($formData['icons'] as $key => $icon) {
+      $formData['icons'][$key] = html_entity_decode($icon['inline_icon']);
+    }
+
+    // Get inline styles. This array is not related to POST so it should be added regardless of POST data
+    $formData['styles'] = $this->model_seo_tag->getUsedStyles();
     foreach ($formData['styles'] as $key => $style) {
-      $formData['styles'][$key] = html_entity_decode($style['inline_style'] ?? '');
+      $formData['styles'][$key] = html_entity_decode($style['inline_style']);
     }
 
     // Get product names
     $this->load->model('catalog/product');
-    foreach ($formData['product_tags'] as $key => $product) {
+    foreach ($formData['product_tags'] ?? [] as $key => $product) {
       $product = $this->model_catalog_product->getProduct($product['product_id']);
       $formData['product_tags'][$key]['name'] = $product['name'];
     }
