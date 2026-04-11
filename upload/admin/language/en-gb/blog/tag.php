@@ -17,7 +17,7 @@ $_['e_permission']              = 'You are not permitted to edit blog tags';
 $_['e_warning']                 = 'Error while saving blog tag';
 
 // Messages
-$_['text_success']              = 'Blog tag saved';
+$_['text_success_saved']        = 'Blog tag saved';
 $_['text_success_deleted']      = 'Blog tag deleted';
 
 // Buttons
