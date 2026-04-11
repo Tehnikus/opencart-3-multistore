@@ -117,4 +117,26 @@
     </div>
   </div>
 </div>
+{# Change order status btn #}
+<script>
+document.addEventListener('click', async e => {
+  if (e.target.closest('.statusBtn')) {
+    const userToken = "{{ user_token }}";
+    const statusBtn = e.target.closest('.statusBtn');
+    const articleId = statusBtn.dataset.articleId
+    const articleStatus = statusBtn.dataset.articleStatus
+    const body = new FormData();
+    body.append('article_id', articleId);
+    body.append('status', articleStatus);
+
+    let response = await fetch(`index.php?route=blog/article/fetchSetArticleStatus&user_token=${userToken}`, {method: "POST", body}).then(r => r.json());
+    if (response.newStatus === 1) {
+      statusBtn.outerHTML = `<button class="btn btn-success statusBtn" data-article-id="${articleId}" data-article-status="${response.newStatus}" type="button"><i class="fa fa-play"></i></button>`;
+    } else {
+      statusBtn.outerHTML = `<button class="btn btn-danger statusBtn" data-article-id="${articleId}" data-article-status="${response.newStatus}" type="button"><i class="fa fa-stop"></i></button>`;
+    }
+  }
+})
+</script>
+
 {{ footer }}
