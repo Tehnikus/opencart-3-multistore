@@ -31,3 +31,7 @@ $_['button_save']               = 'Save';
 // Tabs
 $_['tab_general']               = 'General';
 $_['tab_description']           = 'Description';
+
+$_['entry_status']      = 'Status';
+$_['option_on']         = 'On';
+$_['option_off']        = 'Off';

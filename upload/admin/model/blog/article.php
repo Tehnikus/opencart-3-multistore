@@ -17,7 +17,7 @@ class ModelBlogArticle extends Model {
         INSERT INTO " . DB_PREFIX . "article_to_store 
         SET
           `store_id` 			 = '" . (int) $this->session->data['store_id'] . "', 
-          `status`         = '" . (int) $data['status'] . "',
+          `status`         = '" . (int) (!empty($data['article']['status'])) . "',
           `date_added`     = NOW(),
           `date_modified`  = NOW()
         ");
@@ -99,7 +99,7 @@ class ModelBlogArticle extends Model {
       $this->db->query("
         UPDATE " . DB_PREFIX . "article_to_store 
         SET
-          `status`         = '" . (int) $data['status'] . "',
+          `status`         = '" . (int) (!empty($data['article']['status'])) . "',
           `date_modified`  = NOW()
         WHERE `article_id` = " . (int) $article_id . "
       ");
@@ -405,6 +405,23 @@ class ModelBlogArticle extends Model {
     }
 
     return $result;
+  }
+
+  public function getArticle($pageId) : array {
+    $result = [];
+    if ($pageId === null) {
+      return $result;
+    }
+
+    $query = $this->db->query("
+      SELECT
+        *
+      FROM " . DB_PREFIX . "article_to_store
+      WHERE article_id = " . (int) $pageId . "
+        AND store_id   = '" . (int) $this->session->data['store_id'] . "'
+    ");
+
+    return $query->row ?? [];
   }
 
   public function getArticleDescription($pageId) : array {
