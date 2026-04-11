@@ -24,13 +24,13 @@
           <div class="tab-content">
             
             {# Name #}
-            <div class="form-group">
+            <div class="form-group required">
               <label class="col-sm-2 control-label" for="input-name_{{ language.language_id }}">{{ entry_name }}</label>
               <div class="col-sm-10">
                 {% for language in languages %}                
                   <div class="input-group flex">
                     <span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
-                    {% include "common/button_create_seo_url.twig" with {seo_url_input: 'seo_tag_description[' ~ language.language_id ~ '][url]' } %}
+                    {% include "common/button_create_seo_url.twig" with {seo_url_input: 'seo_url[' ~ language.language_id ~ ']' } %}
                     {% include "common/button_translate.twig" with {sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][name]' } %}
                     <input 
                       type="text" 
@@ -42,13 +42,28 @@
                     />
                     <input 
                       type="text" 
-                      name="seo_tag_description[{{ language.language_id }}][url]" 
-                      value="{{ url[language.language_id].url }}" 
+                      name="seo_url[{{ language.language_id }}]" 
+                      value="{{ url[language.language_id] }}" 
                       placeholder="{{ entry_url }}" 
                       id="input-url_{{ language.language_id }}" 
                       class="form-control" 
                     />
                   </div>
+                  {% if error_name[language.language_id] %}
+                    <p class="text-danger">
+                      {{ error_name[language.language_id] }}
+                    </p>
+                  {% endif %}
+                  {% if error_url_not_unique[language.language_id] %}
+                    <p class="text-danger">
+                      {{ error_url_not_unique[language.language_id] }}
+                    </p>
+                  {% endif %}
+                  {% if error_request_not_unique[language.language_id] %}
+                    <p class="text-danger">
+                      {{ error_request_not_unique[language.language_id] }}
+                    </p>
+                  {% endif %}
                 {% endfor %}
               </div>
             </div>
