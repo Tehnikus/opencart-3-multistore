@@ -121,12 +121,77 @@
                   <div class="alert alert-info">
                     {{ text_show_as_flag }}
                   </div>
-                </div>
               </div>
-            </div>          
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-2 control-label" for="product_tag">{{ entry_product_tag }}</label>
+              <div class="col-sm-10">
+                {# Selected items #}
+                <div class="niftySelected">
+                  {% for row in product_tags %}
+                    <div class="niftyItem" data-id="{{ row.product_id }}">
+                      <span style="flex: 1">
+                        <b>{{ row.name }}</b>
+                      </span>
+                      <button style="padding: 0; line-height: 0; width: 25px; height: 25px;" type="button" class="btn btn-danger niftyItemDelete" onclick="this.closest('.niftyItem').remove()"><i class="fa fa-times"></i></button>
+                      <input hidden name="product_tags[]" value="{{ row.product_id }}" />
+                    </div>
+                  {% endfor %}
+                </div>
+                {# Autocomplete input #}
+                <input 
+                  id="product_tag" 
+                  type="text" 
+                  class="form-control niftyAutocomplete" 
+                  placeholder="{{ entry_product_tag }}" 
+                />
+              </div>
+            </div>
+
+          </div>
         </form>
       </div>
     </div>
   </div>
 </div>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const userToken = "{{ user_token }}";
+      const isMainTag = " {{ is_main_tag }}";
+      const input = document.getElementById('product_tag');
+      const autocomplete = new niftyAutocomplete({
+        input,
+        selectedItemsBox: input.previousElementSibling,
+        idKey: 'product_id',
+        request: {
+          url: `${location.protocol}${location.host}/admin/index.php?route=catalog/product/autocomplete`,
+          // Set GET params
+          getParams: {
+            user_token: userToken,
+            filter_name: () => {
+              return input.value;
+            }
+          },
+        },
+        item: {
+          searchTemplate: (row) => `<div class="niftyItemData"><p><b>${row.name}</p></div>`,
+          selectTemplate: (row) => `
+            <div class="niftyItem" data-id="${row.product_id}">
+              <span style="flex: 1">
+                <b>${row.name}</b>
+              </span>
+              <button style="padding: 0; line-height: 0; width: 25px; height: 25px;" type="button" class="btn btn-danger niftyItemDelete"><i class="fa fa-times"></i></button>
+              <input hidden name="product_tags[]" value="${row.product_id}" />
+            </div>
+          `,
+        },
+        behavior: {
+          
+        }
+      });
+    });
+  </script>
 {{ footer }}

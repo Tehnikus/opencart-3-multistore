@@ -13,6 +13,7 @@ $_['entry_show_as_flag']        = 'Show as flag';
 $_['entry_inline_style']        = 'Inline CSS style';
 $_['entry_inline_icon']         = 'Inline icon';
 $_['entry_show_as_flag']        = 'Show as flag';
+$_['entry_product_tag']         = 'Products';
 
 // Buttons
 $_['button_add']                = 'Add new seo tag';

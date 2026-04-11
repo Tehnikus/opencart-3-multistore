@@ -54,6 +54,8 @@ class ControllerSeoTag extends Controller {
     $this->load->model('localisation/language');
     $this->load->model('seo/tag');
     $this->load->language('seo/tag');
+    $this->document->addScript('view/javascript/niftyAutocomplete.js');
+		$this->document->addStyle('view/stylesheet/niftyAutocomplete.css');
     
     $data       = [];
     $id         = $this->request->get['seo_tag_id'] ?? null;
@@ -68,6 +70,7 @@ class ControllerSeoTag extends Controller {
       'stores'        => $this->model_setting_store->getMultistores(),
       'action'        => $id ? $this->url->link('seo/tag/edit', 'user_token=' . $user_token . '&seo_tag_id=' . $id . $url, true) : $this->url->link('seo/tag/add', 'user_token=' . $user_token . $url, true),
       'cancel'        => $this->url->link('seo/tag', 'user_token=' . $user_token . $url, true),
+      'user_token'    => $user_token,
     ];
     
     // Merge with errors array to hihlight faulty inputs. Merge saved data, POST data, errors and interface
