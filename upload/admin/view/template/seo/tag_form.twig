@@ -86,7 +86,13 @@
                     placeholder="{{ entry_inline_icon }}" 
                     id="input-inline_icon" 
                     class="form-control" 
+                    list="icon-list"
                   />
+                  <datalist id="icon-list">
+                    {% for icon in icons %}
+                      <option value="{{ icon|e }}" label="{{ icon|striptags }}"></option>
+                    {% endfor %}
+                  </datalist>
                 </div>
                 <br>
                 <div class="alert alert-info">

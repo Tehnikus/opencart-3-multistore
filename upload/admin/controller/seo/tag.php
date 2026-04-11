@@ -83,6 +83,13 @@ class ControllerSeoTag extends Controller {
     $formData['tag']         = $this->model_seo_tag->getTagData($seo_tag_id);
     $formData['description'] = $this->model_seo_tag->getTagDescription($seo_tag_id);
     $formData['url']         = $this->model_seo_tag->getSeoUrl($seo_tag_id);
+    
+    // Get inline icons
+    $formData['icons']       = $this->model_seo_tag->getUsedIcons();
+    foreach ($formData['icons'] as $key => $icon) {
+      $formData['icons'][$key] = html_entity_decode($icon['inline_icon'] ?? '');
+    }
+
     // Replace actual data with POST data
     if ($this->request->server['REQUEST_METHOD'] == 'POST') {
       $formData = $this->request->post;
