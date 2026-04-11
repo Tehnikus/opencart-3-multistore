@@ -212,7 +212,7 @@ class ModelBlogArticle extends Model {
       ");
 
       $this->db->query("COMMIT");
-      
+
       return true;
 
     } catch (\Throwable $e) {
@@ -221,21 +221,21 @@ class ModelBlogArticle extends Model {
     }
   }
 
-  public function editImages($page_id, $image_data = []) : int {
+  public function editImages($pageId, $image_data = []) : int {
 
-    $page_id = (int) $page_id;
-    $store_id = (int) $this->session->data['store_id'];
+    $pageId = (int) $pageId;
+    $storeId = (int) $this->session->data['store_id'];
 
     $this->db->query("
       DELETE FROM `". DB_PREFIX . "article_image` 
-      WHERE `article_id`    = '" . (int) $page_id . "'
-        AND store_id        = " . (int) $store_id . "
+      WHERE `article_id`    = '" . (int) $pageId . "'
+        AND store_id        = '" . (int) $storeId . "'
     ");
 
     $this->db->query("
       DELETE FROM `". DB_PREFIX . "article_image_description` 
-      WHERE `article_id`    = '" . (int) $page_id . "'
-        AND store_id        = " . (int) $store_id . "
+      WHERE `article_id`    = '" . (int) $pageId . "'
+        AND store_id        = '" . (int) $storeId . "'
     ");
 
 
@@ -246,10 +246,10 @@ class ModelBlogArticle extends Model {
         $this->db->query("
           INSERT INTO `". DB_PREFIX . "article_image`
           SET 
-            `article_id` 	      = '" . (int) $page_id . "', 
+            `article_id` 	      = '" . (int) $pageId . "', 
             `image` 				    = '" . $this->db->escape($image['image']) . "', 
             `sort_order` 		    = '" . (int) $image['sort_order'] . "',
-            `store_id`          = '" . $store_id . "'
+            `store_id`          = '" . $storeId . "'
         ");
 
         // Add multilang multistore image descriptions
@@ -263,9 +263,9 @@ class ModelBlogArticle extends Model {
             INSERT INTO `". DB_PREFIX . "article_image_description`
             SET
               `image_id` 	      = '" . (int) $image_id . "',
-              `article_id` 	    = '" . (int) $page_id . "',
+              `article_id` 	    = '" . (int) $pageId . "',
               `language_id` 		= '" . (int) $language_id . "',
-              `store_id` 				= '" . (int) $store_id . "',
+              `store_id` 				= '" . (int) $storeId . "',
               `description` 		= '" . $this->db->escape($image_description) ."'
           ");
         }
@@ -356,7 +356,7 @@ class ModelBlogArticle extends Model {
 
   public function getSeoUrl($article_id = null) : array {
     $result   = [];
-    $store_id = (int) $this->session->data['store_id'];
+    $storeId = (int) $this->session->data['store_id'];
 
     if ($article_id === null) {
       return $result;
@@ -367,7 +367,7 @@ class ModelBlogArticle extends Model {
         *
       FROM " . DB_PREFIX . "seo_url su
       WHERE su.`query`  = 'article_id=" . (int) $article_id . "'
-      AND su.`store_id` = " . $store_id . "
+        AND su.`store_id` = " . $storeId . "
     ")->rows;
 
     foreach ($query as $row) {
@@ -377,15 +377,15 @@ class ModelBlogArticle extends Model {
     return $result;
   }
 
-  public function getImages($page_id) : array {
+  public function getImages($pageId) : array {
     $result = [];
-    $store_id = (int) $this->session->data['store_id'];
+    $storeId = (int) $this->session->data['store_id'];
     $images = $this->db->query("
       SELECT
         *
       FROM " . DB_PREFIX . "article_image
-      WHERE `article_id`     = " . (int) $page_id . "
-        AND `store_id`         = " . (int) $store_id . "
+      WHERE `article_id`     = " . (int) $pageId . "
+        AND `store_id`       = " . (int) $storeId . "
       ORDER BY `sort_order`
     ")->rows;
 
@@ -396,7 +396,7 @@ class ModelBlogArticle extends Model {
           `description`
         FROM " . DB_PREFIX . "article_image_description
         WHERE `image_id` = " . (int) $row['image_id'] . "
-          AND `store_id` = " . (int) $store_id . "
+          AND `store_id` = " . (int) $storeId . "
       ")->rows;
       foreach ($descriptions as $description) {
         $row['description'][$description['language_id']] = $description['description'];
@@ -484,8 +484,9 @@ class ModelBlogArticle extends Model {
 	public function setArticleStatus($article_id, $status) : int {
 		$this->db->query("
 			UPDATE " . DB_PREFIX . "article_to_store
-				SET `status` = '" . (int) $status . "',
-				`date_modified` = NOW()
+      SET 
+        `status` = '" . (int) $status . "',
+        `date_modified` = NOW()
 			WHERE `article_id` = '" . (int) $article_id . "'
 				AND `store_id` = '" . (int) $this->session->data['store_id'] . "'
 		");
