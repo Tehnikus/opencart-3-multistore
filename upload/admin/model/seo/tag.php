@@ -2,8 +2,8 @@
 class ModelSeoTag extends Model {
 
   private $sortOrders = [
-    'name'          => 'bd.`name`',
-    'date_modified' => 'b2s.`date_modified`',
+    'name'          => 'td.`name`',
+    'date_modified' => 't2s.`date_modified`',
   ];
 
   public function addTag($data) {
@@ -143,7 +143,7 @@ class ModelSeoTag extends Model {
     
     // Orders
     $ordering = '';
-    $sortField = 'b2s.`date_modified`';
+    $sortField = 't2s.`date_modified`';
 
     if (!empty($filter['sort']) && isset($this->sortOrders[$filter['sort']])) {
       $sortField = $this->sortOrders[$filter['sort']];
@@ -163,24 +163,20 @@ class ModelSeoTag extends Model {
 
     $sql = "
       SELECT
-        bd.`seo_tag_id`,
-        bd.`name`,
-        b2s.`date_modified`
-      FROM " . DB_PREFIX . "seo_tag_description bd
-      JOIN " . DB_PREFIX . "seo_tag_to_store b2s
-        ON b2s.`seo_tag_id` = bd.`seo_tag_id`
-      WHERE bd.`language_id` = {$languageId}
-        AND b2s.`store_id`   = {$storeId}
-        " . ((isset($filter['name'])) ? "AND bd.name LIKE '%" . $this->db->escape($filter['name']) . "%'" : '') . "
+        td.`seo_tag_id`,
+        td.`name`,
+        t2s.`date_modified`
+      FROM " . DB_PREFIX . "seo_tag_description td
+      JOIN " . DB_PREFIX . "seo_tag_to_store t2s
+        ON t2s.`seo_tag_id` = td.`seo_tag_id`
+      WHERE td.`language_id` = {$languageId}
+        AND t2s.`store_id`   = {$storeId}
+        " . ((isset($filter['name'])) ? "AND td.`name` LIKE '%" . $this->db->escape($filter['name']) . "%'" : '') . "
       {$ordering}
       {$limits}
     ";
 
     foreach($this->db->query($sql)->rows ?? [] as $row) {
-      $row['seo'] = json_decode($row['seo'], true);
-      $row['seo']['seoKeywords'] = count(array_filter(explode(',', $row['seo']['seoKeywords'])));
-      $row['image'] = $row['image'] ? (HTTPS_CATALOG . 'image/' . $row['image']) : (HTTPS_CATALOG . 'image/no_image.webp');
-
       $result[] = $row;
     }
 
