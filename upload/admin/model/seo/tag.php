@@ -120,7 +120,7 @@ class ModelSeoTag extends Model {
         // Mostly safety delete, should never happen
         $this->db->query("
           DELETE FROM " . DB_PREFIX . "seo_url 
-          WHERE `query`       = 'seo_tag_id=" . $seo_tag_id . "'
+          WHERE `query`       = 'tag_id=" . $seo_tag_id . "'
             AND `language_id` = '" . (int) $language_id . "'
             AND `store_id`    = '" . (int) $this->session->data['store_id'] . "'
         ");
@@ -131,7 +131,7 @@ class ModelSeoTag extends Model {
             SET 
               `store_id`    = '" . (int) $this->session->data['store_id'] . "',
               `language_id` = '" . (int) $language_id . "', 
-              `query`       = 'seo_tag_id=" . $seo_tag_id . "', 
+              `query`       = 'tag_id=" . $seo_tag_id . "', 
               `keyword`     = '" . $this->db->escape($keyword) . "'
           ");
         }
@@ -247,7 +247,7 @@ class ModelSeoTag extends Model {
       SELECT
         *
       FROM " . DB_PREFIX . "seo_url su
-      WHERE su.`query`    = 'seo_tag_id=" . (int) $seo_tag_id . "'
+      WHERE su.`query`    = 'tag_id=" . (int) $seo_tag_id . "'
         AND su.`store_id` = " . $store_id . "
     ")->rows;
 
