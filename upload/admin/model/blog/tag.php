@@ -331,6 +331,23 @@ class ModelBlogTag extends Model {
     return $result;
   }
 
+  public function getBlogTag($pageId) : array {
+    $result = [];
+    if ($pageId === null) {
+      return $result;
+    }
+
+    $query = $this->db->query("
+      SELECT
+        *
+      FROM " . DB_PREFIX . "blog_tag_to_store
+      WHERE blog_tag_id = " . (int) $pageId . "
+        AND store_id   = '" . (int) $this->session->data['store_id'] . "'
+    ");
+
+    return $query->row ?? [];
+  }
+
   public function getTagDescription($pageId) : array {
     $pageId = (int) $pageId;
     $storeId = (int) $this->session->data['store_id'];
@@ -338,9 +355,6 @@ class ModelBlogTag extends Model {
       SELECT
         *
       FROM " . DB_PREFIX . "blog_tag_description bd
-      JOIN " . DB_PREFIX . "blog_tag_to_store b2s
-        ON b2s.`blog_tag_id` = bd.`blog_tag_id`
-        AND b2s.store_id = {$storeId}
       WHERE bd.`blog_tag_id` = {$pageId}
     ";
     
