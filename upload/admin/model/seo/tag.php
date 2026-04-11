@@ -59,6 +59,16 @@ class ModelSeoTag extends Model {
           ");
         }
       }
+
+      foreach ($data['product_tags'] ?? [] as $product_id) {
+        $this->db->query("
+          INSERT INTO " . DB_PREFIX . "product_seo_tag
+          SET
+            `product_id` = '" . (int) $product_id . "',
+            `store_id`   = '" . (int) $this->session->data['store_id'] . "',
+            `seo_tag_id` = '" . (int) $seo_tag_id . "'
+        ");
+      }
       
       $this->db->query("COMMIT");
       return $seo_tag_id;
@@ -125,6 +135,22 @@ class ModelSeoTag extends Model {
               `keyword`     = '" . $this->db->escape($keyword) . "'
           ");
         }
+      }
+
+      $this->db->query("
+        DELETE FROM " . DB_PREFIX . "product_seo_tag
+          WHERE `seo_tag_id` = '" . (int) $seo_tag_id . "'
+            AND `store_id`   = '" . (int) $this->session->data['store_id'] . "'
+      ");
+      
+      foreach ($data['product_tags'] ?? [] as $product_id) {
+        $this->db->query("
+          INSERT INTO " . DB_PREFIX . "product_seo_tag
+          SET
+            `product_id` = '" . (int) $product_id . "',
+            `store_id`   = '" . (int) $this->session->data['store_id'] . "',
+            `seo_tag_id` = '" . (int) $seo_tag_id . "'
+        ");
       }
       
       $this->db->query("COMMIT");
