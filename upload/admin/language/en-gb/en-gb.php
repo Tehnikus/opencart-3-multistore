@@ -171,6 +171,7 @@ $_['entry_is_available']            = 'Availble for order';
 // Tab general lang description => tab_gescription.twig
 $_['entry_h1']                      = 'H1 tag';
 $_['entry_keyword']                 = 'SEO URL';
+$_['entry_url']                     = 'SEO URL';
 $_['entry_description']             = 'Description';
 $_['entry_seo_description']         = 'SEO description';
 $_['entry_meta_title']              = 'Meta title';
