@@ -297,7 +297,7 @@ class ControllerBlogArticle extends Controller {
 		}
 
 		$this->load->model('blog/article');
-		$newStatus = $this->model_catalog_article->setArticleStatus($articleId, $newStatus);
+		$newStatus = $this->model_blog_article->setArticleStatus($articleId, $newStatus);
 		$json = ['articleId' => $articleId, 'newStatus' => $newStatus];
 
 		$this->response->addHeader('Content-Type: application/json');
