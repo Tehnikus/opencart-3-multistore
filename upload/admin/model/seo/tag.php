@@ -241,10 +241,10 @@ class ModelSeoTag extends Model {
     $query = $this->db->query("
       SELECT
         COUNT(*) AS pages_count
-      FROM " . DB_PREFIX . "seo_tag_description bd
-      JOIN " . DB_PREFIX . "seo_tag_to_store b2s
-        ON b2s.`seo_tag_id` = bd.`seo_tag_id`
-        AND b2s.`store_id`  = {$storeId}
+      FROM " . DB_PREFIX . "seo_tag_description td
+      JOIN " . DB_PREFIX . "seo_tag_to_store t2s
+        ON t2s.`seo_tag_id` = td.`seo_tag_id`
+        AND t2s.`store_id`  = {$storeId}
     ");
 
     return (int) ($query->row['pages_count'] ?? 0);
