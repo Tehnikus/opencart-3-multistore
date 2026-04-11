@@ -45,6 +45,11 @@ class ControllerSeoTag extends Controller {
       'sort'          => $this->request->get['sort'] ?? 'date_added',
       'sort_name'     => $this->url->link('seo/tag', 'user_token=' . $user_token . $this->getSortOrder('name') . $url, true),
     ];
+
+    if (isset($this->session->data['success'])) {
+      $data['success'] = $this->session->data['success'];
+      unset($this->session->data['success']);
+    }
     
     $this->response->setOutput($this->load->view('seo/tag_list', $data));
   }
