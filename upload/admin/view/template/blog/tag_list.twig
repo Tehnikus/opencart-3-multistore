@@ -90,6 +90,13 @@
                             </p>
                           </td>
                           <td class="text-center">{{ tag.date_modified }}</td>
+                          <td>
+                            {% if tag.status == '1' %}
+                              <button class="btn btn-success statusBtn" data-tag-id="{{ tag.blog_tag_id }}" data-tag-status="{{ tag.status }}" type="button"><i class="fa fa-play"></i></button>
+                            {% else %}
+                              <button class="btn btn-danger statusBtn" data-tag-id="{{ tag.blog_tag_id }}" data-tag-status="{{ tag.status }}" type="button"><i class="fa fa-stop"></i></button>
+                            {% endif %}
+                          </td>
                           <td class="text-center"><a href="{{ tag.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
                         </tr>
                       {% endfor %}
@@ -110,4 +117,26 @@
     </div>
   </div>
 </div>
+
+{# Change order status btn #}
+<script>
+document.addEventListener('click', async e => {
+  if (e.target.closest('.statusBtn')) {
+    const userToken = "{{ user_token }}";
+    const statusBtn = e.target.closest('.statusBtn');
+    const tagId     = statusBtn.dataset.tagId
+    const tagStatus = statusBtn.dataset.tagStatus
+    const body      = new FormData();
+    body.append('blog_tag_id', tagId);
+    body.append('status', tagStatus);
+
+    let response = await fetch(`index.php?route=blog/tag/fetchSetTagStatus&user_token=${userToken}`, {method: "POST", body}).then(r => r.json());
+    if (response.newStatus === 1) {
+      statusBtn.outerHTML = `<button class="btn btn-success statusBtn" data-tag-id="${tagId}" data-tag-status="${response.newStatus}" type="button"><i class="fa fa-play"></i></button>`;
+    } else {
+      statusBtn.outerHTML = `<button class="btn btn-danger statusBtn" data-tag-id="${tagId}" data-tag-status="${response.newStatus}" type="button"><i class="fa fa-stop"></i></button>`;
+    }
+  }
+})
+</script>
 {{ footer }}
