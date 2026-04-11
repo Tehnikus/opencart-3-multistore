@@ -151,6 +151,44 @@ class ModelBlogTag extends Model {
     }
   }
 
+    public function deleteTag($pageId) : bool {
+    $tables = [
+      'article_tag',
+      'blog_tag_to_store',
+      'blog_tag_description',
+      'blog_tag_image',
+      'blog_tag_image_description',
+    ];
+
+    $this->db->query("START TRANSACTION");
+
+    try {
+      foreach ($tables as $table) {
+
+        $this->db->query("
+          DELETE FROM " . DB_PREFIX . $table . "
+          WHERE blog_tag_id = '" . (int) $pageId . "'
+            AND store_id   = '" . (int) $this->session->data['store_id'] . "'
+        ");
+      }
+
+      // Delete SEO URL
+      $this->db->query("
+        DELETE FROM " . DB_PREFIX . "seo_url su
+        WHERE su.`query`    = 'blog_tag_id=" . (int) $pageId . "'
+          AND su.`store_id` = '" . (int) $this->session->data['store_id'] . "'
+      ");
+
+      $this->db->query("COMMIT");
+
+      return true;
+
+    } catch (\Throwable $e) {
+      $this->db->query("ROLLBACK");
+      throw $e;
+    }
+  }
+
   public function editImages($page_id, $image_data = []) : int {
 
     $page_id = (int) $page_id;
