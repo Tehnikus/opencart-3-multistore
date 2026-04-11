@@ -227,9 +227,13 @@ class ControllerBlogArticle extends Controller {
 		}
 
     // Check if parent tag is selected
-    // if (!isset($this->request->post['article_tags'])) {
-    //   $this->error['error_select_tag'] = $this->language->get('e_select_tag');
-    // }
+    if (!isset($this->request->post['article_tags']) || empty($this->request->post['article_tags'])) {
+      $this->error['error_select_tag'] = $this->language->get('e_select_tag');
+    }
+
+    if (!isset($this->request->post['is_main']) || empty($this->request->post['is_main'])) {
+      $this->error['error_select_main_tag'] = $this->language->get('e_select_main_tag');
+    }
 
 
 		if ($this->request->post['seo_url']) {
