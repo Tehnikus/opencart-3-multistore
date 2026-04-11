@@ -44,6 +44,11 @@ class ControllerBlogArticle extends Controller {
       'sort'          => $this->request->get['sort'] ?? 'date_added',
       'sort_name'     => $this->url->link('blog/article', 'user_token=' . $user_token . $this->getSortOrder('name') . $url, true),
     ];
+
+    if (isset($this->session->data['success'])) {
+      $data['text_success'] = $this->session->data['success'];
+      unset($this->session->data['success']);
+    }
     
     $this->response->setOutput($this->load->view('blog/article_list', $data));
   }
@@ -70,7 +75,7 @@ class ControllerBlogArticle extends Controller {
       'user_token'    => $user_token,
     ];
     
-    // Merge with errors array to hihlight faulty inputs. Merge saved data, POST data, errors and interface
+    // Merge with errors array to highlight faulty inputs. Merge saved data, POST data, errors, and interface
     $data = [...$data, ...$this->error, ...$this->getFormData()];
     
     $this->response->setOutput($this->load->view('blog/article_form', $data));
