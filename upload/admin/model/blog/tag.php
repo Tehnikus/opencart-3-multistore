@@ -17,6 +17,7 @@ class ModelBlogTag extends Model {
         INSERT INTO " . DB_PREFIX . "blog_tag_to_store 
         SET
           `store_id` 			 = '" . (int) $this->session->data['store_id'] . "', 
+          `status`         = '" . (int) (!empty($data['blog_tag']['status'])) . "',
           `date_added`     = NOW(),
           `date_modified`  = NOW()
         ");
@@ -87,6 +88,7 @@ class ModelBlogTag extends Model {
       $this->db->query("
         UPDATE " . DB_PREFIX . "blog_tag_to_store 
         SET
+          `status`         = '" . (int) (!empty($data['blog_tag']['status'])) . "',
           `date_modified`  = NOW()
         WHERE blog_tag_id = " . (int) $blog_tag_id . "
       ");
