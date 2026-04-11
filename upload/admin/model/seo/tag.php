@@ -17,9 +17,9 @@ class ModelSeoTag extends Model {
         INSERT INTO " . DB_PREFIX . "seo_tag_to_store 
         SET
           `store_id` 			= '" . (int) $this->session->data['store_id'] . "', 
-          `inline_style`  = '" . $this->db->escape($data['inline_style']) . "',
-          `inline_icon`   = '" . $this->db->escape($data['inline_icon']) . "',
-          `show_as_flag`  = '" . ((isset($data['show_as_flag'])) ? '1' : '0') . "',
+          `inline_style`  = '" . $this->db->escape($data['tag']['inline_style'] ?? '') . "',
+          `inline_icon`   = '" . $this->db->escape($data['tag']['inline_icon'] ?? '') . "',
+          `show_as_flag`  = '" . ((isset($data['tag']['show_as_flag'])) ? '1' : '0') . "',
           `date_added`    = NOW(),
           `date_modified` = NOW()
         ");
@@ -319,6 +319,7 @@ class ModelSeoTag extends Model {
       SELECT
         DISTINCT `inline_icon`
       FROM " . DB_PREFIX . "seo_tag_to_store
+      WHERE `inline_icon` <> ''
     ");
 
     return $query->rows ?? [];
@@ -330,6 +331,7 @@ class ModelSeoTag extends Model {
       SELECT
         DISTINCT `inline_style`
       FROM " . DB_PREFIX . "seo_tag_to_store
+      WHERE `inline_style` <> ''
     ");
 
     return $query->rows ?? [];
