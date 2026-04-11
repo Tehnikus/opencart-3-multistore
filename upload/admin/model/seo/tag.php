@@ -246,6 +246,17 @@ class ModelSeoTag extends Model {
 
     return $query->rows ?? [];
   }
+  
+  public function getUsedStyles() : array {
+
+    $query = $this->db->query("
+      SELECT
+        DISTINCT `inline_style`
+      FROM " . DB_PREFIX . "seo_tag_to_store
+    ");
+
+    return $query->rows ?? [];
+  }
 
   public function getTagTotal() : int {
     $storeId = (int) $this->session->data['store_id'];

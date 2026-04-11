@@ -65,8 +65,14 @@
                     placeholder="{{ entry_inline_style }}" 
                     id="input-inline_style" 
                     class="form-control" 
+                    list="style-list"
                   />
                 </div>
+                <datalist id="style-list">
+                  {% for style in styles %}
+                    <option value="{{ style|e }}" label="{{ style|striptags }}"></option>
+                  {% endfor %}
+                </datalist>
                 <br>
                 <div class="alert alert-info">
                   {{ text_inline_style }}
