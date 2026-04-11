@@ -266,4 +266,21 @@ class ControllerBlogTag extends Controller {
     $this->response->addHeader('Content-Type: application/json');
     $this->response->setOutput(json_encode($tags));
   }
+
+  public function fetchSetTagStatus() : void {
+		$tagId 			    = (int) $this->request->post['blog_tag_id'];
+		$currentStatus 	= (int) $this->request->post['status'];
+		$newStatus 			= 0;
+
+		if ($currentStatus === 0) {
+			$newStatus = 1;
+		}
+
+		$this->load->model('blog/tag');
+		$newStatus = $this->model_blog_tag->setTagStatus($tagId, $newStatus);
+		$json = ['blogTagId' => $tagId, 'newStatus' => $newStatus];
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
 }
