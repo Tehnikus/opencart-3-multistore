@@ -163,9 +163,9 @@ class ModelSeoTag extends Model {
 
     $sql = "
       SELECT
+        t2s.*,
         td.`seo_tag_id`,
-        td.`name`,
-        t2s.`date_modified`
+        td.`name`
       FROM " . DB_PREFIX . "seo_tag_description td
       JOIN " . DB_PREFIX . "seo_tag_to_store t2s
         ON t2s.`seo_tag_id` = td.`seo_tag_id`
@@ -232,7 +232,7 @@ class ModelSeoTag extends Model {
     foreach($query->rows ?? [] as $row) {
       $result[$row['language_id']] = $row;
     }
-        
+
     return $result ?? [];
   }
 

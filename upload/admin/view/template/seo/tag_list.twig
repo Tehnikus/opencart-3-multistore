@@ -22,8 +22,8 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
-    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ text_seo_tags_info }}
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <div class="alert alert-info alert-dismissible"><i class="fa fa-check-circle"></i> 
+      {{ text_seo_tags_info }}
     </div>
     <div class="row">
       <div class="col-sm-12">
@@ -39,8 +39,9 @@
                     <tr>
                       <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
                       <td class="text-left"><a href="{{ sort_name }}" {% if sort == 'name' %}class="{{ order|lower }}"{% endif %}>{{ column_name }}</a></td>
-                      <td class="text-left"><a href="{{ sort_product_count }}" {% if sort == 'product_count' %}class="{{ order|lower }}"{% endif %}>{{ column_product_count }}</a></td>
-                      <td class="text-left"><a href="{{ sort_show_as_flag }}" {% if sort == 'show_as_flag' %}class="{{ order|lower }}"{% endif %}>{{ column_show_as_flag }}</a></td>
+                      <td>{{ column_preview }}</td>
+                      <td style="width: 60px" class="text-left"><a href="{{ sort_product_count }}" {% if sort == 'product_count' %}class="{{ order|lower }}"{% endif %}>{{ column_product_count }}</a></td>
+                      <td style="width: 60px" class="text-left"><a href="{{ sort_show_as_flag }}" {% if sort == 'show_as_flag' %}class="{{ order|lower }}"{% endif %}>{{ column_show_as_flag }}</a></td>
                       <td style="width: 60px"></td>
                     </tr>
                   </thead>
@@ -50,6 +51,9 @@
                         <tr>
                           <td class="text-center"><input type="checkbox" name="selected[]" value="{{ tag.tag_id }}" {% if tag.tag_id in selected %}checked="checked"{% endif %} /></td>
                           <td class="text-left"><b>{{ tag.name }}</b></td>
+                          <td>
+                            <span class="badge" style="{{ tag.inline_style }}">{{ tag.inline_icon|raw }}&nbsp;{{ tag.name }}</span>
+                          </td>
                           <td class="text-center"><b>{{ tag.product_count }}</b></td>
                           <td class="text-center"><b>{{ tag.show_as_flag }}</b></td>
                           <td class="text-center"><a href="{{ tag.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>

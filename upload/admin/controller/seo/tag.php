@@ -27,6 +27,7 @@ class ControllerSeoTag extends Controller {
     $items = $this->model_seo_tag->getList($filter_data);
     // Set each item edit link
     foreach ($items as $key => $item) {
+      $items[$key]['inline_icon'] = html_entity_decode($items[$key]['inline_icon']);
       $items[$key]['edit'] = $this->url->link('seo/tag/edit', 'seo_tag_id=' . $item['seo_tag_id'] . '&user_token=' . $user_token, true);
     }
 
@@ -79,7 +80,7 @@ class ControllerSeoTag extends Controller {
     $formData       = [];
     $seo_tag_id = $this->request->get['seo_tag_id'] ?? null;
     $this->load->model('seo/tag');
-    $formData['tag']        = $this->model_seo_tag->getTagData($seo_tag_id);
+    $formData['tag']         = $this->model_seo_tag->getTagData($seo_tag_id);
     $formData['description'] = $this->model_seo_tag->getTagDescription($seo_tag_id);
     $formData['url']         = $this->model_seo_tag->getSeoUrl($seo_tag_id);
     // Replace actual data with POST data
