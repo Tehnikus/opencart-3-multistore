@@ -142,7 +142,7 @@ class ModelSeoTag extends Model {
           WHERE `seo_tag_id` = '" . (int) $seo_tag_id . "'
             AND `store_id`   = '" . (int) $this->session->data['store_id'] . "'
       ");
-      
+
       foreach ($data['product_tags'] ?? [] as $product_id) {
         $this->db->query("
           INSERT INTO " . DB_PREFIX . "product_seo_tag
@@ -155,6 +155,31 @@ class ModelSeoTag extends Model {
       
       $this->db->query("COMMIT");
       return $seo_tag_id;
+      
+    } catch (\Throwable $e) {
+      $this->db->query("ROLLBACK");
+      throw $e;
+    }
+  }
+
+  public function deleteTag($seo_tag_id) : bool {
+    $tables = [
+      'product_seo_tag',
+      'seo_tag_to_store',
+      'seo_tag_description',
+    ];
+
+    $this->db->query("START TRANSACTION");
+    try {
+      foreach ($tables as $table) {
+        $this->db->query("
+          DELETE FROM " . DB_PREFIX . $table . "
+          WHERE seo_tag_id = '" . (int) $seo_tag_id . "'
+            AND store_id   = '" . (int) $this->session->data['store_id'] . "'
+        ");
+      }
+
+      return true;
       
     } catch (\Throwable $e) {
       $this->db->query("ROLLBACK");
