@@ -26,7 +26,7 @@ $_['column_product_count']      = 'Product count';
 $_['column_show_as_flag']       = 'Show as flag';
 
 // Errors
-$_['e_name']                    = 'Set article name';
+$_['e_name']                    = 'Set tag name';
 $_['e_unique']                  = 'SEO URL is not unique';
 $_['e_permission']              = 'You are not permitted to edit seo tags';
 $_['e_warning']                 = 'Error while saving seo tag';
