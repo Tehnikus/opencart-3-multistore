@@ -83,18 +83,24 @@ class ControllerSeoTag extends Controller {
     $formData       = [];
     $seo_tag_id = $this->request->get['seo_tag_id'] ?? null;
     $this->load->model('seo/tag');
-    $formData['tag']         = $this->model_seo_tag->getTagData($seo_tag_id);
-    $formData['description'] = $this->model_seo_tag->getTagDescription($seo_tag_id);
-    $formData['url']         = $this->model_seo_tag->getSeoUrl($seo_tag_id);
+    $formData['tag']          = $this->model_seo_tag->getTagData($seo_tag_id);
+    $formData['description']  = $this->model_seo_tag->getTagDescription($seo_tag_id);
+    $formData['url']          = $this->model_seo_tag->getSeoUrl($seo_tag_id);
+    $formData['product_tags'] = $this->model_seo_tag->getProductTags($seo_tag_id);
+    $formData['icons']        = $this->model_seo_tag->getUsedIcons();
+    $formData['styles']       = $this->model_seo_tag->getUsedStyles();
     
+    // Replace actual data with POST data
+    if ($this->request->server['REQUEST_METHOD'] == 'POST') {
+      $formData = $this->request->post;
+    }
+
     // Get inline icons
-    $formData['icons'] = $this->model_seo_tag->getUsedIcons();
     foreach ($formData['icons'] as $key => $icon) {
       $formData['icons'][$key] = html_entity_decode($icon['inline_icon'] ?? '');
     }
 
     // Get inline styles
-    $formData['styles'] = $this->model_seo_tag->getUsedStyles();
     foreach ($formData['styles'] as $key => $style) {
       $formData['styles'][$key] = html_entity_decode($style['inline_style'] ?? '');
     }
