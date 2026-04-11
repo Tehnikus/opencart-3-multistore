@@ -40,6 +40,7 @@
                       <td style="width: 300px;" class="text-left"><a href="{{ sort_tags }}" {% if sort == 'tags' %}class="{{ order|lower }}"{% endif %}>{{ entry_parent_tag }}</a></td>
                       <td>{{ column_seo }}</td>
                       <td class="text-center" style="width: 60px"><a href="{{ sort_date_modified }}" {% if sort == 'date_modified' %}class="{{ order|lower }}"{% endif %}>{{ column_date_modified }}</a></td>
+                      <td class="text-center" style="width: 60px"><a href="{{ sort_status }}" {% if sort == 'status' %}class="{{ order|lower }}"{% endif %}>{{ column_status }}</a></td>
                       <td style="width: 60px"></td>
                     </tr>
                   </thead>
@@ -89,6 +90,13 @@
                             </p>
                           </td>
                           <td class="text-center">{{ article.date_modified }}</td>
+                          <td>
+                            {% if article.status == '1' %}
+                              <button class="btn btn-success statusBtn" data-article-id="{{ article.article_id }}" data-article-status="{{ article.status }}" type="button"><i class="fa fa-play"></i></button>
+                            {% else %}
+                              <button class="btn btn-danger statusBtn" data-article-id="{{ article.article_id }}" data-article-status="{{ article.status }}" type="button"><i class="fa fa-stop"></i></button>
+                            {% endif %}
+                          </td>
                           <td class="text-center"><a href="{{ article.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
                         </tr>
                       {% endfor %}
