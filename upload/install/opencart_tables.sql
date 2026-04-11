@@ -7604,6 +7604,7 @@ DROP TABLE IF EXISTS `oc_blog_tag_to_store`;
 CREATE TABLE `oc_blog_tag_to_store` (
   `blog_tag_id`         INT NOT NULL AUTO_INCREMENT,
   `store_id`            INT NOT NULL,
+  `status`              TINYINT NOT NULL DEFAULT '0',
   `date_added`          DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   `date_modified`       DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY (`blog_tag_id`, `store_id`)
