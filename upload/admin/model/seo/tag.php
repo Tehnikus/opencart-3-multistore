@@ -287,6 +287,22 @@ class ModelSeoTag extends Model {
 
     return $result ?? [];
   }
+  public function getProductTags($seo_tag_id) : array {
+    
+    if ($seo_tag_id === null) {
+      return [];
+    }
+
+    $query = $this->db->query("
+      SELECT
+        product_id
+      FROM " . DB_PREFIX . "product_seo_tag
+      WHERE `seo_tag_id`  = " . (int) $seo_tag_id . "
+        AND `store_id`    = " . (int) $this->session->data['store_id'] . "
+    ");
+
+    return $query->rows ?? [];
+  }
 
   public function getUsedIcons() : array {
     

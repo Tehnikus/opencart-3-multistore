@@ -99,9 +99,11 @@ class ControllerSeoTag extends Controller {
       $formData['styles'][$key] = html_entity_decode($style['inline_style'] ?? '');
     }
 
-    // Replace actual data with POST data
-    if ($this->request->server['REQUEST_METHOD'] == 'POST') {
-      $formData = $this->request->post;
+    // Get product names
+    $this->load->model('catalog/product');
+    foreach ($formData['product_tags'] as $key => $product) {
+      $product = $this->model_catalog_product->getProduct($product['product_id']);
+      $formData['product_tags'][$key]['name'] = $product['name'];
     }
 
     return $formData;
