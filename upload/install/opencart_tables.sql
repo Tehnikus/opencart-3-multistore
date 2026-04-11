@@ -7525,7 +7525,7 @@ DROP TABLE IF EXISTS `oc_article_to_store`;
 CREATE TABLE `oc_article_to_store` (
   `article_id`          INT NOT NULL AUTO_INCREMENT,
   `store_id`            INT NOT NULL,
-  `status`              INT NOT NULL DEFAULT '0',
+  `status`              TINYINT NOT NULL DEFAULT '0',
   `date_added`          DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   `date_modified`       DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY (`article_id`, `store_id`)
