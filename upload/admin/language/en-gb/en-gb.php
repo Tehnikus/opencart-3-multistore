@@ -266,7 +266,7 @@ $_['text_seo_url']                  = 'SEO URLs';
 $_['text_seo_url_setting']          = 'SEO URLs settings';
 $_['text_facet_filter']             = 'Filter settings';
 $_['text_seo_robots_editor']        = 'Edit robots.txt';
-// BLog
+// Blog
 $_['text_blog']                     = 'Blog';
 $_['text_blog_articles']            = 'Articles';
 $_['text_blog_tags']                = 'Tags';
@@ -278,6 +278,11 @@ $_['button_copy_to_meta_title']     = 'Copy to Meta title';
 $_['button_copy_to_h1']             = 'Copy to H1';
 $_['button_translate']              = 'Translate from default language';
 $_['button_add_lang_postfix']       = 'Add language postfix to URL';
+
+// Common inputs translations
+$_['entry_status']                  = 'Status';
+$_['option_on']                     = 'On';
+$_['option_off']                    = 'Off';
 
 /* When doing translations only include the matching language code */
 
