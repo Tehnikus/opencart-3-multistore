@@ -122,6 +122,19 @@ Class ModelCatalogFacet extends Model {
 
         UNION ALL
 
+        /* SEO TAGS */
+        SELECT
+          pst.`product_id`        AS `product_id`,
+          pst.`store_id`          AS `store_id`,
+          pst.`seo_tag_id`        AS `facet_value_id`,
+          0                       AS `facet_group_id`,
+          6                       AS `facet_type`
+        FROM " . DB_PREFIX . "product_seo_tag pst
+        JOIN " . DB_PREFIX . "product_to_store p2s
+          ON pst.`product_id` = p2s.`product_id`
+
+        UNION ALL
+
         /* SUPPLIER */
         SELECT
           p.`product_id`          AS `product_id`,
@@ -544,6 +557,23 @@ Class ModelCatalogFacet extends Model {
         JOIN " . DB_PREFIX . "manufacturer_description md
           ON md.`manufacturer_id` = m.`manufacturer_id`
           AND md.`store_id` = m2s.`store_id`
+
+        UNION ALL
+
+        SELECT 
+          6 AS `facet_type`,
+          td.`name` AS `name`,
+          NULL AS `group_name`,
+          td.`seo_tag_id` AS `facet_value_id`,
+          0 AS `facet_group_id`,
+          td.`language_id` AS `language_id`,
+          td.`store_id` AS `store_id`,
+          0 AS `sort_order`,
+          0 AS `group_sort_order`
+        FROM " . DB_PREFIX . "seo_tag_description td
+        JOIN " . DB_PREFIX . "seo_tag_to_store t2s
+          ON  t2s.`seo_tag_id` = td.`seo_tag_id`
+          AND t2s.`store_id`   = td.`store_id`
       
       ) src
 
@@ -627,7 +657,7 @@ Class ModelCatalogFacet extends Model {
         $storeWhere
     ");
 
-    // 6. Manufacturers
+    // 5. Manufacturers
     $this->db->query("
         DELETE fi
         FROM " . DB_PREFIX . "facet_index fi
@@ -636,6 +666,18 @@ Class ModelCatalogFacet extends Model {
           AND m.store_id = fi.store_id
         WHERE fi.facet_type = 5
         AND m.manufacturer_id IS NULL
+        $storeWhere
+    ");
+
+    // 6. SEO tags
+    $this->db->query("
+        DELETE fi
+        FROM " . DB_PREFIX . "facet_index fi
+        LEFT JOIN " . DB_PREFIX . "seo_tag_to_store st
+          ON st.seo_tag_id = fi.facet_value_id
+          AND st.store_id = fi.store_id
+        WHERE fi.facet_type = 6
+        AND st.seo_tag_id IS NULL
         $storeWhere
     ");
 
