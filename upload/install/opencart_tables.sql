@@ -2083,7 +2083,7 @@ DROP TABLE IF EXISTS `oc_facet_index`;
 CREATE TABLE `oc_facet_index` (
   `product_id`      INT NOT NULL,
   `store_id`        INT NOT NULL,
-  `facet_type`      ENUM('category_id', 'filter', 'option', 'attribute', 'manufacturer_id', 'tag_id', 'supplier_id', 'is_available', 'has_discount', 'is_featured') NOT NULL,
+  `facet_type`      ENUM('category_id', 'filter', 'option', 'attribute', 'manufacturer_id', 'tag', 'supplier_id', 'is_available', 'has_discount', 'is_featured') NOT NULL,
   `facet_value_id`  INT NOT NULL,  -- Id of category/filter/option/attribute/manufacturer
   `facet_group_id`  INT NOT NULL,  -- Parent group of facet_value_id: filter group id for filters, parent category id for categories, etc. Zero if not applicable (manufacturer, has_discount)
   PRIMARY KEY (`facet_value_id`, `facet_type`, `store_id`, `product_id`, `facet_group_id`),
@@ -2096,7 +2096,7 @@ DROP TABLE IF EXISTS `oc_facet_name`;
 CREATE TABLE oc_facet_name (
   `name`              VARCHAR(255) NOT NULL,
   `group_name`        VARCHAR(255) DEFAULT NULL,
-  `facet_type`        ENUM('category_id', 'filter', 'option', 'attribute', 'manufacturer_id', 'tag_id', 'supplier_id', 'is_available', 'has_discount', 'is_featured') NOT NULL,
+  `facet_type`        ENUM('category_id', 'filter', 'option', 'attribute', 'manufacturer_id', 'tag', 'supplier_id', 'is_available', 'has_discount', 'is_featured') NOT NULL,
   `facet_value_id`    INT NOT NULL,
   `facet_group_id`    INT NOT NULL DEFAULT 0,
   `language_id`       INT NOT NULL DEFAULT 1,
