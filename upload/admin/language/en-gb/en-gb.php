@@ -191,7 +191,7 @@ $_['entry_image_title']             = 'Image title';
 // List entries
 $_['edit_filter_group']             = 'Edit %s filter group';
 $_['edit_option_group']             = 'Edit %s option group';
-$_['edit_attribute_group']          = 'Edit %s attribute group';
+$_['edit_attribute']                = 'Edit %s attribute';
 // Table columns
 $_['column_language']               = 'Language';
 $_['column_store']                  = 'Store';
