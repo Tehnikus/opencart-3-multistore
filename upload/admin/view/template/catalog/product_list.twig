@@ -197,7 +197,11 @@
                         {% endfor %}
                       </div>
                     </td>
-                    <td class="text-center"><b>{{ product.product_attributes }}</b></td>
+                    <td class="text-center">
+                      {% for attribute in product.product_attributes %}
+                         <a href="index.php?route=catalog/attribute/edit&user_token={{ user_token }}&attribute_id={{ attribute.attribute_id }}" title="{{ edit_attribute|format(attribute.name) }}" target="_blank"><span class="badge badge-sm">{{ attribute.name }}</span>
+                      {% endfor %}
+                    </td>
                     <td class="text-right">{% if product.special %} <span style="text-decoration: line-through;">{{ product.price }}</span><br/>
                       <div class="text-danger"><b>{{ product.special }}</b></div>
                       {% else %}
