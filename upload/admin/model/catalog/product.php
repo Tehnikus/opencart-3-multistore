@@ -1133,16 +1133,29 @@ class ModelCatalogProduct extends Model {
 				) AS `parent_name`,
 				(SELECT JSON_ARRAYAGG(p2s.`store_id`) FROM " . DB_PREFIX . "product_to_store p2s WHERE p2s.`product_id` = p.`product_id`) AS stores,
 				(SELECT JSON_OBJECTAGG(p2s.`store_id`, p2s.`status`) FROM " . DB_PREFIX . "product_to_store p2s WHERE p2s.`product_id` = p.`product_id`) AS status_to_store,
-				(SELECT COUNT(pa.`attribute_id`) FROM " . DB_PREFIX . "product_attribute pa WHERE pa.`product_id` = p.`product_id` AND pa.`store_id` = p2s.`store_id`) AS product_attributes,
-
+				(SELECT
+					JSON_ARRAYAGG(
+						JSON_OBJECT(
+							'name', 				ad.`name`,
+							'attribute_id', pa.`attribute_id`
+						)
+					)
+					FROM " . DB_PREFIX . "product_attribute pa
+					JOIN " . DB_PREFIX . "attribute_description ad
+						ON ad.`attribute_id` = pa.attribute_id
+						AND ad.`language_id` = '" . (int) $this->config->get('config_language_id') . "'
+						AND ad.`store_id` 	 = '" . (int) $this->session->data['store_id'] . "'
+					WHERE pa.`product_id` = p2s.product_id
+						AND pa.`store_id` 	= '" . (int) $this->session->data['store_id'] . "'
+				) AS product_attributes,
 				-- Product options list
 				(SELECT 
 					JSON_OBJECTAGG(
 						t.option_id,
 						JSON_OBJECT(
-							'name', od.`name`,
+							'name', 		od.`name`,
 							'group_id', od.`option_id`,
-							'values', options_json
+							'values', 	options_json
 						)
 					)
 					FROM (
@@ -1266,11 +1279,12 @@ class ModelCatalogProduct extends Model {
 		$query = $this->db->query($sql);
 		
 		foreach ($query->rows ?? [] as $row) {
-			$row['stores'] 					= json_decode($row['stores'] ?? '[]');
-			$row['status_to_store'] = json_decode($row['status_to_store'] ?? '[]', true);
-			$row['product_filters'] = json_decode($row['product_filters'] ?? '[]', true);
-			$row['product_options'] = json_decode($row['product_options'] ?? '[]', true);
-			$row['seo'] 						= json_decode($row['seo'] ?? '[]', true);
+			$row['stores'] 							= json_decode($row['stores'] ?? '[]');
+			$row['status_to_store'] 		= json_decode($row['status_to_store'] ?? '[]', true);
+			$row['product_filters'] 		= json_decode($row['product_filters'] ?? '[]', true);
+			$row['product_attributes'] 	= json_decode($row['product_attributes'] ?? '[]', true);
+			$row['product_options'] 		= json_decode($row['product_options'] ?? '[]', true);
+			$row['seo'] 								= json_decode($row['seo'] ?? '[]', true);
 
 			$result[] = $row;
 		}
@@ -1797,7 +1811,7 @@ class ModelCatalogProduct extends Model {
 
 	// Set product status
 	public function setProductStatus($product_id, $status) : int {
-		// Check if product is assocated with current store
+		// Check if product is associated with current store
 		$productIsAssociated = $this->db->query("
 			SELECT
 				`product_id`
