@@ -1350,13 +1350,13 @@
 	  html += '    <option value="1">{{ text_yes }}</option>';
 	  html += '  </select></td>';
     // Wholesale option price
-    html += '  <td>';
-    html += '  <td class="text-right"><select name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][wholesale_price_prefix]" class="form-control">';
-	  html += '    <option value="+">+</option>';
-	  html += '    <option value="-">-</option>';
-	  html += '  </select>';
+    html += '  <td class="text-right">';
+    html += '   <select name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][wholesale_price_prefix]" class="form-control">';
+	  html += '     <option value="+">+</option>';
+	  html += '     <option value="-">-</option>';
+	  html += '   </select>';
     html += '   <input type="text" name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][wholesale_price]" value="" placeholder="{{ entry_wholesale_price }}" class="form-control" />';
-    html+ = '</td>';
+    html += '   </td>';
     // End wholesale option price
 	  html += '  <td class="text-right"><select name="product_option[' + option_row + '][product_option_value][' + option_value_row + '][price_prefix]" class="form-control">';
 	  html += '    <option value="+">+</option>';
