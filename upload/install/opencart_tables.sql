@@ -2328,6 +2328,8 @@ CREATE TABLE `oc_product_option_value` (
   `subtract`                TINYINT NOT NULL,
   `price`                   DECIMAL(15,4) NOT NULL,
   `price_prefix`            VARCHAR(1) NOT NULL,
+  `wholesale_price`         DECIMAL(15,4) NOT NULL,
+  `wholesale_price_prefix`  VARCHAR(1) NOT NULL,
   `points`                  INT NOT NULL,
   `points_prefix`           VARCHAR(1) NOT NULL,
   `weight`                  DECIMAL(15,8) NOT NULL,
