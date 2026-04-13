@@ -2,8 +2,12 @@
 class ModelSeoTag extends Model {
 
   private $sortOrders = [
-    'name'          => 'td.`name`',
-    'date_modified' => 't2s.`date_modified`',
+    'date_modified'   => 't2s.`date_modified`',
+    'name'            => 'td.`name`',
+    'product_count'   => '`product_count`',
+    'sort_order'      => 't2s.`sort_order`',
+    'show_as_facet'   => 't2s.`show_as_facet`',
+    'show_as_flag'    => 't2s.`show_as_flag`',
   ];
 
   public function addTag($data) {
@@ -228,7 +232,7 @@ class ModelSeoTag extends Model {
     
     // Orders
     $ordering = '';
-    $sortField = 't2s.`date_modified`';
+    $sortField = 't2s.`sort_order`';
 
     if (!empty($filter['sort']) && isset($this->sortOrders[$filter['sort']])) {
       $sortField = $this->sortOrders[$filter['sort']];
