@@ -7687,3 +7687,20 @@ CREATE TABLE `oc_seo_tag_description` (
   PRIMARY KEY (`seo_tag_id`, `language_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE `oc_product_search_index` (
+  `product_id`    INT NOT NULL,
+  `language_id`   INT NOT NULL,
+  `store_id`      INT NOT NULL,
+  `name`          TEXT NOT NULL, -- Product name + model + SKU
+  `brand`         TEXT NOT NULL, -- Manufacturer
+  `category`      TEXT NOT NULL, -- All categories
+  `extra`         TEXT NOT NULL, -- Options, attributes, filters, SEO tags
+  `date_modified` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`product_id`, `language_id`, `store_id`),
+
+  FULLTEXT INDEX `ft_name`     (`name`)     WITH PARSER ngram,
+  FULLTEXT INDEX `ft_brand`    (`brand`)    WITH PARSER ngram,
+  FULLTEXT INDEX `ft_category` (`category`) WITH PARSER ngram,
+  FULLTEXT INDEX `ft_extra`    (`extra`)    WITH PARSER ngram
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
