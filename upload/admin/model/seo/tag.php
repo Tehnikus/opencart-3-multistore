@@ -21,6 +21,7 @@ class ModelSeoTag extends Model {
           `inline_style`  = '" . $this->db->escape($data['tag']['inline_style'] ?? '') . "',
           `inline_icon`   = '" . $this->db->escape($data['tag']['inline_icon'] ?? '') . "',
           `show_as_flag`  = '" . ((isset($data['tag']['show_as_flag'])) ? '1' : '0') . "',
+          `show_as_facet` = '" . ((isset($data['tag']['show_as_facet'])) ? '1' : '0') . "',
           `date_added`    = NOW(),
           `date_modified` = NOW()
         ");
@@ -101,6 +102,7 @@ class ModelSeoTag extends Model {
           `inline_style`  = '" . $this->db->escape($data['tag']['inline_style'] ?? '') . "',
           `inline_icon`   = '" . $this->db->escape($data['tag']['inline_icon'] ?? '') . "',
           `show_as_flag`  = '" . ((isset($data['tag']['show_as_flag'])) ? '1' : '0') . "',
+          `show_as_facet` = '" . ((isset($data['tag']['show_as_facet'])) ? '1' : '0') . "',
           `date_modified` = NOW()
         WHERE `seo_tag_id` = " . (int) $seo_tag_id . "
           AND `store_id` 	 = '" . (int) $this->session->data['store_id'] . "'
