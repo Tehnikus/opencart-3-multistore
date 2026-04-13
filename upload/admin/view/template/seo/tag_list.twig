@@ -40,8 +40,10 @@
                       <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
                       <td class="text-left"><a href="{{ sort_name }}" {% if sort == 'name' %}class="{{ order|lower }}"{% endif %}>{{ column_name }}</a></td>
                       <td>{{ column_preview }}</td>
-                      <td style="width: 60px" class="text-center"><a href="{{ sort_product_count }}" {% if sort == 'product_count' %}class="{{ order|lower }}"{% endif %}>{{ column_product_count }}</a></td>
-                      <td style="width: 60px" class="text-center"><a href="{{ sort_show_as_flag }}" {% if sort == 'show_as_flag' %}class="{{ order|lower }}"{% endif %}>{{ column_show_as_flag }}</a></td>
+                      <td style="width: 70px" class="text-center"><a href="{{ sort_product_count }}" {% if sort == 'product_count' %}class="{{ order|lower }}"{% endif %}>{{ column_product_count }}</a></td>
+                      <td style="width: 70px" class="text-center"><a href="{{ sort_sort_order }}" {% if sort == 'sort_order' %}class="{{ order|lower }}"{% endif %}>{{ column_sort_order }}</a></td>
+                      <td style="width: 70px" class="text-center"><a href="{{ sort_show_as_facet }}" {% if sort == 'show_as_facet' %}class="{{ order|lower }}"{% endif %}>{{ column_show_as_facet }}</a></td>
+                      <td style="width: 70px" class="text-center"><a href="{{ sort_show_as_flag }}" {% if sort == 'show_as_flag' %}class="{{ order|lower }}"{% endif %}>{{ column_show_as_flag }}</a></td>
                       <td style="width: 60px"></td>
                     </tr>
                   </thead>
@@ -53,6 +55,8 @@
                           <td class="text-left"><b>{{ tag.name }}</b></td>
                           <td><span class="badge" style="{{ tag.inline_style }}">{{ tag.inline_icon|raw }}&nbsp;{{ tag.name }}</span></td>
                           <td class="text-center"><b>{{ tag.product_count }}</b></td>
+                          <td class="text-center"><b>{{ tag.sort_order }}</b></td>
+                          <td class="text-center"><b>{% if tag.show_as_facet %}<i class="fa fa-check text-success"></i>{% else %}<i class="fa fa-times text-muted"></i>{% endif %}</b></td>
                           <td class="text-center"><b>{% if tag.show_as_flag %}<i class="fa fa-check text-success"></i>{% else %}<i class="fa fa-times text-muted"></i>{% endif %}</b></td>
                           <td class="text-center"><a href="{{ tag.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
                         </tr>
