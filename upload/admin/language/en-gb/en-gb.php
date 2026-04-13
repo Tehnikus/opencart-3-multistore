@@ -212,6 +212,7 @@ $_['column_route']                  = 'Route';
 $_['column_modules']                = 'Modules';
 $_['column_seo']                    = 'SEO Data';
 $_['column_date_modified']          = 'Date modified';
+$_['column_sort_order']             = 'Sort order';
 
 // Tabs
 $_['tab_languages']                 = 'Languages';

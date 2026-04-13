@@ -21,10 +21,9 @@ $_['button_add']                = 'Add new seo tag';
 $_['button_delete']             = 'Delete';
 
 // Columns
-$_['column_name']               = 'Name';
 $_['column_preview']            = 'Preview';
-$_['column_product_count']      = 'Product count';
 $_['column_show_as_flag']       = 'Show as flag';
+$_['column_show_as_facet']      = 'Show as filter';
 
 // Errors
 $_['e_name']                    = 'Set tag name';
