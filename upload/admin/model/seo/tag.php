@@ -202,6 +202,13 @@ class ModelSeoTag extends Model {
       ");
 
       $this->db->query("COMMIT");
+
+      // Rebuild facet indexes
+			$this->load->model('catalog/facet');
+			$store_id = (int) $this->session->data['store_id'];
+			$this->model_catalog_facet->buildFacetNames(facet_value_id: $seo_tag_id, facet_type: 6, store_id: $store_id);
+			$this->model_catalog_facet->buildFacetIndex(facet_value_id: $seo_tag_id, facet_type: 6, store_id: $store_id);
+
       return true;
 
     } catch (\Throwable $e) {
