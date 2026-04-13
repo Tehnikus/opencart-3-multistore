@@ -8,13 +8,70 @@ class ModelCheckoutOrder extends Model {
 		// Products
 		if (isset($data['products'])) {
 			foreach ($data['products'] as $product) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "order_product SET order_id = '" . (int)$order_id . "', product_id = '" . (int)$product['product_id'] . "', name = '" . $this->db->escape($product['name']) . "', model = '" . $this->db->escape($product['model']) . "', quantity = '" . (int)$product['quantity'] . "', price = '" . (float)$product['price'] . "', total = '" . (float)$product['total'] . "', tax = '" . (float)$product['tax'] . "', reward = '" . (int)$product['reward'] . "'");
+				$this->db->query("
+					INSERT INTO " . DB_PREFIX . "order_product 
+					SET 
+						`order_id` 			= '" . (int)$order_id . "', 
+						`product_id` 		= '" . (int)$product['product_id'] . "', 
+						`name` 					= '" . $this->db->escape($product['name']) . "', 
+						`model` 				= '" . $this->db->escape($product['model']) . "', 
+						`quantity` 			= '" . (int)$product['quantity'] . "', 
+						`price` 				= '" . (float)$product['price'] . "', 
+						`total` 				= '" . (float)$product['total'] . "', 
+						`tax` 					= '" . (float)$product['tax'] . "', 
+						`reward` 				= '" . (int)$product['reward'] . "'
+					");
 
 				$order_product_id = $this->db->getLastId();
 
 				foreach ($product['option'] as $option) {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "order_option SET order_id = '" . (int)$order_id . "', order_product_id = '" . (int)$order_product_id . "', product_option_id = '" . (int)$option['product_option_id'] . "', product_option_value_id = '" . (int)$option['product_option_value_id'] . "', name = '" . $this->db->escape($option['name']) . "', `value` = '" . $this->db->escape($option['value']) . "', `type` = '" . $this->db->escape($option['type']) . "'");
+					$this->db->query("
+						INSERT INTO " . DB_PREFIX . "order_option 
+						SET 
+							`order_id` 								= '" . (int) $order_id . "', 
+							`order_product_id` 				= '" . (int) $order_product_id . "', 
+							`product_option_id` 			= '" . (int) $option['product_option_id'] . "', 
+							`product_option_value_id` = '" . (int) $option['product_option_value_id'] . "', 
+							`name` 										= '" . $this->db->escape($option['name']) . "', 
+							`value` 									= '" . $this->db->escape($option['value']) . "', 
+							`type` 										= '" . $this->db->escape($option['type']) . "'
+						");
 				}
+
+				// Update product wholesale price including options
+				// The wholesale price is not passed through frontend like the rest of product's data
+				// It's not needed in frontend, the DB stays the only source of truth and besides is't easier to select it from DB right on the place
+				$wholesalePrice = $this->db->query("
+					SELECT
+						`wholesale_price`
+					FROM " . DB_PREFIX . "product
+					WHERE product_id = '" . (int)$product['product_id'] . "'
+				")->row['wholesale_price'] ?? 0;
+
+				foreach ($product['option'] as $option) {
+					$optionWholesalePrice = $this->db->query("
+						SELECT
+							`wholesale_price`,
+							`wholesale_price_prefix`
+						FROM " . DB_PREFIX . "product_option_value
+						WHERE `product_option_value_id` = '" . (int)$option['product_option_value_id'] . "'
+					")->row;
+
+					if ($optionWholesalePrice['wholesale_price_prefix'] == '-') {
+						$wholesalePrice = (float) $wholesalePrice - (float) $optionWholesalePrice['wholesale_price'];
+					}
+					if ($optionWholesalePrice['wholesale_price_prefix'] == '+') {
+						$wholesalePrice = (float) $wholesalePrice + (float) $optionWholesalePrice['wholesale_price'];
+					}
+				}
+
+				// Write calculated price to DB for each product
+				$this->db->query("
+					UPDATE " . DB_PREFIX . "order_product
+					SET 
+						`wholesale_price` = " . (float) $wholesalePrice . "
+					WHERE `order_product_id` = " . (int) $order_product_id . "
+				");
 
 				// Update product sorts
 				$this->db->query("
@@ -104,13 +161,72 @@ class ModelCheckoutOrder extends Model {
 		// Products
 		if (isset($data['products'])) {
 			foreach ($data['products'] as $product) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "order_product SET order_id = '" . (int)$order_id . "', product_id = '" . (int)$product['product_id'] . "', name = '" . $this->db->escape($product['name']) . "', model = '" . $this->db->escape($product['model']) . "', quantity = '" . (int)$product['quantity'] . "', price = '" . (float)$product['price'] . "', total = '" . (float)$product['total'] . "', tax = '" . (float)$product['tax'] . "', reward = '" . (int)$product['reward'] . "'");
+				$this->db->query("
+					INSERT INTO " . DB_PREFIX . "order_product 
+					SET 
+						`order_id`    = '" . (int)$order_id . "', 
+						`product_id`  = '" . (int)$product['product_id'] . "', 
+						`name`        = '" . $this->db->escape($product['name']) . "', 
+						`model`       = '" . $this->db->escape($product['model']) . "', 
+						`quantity`    = '" . (int)$product['quantity'] . "', 
+						`price`       = '" . (float)$product['price'] . "', 
+						`total`       = '" . (float)$product['total'] . "', 
+						`tax`         = '" . (float)$product['tax'] . "', 
+						`reward`      = '" . (int)$product['reward'] . "'
+				");
 
 				$order_product_id = $this->db->getLastId();
 
 				foreach ($product['option'] as $option) {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "order_option SET order_id = '" . (int)$order_id . "', order_product_id = '" . (int)$order_product_id . "', product_option_id = '" . (int)$option['product_option_id'] . "', product_option_value_id = '" . (int)$option['product_option_value_id'] . "', name = '" . $this->db->escape($option['name']) . "', `value` = '" . $this->db->escape($option['value']) . "', `type` = '" . $this->db->escape($option['type']) . "'");
+					$this->db->query("
+						INSERT INTO " . DB_PREFIX . "order_option 
+						SET 
+							order_id = '" . (int)$order_id . "', 
+							order_product_id = '" . (int)$order_product_id . "', 
+							product_option_id = '" . (int)$option['product_option_id'] . "', 
+							product_option_value_id = '" . (int)$option['product_option_value_id'] . "', 
+							name = '" . $this->db->escape($option['name']) . "', 
+							`value` = '" . $this->db->escape($option['value']) . "', 
+							`type` = '" . $this->db->escape($option['type']) . "'
+					");
 				}
+
+				
+				// Update product wholesale price including options
+				// The wholesale price is not passed through frontend like the rest of product's data
+				// It's not needed in frontend, the DB stays the only source of truth and besides is't easier to select it from DB right on the place
+				$wholesalePrice = $this->db->query("
+					SELECT
+						`wholesale_price`
+					FROM " . DB_PREFIX . "product
+					WHERE product_id = '" . (int)$product['product_id'] . "'
+				")->row['wholesale_price'] ?? 0;
+
+				foreach ($product['option'] as $option) {
+					$optionWholesalePrice = $this->db->query("
+						SELECT
+							`wholesale_price`,
+							`wholesale_price_prefix`
+						FROM " . DB_PREFIX . "product_option_value
+						WHERE `product_option_value_id` = '" . (int)$option['product_option_value_id'] . "'
+					")->row;
+
+					if ($optionWholesalePrice['wholesale_price_prefix'] == '-') {
+						$wholesalePrice = (float) $wholesalePrice - (float) $optionWholesalePrice['wholesale_price'];
+					}
+					if ($optionWholesalePrice['wholesale_price_prefix'] == '+') {
+						$wholesalePrice = (float) $wholesalePrice + (float) $optionWholesalePrice['wholesale_price'];
+					}
+				}
+
+				// Write calculated price to DB for each product
+				$this->db->query("
+					UPDATE " . DB_PREFIX . "order_product
+					SET 
+						`wholesale_price` = " . (float) $wholesalePrice . "
+					WHERE `order_product_id` = " . (int) $order_product_id . "
+				");
+				
 			}
 		}
 
