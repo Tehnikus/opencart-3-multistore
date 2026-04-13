@@ -159,7 +159,10 @@ class niftyAutocomplete {
           } else {
             // If search box is not closed then highlight next item
             // Remove clicked item from items index, so highest currentIndex number is equal to items length
-            this.items.splice(this.currentIndex, 1);
+            const clickedIndex = this.items.indexOf(wrapper);
+            this.items.splice(clickedIndex, 1);
+            this.currentIndex = clickedIndex;
+            // this.items.splice(this.currentIndex, 1);
             // No more items, close results
             if (this.items.length === 0) {
               this.clearResults();
