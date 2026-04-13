@@ -15,7 +15,7 @@ class ControllerSeoTag extends Controller {
     $this->load->model('localisation/language');
     $this->load->model('seo/tag');
     $user_token = $this->session->data['user_token'];
-    $url = '&' . http_build_query(array_intersect_key($this->request->get, array_flip(['page', 'order'])));
+    $url = '&' . http_build_query(array_intersect_key($this->request->get, array_flip(['page'])));
     
     // Get items list
     $filter_data = array(
@@ -42,8 +42,14 @@ class ControllerSeoTag extends Controller {
       'user_token'    => $user_token,
       'add'           => $this->url->link('seo/tag/add', 'user_token=' . $user_token, true),
       'delete'        => $this->url->link('seo/tag/delete', 'user_token=' . $user_token, true),
-      'sort'          => $this->request->get['sort'] ?? 'date_added',
-      'sort_name'     => $this->url->link('seo/tag', 'user_token=' . $user_token . $this->getSortOrder('name') . $url, true),
+      // Sorts
+      'sort'                  => $this->request->get['sort'] ?? 'sort_order',
+      'order'                 => $this->request->get['order'] ?? '',
+      'sort_name'             => $this->url->link('seo/tag', 'user_token=' . $user_token . $this->getSortOrder('name') . $url, true),
+      'sort_product_count'    => $this->url->link('seo/tag', 'user_token=' . $user_token . $this->getSortOrder('product_count') . $url, true),
+      'sort_sort_order'       => $this->url->link('seo/tag', 'user_token=' . $user_token . $this->getSortOrder('sort_order') . $url, true),
+      'sort_show_as_facet'    => $this->url->link('seo/tag', 'user_token=' . $user_token . $this->getSortOrder('show_as_facet') . $url, true),
+      'sort_show_as_flag'     => $this->url->link('seo/tag', 'user_token=' . $user_token . $this->getSortOrder('show_as_flag') . $url, true),
     ];
 
     if (isset($this->session->data['success'])) {
