@@ -17,6 +17,7 @@ class ModelSeoTag extends Model {
         INSERT INTO " . DB_PREFIX . "seo_tag_to_store 
         SET
           `store_id` 			= '" . (int) $this->session->data['store_id'] . "', 
+          `sort_order`    = '" . (int) $data['tag']['sort_order'] . "',
           `inline_style`  = '" . $this->db->escape($data['tag']['inline_style'] ?? '') . "',
           `inline_icon`   = '" . $this->db->escape($data['tag']['inline_icon'] ?? '') . "',
           `show_as_flag`  = '" . ((isset($data['tag']['show_as_flag'])) ? '1' : '0') . "',
@@ -96,6 +97,7 @@ class ModelSeoTag extends Model {
       $this->db->query("
         UPDATE " . DB_PREFIX . "seo_tag_to_store 
         SET
+          `sort_order`    = '" . (int) $data['tag']['sort_order'] . "',
           `inline_style`  = '" . $this->db->escape($data['tag']['inline_style'] ?? '') . "',
           `inline_icon`   = '" . $this->db->escape($data['tag']['inline_icon'] ?? '') . "',
           `show_as_flag`  = '" . ((isset($data['tag']['show_as_flag'])) ? '1' : '0') . "',
