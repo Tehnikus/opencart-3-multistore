@@ -1871,6 +1871,7 @@ CREATE TABLE `oc_order_product` (
   `model`             VARCHAR(255) NOT NULL,
   `quantity`          INT NOT NULL,
   `price`             DECIMAL(15,4) NOT NULL DEFAULT '0.0000',
+  `wholesale_price`   DECIMAL(15,4) NOT NULL DEFAULT '0.0000',
   `total`             DECIMAL(15,4) NOT NULL DEFAULT '0.0000',
   `tax`               DECIMAL(15,4) NOT NULL DEFAULT '0.0000',
   `reward`            INT NOT NULL,
