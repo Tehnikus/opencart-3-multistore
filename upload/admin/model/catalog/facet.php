@@ -132,6 +132,9 @@ Class ModelCatalogFacet extends Model {
         FROM " . DB_PREFIX . "product_seo_tag pst
         JOIN " . DB_PREFIX . "product_to_store p2s
           ON pst.`product_id` = p2s.`product_id`
+        JOIN " . DB_PREFIX . "seo_tag_to_store st
+          ON st.`seo_tag_id` = pst.`seo_tag_id`
+        WHERE st.`show_as_facet` = 1
 
         UNION ALL
 
@@ -572,8 +575,9 @@ Class ModelCatalogFacet extends Model {
           0 AS `group_sort_order`
         FROM " . DB_PREFIX . "seo_tag_description td
         JOIN " . DB_PREFIX . "seo_tag_to_store t2s
-          ON  t2s.`seo_tag_id` = td.`seo_tag_id`
-          AND t2s.`store_id`   = td.`store_id`
+          ON  t2s.`seo_tag_id`    = td.`seo_tag_id`
+          AND t2s.`store_id`      = td.`store_id`
+          AND t2s.`show_as_facet` = 1
       
       ) src
 
