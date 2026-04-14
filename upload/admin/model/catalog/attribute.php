@@ -15,6 +15,13 @@ class ModelCatalogAttribute extends Model {
 	
 			$attribute_id = $this->db->getLastId();
 
+			// Delete SEO URL just in case, should never happen
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "seo_url
+				WHERE `query` 	 = 'attribute_id=" . (int) $attribute_id . "'
+					AND `store_id` = " . (int) $this->session->data['store_id'] . "
+			");
+
 			// Delete cache
 			$this->deleteCache($attribute_id);
 	
@@ -27,6 +34,18 @@ class ModelCatalogAttribute extends Model {
 						`store_id` 			= '" . (int) $this->session->data['store_id'] . "', 
 						`name` 					= '" . $this->db->escape($value['name']) . "'
 				");
+
+				// Save new attribute URL
+				if ($value['url']) {
+					$this->db->query("
+						INSERT INTO " . DB_PREFIX . "seo_url
+						SET
+							`query`   = 'attribute_id=" . (int) $attribute_id . "',
+							`keyword` = '" . $this->db->escape($value['url']) . "',
+							`language_id` 	= '" . (int) $language_id . "', 
+							`store_id` 			= '" . (int) $this->session->data['store_id'] . "'
+					");
+				}
 			}
 
 			// Stores association
