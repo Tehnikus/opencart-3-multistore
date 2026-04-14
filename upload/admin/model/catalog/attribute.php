@@ -36,7 +36,7 @@ class ModelCatalogAttribute extends Model {
 				");
 
 				// Save new attribute URL
-				if ($value['url']) {
+				if (isset($value['url']) && $value['url'] !== '') {
 					$this->db->query("
 						INSERT INTO " . DB_PREFIX . "seo_url
 						SET
@@ -118,7 +118,7 @@ class ModelCatalogAttribute extends Model {
 				");
 
 				// Save new attribute URL
-				if ($value['url']) {
+				if (isset($value['url']) && $value['url'] !== '') {
 					$this->db->query("
 						INSERT INTO " . DB_PREFIX . "seo_url
 						SET
