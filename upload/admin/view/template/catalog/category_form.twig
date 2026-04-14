@@ -26,66 +26,18 @@
       <div class="panel-body">
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-category" class="form-horizontal">
           <ul class="nav nav-tabs">
-            <li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a></li>
+            <li class="active"><a href="#tab-description"  data-toggle="tab">{{ tab_description }}</a></li>
             <li><a href="#tab-data" data-toggle="tab">{{ tab_data }}</a></li>
             <li><a href="#tab-seo" data-toggle="tab">{{ tab_seo }}</a></li>
             <li><a href="#tab-design" data-toggle="tab">{{ tab_design }}</a></li>
-            <li><a href="#tab-description"  data-toggle="tab">{{ tab_description }}</a></li>
+
             <li><a href="#tab-images"       data-toggle="tab">{{ tab_image }}</a></li>
             <li><a href="#tab-faq"          data-toggle="tab">{{ tab_faq }}</a></li>
-            <li><a href="#tab-how_to"        data-toggle="tab">{{ tab_how_to }}</a></li>
+            <li><a href="#tab-how_to"       data-toggle="tab">{{ tab_how_to }}</a></li>
             <li><a href="#tab-footer"       data-toggle="tab">{{ tab_footer }}</a></li>
           </ul>
           <div class="tab-content">
-            <div class="tab-pane active" id="tab-general">
-              <ul class="nav nav-tabs" id="language">
-                {% for language in languages %}
-                <li><a href="#language{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
-                {% endfor %}
-              </ul>
-              <div class="tab-content">
-                {% for language in languages %}
-                <div class="tab-pane" id="language{{ language.language_id }}">
-                  <div class="form-group required">
-                    <label class="col-sm-2 control-label" for="input-name{{ language.language_id }}">{{ entry_name }}</label>
-                    <div class="col-sm-10">
-                      <input type="text" name="category_description[{{ language.language_id }}][name]" value="{{ category_description[language.language_id] ? category_description[language.language_id].name }}" placeholder="{{ entry_name }}" id="input-name{{ language.language_id }}" class="form-control" />
-                      {% if error_name[language.language_id] %}
-                      <div class="text-danger">{{ error_name[language.language_id] }}</div>
-                      {% endif %}
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-sm-2 control-label" for="input-description{{ language.language_id }}">{{ entry_description }}</label>
-                    <div class="col-sm-10">
-                      <textarea name="category_description[{{ language.language_id }}][description]" placeholder="{{ entry_description }}" id="input-description{{ language.language_id }}" data-toggle="summernote" data-lang="{{ summernote }}" class="form-control">{{ category_description[language.language_id] ? category_description[language.language_id].description }}</textarea>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-sm-2 control-label" for="input-meta-title{{ language.language_id }}">{{ entry_meta_title }}</label>
-                    <div class="col-sm-10">
-                      <input type="text" name="category_description[{{ language.language_id }}][meta_title]" value="{{ category_description[language.language_id] ? category_description[language.language_id].meta_title }}" placeholder="{{ entry_meta_title }}" id="input-meta-title{{ language.language_id }}" class="form-control" />
-                      {% if error_meta_title[language.language_id] %}
-                      <div class="text-danger">{{ error_meta_title[language.language_id] }}</div>
-                      {% endif %}
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-sm-2 control-label" for="input-meta-description{{ language.language_id }}">{{ entry_meta_description }}</label>
-                    <div class="col-sm-10">
-                      <textarea name="category_description[{{ language.language_id }}][meta_description]" rows="5" placeholder="{{ entry_meta_description }}" id="input-meta-description{{ language.language_id }}" class="form-control">{{ category_description[language.language_id] ? category_description[language.language_id].meta_description }}</textarea>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-sm-2 control-label" for="input-meta-keyword{{ language.language_id }}">{{ entry_meta_keyword }}</label>
-                    <div class="col-sm-10">
-                      <textarea name="category_description[{{ language.language_id }}][meta_keyword]" rows="5" placeholder="{{ entry_meta_keyword }}" id="input-meta-keyword{{ language.language_id }}" class="form-control">{{ category_description[language.language_id] ? category_description[language.language_id].meta_keyword }}</textarea>
-                    </div>
-                  </div>
-                </div>
-                {% endfor %}
-              </div>
-            </div>
+
             <div class="tab-pane" id="tab-data">
               <div class="form-group">
                 <label class="col-sm-2 control-label" for="input-parent">{{ entry_parent }}</label>
@@ -203,7 +155,8 @@
                   
                 </table>
               </div>
-            </div>            
+            </div>
+
             <div class="tab-pane" id="tab-design">
               <div class="table-responsive">
                 <table class="table table-bordered table-hover">
@@ -236,7 +189,7 @@
             </div>
             {% set data        =  category_description  %}
             {% set name_prefix = 'category_description' %}
-            <div class="tab-pane" id="tab-description">{% include "common/tab_description.twig" %}</div>
+            <div class="tab-pane active" id="tab-description">{% include "common/tab_description.twig" %}</div>
             <div class="tab-pane" id="tab-images">{% include "common/tab_images.twig"  with {name_prefix: 'category_images', mainImage: image, images: category_images} %}</div>
             <div class="tab-pane" id="tab-footer">{% include "common/tab_footer.twig" %}</div>
             <div class="tab-pane" id="tab-faq">{% include "common/tab_faq.twig" %}</div>
