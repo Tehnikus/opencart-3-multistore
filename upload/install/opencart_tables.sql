@@ -7417,15 +7417,27 @@ INSERT INTO `oc_zone_to_geo_zone` (`zone_to_geo_zone_id`, `country_id`, `zone_id
 
 -- Image description tables
 
+DROP TABLE IF EXISTS `oc_category_image`;
+CREATE TABLE `oc_category_image` (
+  `image_id`            INT NOT NULL AUTO_INCREMENT,
+  `category_id`         INT NOT NULL,
+  `store_id`            INT NOT NULL DEFAULT '0',
+  `image`               VARCHAR(255) DEFAULT NULL,
+  `sort_order`          INT NOT NULL DEFAULT '0',
+  PRIMARY KEY (`image_id`),
+  KEY (`category_id`, `store_id`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 DROP TABLE IF EXISTS `oc_category_image_description`;
 CREATE TABLE `oc_category_image_description` (
-  `image_id`                INT NOT NULL,
-  `category_id`             INT NOT NULL,
-  `language_id`             INT NOT NULL,
-  `store_id`                INT NOT NULL,
-  `description`             TEXT NOT NULL,
-  PRIMARY KEY (`category_id`, `language_id`, `store_id`)
+  `image_id`            INT NOT NULL,
+  `category_id`         INT NOT NULL,
+  `language_id`         INT NOT NULL,
+  `store_id`            INT NOT NULL,
+  `description`         TEXT NOT NULL,
+  PRIMARY KEY (`image_id`, `language_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 DROP TABLE IF EXISTS `oc_product_image_description`;
 CREATE TABLE `oc_product_image_description` (
