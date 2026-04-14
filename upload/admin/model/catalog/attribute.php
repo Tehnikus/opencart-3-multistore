@@ -215,6 +215,13 @@ class ModelCatalogAttribute extends Model {
 					AND `store_id` 			= '" . (int) $this->session->data['store_id'] . "'		
 			");
 
+			// Delete attribute URL
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "seo_url
+				WHERE `query` 	 = 'attribute_id=" . (int) $attribute_id . "'
+					AND `store_id` = " . (int) $this->session->data['store_id'] . "
+			");
+
 			// Check if attribute exists in other stores
 			$attributeInOtherStores = $this->db->query("
 				SELECT
@@ -238,6 +245,12 @@ class ModelCatalogAttribute extends Model {
 						WHERE attribute_id = " . (int) $attribute_id
 					);
 				}
+
+				// Cleanup URLs
+				$this->db->query("
+					DELETE FROM " . DB_PREFIX . "seo_url
+					WHERE `query` 	 = 'attribute_id=" . (int) $attribute_id . "'
+				");
 			}
 
 			$this->db->query("COMMIT");
