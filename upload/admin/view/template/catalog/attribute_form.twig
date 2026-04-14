@@ -28,8 +28,24 @@
             <label class="col-sm-2 control-label">{{ entry_name }}</label>
             <div class="col-sm-10">
               {% for language in languages %}
-              <div class="input-group"><span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
-                <input type="text" name="attribute_description[{{ language.language_id }}][name]" value="{{ attribute_description[language.language_id] ? attribute_description[language.language_id].name }}" placeholder="{{ entry_name }}" class="form-control" />
+              <div class="input-group"><span class="input-group-addon">
+                <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
+                 {% include "common/button_create_seo_url.twig" with {seo_url_input: 'attribute_description[' ~ language.language_id ~ '][url]' } %}
+                <input 
+                  type="text" 
+                  name="attribute_description[{{ language.language_id }}][name]" 
+                  value="{{ attribute_description[language.language_id].name }}" 
+                  placeholder="{{ entry_name }}" 
+                  class="form-control" 
+                />
+                <input 
+                  type="text" 
+                  name="attribute_description[{{ language.language_id }}][url]"
+                  value="{{ attribute_description[language.language_id].url }}" 
+                  placeholder="{{ entry_keyword }}" 
+                  class="form-control"
+                />
+
               </div>
               {% if error_name[language.language_id] %}
               <div class="text-danger">{{ error_name[language.language_id] }}</div>
