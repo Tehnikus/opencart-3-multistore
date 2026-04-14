@@ -559,49 +559,53 @@ class ModelCatalogCategory extends Model {
 		}
 
 		try {
+
+			$tables = [
+				'category_description',
+				'category_filter',
+				'category_image',
+				'category_image_description',
+				'category_path',
+				'category_to_layout',
+				'category_to_store',
+				'coupon_category',
+				'product_to_category',
+			];
+
 			// Delete cache
 			$this->deleteCache($category_id);
 
-			$query = $this->db->query("
-				SELECT * FROM " . DB_PREFIX . "category_path 
+			// Get category children
+			$childCategories = $this->db->query("
+				SELECT 
+					DISTINCT category_id 
+				FROM " . DB_PREFIX . "category_path 
 				WHERE path_id  = '" . (int) $category_id . "'
 					AND store_id = '" . (int) $this->session->data['store_id'] . "'
 			");
 
+			// Delete category URL
 			$this->db->query("
-				DELETE FROM " . DB_PREFIX . "category_path 
-				WHERE category_id = '" . (int) $category_id . "'
-					AND store_id 		= '" . (int) $this->session->data['store_id'] . "'
-			");
-	
-			$this->db->query("
-				DELETE FROM " . DB_PREFIX . "category_description WHERE category_id = '" . (int)$category_id . "' AND store_id = '" . (int) $this->session->data['store_id'] . "'
-			");
-			$this->db->query("
-				DELETE FROM " . DB_PREFIX . "category_filter WHERE category_id = '" . (int)$category_id . "' AND store_id = '" . (int) $this->session->data['store_id'] . "'
-			");
-			$this->db->query("
-				DELETE FROM " . DB_PREFIX . "category_to_store WHERE category_id = '" . (int)$category_id . "' AND store_id = '" . (int) $this->session->data['store_id'] . "'
-			");
-			$this->db->query("
-				DELETE FROM " . DB_PREFIX . "category_to_layout WHERE category_id = '" . (int)$category_id . "' AND store_id = '" . (int) $this->session->data['store_id'] . "'
-			");
-			$this->db->query("
-				DELETE FROM " . DB_PREFIX . "product_to_category WHERE category_id = '" . (int)$category_id . "' AND store_id = '" . (int) $this->session->data['store_id'] . "'
-			");
-			$this->db->query("
-				DELETE FROM " . DB_PREFIX . "seo_url WHERE query = 'category_id=" . (int)$category_id . "' AND store_id = '" . (int) $this->session->data['store_id'] . "'
-			");
-			$this->db->query("
-				DELETE FROM " . DB_PREFIX . "coupon_category WHERE category_id = '" . (int)$category_id . "' AND store_id = '" . (int) $this->session->data['store_id'] . "'
+				DELETE FROM " . DB_PREFIX . "seo_url 
+				WHERE query 		= 'category_id=" . (int)$category_id . "' 
+					AND store_id 	= '" . (int) $this->session->data['store_id'] . "'
 			");
 
 			// Delete children categories
-			foreach ($query->rows as $result) {
+			foreach ($childCategories->rows as $result) {
 				// Delete cache
 				$this->deleteCache($result['category_id']);
 				// Second param is false so SQL transaction is not closed prematurely
 				$this->deleteCategory($result['category_id'], false);
+			}
+
+			// Delete all category data in current store 
+			foreach ($tables as $table) {
+				$this->db->query("
+					DELETE FROM " . DB_PREFIX . $table . "
+					WHERE category_id = " . (int) $category_id . "
+						AND store_id		= " . (int) $this->session->data['store_id'] . "
+				");
 			}
 
 			// Next code will fully delete every category data if it is not associated to any store
@@ -616,15 +620,6 @@ class ModelCatalogCategory extends Model {
 
 			// Delete all category data row if category is not present in any other store
 			if (!$categoryInOtherStores) {
-				$tables = [
-					'category',
-					'category_description',
-					'category_filter',
-					'category_to_layout',
-					'product_to_category',
-					'category_path',
-					'coupon_category',
-				];
 
 				// Remove all redundant data if present 
 				foreach ($tables as $table) {
@@ -644,6 +639,11 @@ class ModelCatalogCategory extends Model {
 				$this->db->query("
 					DELETE FROM " . DB_PREFIX . "seo_url
 					WHERE `query` = 'category_id=" . (int) $category_id . "'
+				");
+
+				$this->db->query("
+					DELETE FROM " . DB_PREFIX . "category
+					WHERE category_id = " . (int) $category_id . "
 				");
 			}
 	
