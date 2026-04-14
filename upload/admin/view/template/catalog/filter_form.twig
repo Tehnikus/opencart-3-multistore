@@ -92,6 +92,12 @@
                     {% if error_filter[filter_row][language.language_id] %}
                       <div class="text-danger">{{ error_filter[filter_row][language.language_id] }}</div>
                     {% endif %}
+                    {% if error_url_not_unique[filter_row][language.language_id] %}
+                      <div class="text-danger">{{ error_url_not_unique[filter_row][language.language_id] }}</div>
+                    {% endif %}
+                    {% if error_request_not_unique[filter_row][language.language_id] %}
+                      <div class="text-danger">{{ error_request_not_unique[filter_row][language.language_id] }}</div>
+                    {% endif %}
                   {% endfor %}
                 </td>
                 <td class="text-center" style="width: 100px"><input type="text" name="filter[{{ filter_row }}][sort_order]" value="{{ filter.sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control text-right" /></td>
