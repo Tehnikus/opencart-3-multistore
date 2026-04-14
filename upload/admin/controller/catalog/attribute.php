@@ -415,8 +415,6 @@ class ControllerCatalogAttribute extends Controller {
 					break;
 				}
 			}
-				
-			
 		}
 
 		return !$this->error;
@@ -426,16 +424,6 @@ class ControllerCatalogAttribute extends Controller {
 		if (!$this->user->hasPermission('modify', 'catalog/attribute')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
-
-		// $this->load->model('catalog/product');
-
-		// foreach ($this->request->post['selected'] as $attribute_id) {
-		// 	$product_total = $this->model_catalog_product->getTotalProductsByAttributeId($attribute_id);
-
-		// 	if ($product_total) {
-		// 		$this->error['warning'] = sprintf($this->language->get('error_product'), $product_total);
-		// 	}
-		// }
 
 		return !$this->error;
 	}
