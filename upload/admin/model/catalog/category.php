@@ -905,18 +905,11 @@ class ModelCatalogCategory extends Model {
 				AND store_id 		= '" . (int) $this->session->data['store_id'] . "'
 		");
 
-		foreach ($query->rows as $result) {
-			$category_description_data[$result['language_id']] = array(
-				'name'             => $result['name'],
-				'meta_title'       => $result['meta_title'],
-				'meta_description' => $result['meta_description'],
-				'meta_keyword'     => $result['meta_keyword'],
-				'description'      => $result['description'],
-				'seo_description'  => $result['seo_description'],
-				'footer' 					 => json_decode($result['footer'] ?? '[]', true),
-				'faq'    					 => json_decode($result['faq'] ?? '[]', true),
-				'how_to' 					 => json_decode($result['how_to'] ?? '[]', true),
-			);
+		foreach ($query->rows as $row) {
+			$row['footer'] = json_decode($row['footer'] ?? '[]', true);
+      $row['faq']    = json_decode($row['faq'] ?? '[]', true);
+      $row['how_to'] = json_decode($row['how_to'] ?? '[]', true);
+			$category_description_data[$row['language_id']] = $row;
 		}
 
 		return $category_description_data;
