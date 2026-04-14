@@ -127,6 +127,7 @@
                 </div>
               </div>
             </div>
+
             <div class="tab-pane" id="tab-seo">
               <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_keyword }}</div>
               <div class="table-responsive">
@@ -189,7 +190,7 @@
             </div>
             {% set data        =  category_description  %}
             {% set name_prefix = 'category_description' %}
-            <div class="tab-pane active" id="tab-description">{% include "common/tab_description.twig" with {seo_url: category_seo_url} %}</div>
+            <div class="tab-pane active" id="tab-description">{% include "common/tab_description.twig" with {seo_url: seo_url} %}</div>
             <div class="tab-pane" id="tab-images">{% include "common/tab_images.twig"  with {name_prefix: 'category_images', mainImage: image, images: category_images} %}</div>
             <div class="tab-pane" id="tab-footer">{% include "common/tab_footer.twig" %}</div>
             <div class="tab-pane" id="tab-faq">{% include "common/tab_faq.twig" %}</div>
