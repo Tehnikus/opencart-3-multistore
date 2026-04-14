@@ -133,15 +133,7 @@
                   {% endif %}
                 </div>
               </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label">{{ entry_image }}</label>
-                <div class="col-sm-10">
-                  <a href="" id="thumb-image" data-toggle="image" class="img-thumbnail">
-                    <img src="{{ thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" width="250"/>
-                  </a>
-                  <input type="hidden" name="image" value="{{ image }}" id="input-image" />
-                </div>
-              </div>
+
               <div class="form-group">
                 <label class="col-sm-2 control-label" for="input-top"><span data-toggle="tooltip" title="{{ help_top }}">{{ entry_top }}</span></label>
                 <div class="col-sm-10">
@@ -245,7 +237,7 @@
             {% set data        =  category_description  %}
             {% set name_prefix = 'category_description' %}
             <div class="tab-pane" id="tab-description">{% include "common/tab_description.twig" %}</div>
-            <div class="tab-pane" id="tab-images">{% include "common/tab_images.twig"  with {name_prefix: 'category_images', images: category_images} %}</div>
+            <div class="tab-pane" id="tab-images">{% include "common/tab_images.twig"  with {name_prefix: 'category_images', mainImage: image, images: category_images} %}</div>
             <div class="tab-pane" id="tab-footer">{% include "common/tab_footer.twig" %}</div>
             <div class="tab-pane" id="tab-faq">{% include "common/tab_faq.twig" %}</div>
             <div class="tab-pane" id="tab-how_to">{% include "common/tab_how_to.twig" %}</div>
