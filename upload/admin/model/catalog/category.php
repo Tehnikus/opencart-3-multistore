@@ -486,6 +486,60 @@ class ModelCatalogCategory extends Model {
 		}
 	}
 
+	  public function editImages($pageId, $image_data = []) : int {
+
+    $pageId = (int) $pageId;
+    $storeId = (int) $this->session->data['store_id'];
+
+    $this->db->query("
+      DELETE FROM `". DB_PREFIX . "category_image` 
+      WHERE `category_id` = '" . (int) $pageId . "'
+        AND store_id      = '" . (int) $storeId . "'
+    ");
+
+    $this->db->query("
+      DELETE FROM `". DB_PREFIX . "category_image_description` 
+      WHERE `category_id` = '" . (int) $pageId . "'
+        AND store_id      = '" . (int) $storeId . "'
+    ");
+
+
+    foreach ($image_data as $image) {
+
+      // Check if image actually exists
+      if (!empty($image['image'])) {
+        $this->db->query("
+          INSERT INTO `". DB_PREFIX . "category_image`
+          SET 
+            `category_id` = '" . (int) $pageId . "', 
+            `image` 			= '" . $this->db->escape($image['image']) . "', 
+            `sort_order` 	= '" . (int) $image['sort_order'] . "',
+            `store_id`    = '" . $storeId . "'
+        ");
+
+        // Add multilang multistore image descriptions
+        $image_id = $this->db->getLastId();
+
+        foreach ($image['description'] as $language_id => $image_description) {
+          if (!$image_description) {
+            continue;
+          }
+          $this->db->query("
+            INSERT INTO `". DB_PREFIX . "category_image_description`
+            SET
+              `image_id` 	   = '" . (int) $image_id . "',
+              `category_id`  = '" . (int) $pageId . "',
+              `language_id`  = '" . (int) $language_id . "',
+              `store_id` 		 = '" . (int) $storeId . "',
+              `description`  = '" . $this->db->escape($image_description) ."'
+          ");
+        }
+      }
+    }
+
+    return $this->db->countAffected();
+  }
+
 	/**
 	 * Delete category with SQL transaction to keep data integrity
 	 * @param int $category_id category to be deleted
