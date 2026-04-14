@@ -143,12 +143,17 @@ class ModelCatalogCategory extends Model {
 				}
 			}
 			
-			if (isset($data['category_seo_url'])) {
-				foreach ($data['category_seo_url'] as $store_id => $language) {
-					foreach ($language as $language_id => $keyword) {
-						if (!empty($keyword)) {
-							$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'category_id=" . (int)$category_id . "', keyword = '" . $this->db->escape($keyword) . "'");
-						}
+			if (isset($data['seo_url'])) {
+				foreach ($data['seo_url'] as $language_id => $keyword) {
+					if (!empty($keyword)) {
+						$this->db->query("
+							INSERT INTO " . DB_PREFIX . "seo_url 
+							SET 
+								store_id 		= '" . (int)$store_id . "', 
+								language_id = '" . (int)$language_id . "', 
+								query 			= 'category_id=" . (int)$category_id . "', 
+								keyword 		= '" . $this->db->escape($keyword) . "'
+						");
 					}
 				}
 			}
@@ -427,12 +432,17 @@ class ModelCatalogCategory extends Model {
 			// SEO URL
 			$this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE query = 'category_id=" . (int)$category_id . "'");
 	
-			if (isset($data['category_seo_url'])) {
-				foreach ($data['category_seo_url'] as $store_id => $language) {
-					foreach ($language as $language_id => $keyword) {
-						if (!empty($keyword)) {
-							$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'category_id=" . (int)$category_id . "', keyword = '" . $this->db->escape($keyword) . "'");
-						}
+			if (isset($data['seo_url'])) {
+				foreach ($data['seo_url'] as $language_id => $keyword) {
+					if (!empty($keyword)) {
+						$this->db->query("
+							INSERT INTO " . DB_PREFIX . "seo_url 
+							SET 
+								store_id 		= '" . (int)$store_id . "', 
+								language_id = '" . (int)$language_id . "', 
+								query 			= 'category_id=" . (int)$category_id . "', 
+								keyword 		= '" . $this->db->escape($keyword) . "'
+						");
 					}
 				}
 			}
@@ -962,10 +972,16 @@ class ModelCatalogCategory extends Model {
 	public function getCategorySeoUrls($category_id) {
 		$category_seo_url_data = array();
 		
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "seo_url WHERE query = 'category_id=" . (int)$category_id . "'");
+		$query = $this->db->query("
+			SELECT 
+				* 
+			FROM " . DB_PREFIX . "seo_url 
+			WHERE `query` = 'category_id=" . (int)$category_id . "'
+				AND store_id = " . (int) $this->session->data['store_id'] . "
+		");
 
 		foreach ($query->rows as $result) {
-			$category_seo_url_data[$result['store_id']][$result['language_id']] = $result['keyword'];
+			$category_seo_url_data[$result['language_id']] = $result['keyword'];
 		}
 
 		return $category_seo_url_data;
