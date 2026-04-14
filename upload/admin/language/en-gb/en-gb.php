@@ -193,6 +193,7 @@ $_['edit_filter_group']             = 'Edit %s filter group';
 $_['edit_option_group']             = 'Edit %s option group';
 $_['edit_attribute']                = 'Edit %s attribute';
 // Table columns
+$_['column_name']                   = 'Name';
 $_['column_language']               = 'Language';
 $_['column_store']                  = 'Store';
 $_['column_image']                  = 'Image';
