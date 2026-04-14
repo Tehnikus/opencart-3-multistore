@@ -445,13 +445,16 @@ class ModelCatalogCategory extends Model {
 
 			// Check if user removed some store association checkboxes and delete all store-related data from non-checked stores
 			if (isset($data['category_store'])) {
+				
 				$tables = [
 					'category_description',
 					'category_filter',
+					'category_image',
+					'category_image_description',
 					'category_to_layout',
-					'product_to_category',
-					'category_path',
+					'category_to_store',
 					'coupon_category',
+					'product_to_category',
 				];
 
 				// Remove all redundant data if present 
