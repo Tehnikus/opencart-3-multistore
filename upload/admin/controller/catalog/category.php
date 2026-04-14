@@ -315,18 +315,15 @@ class ControllerCatalogCategory extends Controller {
 		} else {
 			$data['error_category_store'] = '';
 		}
-		
-		if (isset($this->error['keyword'])) {
-			$data['error_keyword'] = $this->error['keyword'];
-		} else {
-			$data['error_keyword'] = '';
-		}
 
 		if (isset($this->error['parent'])) {
 			$data['error_parent'] = $this->error['parent'];
 		} else {
 			$data['error_parent'] = '';
 		}
+
+		$data['error_url_not_unique'] = $this->error['error_url_not_unique'] ?? '';
+		$data['error_request_not_unique'] = $this->error['error_request_not_unique'] ?? '';
 
 		$url = '';
 
@@ -487,12 +484,12 @@ class ControllerCatalogCategory extends Controller {
 			$data['status'] = true;
 		}
 
-		if (isset($this->request->post['category_seo_url'])) {
-			$data['category_seo_url'] = $this->request->post['category_seo_url'];
+		if (isset($this->request->post['seo_url'])) {
+			$data['seo_url'] = $this->request->post['seo_url'];
 		} elseif (isset($this->request->get['category_id'])) {
-			$data['category_seo_url'] = $this->model_catalog_category->getCategorySeoUrls($this->request->get['category_id']);
+			$data['seo_url'] = $this->model_catalog_category->getCategorySeoUrls($this->request->get['category_id']);
 		} else {
-			$data['category_seo_url'] = array();
+			$data['seo_url'] = array();
 		}
 
 		if (isset($this->request->post['category_layout'])) {
@@ -541,28 +538,27 @@ class ControllerCatalogCategory extends Controller {
 			}
 		}
 
-		if ($this->request->post['category_seo_url']) {
+		if ($this->request->post['seo_url']) {
+
 			$this->load->model('design/seo_url');
+      $storeId = (int) $this->session->data['store_id'];
 
-			foreach ($this->request->post['category_seo_url'] as $store_id => $language) {
-				foreach ($language as $language_id => $keyword) {
-					if (!empty($keyword)) {
-						if (count(array_keys($language, $keyword)) > 1) {
-							$this->error['keyword'][$store_id][$language_id] = $this->language->get('error_unique');
-						}
+      foreach ($this->request->post['seo_url'] as $langId => $currentUrl) {
 
-						$seo_urls = $this->model_design_seo_url->getSeoUrlsByKeyword($keyword);
+        $currentUrl = trim(mb_strtolower($currentUrl));
+        if (!$currentUrl) continue;
 
-						foreach ($seo_urls as $seo_url) {
-							if (($seo_url['store_id'] == $store_id) && (!isset($this->request->get['category_id']) || ($seo_url['query'] != 'category_id=' . $this->request->get['category_id']))) {
-								$this->error['keyword'][$store_id][$language_id] = $this->language->get('error_keyword');
+        $pageRequest = (isset($this->request->get['category_id'])) ? 'category_id=' . ((int) $this->request->get['category_id']) : '';
 
-								break;
-							}
-						}
-					}
-				}
-			}
+        $isUrlExists = $this->model_design_seo_url->checkUrlDuplicate($currentUrl, $langId, $storeId);
+
+        foreach ($isUrlExists ?? [] as $row) {
+          if ($row['query'] !== $pageRequest) {
+            $this->error['error_url_not_unique'][$langId] = $this->language->get('e_url_not_unique');
+            break;
+          }
+        }
+      }
 		}
 
 		if ($this->error && !isset($this->error['warning'])) {
