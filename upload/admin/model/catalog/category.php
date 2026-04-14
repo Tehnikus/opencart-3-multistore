@@ -47,6 +47,9 @@ class ModelCatalogCategory extends Model {
             `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? [], ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "'
 				");
 			}
+
+			// Save category images
+			$this->editImages($category_id, $data['category_images']);
 	
 			// Start category tree
 			// Current store
@@ -227,6 +230,9 @@ class ModelCatalogCategory extends Model {
             `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? [], ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "'
 				");
 			}
+			
+			// Save category images
+			$this->editImages($category_id, $data['category_images']);
 	
 			// Start category tree
 			// Surrent store
