@@ -359,6 +359,10 @@ class ModelCatalogProduct extends Model {
 			$this->model_catalog_facet->buildFacetIndex(product_id: (int) $product_id, store_id: (int) $this->session->data['store_id']);
 			$this->model_catalog_facet->buildFacetSorts(product_id: (int) $product_id, store_id: (int) $this->session->data['store_id']);
 
+			// Create fulltext search index
+			$this->load->model('catalog/search');
+			$this->model_catalog_search->buildSearchIndex(product_id: (int) $product_id, store_id: (int) $this->session->data['store_id']);
+
 			// Delete cache
 			$this->deleteCache($product_id, $this->session->data['store_id']);
 
@@ -832,6 +836,10 @@ class ModelCatalogProduct extends Model {
 			$this->load->model('catalog/facet');
 			$this->model_catalog_facet->buildFacetIndex(product_id: (int) $product_id, store_id: (int) $this->session->data['store_id']);
 			$this->model_catalog_facet->buildFacetSorts(product_id: (int) $product_id, store_id: (int) $this->session->data['store_id']);
+
+			// Update fulltext search index
+			$this->load->model('catalog/search');
+			$this->model_catalog_search->buildSearchIndex(product_id: (int) $product_id, store_id: (int) $this->session->data['store_id']);
 
 			// Delete cache
 			$this->deleteCache($product_id, $this->session->data['store_id']);
@@ -1864,6 +1872,10 @@ class ModelCatalogProduct extends Model {
 		$this->model_catalog_facet->buildFacetIndex(product_id: (int) $product_id, store_id: (int) $this->session->data['store_id']);
 		$this->model_catalog_facet->buildFacetSorts(product_id: (int) $product_id, store_id: (int) $this->session->data['store_id']);
 
+		// Update fulltext search index
+		$this->load->model('catalog/search');
+		$this->model_catalog_search->buildSearchIndex(product_id: (int) $product_id, store_id: (int) $this->session->data['store_id']);
+
 		// Delete cache
 		$this->deleteCache($product_id, (int) $this->session->data['store_id']);
 
@@ -1922,6 +1934,10 @@ class ModelCatalogProduct extends Model {
 		$this->load->model('catalog/facet');
 		$this->model_catalog_facet->buildFacetIndex(product_id: (int) $product_id, store_id: (int) $this->session->data['store_id']);
 		$this->model_catalog_facet->buildFacetSorts(product_id: (int) $product_id, store_id: (int) $this->session->data['store_id']);
+
+		// Create fulltext search index
+		$this->load->model('catalog/search');
+		$this->model_catalog_search->buildSearchIndex(product_id: (int) $product_id, store_id: (int) $this->session->data['store_id']);		
 
 		return (int) $newIsAvailable;
 	}
