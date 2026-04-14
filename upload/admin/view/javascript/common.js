@@ -290,11 +290,16 @@ $(document).ready(function() {
 document.addEventListener("DOMContentLoaded", () => {
 	const errors = document.querySelectorAll('.text-danger');
 	errors.forEach(error => {
+
+		// Highlight tab title
 		const tabs = getFaultyTabs(error, 'tab-pane')
 		tabs.forEach(tab => {
 			tab.style.color = '#c72f1d';
 			tab.style.background = '#f5c1bb';
 		});
+
+		// HIghlight input-group if it's not inside form-group
+		error.parentElement.querySelector('.input-group')?.classList.add('has-error');
 
 	});
 });
