@@ -279,6 +279,9 @@ class ControllerCatalogFilter extends Controller {
 			$data['error_filter'] = array();
 		}
 
+		$data['error_url_not_unique'] = $this->error['error_url_not_unique'] ?? '';
+		$data['error_request_not_unique'] = $this->error['error_request_not_unique'] ?? '';
+
 		$url = '';
 
 		if (isset($this->request->get['sort'])) {
@@ -377,10 +380,35 @@ class ControllerCatalogFilter extends Controller {
 		}
 
 		if (isset($this->request->post['filter'])) {
-			foreach ($this->request->post['filter'] as $filter_id => $filter) {
-				foreach ($filter['filter_description'] as $language_id => $filter_description) {
-					if ((utf8_strlen($filter_description['name']) < 1) || (utf8_strlen($filter_description['name']) > 255)) {
-						$this->error['filter'][$filter_id][$language_id] = $this->language->get('error_name');
+			foreach ($this->request->post['filter'] as $filterRow => $filter) {
+				foreach ($filter['filter_description'] as $languageId => $description) {
+					if ((utf8_strlen($description['name']) < 1) || (utf8_strlen($description['name']) > 255)) {
+						$this->error['filter'][$filterRow][$languageId] = $this->language->get('error_name');
+					}
+
+					$this->load->model('design/seo_url');
+					$storeId = (int) $this->session->data['store_id'];
+
+					$currentUrl = trim(mb_strtolower($description['url']));
+					if (!$currentUrl) continue;
+
+					$pageRequest = (isset($this->request->post['filter'][$filterRow]['filter_id'])) ? 'filter=' . ((int) $this->request->post['filter'][$filterRow]['filter_id']) : '';
+
+					$isUrlExists = $this->model_design_seo_url->checkUrlDuplicate($currentUrl, $languageId, $storeId);
+					$isRequestExists = $this->model_design_seo_url->checkRequestDuplicate($pageRequest, $languageId, $storeId);
+
+					foreach ($isUrlExists ?? [] as $row) {
+						if ($row['query'] !== $pageRequest) {
+							$this->error['error_url_not_unique'][$filterRow][$languageId] = $this->language->get('e_url_not_unique');
+							break;
+						}
+					}
+
+					foreach ($isRequestExists ?? [] as $row) {
+						if ($row['keyword'] !== $currentUrl) {
+							$this->error['error_request_not_unique'][$filterRow][$languageId] = sprintf($this->language->get('e_request_not_unique'), $row['keyword']);
+							break;
+						}
 					}
 				}
 			}
