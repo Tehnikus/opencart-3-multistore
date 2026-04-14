@@ -82,4 +82,23 @@ class ModelCatalogSearch extends Model {
     }
   }
 
+  /**
+   * Delete product from index
+   * @param mixed $product_id If not isset the index will be deleted for all products in the store with $store_id = n
+   * @param mixed $store_id If not isset the index for $product_id = n will be deleted in all stores
+   */
+  public function deleteSearchIndex($product_id = null, $store_id = null) : void {
+    $where = [];
+    if ($product_id !== null) {
+      $where[] = "product_id = " . (int) $product_id;
+    }
+    if ($store_id !== null) {
+      $where[] = "store_id = " . (int) $store_id;
+    }
+    $this->db->query("
+      DELETE FROM `" . DB_PREFIX . "product_search_index`
+      WHERE " . implode(' AND ', $where) . "
+    ");
+  }
+
 }
