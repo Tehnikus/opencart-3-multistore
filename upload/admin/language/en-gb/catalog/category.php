@@ -22,7 +22,6 @@ $_['entry_meta_title'] 	     = 'Meta Tag Title';
 $_['entry_meta_keyword']     = 'Meta Tag Keywords';
 $_['entry_meta_description'] = 'Meta Tag Description';
 $_['entry_store']            = 'Stores';
-$_['entry_keyword']          = 'Keyword';
 $_['entry_parent']           = 'Parent';
 $_['entry_filter']           = 'Filters';
 $_['entry_image']            = 'Image';
