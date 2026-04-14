@@ -146,15 +146,21 @@
               <tr id="option-value-row{{ option_value_row }}">
                 <td class="text-center"><input type="hidden" name="option_value[{{ option_value_row }}][option_value_id]" value="{{ option_value.option_value_id }}" />
                   {% for language in languages %}
-                  <div class="input-group">
-                    <span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
-                    {% include "common/button_create_seo_url.twig" with {seo_url_input: 'option_value[' ~ option_value_row ~ '][option_value_description][' ~ language.language_id ~ '][url]' } %}
-                    <input type="text" name="option_value[{{ option_value_row }}][option_value_description][{{ language.language_id }}][name]" value="{{ option_value.option_value_description[language.language_id] ? option_value.option_value_description[language.language_id].name }}" placeholder="{{ entry_option_value }}" class="form-control" />
-                    <input type="text" name="option_value[{{ option_value_row }}][option_value_description][{{ language.language_id }}][url]" value="{{ option_value.option_value_description[language.language_id] ? option_value.option_value_description[language.language_id].url }}" placeholder="{{ entry_keyword }}" class="form-control" />
-                  </div>
-                  {% if error_option_value[option_value_row][language.language_id] %}
-                  <div class="text-danger">{{ error_option_value[option_value_row][language.language_id] }}</div>
-                  {% endif %}
+                    <div class="input-group">
+                      <span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
+                      {% include "common/button_create_seo_url.twig" with {seo_url_input: 'option_value[' ~ option_value_row ~ '][option_value_description][' ~ language.language_id ~ '][url]' } %}
+                      <input type="text" name="option_value[{{ option_value_row }}][option_value_description][{{ language.language_id }}][name]" value="{{ option_value.option_value_description[language.language_id] ? option_value.option_value_description[language.language_id].name }}" placeholder="{{ entry_option_value }}" class="form-control" />
+                      <input type="text" name="option_value[{{ option_value_row }}][option_value_description][{{ language.language_id }}][url]" value="{{ option_value.option_value_description[language.language_id] ? option_value.option_value_description[language.language_id].url }}" placeholder="{{ entry_keyword }}" class="form-control" />
+                    </div>
+                    {% if error_option_value[option_value_row][language.language_id] %}
+                      <div class="text-danger">{{ error_option_value[option_value_row][language.language_id] }}</div>
+                    {% endif %}
+                    {% if error_url_not_unique[option_value_row][language.language_id] %}
+                      <div class="text-danger">{{ error_url_not_unique[option_value_row][language.language_id] }}</div>
+                    {% endif %}
+                    {% if error_request_not_unique[option_value_row][language.language_id] %}
+                      <div class="text-danger">{{ error_request_not_unique[option_value_row][language.language_id] }}</div>
+                    {% endif %}
                   {% endfor %}</td>
                 <td class="text-center">
                   <a href="" id="thumb-image{{ option_value_row }}" data-toggle="image" class="img-thumbnail">
