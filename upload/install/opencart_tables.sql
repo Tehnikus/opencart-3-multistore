@@ -7692,7 +7692,7 @@ CREATE TABLE `oc_product_search_index` (
   `language_id`   INT NOT NULL,
   `store_id`      INT NOT NULL,
   `name`          TEXT NOT NULL, -- Product name + model + SKU
-  `brand`         TEXT NOT NULL, -- Manufacturer
+  `manufacturer`  TEXT NOT NULL, -- Manufacturer
   `category`      TEXT NOT NULL, -- All categories
   `extra`         TEXT NOT NULL, -- Options, attributes, filters, SEO tags
   `date_modified` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
