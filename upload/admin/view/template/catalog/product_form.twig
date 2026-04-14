@@ -20,7 +20,8 @@
       <div class="panel-body">
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-product" class="form-horizontal">
           <ul class="nav nav-tabs">
-            <li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a></li>
+            <li><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a></li>
+            <li class="active"><a href="#tab-description"  data-toggle="tab">{{ tab_description }}</a></li>
             <li><a href="#tab-data" data-toggle="tab">{{ tab_data }}</a></li>
             <li><a href="#tab-links" data-toggle="tab">{{ tab_links }}</a></li>
             <li><a href="#tab-attribute" data-toggle="tab">{{ tab_attribute }}</a></li>
@@ -35,7 +36,7 @@
           </ul>
           <div class="tab-content">
 
-            <div class="tab-pane active" id="tab-general">
+            <div class="tab-pane" id="tab-general">
               <ul class="nav nav-tabs" id="language">
                 {% for language in languages %}
                   <li><a href="#language{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}"/> {{ language.name }}</a></li>
@@ -953,6 +954,11 @@
                 </table>
               </div>
             </div>
+
+            {% set data        =  product_description  %}
+            {% set name_prefix = 'product_description' %}
+            <div class="tab-pane active" id="tab-description">{% include "common/tab_description.twig" with {seo_url: seo_url} %}</div>
+
           </div>
         </form>
       </div>
