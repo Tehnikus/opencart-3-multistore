@@ -909,6 +909,7 @@ class ModelCatalogProduct extends Model {
 			'coupon_product',
 			'facet_index',
 			'facet_sort',
+			'product_search_index',
 		];
 
 		// Delete cache
