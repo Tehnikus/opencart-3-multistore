@@ -41,7 +41,7 @@ class ModelCatalogProduct extends Model {
 			'filter_option'        		=> 3,
 			'filter_attribute'     		=> 4,
 			'filter_manufacturer_id'	=> 5,
-			'filter_tag_id'           => 6,
+			'filter_tag'           		=> 6,
 			'filter_supplier_id'      => 7,
 			'filter_is_available'  		=> 8,
 			'filter_has_discount'  		=> 9,
