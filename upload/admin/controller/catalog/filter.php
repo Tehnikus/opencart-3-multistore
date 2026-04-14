@@ -395,7 +395,7 @@ class ControllerCatalogFilter extends Controller {
 					$pageRequest = (isset($this->request->post['filter'][$filterRow]['filter_id'])) ? 'filter=' . ((int) $this->request->post['filter'][$filterRow]['filter_id']) : '';
 
 					$isUrlExists = $this->model_design_seo_url->checkUrlDuplicate($currentUrl, $languageId, $storeId);
-					$isRequestExists = $this->model_design_seo_url->checkRequestDuplicate($pageRequest, $languageId, $storeId);
+					// $isRequestExists = $this->model_design_seo_url->checkRequestDuplicate($pageRequest, $languageId, $storeId);
 
 					foreach ($isUrlExists ?? [] as $row) {
 						if ($row['query'] !== $pageRequest) {
@@ -404,12 +404,12 @@ class ControllerCatalogFilter extends Controller {
 						}
 					}
 
-					foreach ($isRequestExists ?? [] as $row) {
-						if ($row['keyword'] !== $currentUrl) {
-							$this->error['error_request_not_unique'][$filterRow][$languageId] = sprintf($this->language->get('e_request_not_unique'), $row['keyword']);
-							break;
-						}
-					}
+					// foreach ($isRequestExists ?? [] as $row) {
+					// 	if ($row['keyword'] !== $currentUrl) {
+					// 		$this->error['error_request_not_unique'][$filterRow][$languageId] = sprintf($this->language->get('e_request_not_unique'), $row['keyword']);
+					// 		break;
+					// 	}
+					// }
 				}
 			}
 		}

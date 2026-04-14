@@ -400,7 +400,7 @@ class ControllerCatalogAttribute extends Controller {
 			$pageRequest = (isset($this->request->get['attribute_id'])) ? 'attribute_id=' . ((int) $this->request->get['attribute_id']) : '';
 
 			$isUrlExists = $this->model_design_seo_url->checkUrlDuplicate($currentUrl, $language_id, $storeId);
-			$isRequestExists = $this->model_design_seo_url->checkRequestDuplicate($pageRequest, $language_id, $storeId);
+			// $isRequestExists = $this->model_design_seo_url->checkRequestDuplicate($pageRequest, $language_id, $storeId);
 
 			foreach ($isUrlExists ?? [] as $row) {
 				if ($row['query'] !== $pageRequest) {
@@ -409,12 +409,12 @@ class ControllerCatalogAttribute extends Controller {
 				}
 			}
 
-			foreach ($isRequestExists ?? [] as $row) {
-				if ($row['keyword'] !== $currentUrl) {
-					$this->error['error_request_not_unique'][$language_id] = sprintf($this->language->get('e_request_not_unique'), $row['keyword']);
-					break;
-				}
-			}
+			// foreach ($isRequestExists ?? [] as $row) {
+			// 	if ($row['keyword'] !== $currentUrl) {
+			// 		$this->error['error_request_not_unique'][$language_id] = sprintf($this->language->get('e_request_not_unique'), $row['keyword']);
+			// 		break;
+			// 	}
+			// }
 		}
 
 		return !$this->error;

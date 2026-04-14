@@ -255,7 +255,7 @@ class ControllerBlogArticle extends Controller {
         $pageRequest = (isset($this->request->get['article_id'])) ? 'article_id=' . ((int) $this->request->get['article_id']) : '';
 
         $isUrlExists = $this->model_design_seo_url->checkUrlDuplicate($currentUrl, $langId, $storeId);
-        $isRequestExists = $this->model_design_seo_url->checkRequestDuplicate($pageRequest, $langId, $storeId);
+        // $isRequestExists = $this->model_design_seo_url->checkRequestDuplicate($pageRequest, $langId, $storeId);
 
         foreach ($isUrlExists ?? [] as $row) {
           if ($row['query'] !== $pageRequest) {
@@ -264,12 +264,12 @@ class ControllerBlogArticle extends Controller {
           }
         }
 
-        foreach ($isRequestExists ?? [] as $row) {
-          if ($row['keyword'] !== $currentUrl) {
-            $this->error['error_request_not_unique'][$langId] = sprintf($this->language->get('e_request_not_unique'), $row['keyword']);
-            break;
-          }
-        }
+        // foreach ($isRequestExists ?? [] as $row) {
+        //   if ($row['keyword'] !== $currentUrl) {
+        //     $this->error['error_request_not_unique'][$langId] = sprintf($this->language->get('e_request_not_unique'), $row['keyword']);
+        //     break;
+        //   }
+        // }
       }
 		}
 

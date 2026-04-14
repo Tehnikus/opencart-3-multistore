@@ -432,7 +432,7 @@ class ControllerCatalogOption extends Controller {
 					$pageRequest = (isset($this->request->post['option_value'][$optionRow]['option_value_id'])) ? 'option=' . ((int) $this->request->post['option_value'][$optionRow]['option_value_id']) : '';
 
 					$isUrlExists = $this->model_design_seo_url->checkUrlDuplicate($currentUrl, $languageId, $storeId);
-					$isRequestExists = $this->model_design_seo_url->checkRequestDuplicate($pageRequest, $languageId, $storeId);
+					// $isRequestExists = $this->model_design_seo_url->checkRequestDuplicate($pageRequest, $languageId, $storeId);
 
 					foreach ($isUrlExists ?? [] as $row) {
 						if ($row['query'] !== $pageRequest) {
@@ -441,13 +441,13 @@ class ControllerCatalogOption extends Controller {
 						}
 					}
 
-					foreach ($isRequestExists ?? [] as $row) {
-						if ($row['keyword'] !== $currentUrl) {
-							$this->error['error_request_not_unique'][$optionRow][$languageId] = sprintf($this->language->get('e_request_not_unique'), $row['keyword']);
-							break;
-						}
-					}
-
+					// foreach ($isRequestExists ?? [] as $row) {
+					// 	if ($row['keyword'] !== $currentUrl) {
+					// 		echo '<pre>' . htmlspecialchars(print_r($row, true)) . '</pre>';
+					// 		$this->error['error_request_not_unique'][$optionRow][$languageId] = sprintf($this->language->get('e_request_not_unique'), $row['keyword']);
+					// 		break;
+					// 	}
+					// }
 				}
 			}
 		}
