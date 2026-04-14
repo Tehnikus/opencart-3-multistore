@@ -460,12 +460,18 @@ class ModelCatalogAttribute extends Model {
 		return $attribute_data;
 	}
 
-	public function getTotalAttributes() {
+	/**
+	 * Get total attribute count
+	 * Because attribute lust shows all attributes from all stores (with badges displaying store relation) this functions should also count all attributes from all stores globally
+	 */
+	public function getTotalAttributes() : int {
 		$query = $this->db->query("
-			SELECT COUNT(*) AS total FROM " . DB_PREFIX . "attribute
+			SELECT 
+				COUNT(a.`attribute_id`) AS total 
+			FROM " . DB_PREFIX . "attribute a
 		");
 
-		return $query->row['total'];
+		return (int) $query->row['total'];
 	}
 
 	public function getTotalAttributesByAttributeGroupId($attribute_group_id) {
