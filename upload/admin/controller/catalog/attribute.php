@@ -284,6 +284,9 @@ class ControllerCatalogAttribute extends Controller {
 			$data['error_attribute_group'] = '';
 		}
 
+		$data['error_url_not_unique'] = $this->error['error_url_not_unique'] ?? '';
+		$data['error_request_not_unique'] = $this->error['error_request_not_unique'] ?? '';
+
 		$url = '';
 
 		if (isset($this->request->get['sort'])) {
@@ -384,9 +387,36 @@ class ControllerCatalogAttribute extends Controller {
 		}
 
 		foreach ($this->request->post['attribute_description'] as $language_id => $value) {
-			if ((utf8_strlen($value['name']) < 1) || (utf8_strlen($value['name']) > 64)) {
+			if ((utf8_strlen($value['name']) < 1) || (utf8_strlen($value['name']) > 255)) {
 				$this->error['name'][$language_id] = $this->language->get('error_name');
 			}
+
+			$this->load->model('design/seo_url');
+			$storeId = (int) $this->session->data['store_id'];
+
+			$currentUrl = trim(mb_strtolower($value['url']));
+			if (!$currentUrl) continue;
+
+			$pageRequest = (isset($this->request->get['attribute_id'])) ? 'attribute_id=' . ((int) $this->request->get['attribute_id']) : '';
+
+			$isUrlExists = $this->model_design_seo_url->checkUrlDuplicate($currentUrl, $language_id, $storeId);
+			$isRequestExists = $this->model_design_seo_url->checkRequestDuplicate($pageRequest, $language_id, $storeId);
+
+			foreach ($isUrlExists ?? [] as $row) {
+				if ($row['query'] !== $pageRequest) {
+					$this->error['error_url_not_unique'][$language_id] = $this->language->get('e_url_not_unique');
+					break;
+				}
+			}
+
+			foreach ($isRequestExists ?? [] as $row) {
+				if ($row['keyword'] !== $currentUrl) {
+					$this->error['error_request_not_unique'][$language_id] = sprintf($this->language->get('e_request_not_unique'), $row['keyword']);
+					break;
+				}
+			}
+				
+			
 		}
 
 		return !$this->error;
