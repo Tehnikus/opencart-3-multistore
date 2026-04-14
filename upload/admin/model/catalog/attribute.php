@@ -422,15 +422,39 @@ class ModelCatalogAttribute extends Model {
 		return $result;
 	}
 
-	public function getAttributeDescriptions($attribute_id) {
-		$attribute_data = array();
+	/**
+	 * Get attribute description and SEO URL
+	 * Used in admin attribute form
+	 * @param mixed $attribute_id
+	 * @return array{name: mixed[]}
+	 */
+	public function getAttributeDescriptions($attribute_id) : array {
+		$attribute_data = [];
 
 		$query = $this->db->query("
-			SELECT * FROM " . DB_PREFIX . "attribute_description WHERE attribute_id = '" . (int)$attribute_id . "' AND store_id = '" . (int) $this->session->data['store_id'] . "'
+			SELECT 
+				ad.`attribute_id`,
+				ad.`language_id`,
+				ad.`store_id`,
+				ad.`name`, 
+				(
+					SELECT
+						su.`keyword`
+					FROM " . DB_PREFIX . "seo_url su
+					WHERE su.`query` = 'attribute_id=" . (int) $attribute_id . "'
+						AND su.`language_id` = ad.`language_id`
+						AND su.`store_id` = ad.`store_id`
+				) AS `url`
+			FROM " . DB_PREFIX . "attribute_description ad 
+			WHERE ad.`attribute_id` = '" . (int)$attribute_id . "' 
+				AND ad.`store_id` = '" . (int) $this->session->data['store_id'] . "'
 		");
 
 		foreach ($query->rows as $result) {
-			$attribute_data[$result['language_id']] = array('name' => $result['name']);
+			$attribute_data[$result['language_id']] = [
+				'name' 	=> $result['name'],
+				'url'		=> $result['url'],
+			];
 		}
 
 		return $attribute_data;
