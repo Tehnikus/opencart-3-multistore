@@ -275,6 +275,10 @@ class ModelCatalogAttribute extends Model {
 		
 	}
 
+	/**
+	 * Display attribute on admin product form
+	 * @param mixed $attribute_id
+	 */
 	public function getAttribute($attribute_id) {
 		$query = $this->db->query("
 			SELECT 
@@ -289,10 +293,14 @@ class ModelCatalogAttribute extends Model {
 		return $query->row;
 	}
 
-	// Get attributes list
-	// Used in admin attribute list and attribute autocomplete in product form
-	// Should show all attributes in admin attributes list if $data['store_id'] is not set
-	// and only store related attributes in product form if $data['store_id'] is set
+	/**
+	 * Show attributes list.
+	 * Used in admin attribute list and in attribute autocomplete.
+	 * If $data['store_id'] is not set shows attributes from all stores with store badges representing store relation
+	 * If $data['store_id'] is set shows only attributes from store_id = n. This is used in autocomplete to show only store related attributes
+	 * @param mixed $data
+	 * @return array
+	 */
 	public function getAttributes($data = array()) {
 
 		$result = [];
