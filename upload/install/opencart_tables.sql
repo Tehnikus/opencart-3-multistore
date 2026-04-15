@@ -7435,7 +7435,7 @@ CREATE TABLE `oc_product_image_description` (
   `language_id`             INT NOT NULL,
   `store_id`                INT NOT NULL,
   `description`             TEXT NOT NULL,
-  PRIMARY KEY (`product_id`, `language_id`, `store_id`)
+  PRIMARY KEY (`image_id`, `language_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
