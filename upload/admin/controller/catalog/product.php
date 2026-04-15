@@ -1101,32 +1101,8 @@ class ControllerCatalogProduct extends Controller {
 		$data['placeholder'] = HTTPS_CATALOG . 'image/no_image.webp';
 
 		// Images
-		if (isset($this->request->post['product_image'])) {
-			$product_images = $this->request->post['product_image'];
-		} elseif (isset($this->request->get['product_id'])) {
-			$product_images = $this->model_catalog_product->getProductImages($this->request->get['product_id']);
-		} else {
-			$product_images = array();
-		}
-
-		$data['product_images'] = array();
-
-		foreach ($product_images as $product_image) {
-			if (is_file(DIR_IMAGE . $product_image['image'])) {
-				$image = $product_image['image'];
-				$thumb = $product_image['image'];
-			} else {
-				$image = '';
-				$thumb = 'no_image.webp';
-			}
-
-			$data['product_images'][] = array(
-				'image'      => $image,
-				'thumb'      => HTTPS_CATALOG . 'image/' . $thumb,
-				'sort_order' => $product_image['sort_order']
-			);
-		}
-
+		$data['product_images'] = $this->model_catalog_product->getImages($this->request->get['product_id'] ?? null);
+		
 		// Downloads
 		$this->load->model('catalog/download');
 
@@ -1238,29 +1214,29 @@ class ControllerCatalogProduct extends Controller {
 			$this->error['parent_id'] = $this->language->get('error_parent');
 		}
 
-		if ($this->request->post['product_seo_url']) {
-			$this->load->model('design/seo_url');
+		// if ($this->request->post['product_seo_url']) {
+		// 	$this->load->model('design/seo_url');
 
-			foreach ($this->request->post['product_seo_url'] as $store_id => $language) {
-				foreach ($language as $language_id => $keyword) {
-					if (!empty($keyword)) {
-						if (count(array_keys($language, $keyword)) > 1) {
-							$this->error['keyword'][$store_id][$language_id] = $this->language->get('error_unique');
-						}
+		// 	foreach ($this->request->post['product_seo_url'] as $store_id => $language) {
+		// 		foreach ($language as $language_id => $keyword) {
+		// 			if (!empty($keyword)) {
+		// 				if (count(array_keys($language, $keyword)) > 1) {
+		// 					$this->error['keyword'][$store_id][$language_id] = $this->language->get('error_unique');
+		// 				}
 
-						$seo_urls = $this->model_design_seo_url->getSeoUrlsByKeyword($keyword);
+		// 				$seo_urls = $this->model_design_seo_url->getSeoUrlsByKeyword($keyword);
 
-						foreach ($seo_urls as $seo_url) {
-							if (($seo_url['store_id'] == $store_id) && (!isset($this->request->get['product_id']) || (($seo_url['query'] != 'product_id=' . $this->request->get['product_id'])))) {
-								$this->error['keyword'][$store_id][$language_id] = $this->language->get('error_keyword');
+		// 				foreach ($seo_urls as $seo_url) {
+		// 					if (($seo_url['store_id'] == $store_id) && (!isset($this->request->get['product_id']) || (($seo_url['query'] != 'product_id=' . $this->request->get['product_id'])))) {
+		// 						$this->error['keyword'][$store_id][$language_id] = $this->language->get('error_keyword');
 
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
+		// 						break;
+		// 					}
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// }
 
 		if ($this->error && !isset($this->error['warning'])) {
 			$this->error['warning'] = $this->language->get('error_warning');
