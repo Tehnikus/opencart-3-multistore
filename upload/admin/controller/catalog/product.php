@@ -1188,12 +1188,12 @@ class ControllerCatalogProduct extends Controller {
 			$data['product_reward'] = array();
 		}
 
-		if (isset($this->request->post['product_seo_url'])) {
-			$data['product_seo_url'] = $this->request->post['product_seo_url'];
+		if (isset($this->request->post['seo_url'])) {
+			$data['seo_url'] = $this->request->post['seo_url'];
 		} elseif (isset($this->request->get['product_id'])) {
-			$data['product_seo_url'] = $this->model_catalog_product->getProductSeoUrls($this->request->get['product_id']);
+			$data['seo_url'] = $this->model_catalog_product->getProductSeoUrls($this->request->get['product_id']);
 		} else {
-			$data['product_seo_url'] = array();
+			$data['seo_url'] = array();
 		}
 
 		if (isset($this->request->post['product_layout'])) {
