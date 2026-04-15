@@ -201,7 +201,6 @@ class ModelCatalogProduct extends Model {
 				pd.`meta_title`,
 				pd.`meta_description`,
 				pd.`meta_keyword`,
-				pd.`tag`,
 				pd.`description`,
 				pd.`seo_keywords`,
 				pd.`seo_description`,
@@ -733,10 +732,6 @@ class ModelCatalogProduct extends Model {
 				$implode = array();
 
 				$words = explode(' ', trim(preg_replace('/\s+/', ' ', $data['filter_tag'])));
-
-				foreach ($words as $word) {
-					$implode[] = "pd.tag LIKE '%" . $this->db->escape($word) . "%'";
-				}
 
 				if ($implode) {
 					$sql .= " " . implode(" AND ", $implode) . "";
