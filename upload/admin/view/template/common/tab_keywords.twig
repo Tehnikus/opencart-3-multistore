@@ -1,0 +1,65 @@
+
+
+<div class="panel panel-default">
+  <div class="panel-body">
+    <div id="keywordGroups" class="col-sm-12">
+      <div id="addKeywordGroupInput" class="input-group">
+        <input class="form-control" type="text" placeholder="{{ input_add_keyword_group }}"/><button id="addKeywordGroup" class="btn btn-success" type="button"><i class="fa fa-plus"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    
+<div class="table-responsive tableWrapper">
+  <table id="keywordTable" class="keywordTable table table-bordered table-hover">
+  </table>
+</div>
+
+<script type="text/javascript" src="view/javascript/nimbleTable.js"></script>
+<script type="text/javascript" src="view/javascript/keywords.js"></script>
+<link href="view/stylesheet/nimbleTable.css" rel="stylesheet" />
+
+<script>
+  const user_token = "{{ user_token }}";
+</script>
+
+
+<style>
+  .tableWrapper tr.updatedRow {
+    background-color: #ffca7f7a;
+    &:hover {
+      background-color: #ffc16799
+    }
+  }
+  .tableWrapper tr.newRow {
+    background-color: #56d42840;
+    &:hover {
+      background-color: #56d42857
+    }
+  }
+
+  .tableWrapper tr.importedRow {
+    background-color: #316dc84a;
+    &:hover {
+      background-color: #316dc857;
+    }
+  }
+
+  #keywordGroups {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+      & .keywordGroup {
+      display: flex;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      overflow: hidden;
+      & span {
+        align-self: center;
+        padding: 0 1rem
+      }
+    }
+  }
+</style>
