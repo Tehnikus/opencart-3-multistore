@@ -377,7 +377,10 @@ class ModelBlogArticle extends Model {
     return $result;
   }
 
-  public function getImages($pageId) : array {
+  public function getImages($pageId = null) : array {
+    if ($pageId === null) {
+			return [];
+		}
     $result = [];
     $storeId = (int) $this->session->data['store_id'];
     $images = $this->db->query("

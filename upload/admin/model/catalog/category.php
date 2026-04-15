@@ -511,7 +511,7 @@ class ModelCatalogCategory extends Model {
 		}
 	}
 
-	  public function editImages($pageId, $image_data = []) : int {
+	public function editImages($pageId, $image_data = []) : int {
 
     $pageId = (int) $pageId;
     $storeId = (int) $this->session->data['store_id'];
@@ -565,7 +565,10 @@ class ModelCatalogCategory extends Model {
     return $this->db->countAffected();
   }
 
-	public function getImages($pageId) : array {
+	public function getImages($pageId = null) : array {
+		if ($pageId === null) {
+			return [];
+		}
     $result = [];
     $storeId = (int) $this->session->data['store_id'];
     $images = $this->db->query("

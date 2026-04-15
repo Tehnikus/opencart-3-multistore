@@ -368,15 +368,18 @@ class ModelBlogTag extends Model {
     return $result ?? [];
   }
 
-  public function getImages($page_id) : array {
+  public function getImages($pageId = null) : array {
+    if ($pageId === null) {
+			return [];
+		}
     $result = [];
     $store_id = (int) $this->session->data['store_id'];
     $images = $this->db->query("
       SELECT
         *
       FROM " . DB_PREFIX . "blog_tag_image
-      WHERE `blog_tag_id` = " . (int) $page_id . "
-        AND `store_id`         = " . (int) $store_id . "
+      WHERE `blog_tag_id` = " . (int) $pageId . "
+        AND `store_id`    = " . (int) $store_id . "
       ORDER BY `sort_order`
     ")->rows;
 
