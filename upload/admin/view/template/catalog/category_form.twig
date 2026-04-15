@@ -166,7 +166,7 @@
             {% set data        =  category_description  %}
             {% set name_prefix = 'category_description' %}
             <div class="tab-pane active" id="tab-description">{% include "common/tab_description.twig" with {seo_url: seo_url} %}</div>
-            <div class="tab-pane" id="tab-images">{% include "common/tab_images.twig"  with {name_prefix: 'category_images', mainImage: image, images: category_images} %}</div>
+            <div class="tab-pane" id="tab-images">{% include "common/tab_images.twig"  with {name_prefix: 'category_images', showMainImage: true, mainImage: image, images: category_images} %}</div>
             <div class="tab-pane" id="tab-footer">{% include "common/tab_footer.twig" %}</div>
             <div class="tab-pane" id="tab-faq">{% include "common/tab_faq.twig" %}</div>
             <div class="tab-pane" id="tab-how_to">{% include "common/tab_how_to.twig" %}</div>
