@@ -985,7 +985,7 @@ class ModelCatalogCategory extends Model {
 		");
 
 		foreach ($query->rows as $row) {
-			$row[$result['language_id']] = $row['keyword'];
+			$row[$row['language_id']] = $row['keyword'];
 		}
 
 		return $result;
