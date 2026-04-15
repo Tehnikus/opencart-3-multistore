@@ -1343,7 +1343,7 @@ class ModelCatalogProduct extends Model {
 	// Get product description for product edit form
 	// Should always rely on store_id
 	public function getProductDescriptions($product_id) : array {
-		$product_description_data = [];
+		$result = [];
 
 		$query = $this->db->query("
 			SELECT 
@@ -1353,23 +1353,15 @@ class ModelCatalogProduct extends Model {
 				AND pd.`store_id` 	 = '" . (int) $this->session->data['store_id'] . "'
 		");
 
-		foreach ($query->rows as $result) {
-			$product_description_data[$result['language_id']] = [
-				'name'             	=> $result['name'],
-				'description'      	=> $result['description'],
-				'meta_title'       	=> $result['meta_title'],
-				'meta_description' 	=> $result['meta_description'],
-				'meta_keyword'     	=> $result['meta_keyword'],
-				'tag'              	=> $result['tag'],
-				'seo_keywords'     	=> $result['seo_keywords'],
-				'seo_description'  	=> $result['seo_description'],
-				'footer' 					  => json_decode($result['footer'] ?? '[]', true),
-				'faq'    					  => json_decode($result['faq'] ?? '[]', true),
-				'how_to' 					  => json_decode($result['how_to'] ?? '[]', true),
-			];
+		foreach ($query->rows as $row) {
+			$row['seo_keywords'] =  json_decode($row['seo_keywords'] ?? '[]', true);
+			$row['footer'] 			 =  json_decode($row['footer'] ?? '[]', true);
+			$row['faq'] 				 =  json_decode($row['faq'] ?? '[]', true);
+			$row['how_to'] 			 =  json_decode($row['how_to'] ?? '[]', true);
+			$result[$row['language_id']] = $row;
 		}
 
-		return $product_description_data;
+		return $result;
 	}
 
 	public function getPlaceholders($product_id = null) : array {
