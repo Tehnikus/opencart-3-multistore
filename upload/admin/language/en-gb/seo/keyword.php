@@ -11,9 +11,11 @@ $_['button_save_all']           = 'Save all';
 $_['button_clear_filters']      = 'Clear filters';
 $_['button_find_duplicates']    = 'Find duplicates';
 $_['button_add_tag']            = 'Add to tags';
-$_['button_replace_keywords']   = 'Replace keywords';
 $_['button_copy']               = 'Copy keyword';
 $_['button_delete']             = 'Delete keyword';
+$_['button_add_to_beginning']   = 'Add to the beginning of keywords';
+$_['button_add_to_end']         = 'Add to the end of keywords';
+$_['button_replace']            = 'Replace keywords';
 
 $_['option_all_types']          = 'All types';
 $_['option_existing']           = 'Existing';
