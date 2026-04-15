@@ -7590,10 +7590,9 @@ CREATE TABLE `oc_article_stats` (
 DROP TABLE IF EXISTS `oc_article_product`;
 CREATE TABLE `oc_article_product` (
   `article_id`          INT NOT NULL,
-  `language_id`         INT NOT NULL,
   `store_id`            INT NOT NULL,
   `product_id`          INT NOT NULL,
-  PRIMARY KEY (`article_id`, `language_id`, `store_id`, `product_id`)
+  PRIMARY KEY (`article_id`, `store_id`, `product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `oc_article_tag`;
