@@ -450,7 +450,7 @@ class ControllerCatalogCategory extends Controller {
 		$data['placeholder'] = HTTPS_CATALOG . 'image/no_image.webp';
 
 		// Get additional category images
-		$data['category_images'] = $this->model_catalog_category->getImages($this->request->get['category_id']);
+		$data['category_images'] = $this->model_catalog_category->getImages($this->request->get['category_id'] ?? null);
 
 		if (isset($this->request->post['top'])) {
 			$data['top'] = $this->request->post['top'];
