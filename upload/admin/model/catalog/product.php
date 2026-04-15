@@ -336,12 +336,17 @@ class ModelCatalogProduct extends Model {
 			}
 			
 			// SEO URL
-			if (isset($data['product_seo_url'])) {
-				foreach ($data['product_seo_url'] as $store_id => $language) {
-					foreach ($language as $language_id => $keyword) {
-						if (!empty($keyword)) {
-							$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET `store_id` = '" . (int)$store_id . "', `language_id` = '" . (int)$language_id . "', `query` = 'product_id=" . (int)$product_id . "', `keyword` = '" . $this->db->escape($keyword) . "'");
-						}
+			if (isset($data['seo_url'])) {
+				foreach ($data['seo_url'] as $langId => $keyword) {
+					if (!empty($keyword)) {
+						$this->db->query("
+							INSERT INTO " . DB_PREFIX . "seo_url 
+							SET 
+								`store_id` 		= '" . (int) $this->session->data['store_id'] . "', 
+								`language_id` = '" . (int) $langId . "', 
+								`query` 			= 'product_id=" . (int) $product_id . "', 
+								`keyword` 		= '" . $this->db->escape($keyword) . "'
+						");
 					}
 				}
 			}
@@ -812,14 +817,23 @@ class ModelCatalogProduct extends Model {
 			}
 			
 			// SEO URL
-			$this->db->query("DELETE FROM " . DB_PREFIX . "seo_url WHERE `query` 		= 'product_id=" . (int) $product_id . "'");
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "seo_url 
+				WHERE `query` 		= 'product_id=" . (int) $product_id . "'
+					AND `store_id` 	= " . (int) $this->session->data['store_id'] . "
+			");
 			
-			if (isset($data['product_seo_url'])) {
-				foreach ($data['product_seo_url']as $store_id => $language) {
-					foreach ($language as $language_id => $keyword) {
-						if (!empty($keyword)) {
-							$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET `store_id` = '" . (int)$store_id . "', `language_id` = '" . (int)$language_id . "', `query` = 'product_id=" . (int)$product_id . "', `keyword` = '" . $this->db->escape($keyword) . "'");
-						}
+			if (isset($data['seo_url'])) {
+				foreach ($data['seo_url'] as $langId => $keyword) {
+					if (!empty($keyword)) {
+						$this->db->query("
+							INSERT INTO " . DB_PREFIX . "seo_url 
+							SET 
+								`store_id` 		= '" . (int) $this->session->data['store_id'] . "', 
+								`language_id` = '" . (int) $langId . "', 
+								`query` 			= 'product_id=" . (int) $product_id . "', 
+								`keyword` 		= '" . $this->db->escape($keyword) . "'
+						");
 					}
 				}
 			}
