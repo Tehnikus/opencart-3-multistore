@@ -222,6 +222,7 @@ $_['tab_faq']                       = 'FAQ';
 $_['entry_faq_question']            = 'FAQ Question';
 $_['entry_faq_answer']              = 'FAQ Answer';
 $_['button_add_faq']                = 'Add FAQ row';
+$_['tab_keywords']                  = 'Keywords';
 $_['button_remove_faq']             = 'Remove FAQ row';
 // HowTo
 $_['tab_how_to']                    = 'HowTo';
