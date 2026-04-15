@@ -538,11 +538,8 @@ class ControllerCatalogProduct extends Controller {
 			$data['error_model'] = '';
 		}
 
-		if (isset($this->error['keyword'])) {
-			$data['error_keyword'] = $this->error['keyword'];
-		} else {
-			$data['error_keyword'] = '';
-		}
+		$data['error_url_not_unique'] = $this->error['error_url_not_unique'] ?? '';
+		$data['error_request_not_unique'] = $this->error['error_request_not_unique'] ?? '';
 
 		$url = '';
 
@@ -1102,7 +1099,7 @@ class ControllerCatalogProduct extends Controller {
 
 		// Images
 		$data['product_images'] = $this->model_catalog_product->getImages($this->request->get['product_id'] ?? null);
-		
+
 		// Downloads
 		$this->load->model('catalog/download');
 
@@ -1214,29 +1211,28 @@ class ControllerCatalogProduct extends Controller {
 			$this->error['parent_id'] = $this->language->get('error_parent');
 		}
 
-		// if ($this->request->post['product_seo_url']) {
-		// 	$this->load->model('design/seo_url');
+		if ($this->request->post['seo_url']) {
 
-		// 	foreach ($this->request->post['product_seo_url'] as $store_id => $language) {
-		// 		foreach ($language as $language_id => $keyword) {
-		// 			if (!empty($keyword)) {
-		// 				if (count(array_keys($language, $keyword)) > 1) {
-		// 					$this->error['keyword'][$store_id][$language_id] = $this->language->get('error_unique');
-		// 				}
+			$this->load->model('design/seo_url');
+      $storeId = (int) $this->session->data['store_id'];
 
-		// 				$seo_urls = $this->model_design_seo_url->getSeoUrlsByKeyword($keyword);
+      foreach ($this->request->post['seo_url'] as $langId => $currentUrl) {
 
-		// 				foreach ($seo_urls as $seo_url) {
-		// 					if (($seo_url['store_id'] == $store_id) && (!isset($this->request->get['product_id']) || (($seo_url['query'] != 'product_id=' . $this->request->get['product_id'])))) {
-		// 						$this->error['keyword'][$store_id][$language_id] = $this->language->get('error_keyword');
+        $currentUrl = trim(mb_strtolower($currentUrl));
+        if (!$currentUrl) continue;
 
-		// 						break;
-		// 					}
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// }
+        $pageRequest = (isset($this->request->get['product_id'])) ? 'product_id=' . ((int) $this->request->get['product_id']) : '';
+
+        $isUrlExists = $this->model_design_seo_url->checkUrlDuplicate($currentUrl, $langId, $storeId);
+
+        foreach ($isUrlExists ?? [] as $row) {
+          if ($row['query'] !== $pageRequest) {
+            $this->error['error_url_not_unique'][$langId] = $this->language->get('e_url_not_unique');
+            break;
+          }
+        }
+      }
+		}
 
 		if ($this->error && !isset($this->error['warning'])) {
 			$this->error['warning'] = $this->language->get('error_warning');
