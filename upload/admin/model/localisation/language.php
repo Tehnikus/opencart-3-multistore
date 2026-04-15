@@ -22,6 +22,82 @@ class ModelLocalisationLanguage extends Model {
 		return $this->cloneLanguage($language_id, $source_language_id);		
 	}
 
+	private function cloneLanguage($new_language_id, $source_language_id) {
+		$tables = $this->getLangTables();
+		if (empty($tables)) {
+			return $new_language_id;
+		}
+
+		// Get columns in single query
+		$tableList = implode("','", array_map(fn($t) => DB_PREFIX . $t, $tables));
+		$result = $this->db->query("
+			SELECT TABLE_NAME, COLUMN_NAME
+			FROM INFORMATION_SCHEMA.COLUMNS
+			WHERE TABLE_SCHEMA = '" . DB_DATABASE . "'
+				AND TABLE_NAME IN ('" . $tableList . "')
+			ORDER BY TABLE_NAME, ORDINAL_POSITION
+		");
+
+		// Group columns by tables
+		$tableColumns = [];
+		foreach ($result->rows as $row) {
+			$tableColumns[$row['TABLE_NAME']][] = $row['COLUMN_NAME'];
+		}
+
+		$this->db->query("START TRANSACTION");
+		try {
+			foreach ($tables as $table) {
+				$fullTableName = DB_PREFIX . $table;
+				$columns = $tableColumns[$fullTableName] ?? [];
+				if (empty($columns)) {
+					continue;
+				}
+
+				$column_list   = implode(',', array_map(fn($c) => "`$c`", $columns));
+				$select_list   = implode(',', array_map(
+					fn($c) => $c === 'language_id' ? (int)$new_language_id . " AS `language_id`" : "`$c`",
+					$columns
+				));
+
+				$this->db->query("
+					INSERT IGNORE INTO `$fullTableName` ($column_list)
+					SELECT $select_list
+					FROM `$fullTableName`
+					WHERE `language_id` = '" . (int)$source_language_id . "'
+				");
+			}
+			$this->db->query("COMMIT");
+			return $new_language_id;
+			
+		} catch (\Throwable $e) {
+			$this->db->query("ROLLBACK");
+			throw $e;
+		}
+	}
+
+	private function getLangTables() : array {
+		$tables = [];
+		$excludedTables = ['customer', 'customer_search', 'facet_name', 'language', 'language_to_store', 'order', 'product_search_index', 'review', 'seo_keyword', 'seo_url', 'translation'];
+		$query = $this->db->query("
+			SELECT DISTINCT TABLE_NAME AS `table`
+			FROM INFORMATION_SCHEMA.COLUMNS
+			WHERE COLUMN_NAME = 'language_id'
+				AND TABLE_SCHEMA = '" . DB_DATABASE . "'
+				AND TABLE_NAME LIKE '" . DB_PREFIX . "%'
+		");
+
+		foreach ($query->rows ?? [] as $row) {
+			// Remove table prefix
+			$tableName = substr($row['table'], strlen(DB_PREFIX));
+			// Store table names without prefix
+			if (!in_array($tableName, $excludedTables)) {
+				$tables[] = $tableName;
+			}
+		}
+
+		return $tables;
+	}
+
 	public function editLanguage($language_id, $data) {
 		$language_query = $this->db->query("SELECT `code` FROM " . DB_PREFIX . "language WHERE language_id = '" . (int)$language_id . "'");
 		
@@ -134,97 +210,6 @@ class ModelLocalisationLanguage extends Model {
 		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "language");
 
 		return $query->row['total'];
-	}
-
-	public function cloneLanguage($new_language_id, $source_language_id) {
-
-		$tables = [
-			'attribute_description',
-			'attribute_group_description',
-			'banner_image',
-			'category_description',
-			'customer_group_description',
-			'custom_field_description',
-			'custom_field_value_description',
-			'download_description',
-			'filter_description',
-			'filter_group_description',
-			'information_description',
-			'length_class_description',
-			'option_description',
-			'option_value_description',
-			'order_status',
-			'product_attribute',
-			'product_description',
-			'recurring_description',
-			'return_action',
-			'return_reason',
-			'return_status',
-			'stock_status',
-			'voucher_theme_description',
-			'weight_class_description',
-			// New tables 
-			'manufacturer_description',
-			// 'blog_article_image_description',
-			// 'blog_category_image_description',
-			// 'category_image_description',
-			// 'product_image_description',
-			// 'filter_page_image_description',
-			// 'search_page_image_description',
-			// 'blog_category_description',
-			// 'blog_article_description',
-			// 'search_page_description',
-			// 'filter_page_description',
-			// 'tag_page_description',
-			// 'supplier_description',
-		];
-
-		$this->db->query("START TRANSACTION");
-
-		try {
-
-			foreach ($tables as $table) {
-
-				$result = $this->db->query("
-					SHOW COLUMNS FROM `" . DB_PREFIX . $table . "`
-				");
-
-				$columns = [];
-				$select_columns = [];
-
-				foreach ($result->rows as $row) {
-					$column = $row['Field'];
-
-					$columns[] = "`$column`";
-
-					if ($column === 'language_id') {
-						$select_columns[] = (int)$new_language_id . " AS `language_id`";
-					} else {
-						$select_columns[] = "`$column`";
-					}
-				}
-
-				$column_list = implode(',', $columns);
-				$select_list = implode(',', $select_columns);
-
-				$sql = "
-					INSERT IGNORE INTO `" . DB_PREFIX . $table . "` ($column_list)
-					SELECT $select_list
-					FROM `" . DB_PREFIX . $table . "`
-					WHERE `language_id` = '" . (int) $source_language_id . "'
-				";
-
-				$this->db->query($sql);
-			}
-
-			$this->db->query("COMMIT");
-
-			return $new_language_id;
-
-		} catch (\Throwable $e) {
-			$this->db->query("ROLLBACK");
-			throw $e;
-		}
 	}
 
 	public function getStoresAssociation($id = null) : array {
