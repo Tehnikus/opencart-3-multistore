@@ -896,6 +896,36 @@ class ModelCatalogProduct extends Model {
     return $this->db->countAffected();
   }
 
+	public function getImages($pageId) : array {
+    $result = [];
+    $storeId = (int) $this->session->data['store_id'];
+    $images = $this->db->query("
+      SELECT
+        *
+      FROM " . DB_PREFIX . "category_image
+      WHERE `category_id` = " . (int) $pageId . "
+        AND `store_id`    = " . (int) $storeId . "
+      ORDER BY `sort_order`
+    ")->rows;
+
+    foreach ($images as $row) {
+      $descriptions = $this->db->query("
+        SELECT
+          `language_id`,
+          `description`
+        FROM " . DB_PREFIX . "category_image_description
+        WHERE `image_id` = " . (int) $row['image_id'] . "
+          AND `store_id` = " . (int) $storeId . "
+      ")->rows;
+      foreach ($descriptions as $description) {
+        $row['description'][$description['language_id']] = $description['description'];
+      }
+      $result[] = $row;
+    }
+
+    return $result;
+  }
+
 	public function copyProduct($product_id) {
 		$query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "product p WHERE p.product_id = '" . (int)$product_id . "'");
 
