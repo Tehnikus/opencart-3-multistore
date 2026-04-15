@@ -1680,15 +1680,21 @@ class ModelCatalogProduct extends Model {
 	}
 	
 	public function getProductSeoUrls($product_id) {
-		$product_seo_url_data = [];
+		$result = [];
 		
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "seo_url WHERE `query` = 'product_id=" . (int)$product_id . "'");
+		$query = $this->db->query("
+			SELECT 
+				* 
+			FROM " . DB_PREFIX . "seo_url 
+			WHERE `query` 	 = 'product_id=" . (int)$product_id . "'
+				AND `store_id` = " . (int) $this->session->data['store_id'] . "
+		");
 
-		foreach ($query->rows as $result) {
-			$product_seo_url_data[$result['store_id']][$result['language_id']] = $result['keyword'];
+		foreach ($query->rows as $row) {
+			$result[$row['language_id']] = $row['keyword'];
 		}
 
-		return $product_seo_url_data;
+		return $result;
 	}
 	
 	public function getProductLayouts($product_id) {
