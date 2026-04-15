@@ -10,13 +10,27 @@
   </div>
 </div>
 
-
-    
-<div class="table-responsive tableWrapper">
-  <table id="keywordTable" class="keywordTable table table-bordered table-hover">
-  </table>
+<ul class="nav nav-tabs" id="keywordsTabLanguage">
+  {% for language in languages %}
+    <li {% if loop.first %}class="active"{% endif %}>
+      <a href="#keywords_language_{{ language.language_id }}" data-toggle="tab" data-tab-language-id="{{ language.language_id }}">
+        <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> 
+        <span>{{ tab_description }} {{ language.name }}
+      </a>
+    </li>
+  {% endfor %}
+</ul>
+<div class="tab-content">
+  {% for language in languages %}
+    <div class="tab-pane {% if loop.first %}active{% endif %}" id="keywords_language_{{ language.language_id }}">
+      <div class="table-responsive tableWrapper">
+        <table class="keywordTable table table-bordered table-hover">
+        </table>
+      </div>
+    </div>
+  {% endfor %}
 </div>
-
+{# Everything is done by nimbleTable.js and keywords.js #}
 <script type="text/javascript" src="view/javascript/nimbleTable.js"></script>
 <script type="text/javascript" src="view/javascript/keywords.js"></script>
 <link href="view/stylesheet/nimbleTable.css" rel="stylesheet" />
@@ -24,7 +38,6 @@
 <script>
   const user_token = "{{ user_token }}";
 </script>
-
 
 <style>
   .tableWrapper tr.updatedRow {
