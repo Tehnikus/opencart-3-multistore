@@ -238,19 +238,9 @@ class ModelCatalogProduct extends Model {
 					");
 				}
 			}
-	
-			if (isset($data['product_image'])) {
-				foreach ($data['product_image'] as $product_image) {
-					$this->db->query("
-						INSERT INTO " . DB_PREFIX . "product_image 
-						SET 
-							`product_id` 	= '" . (int) $product_id . "', 
-							`store_id` 		= '" . (int) $this->session->data['store_id'] . "',
-							`image` 			= '" . $this->db->escape($product_image['image']) . "', 
-							`sort_order` 	= '" . (int) $product_image['sort_order'] . "'
-					");
-				}
-			}
+
+			// Save product images
+			$this->editImages($product_id, $data['product_images']);
 	
 			if (isset($data['product_download'])) {
 				foreach ($data['product_download'] as $download_id) {
@@ -679,24 +669,8 @@ class ModelCatalogProduct extends Model {
 				}
 			}
 	
-			$this->db->query("
-				DELETE FROM " . DB_PREFIX . "product_image 
-				WHERE `product_id` 	= '" . (int) $product_id . "'
-					AND `store_id` 		= '" . (int) $this->session->data['store_id'] . "'
-			");
-	
-			if (isset($data['product_image'])) {
-				foreach ($data['product_image'] as $product_image) {
-					$this->db->query("
-						INSERT INTO " . DB_PREFIX . "product_image 
-						SET 
-							`product_id` 	= '" . (int) $product_id . "', 
-							`store_id` 		= '" . (int) $this->session->data['store_id'] . "',
-							`image` 			= '" . $this->db->escape($product_image['image']) . "', 
-							`sort_order` 	= '" . (int) $product_image['sort_order'] . "'
-					");
-				}
-			}
+			// Save product images
+			$this->editImages($product_id, $data['product_images']);
 	
 			$this->db->query("
 				DELETE FROM " . DB_PREFIX . "product_to_download 
@@ -867,6 +841,60 @@ class ModelCatalogProduct extends Model {
 			throw $e;
 		}
 	}
+
+	public function editImages($pageId, $image_data = []) : int {
+
+    $pageId = (int) $pageId;
+    $storeId = (int) $this->session->data['store_id'];
+
+    $this->db->query("
+      DELETE FROM `". DB_PREFIX . "product_image` 
+      WHERE `product_id` = '" . (int) $pageId . "'
+        AND `store_id`      = '" . (int) $storeId . "'
+    ");
+
+    $this->db->query("
+      DELETE FROM `". DB_PREFIX . "product_image_description` 
+      WHERE `product_id` = '" . (int) $pageId . "'
+        AND `store_id`      = '" . (int) $storeId . "'
+    ");
+
+
+    foreach ($image_data as $image) {
+
+      // Check if image actually exists
+      if (!empty($image['image'])) {
+        $this->db->query("
+          INSERT INTO `". DB_PREFIX . "product_image`
+          SET 
+            `product_id` = '" . (int) $pageId . "', 
+            `image` 			= '" . $this->db->escape($image['image']) . "', 
+            `sort_order` 	= '" . (int) $image['sort_order'] . "',
+            `store_id`    = '" . $storeId . "'
+        ");
+
+        // Add multilang multistore image descriptions
+        $image_id = $this->db->getLastId();
+
+        foreach ($image['description'] as $language_id => $image_description) {
+          if (!$image_description) {
+            continue;
+          }
+          $this->db->query("
+            INSERT INTO `". DB_PREFIX . "product_image_description`
+            SET
+              `image_id` 	   = '" . (int) $image_id . "',
+              `product_id`  = '" . (int) $pageId . "',
+              `language_id`  = '" . (int) $language_id . "',
+              `store_id` 		 = '" . (int) $storeId . "',
+              `description`  = '" . $this->db->escape($image_description) ."'
+          ");
+        }
+      }
+    }
+
+    return $this->db->countAffected();
+  }
 
 	public function copyProduct($product_id) {
 		$query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "product p WHERE p.product_id = '" . (int)$product_id . "'");
