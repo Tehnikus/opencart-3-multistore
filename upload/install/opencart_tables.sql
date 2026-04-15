@@ -2226,7 +2226,6 @@ CREATE TABLE `oc_product_description` (
   `meta_title`        VARCHAR(255) NOT NULL,
   `meta_description`  VARCHAR(255) NOT NULL,
   `meta_keyword`      VARCHAR(255) NOT NULL,
-  `tag`               TEXT NOT NULL,
   `description`       TEXT NOT NULL,
   `seo_keywords`      TEXT NOT NULL,
   `seo_description`   TEXT NOT NULL,
