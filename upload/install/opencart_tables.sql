@@ -2272,26 +2272,6 @@ CREATE TABLE `oc_product_filter` (
   PRIMARY KEY (`product_id`, `store_id`, `filter_group_id`, `filter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
-
---
--- Table structure for table `oc_product_image`
---
-
-DROP TABLE IF EXISTS `oc_product_image`;
-CREATE TABLE `oc_product_image` (
-  `product_image_id`  INT NOT NULL AUTO_INCREMENT,
-  `product_id`        INT NOT NULL,
-  `store_id`          INT NOT NULL DEFAULT '0',
-  `image`             VARCHAR(255) DEFAULT NULL,
-  `sort_order`        INT NOT NULL DEFAULT '0',
-  PRIMARY KEY (`product_image_id`),
-  KEY (`product_id`, `store_id`, `sort_order`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-
-
 --
 -- Table structure for table `oc_product_option`
 --
@@ -7437,6 +7417,16 @@ CREATE TABLE `oc_category_image_description` (
   PRIMARY KEY (`image_id`, `language_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+DROP TABLE IF EXISTS `oc_product_image`;
+CREATE TABLE `oc_product_image` (
+  `image_id`          INT NOT NULL AUTO_INCREMENT,
+  `product_id`        INT NOT NULL,
+  `store_id`          INT NOT NULL DEFAULT '0',
+  `image`             VARCHAR(255) DEFAULT NULL,
+  `sort_order`        INT NOT NULL DEFAULT '0',
+  PRIMARY KEY (`image_id`),
+  KEY (`product_id`, `store_id`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `oc_product_image_description`;
 CREATE TABLE `oc_product_image_description` (
@@ -7447,6 +7437,7 @@ CREATE TABLE `oc_product_image_description` (
   `description`             TEXT NOT NULL,
   PRIMARY KEY (`product_id`, `language_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 DROP TABLE IF EXISTS `oc_seo_filter_page_facet_index`;
 CREATE TABLE `oc_seo_filter_page_facet_index` (
