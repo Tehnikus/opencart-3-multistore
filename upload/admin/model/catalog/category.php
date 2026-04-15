@@ -981,11 +981,11 @@ class ModelCatalogCategory extends Model {
 				* 
 			FROM " . DB_PREFIX . "seo_url 
 			WHERE `query` = 'category_id=" . (int)$category_id . "'
-				AND store_id = " . (int) $this->session->data['store_id'] . "
+				AND `store_id` = " . (int) $this->session->data['store_id'] . "
 		");
 
 		foreach ($query->rows as $row) {
-			$row[$row['language_id']] = $row['keyword'];
+			$result[$row['language_id']] = $row['keyword'];
 		}
 
 		return $result;
