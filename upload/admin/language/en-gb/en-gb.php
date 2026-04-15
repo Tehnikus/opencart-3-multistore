@@ -286,6 +286,7 @@ $_['button_add_lang_postfix']       = 'Add language postfix to URL';
 $_['entry_status']                  = 'Status';
 $_['option_on']                     = 'On';
 $_['option_off']                    = 'Off';
+$_['input_add_keyword_group']       = "Add new group";
 
 /* When doing translations only include the matching language code */
 
