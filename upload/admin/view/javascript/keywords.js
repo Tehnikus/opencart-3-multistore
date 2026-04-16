@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', async ()=> {
     });
   });
 
+  // Language select prerender
   interface.languageSelect = renderSelect([
     ...Object.values(interface.languages).map(l => ({
         value: l.language_id,
@@ -30,6 +31,8 @@ document.addEventListener('DOMContentLoaded', async ()=> {
       })
     )
   ]);
+
+  // Store select prerender
   interface.storeSelect = renderSelect([
     ...Object.values(interface.stores).map(l => ({
         value: l.store_id,
@@ -37,6 +40,8 @@ document.addEventListener('DOMContentLoaded', async ()=> {
       })
     )
   ]);
+
+  // Keyword group select prerender
   interface.groupSelect = renderSelect([
     ...Object.values(interface.keywordGroups).map(l => ({
         value: l.keyword_group_id,
@@ -44,7 +49,6 @@ document.addEventListener('DOMContentLoaded', async ()=> {
       })
     )
   ]);
-
 
   // Render nimbleTable keywords list
   renderKeywords(interface, keywords);
@@ -80,6 +84,7 @@ function renderKeywordGroup(id, name, interface) {
     deleteResponse = await fetch(`index.php?route=seo/keyword/fetchDeleteKeywordGroup&user_token=${user_token}`, {method: "POST", body: data})
     .then(r => r.json())
     .then(groupElement.remove());
+    // Remove group from table headers - filter and bulk rows edit, and all displayed rows group option
     document.querySelectorAll('[data-search-column="keyword_group_id"], [data-add-row-column="keyword_group_id"], [data-column="keyword_group_id"]').forEach(select => {
       select.querySelector(`option[value="${id}"]`)?.remove();
     });
