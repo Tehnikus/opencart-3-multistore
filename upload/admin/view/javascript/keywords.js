@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async ()=> {
   }
   
   // // Add event listener on group add button
-  addGroupBtns?.forEach(btn => {    
+  addGroupBtns?.forEach(btn => {
     btn.addEventListener('click', async e => {
       const groupName = e.target.closest('button').previousElementSibling.value;
       if (!groupName) {return}
@@ -41,6 +41,14 @@ document.addEventListener('DOMContentLoaded', async ()=> {
       // Append new group option to prerendered interface selects
       interface.groupSelect.add(Object.assign(document.createElement('option'), {value: newGroup.keyword_group_id, textContent: groupName}));
     });
+
+    // Add new keyword group on enter press
+    btn.parentElement.querySelector('input[data-add-keyword-group]').addEventListener('keydown', e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        btn.dispatchEvent(new Event('click'));
+      }
+    })
   });
 
   // Language select prerender
@@ -184,11 +192,29 @@ function renderKeywords(interface, keywords, tableElement) {
         addKeywordToPage(keywordTable, e);
       }
     });
+
+    // Prevent form from submit on enter press
+    keywordTable.table.addEventListener('keydown', e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+      }
+    });
   
     // Add new row
-    tableHeaderElement.querySelector('.addRow').addEventListener('click', (e) => {
+    tableHeaderElement.querySelector('.addRow').addEventListener('click', e => {
       const newRow = e.target.closest('tr');
       addRow(keywordTable, newRow);
+    });
+
+    // Add new row on enter press in add row inputs
+    tableHeaderElement.querySelectorAll('input[data-add-row-column][type="text"]').forEach(input => {
+      input.addEventListener('keydown', e => {      
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const newRow = e.target.closest('tr');
+          addRow(keywordTable, newRow);
+        }
+      });
     });
   
     // Clear filters
@@ -472,6 +498,7 @@ function addRow(keywordTable, newRow) {
     newData[element.dataset.addRowColumn] = element.value || '';
   });
   if (returnFlag) {
+    newRow.querySelector('input.alert-danger')?.focus();
     return;
   }
   newData.rowType = 'newRow';
