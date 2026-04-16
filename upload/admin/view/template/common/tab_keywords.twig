@@ -3,8 +3,8 @@
 <div class="panel panel-default">
   <div class="panel-body">
     <div class="col-sm-12 keywordGroups">
-      <div class="input-group addKeywordGroupInput">
-        <input class="form-control" type="text" placeholder="{{ input_add_keyword_group }}"/>
+      <div class="input-group">
+        <input class="form-control" data-add-keyword-group type="text" placeholder="{{ input_add_keyword_group }}"/>
         <button class="btn btn-success addKeywordGroupBtn" type="button"><i class="fa fa-plus"></i></button>
       </div>
     </div>
@@ -21,13 +21,14 @@
     </li>
   {% endfor %}
 </ul>
+
 <div class="tab-content">
   {% for language in languages %}
-    <div class="tab-pane {% if loop.first %}active{% endif %}" id="keywords_language_{{ language.language_id }}">
+    <div class="tab-pane {% if loop.first %}active{% endif %} pageKeywords" id="keywords_language_{{ language.language_id }}">
       <table class="table table-bordered table-hover table-striped">
         <thead>
           <tr>
-            <td colspan="3"><h3 class="text-center">{{ tab_keywords }} {{ language.name }}</h3></td>
+            <td colspan="3"><h4 class="text-center">{{ tab_keywords }} {{ language.name }}</h4></td>
           </td>
           <tr>
             <td style="width: 50%">{{ column_seo_keyword }}</td>
@@ -100,5 +101,12 @@
 
   [data-remove-row] {
     display: none!important;
+  }
+
+  .pageKeywords {
+    height: 400px;
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
   }
 </style>
