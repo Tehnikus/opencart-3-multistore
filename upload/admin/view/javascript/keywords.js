@@ -50,8 +50,12 @@ document.addEventListener('DOMContentLoaded', async ()=> {
     )
   ]);
 
-  // Render nimbleTable keywords list
-  renderKeywords(interface, keywords);
+  // Render keywords tables
+  const tableElements = document.querySelectorAll('.keywordTable');
+  tableElements.forEach(tableElement => {
+    // Call nimbleTable with params and add event listeners
+    renderKeywords(interface, keywords, tableElement);
+  });
 });
 
 // Save keyword group
@@ -105,154 +109,166 @@ function appendKeywordGroup(el, target) {
 }
 
 // Render keywords table
-function renderKeywords(interface, keywords) {
-  const keywordTable = new nimbleTable({
-    table: document.getElementById('keywordTable'),
-    idField:  'keyword_id',
-    pagination: {perPage: 200},
-    template: (row) => renderRow(interface, row),
-    addEventListeners: (table) => {
-      table.addEventListener('change', e => {
-        // Save rows when any row input changed by user
-        if (e.target.closest('[data-id]')) {
-          const tr = e.target.closest('[data-id]');
-          const newData = {};
-          newData.keyword_id = tr.dataset.id;
-          newData.rowType = 'updatedRow'
-          const inputs = tr.querySelectorAll('input, select');
-          inputs.forEach(input => {
-            newData[input.dataset.column] = input.value;
-          });
-          saveKeywords([newData]);
-          keywordTable.updateRow(newData.keyword_id, newData, false);
-          tr.className = '';
-          tr.classList.add('updatedRow');
-          tr.querySelector('.rowType').innerText = interface.lang.option_updated;
+function renderKeywords(interface, keywords, tableElement) {
+
+    // Table instance
+    const keywordTable = new nimbleTable({
+      table: tableElement,
+      idField:  'keyword_id',
+      pagination: {perPage: 200},
+      template: (row) => renderRow(interface, row),
+      addEventListeners: (table) => {
+        table.addEventListener('change', e => {
+          // Save rows when any row input changed by user
+          if (e.target.closest('[data-id]')) {
+            const tr = e.target.closest('[data-id]');
+            const newData = {};
+            newData.keyword_id = tr.dataset.id;
+            newData.rowType = 'updatedRow'
+            const inputs = tr.querySelectorAll('input, select');
+            inputs.forEach(input => {
+              newData[input.dataset.column] = input.value;
+            });
+            saveKeywords([newData]);
+            keywordTable.updateRow(newData.keyword_id, newData, false);
+            tr.className = '';
+            tr.classList.add('updatedRow');
+            tr.querySelector('.rowType').innerText = interface.lang.option_updated;
+          }
+        })
+      },
+      onFilterEnd: (filteredMap) => {
+        // console.log(filteredMap);
+      },
+      onRowDelete: async (row) => {
+        // Delete rows from DB
+        const body = new FormData();
+        body.append('keywords[]', row.keyword_id);
+        await fetch(`index.php?route=seo/keyword/fetchDeleteKeywords&user_token=${user_token}`, {method: "POST", body});
+      }
+    });
+
+    // Set each loaded row type to 'existing'. Originally row type is not stored in DB, it's just for filtering purpose 
+    keywords.forEach(row => {
+      row.rowType = 'existing';
+    });
+
+    // Render table header element 
+    const tableHeaderElement = renderHeader(interface);
+    // Append header to table, 
+    keywordTable.renderHeader(tableHeaderElement);
+    keywordTable.setData(keywords);
+  
+    // Copy row
+    keywordTable.tbody.addEventListener('click', e => {
+      if (e.target.closest('[data-copy-row]')) {
+        copyRow(keywordTable, e);
+      }
+      if (e.target.closest('[data-add-to-page]')) {
+        addKeywordToPage(keywordTable, e);
+      }
+    });
+  
+    // Add new row
+    tableHeaderElement.querySelector('.addRow').addEventListener('click', (e) => {
+      const newRow = e.target.closest('tr');
+      addRow(keywordTable, newRow);
+    });
+  
+    // Clear filters
+    tableHeaderElement.querySelector('.clearFilters').addEventListener('click', () => {
+      keywordTable.resetFilter();
+      keywordTable.setData(keywords); // Set data in case find duplicate was used to return to original state
+    });
+  
+    // Find duplicates
+    tableHeaderElement.querySelector('.findDuplicates').addEventListener('click', () => {
+      const keywordIds = keywordTable.filteredOrder;
+      const rows = [];
+      keywordIds.forEach(id => {
+        const row = keywordTable.getRow(id);
+        if (row !== null) {
+          rows.push(row);
         }
-      })
-    },
-    onFilterEnd: (filteredMap) => {
-      // console.log(filteredMap);
-    },
-    onRowDelete: async (row) => {
-      // Delete rows from DB
-      const body = new FormData();
-      body.append('keywords[]', row.keyword_id);
-      await fetch(`index.php?route=seo/keyword/fetchDeleteKeywords&user_token=${user_token}`, {method: "POST", body});
-    }
-  });
-
-  keywords.forEach(row => {
-    row.rowType = 'existing';
-  });
-  const tableHeaderElement = renderHeader(interface);
-  keywordTable.renderHeader(tableHeaderElement);
-  keywordTable.setData(keywords);
-
-  // Copy row
-  keywordTable.tbody.addEventListener('click', e => {
-    if (e.target.closest('[data-copy-row]')) {
-      copyRow(keywordTable, e);
-    }
-  });
-
-  // Add new row
-  tableHeaderElement.querySelector('.addRow').addEventListener('click', (e) => {
-    const newRow = e.target.closest('tr');
-    addRow(keywordTable, newRow);
-  });
-
-  // Clear filters
-  tableHeaderElement.querySelector('.clearFilters').addEventListener('click', () => {
-    keywordTable.resetFilter();
-    keywordTable.setData(keywords); // Set data in case find duplicate was used to return to original state
-  });
-
-  // Find duplicates
-  tableHeaderElement.querySelector('.findDuplicates').addEventListener('click', () => {
-    const keywordIds = keywordTable.filteredOrder;
-    const rows = []
-    keywordIds.forEach(id => {
-      rows.push(keywordTable.getRow(id))
-    });
-
-    const duplicates = findDuplicates(rows);
-    keywordTable.clearData();
-    keywordTable.setData(duplicates);
-  });
-
-  // Replace string event listener
-  tableHeaderElement.querySelectorAll('.replace').forEach(button => {
-    button.addEventListener('click', (e) => {
-      const newRow = e.target.closest('div');
-      const newData = {};
-      newRow.querySelectorAll('input, select').forEach(element => {
-        newData[element.dataset.addRowColumn] = element.value || '';
       });
-      updateRow(keywordTable, newData);
+  
+      const duplicates = findDuplicates(rows);
+      keywordTable.clearData();
+      keywordTable.setData(duplicates);
     });
-  });
-
-  // Add to the beginning fo the string event listener
-  tableHeaderElement.querySelectorAll('.addToBeginning').forEach(button =>{
-    button.addEventListener('click', (e) => {
-      const newRow = e.target.closest('div');
-      const newData = {};
-      newRow.querySelectorAll('input').forEach(element => {
-        newData[element.dataset.addRowColumn] = element.value || '';
-      });
-      const items = keywordTable.filteredOrder;
-      items.forEach(id => {
-        rowVals = keywordTable.rowMap.get(id);
-        for (const key in newData) {
-          rowVals[key] = String(newData[key]) + String(rowVals[key]);
-        }
-        rowVals.rowType = 'updatedRow';
-        keywordTable.updateRow(id, rowVals, updateElement = true);
+  
+    // Replace string event listener
+    tableHeaderElement.querySelectorAll('.replace').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const newRow = e.target.closest('div');
+        const newData = {};
+        newRow.querySelectorAll('input, select').forEach(element => {
+          newData[element.dataset.addRowColumn] = element.value || '';
+        });
+        updateRow(keywordTable, newData);
       });
     });
-  });
-
-  // Add to the beginning fo the string event listener
-  tableHeaderElement.querySelectorAll('.addToEnd').forEach(button =>{
-    button.addEventListener('click', (e) => {
-      const newRow = e.target.closest('div');
-      const newData = {};
-      newRow.querySelectorAll('input').forEach(element => {
-        newData[element.dataset.addRowColumn] = element.value || '';
-      });
-      const items = keywordTable.filteredOrder;
-      items.forEach(id => {
-        rowVals = keywordTable.rowMap.get(id);
-        for (const key in newData) {
-          rowVals[key] = String(rowVals[key]) + String(newData[key]);
-        }
-        rowVals.rowType = 'updatedRow';
-        keywordTable.updateRow(id, rowVals, updateElement = true);
+  
+    // Add to the beginning fo the string event listener
+    tableHeaderElement.querySelectorAll('.addToBeginning').forEach(button =>{
+      button.addEventListener('click', (e) => {
+        const newRow = e.target.closest('div');
+        const newData = {};
+        newRow.querySelectorAll('input').forEach(element => {
+          newData[element.dataset.addRowColumn] = element.value || '';
+        });
+        const items = keywordTable.filteredOrder;
+        items.forEach(id => {
+          rowVals = keywordTable.rowMap.get(id);
+          for (const key in newData) {
+            rowVals[key] = String(newData[key]) + String(rowVals[key]);
+          }
+          rowVals.rowType = 'updatedRow';
+          keywordTable.updateRow(id, rowVals, updateElement = true);
+        });
       });
     });
-  });
-
-  // Save all keywords
-  document.querySelector('.saveAllKeywords').addEventListener('click', async () => {
-    const rows = keywordTable.rowMap
-    const savedData = [];
-    rows.forEach((row) => {
-      savedData.push({
-        keyword_id:   row.id,
-        keyword_text: row.keyword_text,
-        keyword_url:  row.keyword_url,
-        language_id:  row.language_id,
-        store_id:     row.store_id,
-      })
+  
+    // Add to the beginning fo the string event listener
+    tableHeaderElement.querySelectorAll('.addToEnd').forEach(button =>{
+      button.addEventListener('click', (e) => {
+        const newRow = e.target.closest('div');
+        const newData = {};
+        newRow.querySelectorAll('input').forEach(element => {
+          newData[element.dataset.addRowColumn] = element.value || '';
+        });
+        const items = keywordTable.filteredOrder;
+        items.forEach(id => {
+          rowVals = keywordTable.rowMap.get(id);
+          for (const key in newData) {
+            rowVals[key] = String(rowVals[key]) + String(newData[key]);
+          }
+          rowVals.rowType = 'updatedRow';
+          keywordTable.updateRow(id, rowVals, updateElement = true);
+        });
+      });
     });
-    saveKeywords(savedData);
-  });
-
-  // Import CSV
-  tableHeaderElement.querySelector('.importCSV > input').addEventListener('input', (e) => {
-    importCSV(e.target, keywordTable);
-  });
+  
+    // Save all keywords
+    document.querySelector('.saveAllKeywords').addEventListener('click', async () => {
+      const rows = keywordTable.rowMap
+      const savedData = [];
+      rows.forEach((row) => {
+        savedData.push({
+          keyword_id:   row.id,
+          keyword_text: row.keyword_text,
+          keyword_url:  row.keyword_url,
+          language_id:  row.language_id,
+          store_id:     row.store_id,
+        })
+      });
+      saveKeywords(savedData);
+    });
+  
+    // Import CSV
+    tableHeaderElement.querySelector('.importCSV > input').addEventListener('input', (e) => {
+      importCSV(e.target, keywordTable);
+    });
 }
 
 // Render table row
