@@ -332,20 +332,6 @@ function renderHeader(interface) {
   
   thead.innerHTML = `
     <tr>
-      <th style="width: auto"   class="text-center"><input type="text" class="form-control" data-search-column="keyword_text" placeholder="${interface.lang.text_search} ${interface.lang.column_seo_keyword}"></th>
-      <th style="width: auto"   class="text-center"><input type="text" class="form-control" data-search-column="keyword_url" placeholder="${interface.lang.text_search} ${interface.lang.column_url}"></th>
-      <th style="width: 180px"  class="text-center">${languageSelect.outerHTML}</th>
-      <th style="width: 180px"  class="text-center">${storeSelect.outerHTML}</th>
-      <th style="width: 180px"  class="text-center">${groupSelect.outerHTML}</th>
-      <th style="width: 130px"  class="text-center">${filterRowTypeSelect.outerHTML}</th>
-      <th style="width: 130px"  class="text-center">
-        <div class="btn-group">
-          <button type="button" class="btn btn-default findDuplicates" title="${interface.lang.button_find_duplicates}"><i class="fa fa-search"></i></button>
-          <button type="button" class="btn btn-default clearFilters" title="${interface.lang.button_clear_filters}"><i class="fa fa-times"></i></button>
-        </div>
-      </th>
-    </tr>
-    <tr>
       <th class="text-center">
         <div class="input-group">
           <input type="text" class="form-control" data-add-row-column="keyword_text" placeholder="${interface.lang.column_add_keyword}/${interface.lang.column_edit_keyword} ${interface.lang.column_seo_keyword}">
@@ -386,6 +372,20 @@ function renderHeader(interface) {
             <input type="file" accept=".csv" style="display: none;" name="importKeywords" />
           </label>
           <button type="button" class="btn btn-success saveAllKeywords" title="${interface.lang.button_save_all}"><i class="fa fa-save"></i></button>
+        </div>
+      </th>
+    </tr>
+    <tr>
+      <th style="width: auto"   class="text-center"><input type="text" class="form-control" data-search-column="keyword_text" placeholder="${interface.lang.text_search} ${interface.lang.column_seo_keyword}"></th>
+      <th style="width: auto"   class="text-center"><input type="text" class="form-control" data-search-column="keyword_url" placeholder="${interface.lang.text_search} ${interface.lang.column_url}"></th>
+      <th style="width: 180px"  class="text-center">${languageSelect.outerHTML}</th>
+      <th style="width: 180px"  class="text-center">${storeSelect.outerHTML}</th>
+      <th style="width: 180px"  class="text-center">${groupSelect.outerHTML}</th>
+      <th style="width: 130px"  class="text-center">${filterRowTypeSelect.outerHTML}</th>
+      <th style="width: 130px"  class="text-center">
+        <div class="btn-group">
+          <button type="button" class="btn btn-default findDuplicates" title="${interface.lang.button_find_duplicates}"><i class="fa fa-search-plus"></i></button>
+          <button type="button" class="btn btn-default clearFilters" title="${interface.lang.button_clear_filters}"><i class="fa fa-times"></i></button>
         </div>
       </th>
     </tr>
