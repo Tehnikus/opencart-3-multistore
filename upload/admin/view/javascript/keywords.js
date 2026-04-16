@@ -450,6 +450,34 @@ function copyRow(keywordTable, e) {
   saveKeywords([rowData]);
 }
 
+function addKeywordToPage(keywordTable, e) {
+  const id = Number(e.target.closest('[data-id]').dataset.id);
+  const rowData = {...keywordTable.rowMap.get(id)};
+  const pageKeywords = document.querySelector(`${document.querySelector('#keywordsTabLanguage li.active a').hash} tbody`);
+  let newKeyword = `
+    <tr data-saved-keyword-id="">
+      <td>
+        <input 
+          name="seo_keywords[${rowData.language_id}][]"
+          value="${rowData.keyword_text}"
+          class="form-control"
+        />
+      </td>
+      <td>
+        <input 
+          name="seo_keywords[${rowData.language_id}][]"
+          value="${rowData.keyword_url}"
+          class="form-control"
+        />
+      </td>
+      <td>
+        <button type="button" onclick="this.closest('tr').remove()" class="btn btn-danger" title="Remove FAQ row"><i class="fa fa-times"></i></button>
+      </td>
+    </tr>
+  `;
+  pageKeywords.insertAdjacentHTML('beforeend', newKeyword);
+}
+
 // Save keyword to DB
 function saveKeywords(data) {
   const body = new FormData();
