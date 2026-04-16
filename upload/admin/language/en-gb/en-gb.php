@@ -248,6 +248,9 @@ $_['entry_footer_tab_name']         = 'Footer tab name';
 $_['entry_footer_help']             = 'Every row created here will be displayed as a tab in the very bottom in front-end on corresponding page';
 $_['button_add_footer']             = 'Add Footer row';
 $_['button_remove_footer']          = 'Remove Footer row';
+// Keywords 
+$_['button_remove_all_keywords']    = 'Remove all keywords in this language';
+$_['confirm_remove_all_keywords']   = 'This will remove all keywords in this language. Are you sure?';
 // Tags
 $_['tab_tag']                       = 'Tags';
 $_['tab_selected_tags']             = 'Selected tags';
