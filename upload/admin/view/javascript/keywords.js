@@ -130,8 +130,6 @@ function renderKeywordGroupElm(id, name, interface) {
   return groupElement;
 }
 
-
-
 // Render keywords table
 function renderKeywords(interface, keywords, tableElement) {
 
@@ -189,7 +187,7 @@ function renderKeywords(interface, keywords, tableElement) {
         copyRow(keywordTable, e);
       }
       if (e.target.closest('[data-add-to-page]')) {
-        addKeywordToPage(keywordTable, e);
+        addKeywordToPage(keywordTable, interface, e);
       }
     });
 
@@ -532,7 +530,7 @@ function copyRow(keywordTable, e) {
   saveKeywords([rowData]);
 }
 
-function addKeywordToPage(keywordTable, e) {
+function addKeywordToPage(keywordTable, interface, e) {
   const id = Number(e.target.closest('[data-id]').dataset.id);
   const rowData = {...keywordTable.rowMap.get(id)};
   const pageKeywords = document.querySelector(`${document.querySelector('#keywordsTabLanguage li.active a').hash} tbody`);
@@ -554,8 +552,12 @@ function addKeywordToPage(keywordTable, e) {
           class="form-control"
         />
       </td>
-      <td>
-        <button type="button" onclick="this.closest('tr').remove()" class="btn btn-danger" title="Remove FAQ row"><i class="fa fa-times"></i></button>
+      <td style="text-align: center">
+        <div class="btn-group">
+          <button type="button" onclick="moveRow(this, 'up')" class="btn btn-default" title="${interface.lang.button_move_up}"><i class="fa fa-arrow-up"></i></button>
+          <button type="button" onclick="moveRow(this, 'down')" class="btn btn-default" title="${interface.lang.button_move_down}"><i class="fa fa-arrow-down"></i></button>
+          <button type="button" onclick="this.closest('tr').remove()" class="btn btn-danger" title="${interface.lang.button_remove_keyword}"><i class="fa fa-times"></i></button>
+        </div>
       </td>
     </tr>
   `;
@@ -721,4 +723,24 @@ function findDuplicates(data) {
     const key = item.keyword_text.trim().toLowerCase();
     return map.get(key) > 1;
   });
+}
+
+function moveRow(button, direction) {
+  const row = button.closest('tr');
+  const parent = row.parentNode;
+
+  if (direction === 'up') {
+    const prevRow = row.previousElementSibling;
+    if (prevRow) {
+      // insertBefore moves the row before the previous one
+      parent.insertBefore(row, prevRow);
+    }
+  } else if (direction === 'down') {
+    const nextRow = row.nextElementSibling;
+    if (nextRow) {
+      // To move down, insert after the next row
+      // We achieve "after" by inserting before the sibling of the next row
+      parent.insertBefore(row, nextRow.nextElementSibling);
+    }
+  }
 }
