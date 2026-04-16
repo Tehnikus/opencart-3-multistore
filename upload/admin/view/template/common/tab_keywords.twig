@@ -24,7 +24,6 @@
 <div class="tab-content">
   {% for language in languages %}
     <div class="tab-pane {% if loop.first %}active{% endif %}" id="keywords_language_{{ language.language_id }}">
-      
       <table class="table table-bordered table-hover table-striped">
         <thead>
           <tr>
@@ -49,8 +48,8 @@
   </div>
 
 {# Everything is done by nimbleTable.js and keywords.js #}
-<script type="text/javascript" src="view/javascript/nimbleTable.js"></script>
-<script type="text/javascript" src="view/javascript/keywords.js"></script>
+<script defer type="text/javascript" src="view/javascript/nimbleTable.js"></script>
+<script defer type="text/javascript" src="view/javascript/keywords.js"></script>
 <link href="view/stylesheet/nimbleTable.css" rel="stylesheet" />
 
 <script>
