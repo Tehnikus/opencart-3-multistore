@@ -15,7 +15,7 @@
     <li {% if loop.first %}class="active"{% endif %}>
       <a href="#keywords_language_{{ language.language_id }}" data-toggle="tab" data-tab-language-id="{{ language.language_id }}">
         <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> 
-        <span>{{ tab_description }} {{ language.name }}
+        <span>{{ tab_keywords }} {{ language.name }}
       </a>
     </li>
   {% endfor %}
@@ -23,13 +23,30 @@
 <div class="tab-content">
   {% for language in languages %}
     <div class="tab-pane {% if loop.first %}active{% endif %}" id="keywords_language_{{ language.language_id }}">
-      <div class="table-responsive tableWrapper">
-        <table class="keywordTable table table-bordered table-hover">
-        </table>
-      </div>
+      
+      <table class="table table-bordered table-hover table-striped">
+        <thead>
+          <tr>
+            <td colspan="3"><h3 class="text-center">{{ tab_keywords }} {{ language.name }}</h3></td>
+          </td>
+          <tr>
+            <td style="width: 50%">{{ column_seo_keyword }}</td>
+            <td style="width: 50%">{{ column_url }}</td>
+            <td style="width: 35px"><button type="button" onclick="" class="btn btn-danger" title="Remove FAQ row"><i class="fa fa-times"></i></button></td>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
     </div>
   {% endfor %}
 </div>
+
+  <div class="table-responsive tableWrapper">
+    <table class="keywordTable table table-bordered table-hover">
+    </table>
+  </div>
+
 {# Everything is done by nimbleTable.js and keywords.js #}
 <script type="text/javascript" src="view/javascript/nimbleTable.js"></script>
 <script type="text/javascript" src="view/javascript/keywords.js"></script>
