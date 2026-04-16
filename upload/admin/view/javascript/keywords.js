@@ -534,20 +534,21 @@ function addKeywordToPage(keywordTable, interface, e) {
   const id = Number(e.target.closest('[data-id]').dataset.id);
   const rowData = {...keywordTable.rowMap.get(id)};
   const pageKeywords = document.querySelector(`${document.querySelector('#keywordsTabLanguage li.active a').hash} tbody`);
+  const index = pageKeywords.childElementCount;
   // Get language id from current active tab. This way keyword from any language can be added to desired page language
   const languageId = document.querySelector('#keywordsTabLanguage li.active a').dataset.tabLanguageId;
   let newKeyword = `
     <tr data-saved-keyword-id="">
       <td>
         <input 
-          name="${name_prefix}[${languageId}][seo_keywords][]"
+          name="${name_prefix}[${languageId}][seo_keywords][${index}][keyword]"
           value="${rowData.keyword_text}"
           class="form-control"
         />
       </td>
       <td>
         <input 
-          name="${name_prefix}[${languageId}][seo_keywords][]"
+          name="${name_prefix}[${languageId}][seo_keywords][${index}][url]"
           value="${rowData.keyword_url}"
           class="form-control"
         />
