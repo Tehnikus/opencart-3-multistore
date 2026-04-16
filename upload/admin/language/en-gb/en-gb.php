@@ -251,6 +251,9 @@ $_['button_remove_footer']          = 'Remove Footer row';
 // Keywords 
 $_['button_remove_all_keywords']    = 'Remove all keywords in this language';
 $_['confirm_remove_all_keywords']   = 'This will remove all keywords in this language. Are you sure?';
+$_['keywords_list']                 = 'Keywords list';
+$_['page_keywords_list']            = 'Page keywords';
+$_['keywords_groups']               = 'Keyword groups';
 // Tags
 $_['tab_tag']                       = 'Tags';
 $_['tab_selected_tags']             = 'Selected tags';
