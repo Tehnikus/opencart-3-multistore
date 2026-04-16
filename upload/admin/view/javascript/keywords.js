@@ -3,23 +3,43 @@ import('./nimbleTable.js');
 document.addEventListener('DOMContentLoaded', async ()=> {
   const interface     = await fetch(`index.php?route=seo/keyword/fetchGetInterface&user_token=${user_token}`).then(r => r.json());
   const keywords      = await fetch(`index.php?route=seo/keyword/fetchGetKeywords&user_token=${user_token}`).then(r => r.json());
-  const addGroupBtn   = document.querySelectorAll('.addKeywordGroupBtn');
-  const groupList     = document.querySelectorAll('.addKeywordGroupInput');
+  const addGroupBtns  = document.querySelectorAll('.addKeywordGroupBtn');
+  const groupList     = document.querySelectorAll('.keywordGroups');
 
-  // Render keyword groups lists
+  // Render existing keyword groups lists
   for (const el of interface.keywordGroups) {
-    const groupElement = renderKeywordGroup(el.keyword_group_id, el.keyword_group_name);
+    // Render element with event listeners
+    const groupElement = renderKeywordGroupElm(el.keyword_group_id, el.keyword_group_name, interface);
     groupList?.forEach(list => {
       appendKeywordGroup(groupElement, list);
     });
   }
   
-  // Add event listener on group add button
-  addGroupBtn?.forEach(btn => {
-    btn.addEventListener('click', e => {
+  // // Add event listener on group add button
+  addGroupBtns?.forEach(btn => {    
+    btn.addEventListener('click', async e => {
       const groupName = e.target.closest('button').previousElementSibling.value;
       if (!groupName) {return}
-      saveKeywordGroup(groupName, groupList, interface);
+
+      // Save new group tb DB, returns new group id
+      const newGroup = await saveKeywordGroup(groupName, groupList, interface);
+      if (!newGroup.keyword_group_id) {return}
+      
+      // Render new group element with event listeners
+      const newGroupEl = renderKeywordGroupElm(newGroup.keyword_group_id, groupName, interface);
+      
+      // Append new group element to all lists
+      groupList?.forEach(list => {
+        appendKeywordGroup(newGroupEl, list);
+      });
+
+      // Append new group option to all selects - table filter, table bulk edit, visible table rows
+      document.querySelectorAll('[data-search-column="keyword_group_id"], [data-add-row-column="keyword_group_id"], [data-column="keyword_group_id"]').forEach(select => {
+        select.add(Object.assign(document.createElement('option'), {value: newGroup.keyword_group_id, textContent: groupName}));
+      });
+
+      // Append new group option to prerendered interface selects
+      interface.groupSelect.add(Object.assign(document.createElement('option'), {value: newGroup.keyword_group_id, textContent: groupName}));
     });
   });
 
@@ -59,21 +79,20 @@ document.addEventListener('DOMContentLoaded', async ()=> {
 });
 
 // Save keyword group
-async function saveKeywordGroup(groupName, groupList, interface) {
+async function saveKeywordGroup(groupName) {
   const data = new FormData();
   data.append('keyword_group_name', groupName.slice(0, 100));
   let newGroup = await fetch(`index.php?route=seo/keyword/fetchSaveKeywordGroup&user_token=${user_token}`, {method: "POST", body: data}).then(r => r.json());
-  let groupElement = renderKeywordGroup(newGroup.keyword_group_id, groupName, interface);
-  // Add new group to filter select, add row select and each row group select 
-  document.querySelectorAll('[data-search-column="keyword_group_id"], [data-add-row-column="keyword_group_id"], [data-column="keyword_group_id"]').forEach(select => {
-    select.add(Object.assign(document.createElement('option'), {value: newGroup.keyword_group_id, textContent: groupName}));
-  });
-  interface.groupSelect.add(Object.assign(document.createElement('option'), {value: newGroup.keyword_group_id, textContent: groupName}));
-  appendKeywordGroup(groupElement, groupList)
+  return newGroup;
+}
+
+// // Insert keyword group element
+function appendKeywordGroup(el, target) {
+  target.insertAdjacentElement('beforeend', el);
 }
 
 // Render keyword group element
-function renderKeywordGroup(id, name, interface) {
+function renderKeywordGroupElm(id, name, interface) {
   const groupElement  = document.createElement('div');
   const nameElement   = document.createElement('span');
   const deleteButton  = document.createElement('button');
@@ -81,7 +100,8 @@ function renderKeywordGroup(id, name, interface) {
   nameElement.innerText = name;
 
   deleteButton.classList.add("btn", "btn-danger", "btn-xs", "deleteKeywordGroup");
-  deleteButton.innerHTML = `<i class="fa fa-times"></i>`
+  deleteButton.innerHTML = `<i class="fa fa-times"></i>`;
+  // Add event listener for remove button
   deleteButton.addEventListener('click', async () => {
     const data = new FormData();
     data.append('keyword_group_id', id);
@@ -102,11 +122,7 @@ function renderKeywordGroup(id, name, interface) {
   return groupElement;
 }
 
-// Insert keyword group element
-function appendKeywordGroup(el, target) {
-  const parent = target.parentNode;
-  parent.insertBefore(el, target);
-}
+
 
 // Render keywords table
 function renderKeywords(interface, keywords, tableElement) {
