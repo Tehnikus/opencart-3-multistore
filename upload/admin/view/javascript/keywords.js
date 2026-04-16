@@ -242,11 +242,15 @@ function renderKeywords(interface, keywords, tableElement) {
     // Replace string event listener
     tableHeaderElement.querySelectorAll('.replace').forEach(button => {
       button.addEventListener('click', (e) => {
+        
         const newRow = e.target.closest('div');
         const newData = {};
+        let textReplace;
         newRow.querySelectorAll('input, select').forEach(element => {
           newData[element.dataset.addRowColumn] = element.value || '';
+          textReplace = (element.selectedOptions) ? element.selectedOptions[0]?.text : element.value;
         });
+        if (!confirm(interface.lang.confirm_replace.replace('{{ text }}', textReplace))) {return}
         updateRow(keywordTable, newData);
       });
     });
@@ -256,9 +260,14 @@ function renderKeywords(interface, keywords, tableElement) {
       button.addEventListener('click', (e) => {
         const newRow = e.target.closest('div');
         const newData = {};
+        let textReplace;
         newRow.querySelectorAll('input').forEach(element => {
           newData[element.dataset.addRowColumn] = element.value || '';
+          textReplace = (element.selectedOptions) ? element.selectedOptions[0]?.text : element.value;
         });
+
+        if (!confirm(interface.lang.confirm_add_to_beginning.replace('{{ text }}', textReplace))) {return}
+
         const items = keywordTable.filteredOrder;
         items.forEach(id => {
           rowVals = keywordTable.rowMap.get(id);
@@ -276,9 +285,13 @@ function renderKeywords(interface, keywords, tableElement) {
       button.addEventListener('click', (e) => {
         const newRow = e.target.closest('div');
         const newData = {};
+        let textReplace;
         newRow.querySelectorAll('input').forEach(element => {
           newData[element.dataset.addRowColumn] = element.value || '';
+          textReplace = (element.selectedOptions) ? element.selectedOptions[0]?.text : element.value;
         });
+        if (!confirm(interface.lang.confirm_add_to_end.replace('{{ text }}', textReplace))) {return}
+        
         const items = keywordTable.filteredOrder;
         items.forEach(id => {
           rowVals = keywordTable.rowMap.get(id);
