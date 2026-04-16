@@ -987,6 +987,8 @@ class ModelCatalogProduct extends Model {
 			'facet_index',
 			'facet_sort',
 			'product_search_index',
+			'product_seo_tag',
+			'article_product',
 		];
 
 		// Delete cache
