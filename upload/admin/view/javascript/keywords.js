@@ -291,8 +291,9 @@ function renderRow(interface, row) {
     <td class="text-center rowType">${rowTypeLabel}</td>
     <td class="text-center">
       <div class="btn-group">
-        <button type="button" class="btn btn-default" data-copy-row="" title="${interface.lang.button_copy}"><i class="fa fa-copy"></i></button>
-        <button type="button" class="btn btn-danger"  data-remove-row=""title="${interface.lang.button_delete}"><i class="fa fa-times"></i></button>
+        <button type="button" class="btn btn-success" data-add-to-page    title="${interface.lang.button_add_to_page}"><i class="fa fa-plus-circle"></i></button>
+        <button type="button" class="btn btn-default" data-copy-row=""    title="${interface.lang.button_copy}"><i class="fa fa-copy"></i></button>
+        <button type="button" class="btn btn-danger"  data-remove-row=""  title="${interface.lang.button_delete}"><i class="fa fa-times"></i></button>
       </div>
     </td>
   `;
