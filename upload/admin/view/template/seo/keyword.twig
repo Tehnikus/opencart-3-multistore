@@ -22,9 +22,10 @@
         <h3 class="panel-title"><i class="fa fa-list"></i> {{ keyword_groups }}</h3>
       </div>
       <div class="panel-body">
-        <div id="keywordGroups" class="col-sm-12">
-          <div id="addKeywordGroupInput" class="input-group col-sm-12">
-            <input class="form-control" type="text" placeholder="{{ input_add_keyword_group }}"/><button id="addKeywordGroup" class="btn btn-success" type="button"><i class="fa fa-plus"></i></button>
+        <div class="col-sm-12 keywordGroups">
+          <div class="input-group addKeywordGroupInput">
+            <input class="form-control" type="text" placeholder="{{ input_add_keyword_group }}"/>
+            <button class="btn btn-success addKeywordGroupBtn" type="button"><i class="fa fa-plus"></i></button>
           </div>
         </div>
       </div>
@@ -37,7 +38,7 @@
       <div class="panel-body">
         <form action="{{ form_action }}" method="post" enctype="multipart/form-data" id="form-filter" class="fetchSaveForm">
           <div class="table-responsive tableWrapper">
-            <table id="keywordTable" class="keywordTable table table-bordered table-hover">
+            <table class="keywordTable table table-bordered table-hover">
             </table>
           </div>
         </form>
@@ -77,7 +78,7 @@
     }
   }
 
-  #keywordGroups {
+  .keywordGroups {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
@@ -91,6 +92,10 @@
         padding: 0 1rem
       }
     }
+  }
+
+  [data-add-to-page] {
+    display: none!important;
   }
 </style>
 
