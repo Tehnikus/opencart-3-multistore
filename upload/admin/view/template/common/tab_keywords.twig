@@ -30,6 +30,31 @@
               </tr>
             </thead>
             <tbody>
+              {% for key, keywordRow in data[language.language_id].seo_keywords %}
+                <tr data-saved-keyword-id="">
+                  <td>
+                    <input 
+                      name="{{ name_prefix }}[{{ language.language_id }}][seo_keywords][{{ key }}][keyword]"
+                      value="{{ keywordRow.keyword }}"
+                      class="form-control"
+                    />
+                  </td>
+                  <td>
+                    <input 
+                      name="{{ name_prefix }}[{{ language.language_id }}][seo_keywords][{{ key }}][url]"
+                      value="{{ keywordRow.url }}"
+                      class="form-control"
+                    />
+                  </td>
+                  <td style="text-align: center">
+                    <div class="btn-group">
+                      <button type="button" onclick="moveRow(this, 'up')" class="btn btn-default" title="${interface.lang.button_move_up}"><i class="fa fa-arrow-up"></i></button>
+                      <button type="button" onclick="moveRow(this, 'down')" class="btn btn-default" title="${interface.lang.button_move_down}"><i class="fa fa-arrow-down"></i></button>
+                      <button type="button" onclick="this.closest('tr').remove()" class="btn btn-danger" title="${interface.lang.button_remove_keyword}"><i class="fa fa-times"></i></button>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
             </tbody>
           </table>
         </div>
