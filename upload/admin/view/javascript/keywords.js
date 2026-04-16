@@ -3,20 +3,24 @@ import('./nimbleTable.js');
 document.addEventListener('DOMContentLoaded', async ()=> {
   const interface     = await fetch(`index.php?route=seo/keyword/fetchGetInterface&user_token=${user_token}`).then(r => r.json());
   const keywords      = await fetch(`index.php?route=seo/keyword/fetchGetKeywords&user_token=${user_token}`).then(r => r.json());
-  const addGroupBtn   = document.getElementById('addKeywordGroup');
-  const groupList     = document.getElementById('addKeywordGroupInput');
+  const addGroupBtn   = document.querySelectorAll('.addKeywordGroupBtn');
+  const groupList     = document.querySelectorAll('.addKeywordGroupInput');
 
-  // Render keyword groups
+  // Render keyword groups lists
   for (const el of interface.keywordGroups) {
     const groupElement = renderKeywordGroup(el.keyword_group_id, el.keyword_group_name);
-    appendKeywordGroup(groupElement, groupList);
+    groupList?.forEach(list => {
+      appendKeywordGroup(groupElement, list);
+    });
   }
   
   // Add event listener on group add button
-  addGroupBtn?.addEventListener('click', e => {
-    const groupName = e.target.closest('button').previousElementSibling.value;
-    if (!groupName) {return}
-    saveKeywordGroup(groupName, groupList, interface);
+  addGroupBtn?.forEach(btn => {
+    btn.addEventListener('click', e => {
+      const groupName = e.target.closest('button').previousElementSibling.value;
+      if (!groupName) {return}
+      saveKeywordGroup(groupName, groupList, interface);
+    });
   });
 
   interface.languageSelect = renderSelect([
