@@ -31,8 +31,8 @@
           </td>
           <tr>
             <td style="width: 50%">{{ column_seo_keyword }}</td>
-            <td style="width: 50%">{{ column_url }}</td>
-            <td style="width: 35px"><button type="button" onclick="" class="btn btn-danger" title="Remove FAQ row"><i class="fa fa-times"></i></button></td>
+            <td style="width: auto">{{ column_url }}</td>
+            <td style="width: 140px; text-align: center"><button type="button" onclick="confirmDelete(this)" class="btn btn-danger" title="{{ remove_all_keywords }}"><i class="fa fa-trash"></i></button></td>
           </tr>
         </thead>
         <tbody>
@@ -55,6 +55,10 @@
 <script>
   const user_token = "{{ user_token }}";
   const name_prefix = "{{ name_prefix }}";
+  function confirmDelete(button) {
+    if (!confirm("{{ confirm_remove_all_keywords }}")) {return}
+    button.closest('table').tBodies[0].innerHTML = '';
+  }
 </script>
 
 <style>
