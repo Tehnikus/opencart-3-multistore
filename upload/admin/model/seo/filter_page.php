@@ -447,9 +447,10 @@ class ModelSeoFilterPage extends Model {
     ";
 
     foreach($this->db->query($sql)->rows ?? [] as $row) {
-      $row['footer'] = json_decode($row['footer'] ?? '[]', true);
-      $row['faq']    = json_decode($row['faq'] ?? '[]', true);
-      $row['how_to'] = json_decode($row['how_to'] ?? '[]', true);
+      $row['seo_keywords'] = json_decode($row['seo_keywords'] ?? '[]', true);
+      $row['footer']       = json_decode($row['footer'] ?? '[]', true);
+      $row['faq']          = json_decode($row['faq'] ?? '[]', true);
+      $row['how_to']       = json_decode($row['how_to'] ?? '[]', true);
       $result[$row['language_id']] = $row;
     }
     
