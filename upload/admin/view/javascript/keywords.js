@@ -271,9 +271,9 @@ function renderRow(interface, row) {
   const languageSelect  = interface.languageSelect.cloneNode(true);
   const storeSelect     = interface.storeSelect.cloneNode(true);
   const groupSelect     = interface.groupSelect.cloneNode(true);
-  storeSelect.name     = storeSelect.dataset.column     = 'store_id';
-  languageSelect.name  = languageSelect.dataset.column  = 'language_id';
-  groupSelect.name     = groupSelect.dataset.column     = 'keyword_group_id';
+  storeSelect.dataset.column     = 'store_id';
+  languageSelect.dataset.column  = 'language_id';
+  groupSelect.dataset.column     = 'keyword_group_id';
 
   [...languageSelect.options].forEach(opt => {
     if (opt.value == row.language_id) {
@@ -292,8 +292,8 @@ function renderRow(interface, row) {
   });
 
   tr.innerHTML = `
-    <td><input data-column="keyword_text" name="keyword_text" value="${row.keyword_text}" class="form-control"></td>
-    <td><input data-column="keyword_url"  name="keyword_url"  value="${row.keyword_url}"  class="form-control"></td>
+    <td><input data-column="keyword_text" value="${row.keyword_text}" class="form-control"></td>
+    <td><input data-column="keyword_url"  value="${row.keyword_url}"  class="form-control"></td>
     <td>${languageSelect.outerHTML}</td>
     <td>${storeSelect.outerHTML}</td>
     <td>${groupSelect.outerHTML}</td>
@@ -379,7 +379,7 @@ function renderHeader(interface) {
           <button type="button" class="btn btn-success addRow" title="${interface.lang.button_add_row}"><i class="fa fa-plus-circle"></i></button>
           <label class="btn btn-primary importCSV" title="${interface.lang.button_import}">
             <i class="fa fa-cloud-upload"></i>&nbsp;
-            <input type="file" accept=".csv" style="display: none;" name="importKeywords" />
+            <input type="file" accept=".csv" style="display: none;" />
           </label>
           <button type="button" class="btn btn-success saveAllKeywords" title="${interface.lang.button_save_all}"><i class="fa fa-save"></i></button>
         </div>
