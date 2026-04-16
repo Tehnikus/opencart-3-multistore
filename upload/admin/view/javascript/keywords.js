@@ -335,32 +335,32 @@ function renderHeader(interface) {
       <th class="text-center">
         <div class="input-group">
           <input type="text" class="form-control" data-add-row-column="keyword_text" placeholder="${interface.lang.column_add_keyword}/${interface.lang.column_edit_keyword} ${interface.lang.column_seo_keyword}">
-          <button type="button" class="btn btn-default addToBeginning"><i class="fa fa-fast-backward"></i></button>
-          <button type="button" class="btn btn-default addToEnd"><i class="fa fa-fast-forward"></i></button>
-          <button type="button" class="btn btn-warning replace"><i class="fa fa-random"></i></button>
+          <button type="button" title="${interface.lang.button_add_to_beginning}" class="btn btn-default addToBeginning"><i class="fa fa-fast-backward"></i></button>
+          <button type="button" title="${interface.lang.button_add_to_end}" class="btn btn-default addToEnd"><i class="fa fa-fast-forward"></i></button>
+          <button type="button" title="${interface.lang.button_replace}" class="btn btn-warning replace"><i class="fa fa-random"></i></button>
         </div>
       </th>
       <th class="text-center">
         <div class="input-group">
           <input type="text" class="form-control" data-add-row-column="keyword_url" placeholder="${interface.lang.column_url}">
-          <button type="button" class="btn btn-default addToBeginning"><i class="fa fa-fast-backward"></i></button>
-          <button type="button" class="btn btn-default addToEnd"><i class="fa fa-fast-forward"></i></button>
-          <button type="button" class="btn btn-warning replace"><i class="fa fa-random"></i></button>
+          <button type="button" title="${interface.lang.button_add_to_beginning}" class="btn btn-default addToBeginning"><i class="fa fa-fast-backward"></i></button>
+          <button type="button" title="${interface.lang.button_add_to_end}" class="btn btn-default addToEnd"><i class="fa fa-fast-forward"></i></button>
+          <button type="button" title="${interface.lang.button_replace}" class="btn btn-warning replace"><i class="fa fa-random"></i></button>
         </div>
       </th>
       <th class="text-center">
         <div class="input-group">
-         ${addRowLangSelect.outerHTML}<button type="button" class="btn btn-warning replace"><i class="fa fa-random"></i></button>
+         ${addRowLangSelect.outerHTML}<button type="button" title="${interface.lang.button_replace}" class="btn btn-warning replace"><i class="fa fa-random"></i></button>
         </div>
       </th>
       <th class="text-center">
         <div class="input-group">
-         ${addRowStoreSelect.outerHTML}<button type="button" class="btn btn-warning replace"><i class="fa fa-random"></i></button>
+         ${addRowStoreSelect.outerHTML}<button type="button" title="${interface.lang.button_replace}" class="btn btn-warning replace"><i class="fa fa-random"></i></button>
         </div>
       </th>
       <th class="text-center">
         <div class="input-group">
-         ${addRowGroupSelect.outerHTML}<button type="button" class="btn btn-warning replace"><i class="fa fa-random"></i></button>
+         ${addRowGroupSelect.outerHTML}<button type="button" title="${interface.lang.button_replace}" class="btn btn-warning replace"><i class="fa fa-random"></i></button>
         </div>
       </th>
       <th class="text-center"></th>
