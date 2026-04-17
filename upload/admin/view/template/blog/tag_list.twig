@@ -51,15 +51,8 @@
                           <td class="text-center"><input type="checkbox" name="selected[]" value="{{ tag.blog_tag_id }}" {% if tag.tag_id in selected %}checked="checked"{% endif %} /></td>
                           <td class="text-center"><img class="img-thumbnail" src="{{ tag.image }}" loading="lazy"></td>
                           <td class="text-left"><b>{{ tag.name }}</b></td>
-                          <td class="text-left">
-                            {# <div>
-                              {% for tag in tag.tags %}
-                                <span class="badge badge-sm {% if tag.is_main == 1 %}strong alert-success{% endif %}">
-                                  {{ tag.name }}
-                                </span>
-                                {% if tag.is_main == 1 %}<br>{% endif %}
-                              {% endfor %}
-                            </div> #}
+                          <td class="text-center">
+                            <b>{{ tag.article_count }}</b>
                           </td>
                           <td>
                             <p>
