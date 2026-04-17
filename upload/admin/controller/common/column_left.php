@@ -187,7 +187,7 @@ class ControllerCommonColumnLeft extends Controller {
 			if ($this->user->hasPermission('access', 'seo/meta_editor')) {
 				$seo[] = array(
 					'name'	   => $this->language->get('text_meta_editor'),
-					'href'     => $this->url->link('seo/meta_editor/getProductsList', 'user_token=' . $this->session->data['user_token'], true),
+					'href'     => $this->url->link('seo/meta_editor', 'user_token=' . $this->session->data['user_token'] . '&type=category', true),
 					'children' => array()
 				);
 			}
