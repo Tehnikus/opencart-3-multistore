@@ -4,6 +4,8 @@ class ModelBlogArticle extends Model {
   private $sortOrders = [
     'name'          => 'ad.`name`',
     'date_modified' => 'a2s.`date_modified`',
+    'status'        => 'a2s.`status`',
+    'tags'          => 'at.`blog_tag_id`',
   ];
 
   public function addArticle($data) {
@@ -308,6 +310,7 @@ class ModelBlogArticle extends Model {
         ad.`name`,
         a2s.`status`,
         a2s.`date_modified`,
+        at.`blog_tag_id`,
         (SELECT ai.`image` FROM " . DB_PREFIX . "article_image ai WHERE ai.`article_id` = a2s.`article_id` AND ai.`store_id` = a2s.`store_id` ORDER BY ai.`sort_order` LIMIT 1) AS `image`,
         (
           SELECT JSON_OBJECT(
@@ -337,6 +340,10 @@ class ModelBlogArticle extends Model {
       FROM " . DB_PREFIX . "article_description ad
       JOIN " . DB_PREFIX . "article_to_store a2s
         ON a2s.`article_id` = ad.`article_id`
+      LEFT JOIN " . DB_PREFIX . "article_tag at
+        ON at.`article_id` = a2s.`article_id`
+        AND at.`store_id` = a2s.`store_id`
+        AND at.`is_main` = 1 
       WHERE ad.`language_id` = {$languageId}
         AND a2s.`store_id`   = {$storeId}
       {$ordering}
