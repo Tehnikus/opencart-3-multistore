@@ -15,7 +15,7 @@ class ControllerBlogArticle extends Controller {
     $this->load->model('localisation/language');
     $this->load->model('blog/article');
     $user_token = $this->session->data['user_token'];
-    $url = '&' . http_build_query(array_intersect_key($this->request->get, array_flip(['page', 'order'])));
+    $url = '&' . http_build_query(array_intersect_key($this->request->get, array_flip(['page'])));
     
     // Get items list
     $filter_data = array(
@@ -31,18 +31,22 @@ class ControllerBlogArticle extends Controller {
     }
 
     $data = [
-      'items'         => $items,
-      'column_left'   => $this->load->controller('common/column_left'),
-      'footer'        => $this->load->controller('common/footer'),
-      'header'        => $this->load->controller('common/header'),
-      'breadcrumbs'   => $this->displayBreadcrumbs(),
-      'pagination'    => $this->getPagination()['pagination'],
-      'results'       => $this->getPagination()['results'],
-      'user_token'    => $user_token,
-      'add'           => $this->url->link('blog/article/add', 'user_token=' . $user_token, true),
-      'delete'        => $this->url->link('blog/article/delete', 'user_token=' . $user_token, true),
-      'sort'          => $this->request->get['sort'] ?? 'date_added',
-      'sort_name'     => $this->url->link('blog/article', 'user_token=' . $user_token . $this->getSortOrder('name') . $url, true),
+      'items'              => $items,
+      'column_left'        => $this->load->controller('common/column_left'),
+      'footer'             => $this->load->controller('common/footer'),
+      'header'             => $this->load->controller('common/header'),
+      'breadcrumbs'        => $this->displayBreadcrumbs(),
+      'pagination'         => $this->getPagination()['pagination'],
+      'results'            => $this->getPagination()['results'],
+      'user_token'         => $user_token,
+      'add'                => $this->url->link('blog/article/add', 'user_token=' . $user_token, true),
+      'delete'             => $this->url->link('blog/article/delete', 'user_token=' . $user_token, true),
+      'order'              => $this->request->get['order'] ?? 'DESC',
+      'sort'               => $this->request->get['sort'] ?? 'date_added',
+      'sort_name'          => $this->url->link('blog/article', 'user_token=' . $user_token . $this->getSortOrder('name') . $url, true),
+      'sort_tags'          => $this->url->link('blog/article', 'user_token=' . $user_token . $this->getSortOrder('tags') . $url, true),
+      'sort_status'        => $this->url->link('blog/article', 'user_token=' . $user_token . $this->getSortOrder('status') . $url, true),
+      'sort_date_modified' => $this->url->link('blog/article', 'user_token=' . $user_token . $this->getSortOrder('date_modified') . $url, true),
     ];
 
     if (isset($this->session->data['success'])) {
