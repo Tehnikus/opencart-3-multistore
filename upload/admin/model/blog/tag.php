@@ -2,8 +2,10 @@
 class ModelBlogTag extends Model {
 
   private $sortOrders = [
-    'name'          => 'bd.`name`',
-    'date_modified' => 'b2s.`date_modified`',
+    'name'            => 'bd.`name`',
+    'status'          => 'b2s.`status`',
+    'date_added'      => 'b2s.`date_added`',
+    'article_count'   => 'article_count',
   ];
 
   public function addTag($data) {
@@ -254,7 +256,7 @@ class ModelBlogTag extends Model {
     
     // Orders
     $ordering = '';
-    $sortField = 'b2s.`date_modified`';
+    $sortField = 'b2s.`date_added`';
 
     if (!empty($filter['sort']) && isset($this->sortOrders[$filter['sort']])) {
       $sortField = $this->sortOrders[$filter['sort']];
@@ -276,8 +278,10 @@ class ModelBlogTag extends Model {
       SELECT
         bd.`blog_tag_id`,
         bd.`name`,
+        b2s.`date_added`,
         b2s.`date_modified`,
         b2s.`status`,
+        (SELECT COUNT(*) FROM " . DB_PREFIX . "article_tag at WHERE at.`blog_tag_id` = b2s.`blog_tag_id` AND at.`store_id` = b2s.`store_id`) AS article_count,
         (SELECT bi.`image` FROM " . DB_PREFIX . "blog_tag_image bi WHERE bi.`blog_tag_id` = b2s.`blog_tag_id` AND bi.`store_id` = b2s.`store_id` ORDER BY bi.`sort_order` LIMIT 1) AS `image`,
         (
           SELECT JSON_OBJECT(
