@@ -91,7 +91,10 @@ async function loadBatch(model, method, filter = {}, userToken, batchSize = 100,
     if (debug) { console.info(`loadBatch: Model-> ${model}, Method-> ${method}, Batch loaded: `, result) }
     if (result.status !== "ok") { console.error("loadBatch: Server returned error: " + result.message); return; }
     // Break while(true) if result is empty
-    if (!result.rows.length) { break }
+    const isEmpty = Array.isArray(result.rows)
+      ? result.rows.length === 0
+      : Object.keys(result.rows).length === 0;
+    if (isEmpty) { break }
 
     // Parse JSON if SQL returns prepared JSON string
     if (typeof result.rows === 'string') {
