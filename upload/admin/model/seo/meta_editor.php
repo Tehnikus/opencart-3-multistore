@@ -20,17 +20,22 @@ class ModelSeoMetaEditor extends Model
       return $result;
     }
 
+    $type = $this->types[$filter['type']];
     // Limits
     $limit  = max(1, (int) ($filter['limit'] ?? $this->config->get('config_limit_admin') ?? 100));
     $start  = max(0, (int) ($filter['start'] ?? 0));
     $limits = " LIMIT {$start}, {$limit}";
 
     $query = $this->db->query("
-      SELECT
-        *
-      FROM " . DB_PREFIX . $this->types[$filter['type']]['table'] . "
-      WHERE store_id = " . (int) $this->session->data['store_id'] . "
-      $limits
+      SELECT d.*
+      FROM " . DB_PREFIX . $type['table'] . " d
+      INNER JOIN (
+        SELECT DISTINCT " . $type['column_id'] . "
+        FROM " . DB_PREFIX . $type['table'] . "
+        WHERE store_id = " . (int) $this->session->data['store_id'] . "
+        LIMIT {$start}, {$limit}
+      ) ids ON d." . $type['column_id'] . " = ids." . $type['column_id'] . "
+      WHERE d.store_id = " . (int) $this->session->data['store_id'] . "
     ");
 
     foreach ($query->rows ?? [] as $row) {
