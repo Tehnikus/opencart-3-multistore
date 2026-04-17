@@ -78,15 +78,24 @@ $(document).ready(function() {
 			}
 		}
 	}
+
 	// Override summernotes image manager
 	$('[data-toggle=\'summernote\']').each(function() {
-		var element = this;
+			var element = this;
 
-		if ($(this).attr('data-lang') && $(this).attr('data-lang')!='en-gb') {
-			$('head').append('<script type="text/javascript" src="view/javascript/summernote/lang/summernote-' + $(this).attr('data-lang') + '.min.js"></script>');
-		}
+		const observer = new IntersectionObserver((entries) => {
+			entries.forEach(entry => {
+				if (entry.isIntersecting) {
+					if ($(this).attr('data-lang') && $(this).attr('data-lang')!='en-gb') {
+						$('head').append('<script type="text/javascript" src="view/javascript/summernote/lang/summernote-' + $(this).attr('data-lang') + '.min.js"></script>');
+					}
 
-		$(element).summernote(window.summernoteOptions);
+					$(element).summernote(window.summernoteOptions);
+				}
+			});
+		});
+
+		observer.observe(element);
 	});
 
 	$(document).on('submit', 'form', function() {
