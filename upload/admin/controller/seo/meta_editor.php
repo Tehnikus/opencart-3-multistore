@@ -21,9 +21,21 @@ class ControllerSeoMetaEditor extends Controller {
       'column_id'   => 'product_id',
     ];
 
-    $data = [...$data, ...$this->getCommonFormData()];
+    $data = [...$data, ...$this->getCommonListData()];
 
     $this->response->setOutput($this->load->view('seo/meta_editor', $data));
+  }
+
+  private function getCommonListData() : array {
+    $data = [
+      'store_id'     => (int) $this->session->data['store_id'],
+      'breadcrumbs'  => $this->displayBreadcrumbs(),
+      'user_token'   => $this->session->data['user_token'],
+      'column_left'  => $this->load->controller('common/column_left'),
+      'footer'       => $this->load->controller('common/footer'),
+      'header'       => $this->load->controller('common/header'),
+    ];
+    return $data;
   }
 
   public function displayBreadcrumbs() {
