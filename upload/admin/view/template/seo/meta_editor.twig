@@ -3,6 +3,11 @@
   <div class="page-header">
     <div class="container-fluid">
       <h1>{{ meta_editor }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
     </div>
   </div>
   <div class="container-fluid">
