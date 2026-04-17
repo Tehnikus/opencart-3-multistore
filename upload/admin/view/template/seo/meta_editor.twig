@@ -1,0 +1,67 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <h1>{{ meta_editor }}</h1>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-list"></i> {{ meta_editor }}</h3>
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive tableWrapper">
+          <table class="metaEditorTable table table-bordered table-hover">
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const user_token = "{{ user_token }}";
+</script>
+
+<link href="view/stylesheet/nimbleTable.css" rel="stylesheet" />
+
+<style>
+  .tableWrapper tr.updatedRow {
+    background-color: #ffca7f7a;
+    &:hover {
+      background-color: #ffc16799
+    }
+  }
+  .tableWrapper tr.newRow {
+    background-color: #56d42840;
+    &:hover {
+      background-color: #56d42857
+    }
+  }
+
+  .tableWrapper tr.importedRow {
+    background-color: #316dc84a;
+    &:hover {
+      background-color: #316dc857;
+    }
+  }
+
+  [data-add-to-page] {
+    display: none!important;
+  }
+</style>
+
+{{ footer }}
