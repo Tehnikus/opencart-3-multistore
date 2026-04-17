@@ -3,6 +3,7 @@ $_['heading_title']             = 'Blog tags';
 $_['text_no_results']           = 'No results';
 $_['text_confirm']              = 'This will delete selected blog tags! Are you sure?';
 $_['text_form']                 = 'Blog tag edit';
+$_['column_article_count']      = 'Articles';
 
 // Buttons
 $_['button_add']                = 'Add new blog tag';

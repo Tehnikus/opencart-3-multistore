@@ -213,6 +213,7 @@ $_['column_route']                  = 'Route';
 $_['column_modules']                = 'Modules';
 $_['column_seo']                    = 'SEO Data';
 $_['column_date_modified']          = 'Date modified';
+$_['column_date_added']             = 'Date added';
 $_['column_sort_order']             = 'Sort order';
 $_['column_seo_keyword']            = 'Keyword';
 $_['column_url']                    = 'URL';
