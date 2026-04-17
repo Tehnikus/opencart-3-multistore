@@ -5,27 +5,23 @@ class ControllerSeoMetaEditor extends Controller {
     $this->load->model('seo/meta_editor');
     $this->document->setTitle($this->language->get('meta_editor'));
     
-
-    $this->getProductsList();
+    $this->getList();
   }
 
-  public function getProductsList() {
-
+  public function getList() {
     $this->load->language('seo/meta_editor');
+    $this->load->model('seo/meta_editor');
     $this->document->setTitle($this->language->get('meta_editor'));
-    $this->document->addScript('view/javascript/nimbleTable.js');
-    $this->document->addScript('view/javascript/batchloader.js');
-
-    $this->load->model('setting/store');
-    $this->load->model('localisation/language');
+    
+    $types = $this->model_seo_meta_editor->getTypes();
+    $current_type = isset($types[$this->request->get['type']]) ? $this->request->get['type'] : 'category';
 
     $data = [
-      'column_left'            => $this->load->controller('common/column_left'),
-      'footer'                 => $this->load->controller('common/footer'),
-      'header'                 => $this->load->controller('common/header'),
-      'breadcrumbs'            => $this->displayBreadcrumbs(),
-      'user_token'             => $this->session->data['user_token'],
+      'type'        => $current_type,
+      'column_id'   => 'product_id',
     ];
+
+    $data = [...$data, ...$this->getCommonFormData()];
 
     $this->response->setOutput($this->load->view('seo/meta_editor', $data));
   }
