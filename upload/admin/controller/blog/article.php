@@ -46,7 +46,7 @@ class ControllerBlogArticle extends Controller {
       'sort_name'          => $this->url->link('blog/article', 'user_token=' . $user_token . $this->getSortOrder('name') . $url, true),
       'sort_tags'          => $this->url->link('blog/article', 'user_token=' . $user_token . $this->getSortOrder('tags') . $url, true),
       'sort_status'        => $this->url->link('blog/article', 'user_token=' . $user_token . $this->getSortOrder('status') . $url, true),
-      'sort_date_modified' => $this->url->link('blog/article', 'user_token=' . $user_token . $this->getSortOrder('date_modified') . $url, true),
+      'sort_date_added'    => $this->url->link('blog/article', 'user_token=' . $user_token . $this->getSortOrder('date_added') . $url, true),
     ];
 
     if (isset($this->session->data['success'])) {

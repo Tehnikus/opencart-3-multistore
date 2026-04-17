@@ -3,7 +3,7 @@ class ModelBlogArticle extends Model {
 
   private $sortOrders = [
     'name'          => 'ad.`name`',
-    'date_modified' => 'a2s.`date_modified`',
+    'date_added'    => 'a2s.`date_added`',
     'status'        => 'a2s.`status`',
     'tags'          => 'at.`blog_tag_id`',
   ];
@@ -286,7 +286,7 @@ class ModelBlogArticle extends Model {
     
     // Orders
     $ordering = '';
-    $sortField = 'a2s.`date_modified`';
+    $sortField = 'a2s.`date_added`';
 
     if (!empty($filter['sort']) && isset($this->sortOrders[$filter['sort']])) {
       $sortField = $this->sortOrders[$filter['sort']];
@@ -310,6 +310,7 @@ class ModelBlogArticle extends Model {
         ad.`name`,
         a2s.`status`,
         a2s.`date_modified`,
+        a2s.`date_added`,
         at.`blog_tag_id`,
         (SELECT ai.`image` FROM " . DB_PREFIX . "article_image ai WHERE ai.`article_id` = a2s.`article_id` AND ai.`store_id` = a2s.`store_id` ORDER BY ai.`sort_order` LIMIT 1) AS `image`,
         (
