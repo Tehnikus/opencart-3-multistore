@@ -40,14 +40,14 @@ class ControllerSeoMetaEditor extends Controller {
 
   public function displayBreadcrumbs() {
     $breadcrumbs = [];
-    $breadcrumbs[] = [
-      'text' => $this->language->get('text_home'),
-      'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-    ];
-    $breadcrumbs[] = [
-      'text' => $this->language->get('heading_title'),
-      'href' => $this->url->link('seo/meta_editor', 'user_token=' . $this->session->data['user_token'], true)
-    ];
+    $this->load->model('seo/meta_editor');
+    $types = $this->model_seo_meta_editor->getTypes();
+    foreach ($types as $key => $type) {
+      $breadcrumbs[] = [
+        'text' => $this->language->get('header_' . $key),
+        'href' => $this->url->link('seo/meta_editor', 'user_token=' . $this->session->data['user_token'] . '&type=' . $key, true)
+      ];
+    }
     return $breadcrumbs;
   }
 
