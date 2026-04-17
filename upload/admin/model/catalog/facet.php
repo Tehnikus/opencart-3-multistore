@@ -105,6 +105,7 @@ Class ModelCatalogFacet extends Model {
           pa.`attribute_group_id` AS `facet_group_id`,
           4                       AS `facet_type`
         FROM " . DB_PREFIX . "product_attribute pa
+        WHERE pa.language_id = " . (int) $this->config->get('config_language_id') . "
 
         UNION ALL
 
