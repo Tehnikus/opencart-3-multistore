@@ -42,6 +42,12 @@ class ModelSeoMetaEditor extends Model
     ");
 
     foreach ($query->rows as $row) {
+      $row['description']     = strlen(strip_tags($row['description'] ?? '')) ?? 0;
+      $row['seo_description'] = strlen(strip_tags($row['seo_description'] ?? '')) ?? 0;
+      $row['faq']             = !empty(json_decode($row['faq'] ?? '[]', true));
+      $row['how_to']          = !empty(json_decode($row['how_to'] ?? '[]', true));
+      $row['footer']          = !empty(json_decode($row['footer'] ?? '[]', true));
+      $row['seo_keywords']    = count(json_decode($row['seo_keywords'] ?? '[]', true) ?? []);
       $result[] = $row;
     }
 
