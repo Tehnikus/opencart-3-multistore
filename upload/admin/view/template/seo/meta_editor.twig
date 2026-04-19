@@ -44,30 +44,37 @@
 </script>
 
 <link href="view/stylesheet/nimbleTable.css" rel="stylesheet" />
-
 <style>
-  .tableWrapper tr.updatedRow {
-    background-color: #ffca7f7a;
-    &:hover {
-      background-color: #ffc16799
+  .tableWrapper {
+    & .langData {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      & .langFlag {
+        flex: 0 1 auto;
+        align-content: center;
+      }
+      & .langSeoData {
+        flex: 1 1 auto;
+        flex-wrap: wrap;
+        display: flex;
+        & .seoInputs {
+          display: flex;
+          flex: 1 0 100%;
+          flex-wrap: wrap;
+          /* gap: 1rem; */
+        }
+        & .seoInputs .input-group {
+          flex: 1 0 100%;
+        }
+      }
+      & .seoBadges {
+        flex: 1 0 100%;
+        justify-content: center;
+        display: flex;
+        gap: 1rem;
+      }
     }
-  }
-  .tableWrapper tr.newRow {
-    background-color: #56d42840;
-    &:hover {
-      background-color: #56d42857
-    }
-  }
-
-  .tableWrapper tr.importedRow {
-    background-color: #316dc84a;
-    &:hover {
-      background-color: #316dc857;
-    }
-  }
-
-  [data-add-to-page] {
-    display: none!important;
   }
 </style>
 
