@@ -227,6 +227,29 @@
       }
     }
   }
+  .message.fixed {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 20;
+    max-height: 300px;
+    overflow-y: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    
+    border-radius: 3px;
+    scrollbar-gutter: stable;
+  }
+  .message-success {
+    scrollbar-color: gray #cbeacb;  
+  }
+  .message-error {
+    scrollbar-color: gray #cbeacb;  
+  }
+  .message.fixed .alert {
+    margin-bottom: 0;
+  }
 </style>
 
 {{ footer }}
