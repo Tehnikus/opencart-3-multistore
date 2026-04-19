@@ -70,4 +70,78 @@ function renderEditor(interface, data, tableElement) {
   metaEditorTable.renderHeader(tableHeaderElement);
   metaEditorTable.setData(data);
 
+
+function renderHeader(interface) {
+  const thead = document.createElement('thead');
+
+  // Create filter selects
+  const languageSelect  = interface.languageSelect.cloneNode(true);
+  const storeSelect     = interface.storeSelect.cloneNode(true);
+  // Add empty values to filter selects
+  languageSelect.add(Object.assign(document.createElement('option'), {value: '', textContent: interface.lang.column_language}), languageSelect.options[0]);
+  storeSelect.add(Object.assign(document.createElement('option'), {value: '', textContent: interface.lang.column_store}), storeSelect.options[0]);
+
+  // Set dataset
+  languageSelect.dataset.searchColumn = 'language_id';
+  storeSelect.dataset.searchColumn    = 'store_id';
+
+  // Row type select options 
+  
+  thead.innerHTML = `
+    <tr>
+      <th style="width: 67%" class="text-center">
+        <div class="input-group flex">
+          <input type="text" class="form-control" data-search-column="lang_data.*.meta_title" placeholder="${interface.lang.input_search} ${interface.lang.input_meta_title}">
+          <input type="text" class="form-control" data-search-column="lang_data.*.h1" placeholder="${interface.lang.input_search} ${interface.lang.input_h1}">
+        </div>
+        <div class="input-group flex">
+          <input type="text" class="form-control" data-search-column="lang_data.*.meta_description" placeholder="${interface.lang.input_search} ${interface.lang.input_meta_description}">
+        </div>
+      </th>
+      <th>
+        <div class="input-group flex">
+          <select class="form-control" data-search-column="lang_data.*.description">
+            <option style="background-color: #ffffff; border-color: #cccccc; color: #555555;" value="">${interface.lang.input_description}</option>
+            <option style="background-color: #cbeacb; border-color: #b9e2b9; color: #398c39;" value="">${interface.lang.input_description}</option>
+            <option style="background-color: #f5c1bb; border-color: #f3b5ad; color: #c72f1d;" value="">${interface.lang.input_description}</option>
+          </select>
+          <select class="form-control" data-search-column="lang_data.*.seo_description">
+            <option style="background-color: #ffffff; border-color: #cccccc; color: #555555;" value="">${interface.lang.input_seo_description}</option>
+            <option style="background-color: #cbeacb; border-color: #b9e2b9; color: #398c39;" value=">2000">${interface.lang.input_seo_description} >2000</option>
+            <option style="background-color: #f5c1bb; border-color: #f3b5ad; color: #c72f1d;" value=">1000">${interface.lang.input_seo_description} >1000</option>
+            <option style="background-color: #f5c1bb; border-color: #f3b5ad; color: #c72f1d;" value="<1000">${interface.lang.input_seo_description} <1000</option>
+          </select>
+          <select class="form-control" data-search-column="lang_data.*.footer">
+            <option style="background-color: #ffffff; border-color: #cccccc; color: #555555;" value="">${interface.lang.input_footer}</option>
+            <option style="background-color: #cbeacb; border-color: #b9e2b9; color: #398c39;" value="true">${interface.lang.input_footer}</option>
+            <option style="background-color: #f5c1bb; border-color: #f3b5ad; color: #c72f1d;" value="false">${interface.lang.input_footer}</option>
+          </select>
+        </div>
+        <div class="input-group flex">
+          <select class="form-control" data-search-column="lang_data.*.seo_keywords">
+            <option style="background-color: #ffffff; border-color: #cccccc; color: #555555;" value="">${interface.lang.input_seo_keywords}</option>
+            <option style="background-color: #cbeacb; border-color: #b9e2b9; color: #398c39;" value=">0">${interface.lang.input_seo_keywords}</option>
+            <option style="background-color: #f5c1bb; border-color: #f3b5ad; color: #c72f1d;" value="<1">${interface.lang.input_seo_keywords}</option>
+          </select>
+          <select class="form-control" data-search-column="lang_data.*.faq">
+            <option style="background-color: #ffffff; border-color: #cccccc; color: #555555;" value="">${interface.lang.input_faq}</option>
+            <option style="background-color: #cbeacb; border-color: #b9e2b9; color: #398c39;" value="true">${interface.lang.input_faq}</option>
+            <option style="background-color: #f5c1bb; border-color: #f3b5ad; color: #c72f1d;" value="false">${interface.lang.input_faq}</option>
+          </select>
+          <select class="form-control" data-search-column="lang_data.*.how_to">
+            <option style="background-color: #ffffff; border-color: #cccccc; color: #555555;" value="">${interface.lang.input_how_to}</option>
+            <option style="background-color: #cbeacb; border-color: #b9e2b9; color: #398c39;" value="true">${interface.lang.input_how_to}</option>
+            <option style="background-color: #f5c1bb; border-color: #f3b5ad; color: #c72f1d;" value="false">${interface.lang.input_how_to}</option>
+          </select>
+        </div>
+
+      </th>
+      <th>
+        <button type="button" class="btn btn-warning" title="${interface.lang.button_save_all}"><i class="fa fa-save"></i></button>
+      </th>
+    </tr>
+  `;
+
+  return thead;
 }
+
