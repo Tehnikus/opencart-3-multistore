@@ -244,7 +244,8 @@ class nimbleTable {
       const targetRow = e.target.closest('[data-id]');
       const newData = {};
       targetRow.querySelectorAll('input, select, textarea').forEach(element => {
-        newData[element.dataset.column] = element.value;
+        // Nested object path
+        this.#setByPath(newData, element.dataset.column, element.value);
       });
       if (this.options.onRowUpdate) {
         this.options.onRowUpdate(newData, targetRow);
@@ -255,6 +256,16 @@ class nimbleTable {
 
     this.eventListenersAdded = true;
     return;
+  }
+
+  #setByPath(obj, path, value) {
+    const keys = path.split('.');
+    let current = obj;
+    for (let i = 0; i < keys.length - 1; i++) {
+      if (!current[keys[i]]) current[keys[i]] = {};
+      current = current[keys[i]];
+    }
+    current[keys[keys.length - 1]] = value;
   }
 
   /**
