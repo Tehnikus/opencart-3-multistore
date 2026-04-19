@@ -2,12 +2,12 @@
 class ModelSeoMetaEditor extends Model
 {
   private $types = [
-    'category'      => ['main_table' => 'category_to_store',        'description_table' => 'category_description',        'column_id' => 'category_id'],
-    'product'       => ['main_table' => 'product_to_store',         'description_table' => 'product_description',         'column_id' => 'product_id'],
-    'filter_page'   => ['main_table' => 'seo_filter_page_to_store', 'description_table' => 'seo_filter_page_description', 'column_id' => 'filter_page_id'],
-    'manufacturer'  => ['main_table' => 'manufacturer_to_store',    'description_table' => 'manufacturer_description',    'column_id' => 'manufacturer_id'],
-    'article'       => ['main_table' => 'article_to_store',         'description_table' => 'article_description',         'column_id' => 'article_id'],
-    'tag'           => ['main_table' => 'blog_tag_to_store',        'description_table' => 'blog_tag_description',        'column_id' => 'blog_tag_id'],
+    'category'      => ['main_table' => 'category_to_store',        'description_table' => 'category_description',        'path' => 'catalog/category',     'column_id' => 'category_id'],
+    'product'       => ['main_table' => 'product_to_store',         'description_table' => 'product_description',         'path' => 'catalog/product',      'column_id' => 'product_id'],
+    'filter_page'   => ['main_table' => 'seo_filter_page_to_store', 'description_table' => 'seo_filter_page_description', 'path' => 'seo/filter_page',      'column_id' => 'filter_page_id'],
+    'manufacturer'  => ['main_table' => 'manufacturer_to_store',    'description_table' => 'manufacturer_description',    'path' => 'catalog/manufacturer', 'column_id' => 'manufacturer_id'],
+    'article'       => ['main_table' => 'article_to_store',         'description_table' => 'article_description',         'path' => 'blog/article',         'column_id' => 'article_id'],
+    'tag'           => ['main_table' => 'blog_tag_to_store',        'description_table' => 'blog_tag_description',        'path' => 'blog/tag',             'column_id' => 'blog_tag_id'],
   ];
 
   public function getTypes() : array {
