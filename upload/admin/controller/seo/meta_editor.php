@@ -32,13 +32,26 @@ class ControllerSeoMetaEditor extends Controller {
   }
 
   private function getCommonListData() : array {
+    $this->load->model('localisation/language');
+    $this->load->model('localisation/currency');
+    $this->load->language('seo/meta_editor');
+    $currencies = $this->model_localisation_currency->getCurrencies();
+    $languages = $this->model_localisation_language->getLanguages();
+    $target_options = [
+      'meta_title' => $this->language->get('input_meta_title'),
+      'h1' => $this->language->get('input_h1'),
+      'meta_description' => $this->language->get('input_meta_description')
+    ];
     $data = [
-      'store_id'     => (int) $this->session->data['store_id'],
-      'breadcrumbs'  => $this->displayBreadcrumbs(),
-      'user_token'   => $this->session->data['user_token'],
-      'column_left'  => $this->load->controller('common/column_left'),
-      'footer'       => $this->load->controller('common/footer'),
-      'header'       => $this->load->controller('common/header'),
+      'languages'      => $languages,
+      'currencies'     => $currencies,
+      'target_options' => $target_options,
+      'store_id'       => (int) $this->session->data['store_id'],
+      'breadcrumbs'    => $this->displayBreadcrumbs(),
+      'user_token'     => $this->session->data['user_token'],
+      'column_left'    => $this->load->controller('common/column_left'),
+      'footer'         => $this->load->controller('common/footer'),
+      'header'         => $this->load->controller('common/header'),
     ];
     return $data;
   }
