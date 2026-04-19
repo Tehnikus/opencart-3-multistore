@@ -45,3 +45,29 @@ document.addEventListener('DOMContentLoaded', async ()=> {
   });
 });
 
+function renderEditor(interface, data, tableElement) {
+  console.log(data)
+
+  // Table instance
+  const metaEditorTable = new nimbleTable({
+    table: tableElement,
+    idField:  'column_id',
+    pagination: {perPage: 200},
+    template: (row) => renderRow(interface, row),
+    addEventListeners: (table) => {
+
+    },
+    onFilterEnd: (filteredMap) => {
+    },
+    onRowDelete: async (row) => {
+    }
+  });
+
+
+  // Render table header element 
+  const tableHeaderElement = renderHeader(interface);
+  // Append header to table, 
+  metaEditorTable.renderHeader(tableHeaderElement);
+  metaEditorTable.setData(data);
+
+}
