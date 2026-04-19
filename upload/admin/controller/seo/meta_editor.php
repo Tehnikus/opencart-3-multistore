@@ -99,4 +99,20 @@ class ControllerSeoMetaEditor extends Controller {
       )
     );
   }
+
+  public function fetchSaveFormulas() {
+    $json = [];
+    $this->load->model('setting/setting');
+    $this->language->load('seo/meta_editor');
+		$post_data = $this->request->post;
+		$saveResult = $this->model_setting_setting->editSetting('config_metadata_formulas', ['config_metadata_formulas' => $post_data]);
+
+		$json['success'] = true;
+		$json['message'] = $this->language->get('message_formulas_saved');
+		$json['response'] = $saveResult;
+		
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+
+	}
 }
