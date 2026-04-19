@@ -145,3 +145,55 @@ function renderHeader(interface) {
   return thead;
 }
 
+function renderRow(interface, row) {
+  const tr = document.createElement('tr');
+  tr.dataset.id = row.column_id || '';
+
+  let langRowHtml = '';
+  for (const langId in row.lang_data) {
+    const langRow = row.lang_data[langId];
+    langRowHtml += `
+      <div class="langData">
+        <div class="langFlag">
+          <img src="language/${interface.languages[langId].code}/${interface.languages[langId].code}.png" loading="lazy" />
+        </div>
+        <div class="langSeoData">
+          <div class="seoInputs">
+            <div class="input-group flex">
+              <span class="input-group-addon">${interface.lang.input_h1}</span>
+              <input data-column="lang_data.${langId}.h1" value="${langRow.h1}" class="form-control" placeholder="${interface.lang.input_h1}">
+              <span class="input-group-addon">${interface.lang.input_meta_title}</span>
+              <input data-column="lang_data.${langId}.meta_title" value="${langRow.meta_title}" class="form-control" placeholder="${interface.lang.input_meta_title}">
+            </div>
+            <div class="input-group flex">
+              <span class="input-group-addon">${interface.lang.input_meta_description_short}</span>
+              <input data-column="lang_data.${langId}.meta_description" value="${langRow.meta_description}" class="form-control" placeholder="${interface.lang.input_meta_description}">
+            </div>
+          </div>
+        </div>
+        <div class="seoBadges">
+          <span class="badge badge-sm strong ${langRow.description     ? 'alert-success' : 'alert-danger'}">${interface.lang.input_description}: ${langRow.description}</span>
+          <span class="badge badge-sm strong ${langRow.seo_description ? 'alert-success' : 'alert-danger'}">${interface.lang.input_seo_description}: ${langRow.seo_description}</span>
+          <span class="badge badge-sm strong ${langRow.footer          ? 'alert-success' : 'alert-danger'}">${interface.lang.input_footer}: ${langRow.footer}</span>
+          <span class="badge badge-sm strong ${langRow.seo_keywords    ? 'alert-success' : 'alert-danger'}">${interface.lang.input_seo_keywords}: ${langRow.seo_keywords}</span>
+          <span class="badge badge-sm strong ${langRow.faq             ? 'alert-success' : 'alert-danger'}">${interface.lang.input_faq}: ${langRow.faq}</span>
+          <span class="badge badge-sm strong ${langRow.how_to          ? 'alert-success' : 'alert-danger'}">${interface.lang.input_how_to}: ${langRow.how_to}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  tr.innerHTML = `
+    <td colspan=2>
+      <div class="name text-center">
+        <span class="h4">${row.lang_data[interface.defaultLanguageId].name}</span>
+      </div>
+      ${langRowHtml}
+    </td>
+    <td>
+      <button type="button" class="btn btn-success" title="${interface.lang.button_save}"><i class="fa fa-save"></i></button>
+    </td>
+  `;
+
+  return tr;
+}
