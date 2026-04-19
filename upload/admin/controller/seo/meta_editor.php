@@ -14,11 +14,16 @@ class ControllerSeoMetaEditor extends Controller {
     $this->document->setTitle($this->language->get('meta_editor'));
     
     $types = $this->model_seo_meta_editor->getTypes();
-    $current_type = isset($types[$this->request->get['type']]) ? $this->request->get['type'] : 'category';
+    $requestType = $this->request->get['type'];
+
+    $current_type = isset($types[$requestType]) ? $requestType : 'category';
+    $column_id    = isset($types[$requestType]) ? $types[$requestType]['column_id'] : 'category_id';
+    $path         = isset($types[$requestType]) ? $types[$requestType]['path'] : 'catalog/category';
 
     $data = [
-      'type'        => $current_type,
-      'column_id'   => 'product_id',
+      'page_type'  => $current_type,
+      'column_id'  => $column_id,
+      'path'       => $path,
     ];
 
     $data = [...$data, ...$this->getCommonListData()];
