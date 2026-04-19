@@ -21,9 +21,10 @@ class ControllerSeoMetaEditor extends Controller {
     $path         = isset($types[$requestType]) ? $types[$requestType]['path'] : 'catalog/category';
 
     $data = [
-      'page_type'  => $current_type,
-      'column_id'  => $column_id,
-      'path'       => $path,
+      'page_type'         => $current_type,
+      'column_id'         => $column_id,
+      'path'              => $path,
+      'fetchSaveFormulas' => $this->url->link('seo/meta_editor/fetchSaveFormulas', 'user_token=' . $this->session->data['user_token'] . '&type=' . $current_type, true),
     ];
 
     $data = [...$data, ...$this->getCommonListData()];
