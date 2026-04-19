@@ -69,6 +69,10 @@ class ControllerSeoMetaEditor extends Controller {
     $this->load->model('seo/meta_editor');
     $stores    = $this->model_setting_store->getMultistores();
     $languages = $this->model_localisation_language->getLanguages();
+    $languagesById = [];
+    foreach ($languages as $language) {
+      $languagesById[$language['language_id']] = $language;
+    }
     // Return JSON to fetch
     $this->response->addHeader('Content-Type: application/json');
     $this->response->setOutput(
@@ -76,7 +80,8 @@ class ControllerSeoMetaEditor extends Controller {
         [
           'lang'          => $lang->data,
           'stores'        => $stores,
-          'languages'     => $languages,
+          'languages'     => $languagesById,
+          'defaultLanguageId' => (int) $this->config->get('config_language_id'),
         ]
       )
     );
