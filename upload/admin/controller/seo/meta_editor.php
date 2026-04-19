@@ -11,19 +11,24 @@ class ControllerSeoMetaEditor extends Controller {
   public function getList() {
     $this->load->language('seo/meta_editor');
     $this->load->model('seo/meta_editor');
+    $this->load->model('setting/setting');
+
     $this->document->setTitle($this->language->get('meta_editor'));
     
-    $types = $this->model_seo_meta_editor->getTypes();
-    $requestType = $this->request->get['type'];
-
+    $types        = $this->model_seo_meta_editor->getTypes();
+    $formulas     = $this->model_setting_setting->getSetting('meta_editor_formulas');
+    
+    $requestType  = $this->request->get['type'];
     $current_type = isset($types[$requestType]) ? $requestType : 'category';
     $column_id    = isset($types[$requestType]) ? $types[$requestType]['column_id'] : 'category_id';
     $path         = isset($types[$requestType]) ? $types[$requestType]['path'] : 'catalog/category';
+
 
     $data = [
       'page_type'         => $current_type,
       'column_id'         => $column_id,
       'path'              => $path,
+      'formulas'          => $formulas['meta_editor_formulas_' . $current_type]['formulas'] ?? [],
       'fetchSaveFormulas' => $this->url->link('seo/meta_editor/fetchSaveFormulas', 'user_token=' . $this->session->data['user_token'] . '&type=' . $current_type, true),
     ];
 
