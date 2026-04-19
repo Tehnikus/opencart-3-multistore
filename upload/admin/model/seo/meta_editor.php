@@ -28,12 +28,17 @@ class ModelSeoMetaEditor extends Model
 
     $query = $this->db->query("
       SELECT
-        m.`" . $type['column_id'] . "`,
+        m.`" . $type['column_id'] . "` as column_id,
         d.*
-        FROM `" . DB_PREFIX . $type['main_table'] . "` m
-        LEFT JOIN `" . DB_PREFIX . $type['description_table'] . "` d ON d.`" . $type['column_id'] . "` = m.`" . $type['column_id'] . "`
-        WHERE d.store_id = " . (int) $this->session->data['store_id'] . "
+      FROM (
+        SELECT `" . $type['column_id'] . "`
+        FROM `" . DB_PREFIX . $type['main_table'] . "`
+        WHERE `store_id` = " . (int) $this->session->data['store_id'] . "
         LIMIT {$start}, {$limit}
+      ) m
+      LEFT JOIN `" . DB_PREFIX . $type['description_table'] . "` d 
+        ON d.`" . $type['column_id'] . "` = m.`" . $type['column_id'] . "`
+        AND d.`store_id` = " . (int) $this->session->data['store_id'] . "
     ");
 
     foreach ($query->rows as $row) {
