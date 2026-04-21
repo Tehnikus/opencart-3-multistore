@@ -526,18 +526,39 @@ class nimbleTable {
     if (!this.rowMap.has(id)) return false;
 
     const oldData = this.rowMap.get(id);
-    const updatedRow = { ...oldData, ...newData, id };
-    this.rowMap.set(id, updatedRow);
+    let updatedData = {};
+    updatedData = this.#deepMerge(oldData, newData, id);
+    this.rowMap.set(id, updatedData);
 
     if (updateElement) {
       const tr = this.tbody.querySelector(`[data-id="${id}"]`);
       if (tr) {
-        const newTr = this.#renderRow(updatedRow);
+        const newTr = this.#renderRow(updatedData);
         tr.replaceWith(newTr);
       }
     }
 
     return true;
+  }
+
+  /**
+   * Deep merge object values
+   * @param {Object} target The target object
+   * @param  {...any} sources A list of sources
+   * @returns Object
+   */
+  #deepMerge(target, ...sources) {
+    for (let source of sources) {
+      for (let k in source) {
+        let vs = source[k], vt = target[k]
+        if (Object(vs) == vs && Object(vt) === vt) {
+          target[k] = this.#deepMerge(vt, vs)
+          continue
+        }
+        target[k] = source[k]
+      }
+    }
+    return target
   }
 
   // Get and find rows
