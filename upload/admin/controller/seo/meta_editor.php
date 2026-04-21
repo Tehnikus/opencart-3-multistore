@@ -68,6 +68,7 @@ class ControllerSeoMetaEditor extends Controller {
     $types = $this->model_seo_meta_editor->getTypes();
     foreach ($types as $key => $type) {
       $breadcrumbs[] = [
+        'type' => $key,
         'text' => $this->language->get('header_' . $key),
         'href' => $this->url->link('seo/meta_editor', 'user_token=' . $this->session->data['user_token'] . '&type=' . $key, true)
       ];
