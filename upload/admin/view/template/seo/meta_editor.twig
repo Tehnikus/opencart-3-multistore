@@ -148,55 +148,6 @@
   const columnId   = "{{ column_id }}";
 </script>
 
-{# Save form values #}
-<script type="text/javascript">
-  document.addEventListener('DOMContentLoaded', () => {
-    let metaEditorForms = document.querySelectorAll('.fetchSaveForm');    
-    metaEditorForms.forEach(metaEditorForm => {
-      metaEditorForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        fetchSave(metaEditorForm);
-      });
-    });
-  });
-
-  function fetchSave(formElement, debug = false) {
-    const post_action = formElement.action;
-    const formData = new FormData(formElement);
-    if (debug) {
-      console.log('Send to:', post_action);
-      console.log('Data:', result);
-    }
-    return fetch(post_action, {
-      method: 'POST',
-      body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-      
-      const savedInputs = formElement.querySelectorAll('input, select, textarea');
-      savedInputs.forEach(input => input.classList.add(data.success ? 'success' : 'error'));
-
-      if (data.message) {
-        const messageDiv = formElement.querySelector('.message');
-        if (messageDiv) {
-          messageDiv.innerHTML = `<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>${data.message}</div>`;
-        }
-      }
-
-      return data; // necessary for sequential form saving
-    })
-    .catch(error => {
-      console.error('Error while sending data:', error);
-    });
-  }
-
-  async function saveAllForms(forms) {
-    for (const form of forms) {
-      await fetchSave(form);  // await every form save
-    }
-  }
-</script>
 
 <link href="view/stylesheet/nimbleTable.css" rel="stylesheet" />
 <style>
