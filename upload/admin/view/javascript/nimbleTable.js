@@ -244,9 +244,17 @@ class nimbleTable {
       const targetRow = e.target.closest('[data-id]');
       const newData = {};
       targetRow.querySelectorAll('input, select, textarea').forEach(element => {
-        // Nested object path
-        this.#setByPath(newData, element.dataset.column, element.value);
+        if (['checkbox', 'radio'].includes(element.type)) {
+          if (element.checked) {
+            this.#setByPath(newData, element.dataset.column, element.value);
+          } else {
+            this.#setByPath(newData, element.dataset.column, null);
+          }
+        } else {
+          this.#setByPath(newData, element.dataset.column, element.value);
+        }
       });
+
       if (this.options.onRowUpdate) {
         this.options.onRowUpdate(newData, targetRow);
       }
@@ -258,6 +266,12 @@ class nimbleTable {
     return;
   }
 
+  /**
+   * 
+   * @param {Object} obj Object to save data to
+   * @param {String} path the path where to save data
+   * @param {string|int} value to be set in row data
+   */
   #setByPath(obj, path, value) {
     const keys = path.split('.');
     let current = obj;
