@@ -36,6 +36,7 @@
             <table id="meta_editor_formulas" class="table table-bordered table-hover table-striped">
               <thead>
                 <tr>
+                  <td style="width: 45px"></td>
                   <td class="text-center">{{ column_formulas }}</td>
                   <td style="width: 50px"><button type="submit" form="generateFormulas" class="btn btn-warning" title="{{ button_save_all }}"><i class="fa fa-save"></i></button></td>
                 </tr>
@@ -44,65 +45,71 @@
                 {% if formulas %}
                   {% for formula in formulas %}
                     <tr class="formula-row" data-row-index="{{ loop.index }}">
+                      <td class="text-center"><input style="all: revert" type="radio" name="formulas[selected]" /></td>
                       <td>
                         <div class="input-group flex">
-                          <input value="{{ formula.generate_text }}" type="text" name="formulas[{{ loop.index }}][generate_text]" placeholder="{{placeholder_formula}}" class="form-control" />
-                          <select class="form-control excludedInput" data-name="target_field" name="formulas[{{ loop.index }}][target_field]" value="{{formula.target_field}}">
+                          <input data-name="formula" value="{{ formula.generate_text }}" type="text" name="formulas[{{ loop.index }}][generate_text]" placeholder="{{ input_formula }}" class="form-control" />
+                          <button type="button" onclick="parentElement.querySelector('[name*=&quot;generate_text&quot;]').value=''" class="btn btn-default"><i class="fa fa-times"></i></button>
+                          <select class="form-control" data-name="target_field" name="formulas[{{ loop.index }}][target_field]" value="{{formula.target_field}}" style="min-width: 150px; max-width: 150px;">
                             {% for key, label in target_options %}
                               <option value="{{ key }}" {% if formula.target_field == key %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
                           </select>
-                          <select class="form-control excludedInput" data-name="language_id" name="formulas[{{ loop.index }}][language_id]">
+                          <select class="form-control" data-name="language_id" name="formulas[{{ loop.index }}][language_id]" style="min-width: 150px; max-width: 150px;">
                             {% for language in languages %}
                               <option value="{{ language.language_id }}" {% if formula.language_id == language.language_id %}selected{% endif %}>{{ language.name }}</option>
                             {% endfor %}
                           </select>
-                          <select class="form-control excludedInput" data-name="currency_id" name="formulas[{{ loop.index }}][currency_id]">
+                          <select class="form-control" data-name="currency_id" name="formulas[{{ loop.index }}][currency_id]" style="min-width: 150px; max-width: 150px;">
                             {% for currency in currencies %}
                               <option value="{{ currency.currency_id }}" {% if formula.currency_id == currency.currency_id %}selected{% endif %}>{{ currency.title }}</option>
                             {% endfor %}
                           </select>
-                          <button onclick="generateMeta(this)" type="button" class="flex flex-center btn btn-warning" title="{{ button_generate }}"><i class="fa fa-repeat"></i></button>
+                          <button type="button" class="generateMeta btn btn-warning" title="{{ button_generate }}"><i class="fa fa-repeat"></i></button>
                         </div>
                       </td>
                       <td>
-                        <button type="button" onclick="removeRow2(this, '#meta_editor_formulas', '[data-row-index]')" class="btn btn-danger remove_row" title="{{ button_remove_formula }}"><i class="fa fa-times"></i></button>
+                        <button type="button" class="btn btn-danger deleteFormula" title="{{ button_remove_formula }}"><i class="fa fa-times"></i></button>
                       </td>
                     </tr>
                   {% endfor %}
                 {% else %}
                   <tr class="formula-row" data-row-index="0">
+                    <td class="text-center"><input style="all: revert" type="radio" name="formulas[selected]" /></td>
                     <td>
                       <div class="input-group flex">
-                        <input type="text" name="formulas[0][generate_text]" placeholder="{{ input_formula }}" class="form-control" />
-                        <select class="form-control excludedInput" data-name="target_field" name="formulas[0][target_field]" style="min-width: 150px; max-width: 150px;">
+                        <input data-name="formula" type="text" name="formulas[0][generate_text]" placeholder="{{ input_formula }}" class="form-control" />
+                        <button type="button" onclick="parentElement.querySelector('[name*=&quot;generate_text&quot;]').value=''" class="btn btn-default"><i class="fa fa-times"></i></button>
+                        <select class="form-control" data-name="target_field" name="formulas[0][target_field]" style="min-width: 150px; max-width: 150px;">
                           {% for key, label in target_options %}
                             <option value="{{ key }}">{{ label }}</option>
                           {% endfor %}
                         </select>
-                        <select class="form-control excludedInput" data-name="language_id" name="formulas[0][language_id]" style="min-width: 150px; max-width: 150px;">
+                        <select class="form-control" data-name="language_id" name="formulas[0][language_id]" style="min-width: 150px; max-width: 150px;">
                           {% for language in languages %}
                             <option value="{{ language.language_id }}">{{ language.name }}</option>
                           {% endfor %}
                         </select>
-                        <select class="form-control excludedInput" data-name="currency_id" name="formulas[0][currency_id]" style="min-width: 150px; max-width: 150px;">
+                        <select class="form-control" data-name="currency_id" name="formulas[0][currency_id]" style="min-width: 150px; max-width: 150px;">
                           {% for currency in currencies %}
                             <option value="{{ currency.currency_id }}">{{ currency.title }}</option>
                           {% endfor %}
                         </select>
-                        <button onclick="generateMeta(this)" type="button" class="flex flex-center btn btn-warning" title="{{ button_generate }}"><i class="fa fa-repeat"></i></button>
+                        <button type="button" class="generateMeta btn btn-warning" title="{{ button_generate }}"><i class="fa fa-repeat"></i></button>
                       </div>
                     </td>
                     <td>
-                      <button type="button" onclick="removeRow2(this, '#meta_editor_formulas')" class="btn btn-danger remove_row" title="{{ button_remove_formula }}"><i class="fa fa-times"></i></button>
+                      <button type="button" class="deleteFormula btn btn-danger" title="{{ button_remove_formula }}"><i class="fa fa-times"></i></button>
                     </td>
                   </tr>
                 {% endif %}
-                <tr>
-                  <td></td>
-                  <td><button type="button" onclick="addRow2(this, '#meta_editor_formulas', '[data-row-index]', ['.excludedInput'])" class="btn btn-primary add_row" title="{{ button_add_formula }}"><i class="fa fa-plus-circle"></button></td>
-                </tr>
               </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="2"></td>
+                  <td><button type="button" class="addFormula btn btn-primary add_row" title="{{ button_add_formula }}"><i class="fa fa-plus-circle"></button></td>
+                </tr>
+              </tfoot>
             </table>
             <div class="alert alert-info">
               <p>{{ help_syntax_hint }}</p>
