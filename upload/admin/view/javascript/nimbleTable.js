@@ -519,11 +519,12 @@ class nimbleTable {
    * @param {Number} id The id number of row to be updated
    * @param {Object} newData Object of new data to be set in this row
    * @param {Boolean} updateElement Update actual HTML element or not
-   * @returns {Boolean} true if element updated, false if element does not exist
+   * @returns {Element|Boolean} true if element updated, false if element does not exist
    */
   updateRow(id, newData, updateElement = false) {
     id = Number(id);
     if (!this.rowMap.has(id)) return false;
+    let tr;
 
     const oldData = this.rowMap.get(id);
     let updatedData = {};
@@ -531,14 +532,14 @@ class nimbleTable {
     this.rowMap.set(id, updatedData);
 
     if (updateElement) {
-      const tr = this.tbody.querySelector(`[data-id="${id}"]`);
+      tr = this.tbody.querySelector(`[data-id="${id}"]`);
       if (tr) {
         const newTr = this.#renderRow(updatedData);
         tr.replaceWith(newTr);
       }
     }
 
-    return true;
+    return tr || false;
   }
 
   /**
