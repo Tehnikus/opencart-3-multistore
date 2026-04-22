@@ -1,22 +1,8 @@
 document.addEventListener('DOMContentLoaded', async ()=> {
   const interface = await fetch(`index.php?route=seo/meta_editor/fetchGetInterface&user_token=${user_token}`).then(r => r.json());
-  const rows      = await loadBatch('seo/meta_editor','getPages', {type: pageType}, user_token, 100, (currentCount) => {
+  const data      = await loadBatch('seo/meta_editor','getPages', {type: pageType}, user_token, 100, (currentCount) => {
     progressCount(document.getElementById('progressbar'), currentCount.length, pagesCount)
   }, false);
-  const data = [];
-  const index = {};
-
-  for (const row of rows) {
-    const id = row['column_id'];
-    const langId = row['language_id'];
-    
-    if (!index[id]) {
-      index[id] = { column_id: id, lang_data: {} };
-      data.push(index[id]);
-    }
-    index[id].lang_data[langId] = row;
-  }
-
   
   // Pass static variables provided by PHP to interface that is needed for nimbleTable
   interface.variables = {pageType, columnId};
@@ -58,12 +44,11 @@ function renderEditor(interface, data, tableElement) {
     pagination: {perPage: 200},
     template: (row) => renderRow(interface, row),
     addEventListeners: (table) => {
-
+      // console.log(table)
     },
     onFilterEnd: (filteredMap) => {
+      // console.log(filteredMap);
     },
-    onRowDelete: async (row) => {
-    }
   });
 
   // Set each loaded row type to 'existing'. Originally row type is not stored in DB, it's just for filtering purpose 
@@ -79,6 +64,50 @@ function renderEditor(interface, data, tableElement) {
 
   return metaEditorTable;
 }
+
+function generateMeta2(button, metaEditorTable) {
+  const row = button.closest('tr');
+  const targetField     = row.querySelector('[data-name="target_field"]').value;
+  const targetLang      = row.querySelector('[data-name="language_id"]').value;
+  const targetCurrency  = row.querySelector('[data-name="currency_id"]').value;
+  const formula         = row.querySelector('[data-name="formula"]').value;
+  const filteredRows    = {};
+
+  metaEditorTable.filteredOrder.forEach(id => {
+    const row = metaEditorTable.getRow(id);
+    filteredRows[id] = row;
+  })
+
+  console.log(filteredRows);
+  
+  // console.log(row, targetField, targetLang, targetCurrency, filteredRows);
+  for (const rowId in filteredRows) {
+    const data = filteredRows[rowId];
+    if (!data.selected) {continue}
+    const newData = {...data};
+
+    // console.log(data, newData);
+
+    newData.lang_data[targetLang][targetField] = formula;
+    newData.rowType = "updated";
+    const rowElement = metaEditorTable.updateRow(data.column_id, newData, true);
+    // Highlight changed inputs 
+    rowElement.querySelectorAll(`[data-column="lang_data.${targetLang}.${targetField}"]`).forEach(input => {
+
+    })
+  }
+  
+}
+
+function applyFormula(formula, text) {
+  return {
+    newText,
+    messages: {
+
+    }
+  }
+}
+
 
 function renderHeader(interface) {
   const thead = document.createElement('thead');
@@ -149,7 +178,7 @@ function renderHeader(interface) {
 
       </th>
       <th>
-        <button type="button" class="btn btn-warning" title="${interface.lang.button_save_all}"><i class="fa fa-save"></i></button>
+        <button type="button" class="saveAllPages btn btn-warning" title="${interface.lang.button_save_all}"><i class="fa fa-save"></i></button>
       </th>
     </tr>
   `;
@@ -167,7 +196,7 @@ function renderRow(interface, row) {
     langRowHtml += `
       <div class="langData">
         <div class="langFlag">
-          <img src="language/${interface.languages[langId].code}/${interface.languages[langId].code}.png" loading="lazy" />
+          <img width="16" height="11" src="language/${interface.languages[langId].code}/${interface.languages[langId].code}.png" loading="lazy" />
         </div>
         <div class="langSeoData">
           <div class="seoInputs">
@@ -206,7 +235,7 @@ function renderRow(interface, row) {
       ${langRowHtml}
     </td>
     <td>
-      <button type="button" class="btn btn-success" title="${interface.lang.button_save}"><i class="fa fa-save"></i></button>
+      <button type="button" class="savePage btn btn-success" title="${interface.lang.button_save}"><i class="fa fa-save"></i></button>
     </td>
   `;
 
@@ -233,6 +262,125 @@ function renderSelect(options, datasetAttr) {
   });
 
   return select;
+}
+
+function generateMeta(button, tableElement) {
+  let row = button.closest('td');
+  let targetSelector = '';
+  let selectsValues = {};
+  let selects = row.querySelectorAll('select');
+  
+  
+  let textTemplate = row.querySelector('[name*="generate_text"]').value;
+  let successMessages = [];
+  let errorMessages = [];
+  let successMessagesDiv = row.closest('form').querySelector('.message-success');
+  let errorMessagesDiv   = row.closest('form').querySelector('.message-error');
+
+  selects.forEach(select => {
+    selectsValues[select.dataset.name] = select.value;
+  });
+
+  targetSelector = `[name="meta_data[${selectsValues.store_id}][${selectsValues.language_id}][${selectsValues.target_field}]"]`;
+  
+  let targetInputs = document.querySelectorAll(targetSelector);
+  
+  if (!targetInputs) {return}
+  targetInputs.forEach(targetInput => {
+    // Тут получаем данные из row таблицы
+    let metaData = JSON.parse(targetInput.closest('td').dataset.metas);
+
+    let generateData = {
+      name:             metaData.meta[selectsValues.store_id].languages[selectsValues.language_id].name,
+      category:         metaData.meta[selectsValues.store_id].languages[selectsValues.language_id].category,
+      store:            metaData.meta[selectsValues.store_id].languages[selectsValues.language_id].store,
+      manufacturer:     metaData.meta[selectsValues.store_id].languages[selectsValues.language_id].manufacturer,
+      price:            metaData.prices[selectsValues.store_id].basePrice[selectsValues.currency_id],
+      minPrice:         metaData.prices[selectsValues.store_id].minPrice[selectsValues.currency_id],
+      maxPrice:         metaData.prices[selectsValues.store_id].maxPrice[selectsValues.currency_id],
+      discount:         metaData.prices[selectsValues.store_id].discount[selectsValues.currency_id],
+      rating:           metaData.reviews.rating,
+      reviews:          metaData.reviews.reviews,
+      offers:           metaData.offers,
+    }
+
+    // console.log(generateData);
+    generatedText = applyTemplate(textTemplate, generateData);
+    if (generatedText.match(/{{\s*(\w+)\s*}}/g)) {
+      targetInput.classList.add('error');
+      row.querySelector('[name*="generate_text"]').classList.add('error');
+      errorMessages.push(`<a class="text-danger" href="${window.location.href.split('#')[0]}#${targetInput.closest('tr').id}">${generateData.name}</a>`);
+    } else {
+      targetInput.value = generatedText;
+      targetInput.classList.add('success');
+      row.querySelector('[name*="generate_text"]').classList.add('success');
+      successMessages.push(`<a class="text-success" href="${window.location.href.split('#')[0]}#${targetInput.closest('tr').id}">${generateData.name}</a>`);
+    }
+  })
+
+  successMessagesDiv.innerHTML = '';
+  if (successMessages.length) {
+    successMessagesDiv.innerHTML = `<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button><p><b>${metaEditorJsLang.jsSuccess}</b></p>${successMessages.join('<br>')}</div>`;
+  }
+
+  errorMessagesDiv.innerHTML = '';
+  if (errorMessages.length) {
+    errorMessagesDiv.innerHTML = `<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button><p><b>${metaEditorJsLang.jsErrors}</b></p>${errorMessages.join('<br>')}</div>`;
+  }
+}
+
+function applyTemplate(template, data) {
+  // Replace {{category:manufacturer:"super-duper products"|lower}} with:
+  // If {{category}} is present - then with {{category}} value, e.g. "Desktops"
+  // If {{category}} is NOT present, then with followning key {{manufacturer}}
+  // If no category or manufacturer found, then use text in quotes after semicolon, in this case "super-duper products"
+  // In both cases convert string to lower case - "desktops"
+  return template.replace(/{{(.*?)}}/g, (_, content) => {
+    // Разделим на ключи и фильтр по последнему |
+    let [rawKeys, filter] = content.split('|').map(part => part.trim());
+
+    // Разбиваем каскад fallback'ов: discount:price:"Super deal!"
+    let keys = [];
+    let current = '';
+    let insideQuotes = false;
+
+    for (let char of rawKeys) {
+      if (char === '"' || char === "'") {
+        insideQuotes = !insideQuotes;
+        current += char;
+      } else if (char === ':' && !insideQuotes) {
+        keys.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    if (current) keys.push(current.trim());
+
+    // Пробуем взять значение из данных или использовать строку в кавычках
+    let value = '';
+    for (let key of keys) {
+      // Удалим кавычки, если это строка
+      if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
+        value = key.slice(1, -1);
+        break;
+      } else if (data[key] !== undefined && data[key] !== null && data[key] !== '') {
+        value = data[key];
+        break;
+      }
+    }
+
+    // Применим фильтр
+    if (filter && typeof value === 'string') {
+      switch (filter.toLowerCase()) {
+        case 'upper': value = value.toUpperCase(); break;
+        case 'lower': value = value.toLowerCase(); break;
+        case 'capitalize': value = value.charAt(0).toUpperCase() + value.slice(1); break;
+      }
+    }
+
+    return value;
+  });
 }
 
 /**
