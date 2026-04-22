@@ -54,4 +54,21 @@ class ModelSeoMetaEditor extends Model
     return $result;
   }
 
+  public function getTotalPages($page_type) : int {
+
+    if (!isset($this->types[$page_type])) {
+      return 0;
+    }
+
+    $type = $this->types[$page_type];
+    $result = $this->db->query("
+      SELECT
+        COUNT(*) AS pages_count
+      FROM `" . DB_PREFIX . $type['main_table'] . "`
+      WHERE `store_id` = " . (int) $this->session->data['store_id'] . "
+    ")->row;
+
+    return (int) $result['pages_count'];
+  }
+
 }
