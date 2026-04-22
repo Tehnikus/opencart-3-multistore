@@ -223,6 +223,22 @@ function renderSelect(options, datasetAttr) {
 }
 
 /**
+ * Delete formula row and asynchnously save new formulas list to DB
+ * @param {Element} button 
+ */
+function deleteFormula(button) {
+  const tr = button.closest('tr');
+  form = button.closest('form');
+  if (tr.parentElement.querySelectorAll("[data-row-index]").length === 1) {
+    tr.querySelectorAll('input').forEach(e => {e.value = ''});
+    tr.querySelectorAll('select').forEach(e => {e.selectedIndex = 0});
+  } else {
+    button.closest('tr').remove();
+  }
+  fetchSave(form);
+}
+
+/**
  * Add formula row. Claer input values before adding. Increment dataset row index and row index in input names
  * @param {Element} button 
  */
