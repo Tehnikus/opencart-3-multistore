@@ -221,3 +221,79 @@ function renderSelect(options, datasetAttr) {
 
   return select;
 }
+
+/**
+ * Dynamic elements event listeners
+ */
+function addAsyncListeners(metaEditorTable, data) {
+  // Clicks
+  document.addEventListener('click', e => {
+    // Generate meta buttons
+    if (e.target.closest('.generateMeta')) {
+      generateMeta2(e.target, metaEditorTable);
+    }
+
+    // Clear filters button
+    if (e.target.closest('.clearFilters')) {
+      metaEditorTable.resetFilter();
+      metaEditorTable.setData(data); // Set data in case language filter is used because language filter removes data
+    }
+
+    // Add formula button
+    if (e.target.closest('.addFormula')) {
+      addFormula(e.target);
+    }
+
+    // Delete formula button
+    if (e.target.closest('.deleteFormula')) {
+      deleteFormula(e.target);
+    }
+
+    // Save single page 
+    if (e.target.closest('.savePage')) {
+      console.log('savePage')
+      const pageData = [];
+      saveBatch('seo/meta_editor', 'savePages', pageData, user_token, batchsize = 1, callback = null, debug = false);
+    }
+
+    // Save all pages 
+    if (e.target.closest('.saveAllPages')) {
+      console.log('savePage')
+      const pagesData = [];
+      saveBatch('seo/meta_editor', 'savePages', pagesData, user_token, batchsize = 1, callback = null, debug = false);
+    }
+  });
+
+  // Input changes
+  document.addEventListener('change', e => {
+    // Select all filtered rows
+    if (e.target.closest('.selectAllRows')) {
+      metaEditorTable.table.querySelectorAll('[data-column="selected"]').forEach(checkbox => {
+        checkbox.checked = e.target.checked;
+      });
+
+      // Set row data selected value, so the rows out of visibility (e.g. out of current pagination page) are also checked
+      metaEditorTable.filteredOrder.forEach(rowId => {
+        const rowData = metaEditorTable.getRow(rowId);
+        if (e.target.checked) {
+          rowData.selected = 1;
+        } else {
+          rowData.selected = null;
+        }
+      });
+    }
+
+    // Language filter. Removes langauge data from each row in data except selected. Then sets new data to nimbleTable
+    if (e.target.closest('.languageFilter')) {
+      // const newData = data.map(row => row.lang_data)
+    }
+  });
+
+  // Submits
+  document.addEventListener('submit', e => {
+    if (e.target.closest('.fetchSaveForm')) {
+      e.preventDefault();
+      fetchSave(e.target);
+    }
+  })
+}
