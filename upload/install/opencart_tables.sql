@@ -7474,6 +7474,7 @@ CREATE TABLE `oc_seo_filter_page_description` (
   `faq`                 TEXT NOT NULL,
   `how_to`              TEXT NOT NULL,
   `footer`              TEXT NOT NULL,
+  `date_modified`       DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP) ON UPDATE (CURRENT_TIMESTAMP),
   PRIMARY KEY (`filter_page_id`, `language_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
