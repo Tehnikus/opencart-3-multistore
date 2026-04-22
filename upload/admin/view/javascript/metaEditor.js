@@ -43,7 +43,8 @@ document.addEventListener('DOMContentLoaded', async ()=> {
   const tableElements = document.querySelectorAll('.metaEditorTable');
   tableElements.forEach(tableElement => {
     // Call nimbleTable with params and add event listeners
-    renderEditor(interface, data, tableElement);
+    const metaEditorInstace = renderEditor(interface, data, tableElement);
+    addAsyncListeners(metaEditorInstace, data);
   });
 });
 
@@ -65,6 +66,10 @@ function renderEditor(interface, data, tableElement) {
     }
   });
 
+  // Set each loaded row type to 'existing'. Originally row type is not stored in DB, it's just for filtering purpose 
+  data.forEach(row => {
+    row.rowType = 'existing';
+  });
 
   // Render table header element 
   const tableHeaderElement = renderHeader(interface);
@@ -72,6 +77,8 @@ function renderEditor(interface, data, tableElement) {
   metaEditorTable.renderHeader(tableHeaderElement);
   metaEditorTable.setData(data);
 
+  return metaEditorTable;
+}
 
 function renderHeader(interface) {
   const thead = document.createElement('thead');
