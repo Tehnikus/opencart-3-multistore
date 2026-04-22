@@ -35,7 +35,7 @@ async function saveBatch(model, method, data = [], userToken, batchSize = 100, c
     totalSaved += result.saved ?? batch.length;
   }
 
-  if(debug) {console.ingo(`saveBatch: Data transfered: `, data)}
+  if(debug) {console.info(`saveBatch: Data transfered: `, data)}
   if (callback) {callback(totalSaved)}
   return totalSaved;
 }
