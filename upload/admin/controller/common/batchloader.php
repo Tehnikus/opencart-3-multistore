@@ -60,7 +60,7 @@ class ControllerCommonBatchloader extends Controller
         'saved' => count($rows),
         'result' => $result ?? []
       ], 200);
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
       $this->jsonError("Error on method call {$method}: " . $e->getMessage(), 400);
     }
   }
@@ -94,7 +94,7 @@ class ControllerCommonBatchloader extends Controller
         'status' => 'ok',
         'rows' => $result['rows'] ?? $result ?? []
       ], 200);
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
       $this->jsonError("Error on method call {$method}: " . $e->getMessage(), 400);
     }
   }
