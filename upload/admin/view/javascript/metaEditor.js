@@ -223,6 +223,34 @@ function renderSelect(options, datasetAttr) {
 }
 
 /**
+ * Add formula row. Claer input values before adding. Increment dataset row index and row index in input names
+ * @param {Element} button 
+ */
+function addFormula(button) {
+  const row = button.closest('table').querySelector('tbody').lastElementChild;
+  let rowIndex = row.dataset.rowIndex;
+  let newIndex = parseInt(rowIndex) + 1;
+  const newRow = row.cloneNode(true);
+  newRow.dataset.rowIndex = newIndex;
+  newRow.querySelectorAll('input, select').forEach(e => {
+    e.name = e.name.replace(`[${rowIndex}]`, `[${newIndex}]`);
+    switch (e.tagName) {
+      case 'SELECT':
+        e.selectedIndex = 0;
+      break;
+      case 'INPUT':
+        if (e.type === 'checkbox' || e.type === 'radio') {
+          e.checked = false;
+        } else {
+          e.value = '';
+        }
+      break;
+    }
+  });
+  row.after(newRow);
+}
+
+/**
  * Save forms asynchronously
  * @param {Element} formElement form element to be saved. Must have action attribute
  * @param {Boolean} debug Flag to log to console
