@@ -14,6 +14,11 @@ class ModelSeoMetaEditor extends Model
     return $this->types;
   }
 
+  /**
+   * Get pages SEO data
+   * @param array $filter
+   * @return array pages data with nested langId => data_array
+   */
   public function getPages($filter) : array {
     $result = [];
     if (!isset($this->types[$filter['type']])) {
@@ -79,6 +84,11 @@ class ModelSeoMetaEditor extends Model
     return $result;
   }
 
+  /**
+   * Get total pages count to for async progress bar
+   * @param string $page_type the type of pages to be returned
+   * @return int pages coun
+   */
   public function getTotalPages($page_type) : int {
 
     if (!isset($this->types[$page_type])) {
