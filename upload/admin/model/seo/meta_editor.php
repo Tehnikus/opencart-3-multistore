@@ -43,7 +43,7 @@ class ModelSeoMetaEditor extends Model
             'how_to',             d.`how_to`,
             'footer',             d.`footer`,
             'date_modified',      d.`date_modified`,
-            'language_id',        d.language_id
+            'language_id',        d.`language_id`
           )
         ) AS lang_data
         FROM `" . DB_PREFIX . $type['main_table'] . "` m
