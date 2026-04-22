@@ -91,6 +91,9 @@ function renderHeader(interface) {
   
   thead.innerHTML = `
     <tr>
+      <th style="width: 20px">
+        <input type="checkbox" style="all: revert" class="selectAllRows" />
+      </th>
       <th style="width: 67%" class="text-center">
         <div class="input-group flex">
           <input type="text" class="form-control" data-search-column="lang_data.*.meta_title" placeholder="${interface.lang.input_search} ${interface.lang.input_meta_title}">
@@ -186,6 +189,9 @@ function renderRow(interface, row) {
   }
 
   tr.innerHTML = `
+    <td>
+      <input type="checkbox" style="all: revert" data-column="selected" value="1" ${row.selected ? "checked" : ""} />
+    </td>
     <td colspan=2>
       <div class="name text-center">
         <span class="h4">${row.lang_data[interface.defaultLanguageId].name}</span>
