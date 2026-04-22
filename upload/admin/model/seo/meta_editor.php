@@ -16,7 +16,6 @@ class ModelSeoMetaEditor extends Model
 
   public function getPages($filter) : array {
     $result = [];
-    $preresult = [];
     if (!isset($this->types[$filter['type']])) {
       return $result;
     }
@@ -26,28 +25,54 @@ class ModelSeoMetaEditor extends Model
     $limit  = max(1, (int) ($filter['limit'] ?? $this->config->get('config_limit_admin') ?? 100));
     $start  = max(0, (int) ($filter['start'] ?? 0));
 
-    $query = $this->db->query("
+
+    $rows = $this->db->query("
       SELECT
         m.`" . $type['column_id'] . "` as column_id,
-        d.*
-      FROM (
-        SELECT `" . $type['column_id'] . "`
-        FROM `" . DB_PREFIX . $type['main_table'] . "`
-        WHERE `store_id` = " . (int) $this->session->data['store_id'] . "
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'name',               d.`name`,
+            'h1',                 d.`h1`,
+            'meta_title',         d.`meta_title`,
+            'meta_description',   d.`meta_description`,
+            'meta_keyword',       d.`meta_keyword`,
+            'description',        d.`description`,
+            'seo_keywords',       d.`seo_keywords`,
+            'seo_description',    d.`seo_description`,
+            'faq',                d.`faq`,
+            'how_to',             d.`how_to`,
+            'footer',             d.`footer`,
+            'date_modified',      d.`date_modified`,
+            'language_id',        d.language_id
+          )
+        ) AS lang_data
+        FROM `" . DB_PREFIX . $type['main_table'] . "` m
+        LEFT JOIN `" . DB_PREFIX . $type['description_table'] . "` d 
+          ON  d.`" . $type['column_id'] . "` = m.`" . $type['column_id'] . "`
+          AND d.`store_id` = m.`store_id`
+        WHERE m.`store_id` = " . (int) $this->session->data['store_id'] . "
+        GROUP BY m.`" . $type['column_id'] . "`, m.`store_id`
         LIMIT {$start}, {$limit}
-      ) m
-      LEFT JOIN `" . DB_PREFIX . $type['description_table'] . "` d 
-        ON d.`" . $type['column_id'] . "` = m.`" . $type['column_id'] . "`
-        AND d.`store_id` = " . (int) $this->session->data['store_id'] . "
-    ");
+    ")->rows;
 
-    foreach ($query->rows as $row) {
-      $row['description']     = strlen(strip_tags($row['description'] ?? '')) ?? 0;
-      $row['seo_description'] = strlen(strip_tags($row['seo_description'] ?? '')) ?? 0;
-      $row['faq']             = !empty(json_decode($row['faq'] ?? '[]', true));
-      $row['how_to']          = !empty(json_decode($row['how_to'] ?? '[]', true));
-      $row['footer']          = !empty(json_decode($row['footer'] ?? '[]', true));
-      $row['seo_keywords']    = count(json_decode($row['seo_keywords'] ?? '[]', true) ?? []);
+    foreach ($rows as &$row) {
+      $row['lang_data'] = json_decode($row['lang_data'], true) ?? [];
+
+      $lang_data = $row['lang_data'];
+      unset($row['lang_data']);
+
+      foreach ($lang_data as $lang) {
+
+        $lang['description']     = strlen(strip_tags($lang['description'] ?? ''));
+        $lang['seo_description'] = strlen(strip_tags($lang['seo_description'] ?? ''));
+        $lang['faq']             = !empty($lang['faq']);
+        $lang['how_to']          = !empty($lang['how_to']);
+        $lang['footer']          = !empty($lang['footer']);
+        $lang['seo_keywords']    = is_array($lang['seo_keywords']) ? count($lang['seo_keywords']) : (empty($lang['seo_keywords']) ? 0 : 1);
+        
+        $row['lang_data'][$lang['language_id']] = $lang;
+      }
+
       $result[] = $row;
     }
 
