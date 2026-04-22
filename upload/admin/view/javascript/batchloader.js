@@ -33,10 +33,10 @@ async function saveBatch(model, method, data = [], userToken, batchSize = 100, c
     if (result.status !== "ok") { console.error("saveBatch: Server returned error: " + result.message); return; }
 
     totalSaved += result.saved ?? batch.length;
+    if (callback) {callback(totalSaved)}
   }
 
-  if(debug) {console.info(`saveBatch: Data transfered: `, data)}
-  if (callback) {callback(totalSaved)}
+  if (debug) {console.info(`saveBatch: Data transferred: `, data)}
   return totalSaved;
 }
 
