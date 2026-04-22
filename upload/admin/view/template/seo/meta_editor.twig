@@ -232,6 +232,51 @@
     font-size: 2rem;
     padding: 1rem 1rem 0 0;
   }
+  .progressBar_container {
+      position: relative;
+      width: 200px
+  }
+
+  progress[value] {
+    --color: linear-gradient(270deg,rgba(42, 155, 123, 1) 0%, rgba(30, 145, 207, 1) 100%);;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: none;
+    width: 100%;
+    border-radius: 3px;
+    background: var(--color);
+    height: 30px;
+    vertical-align: bottom;
+    display: inline-block;
+  }
+
+  progress[value]::-webkit-progress-bar {
+    border-radius: 3px;
+    background: var(--color);
+  }
+
+  progress[value]::-webkit-progress-value {
+    border-radius: 3px;
+    background: var(--color);
+  }
+
+  progress[value]::-moz-progress-bar {
+    border-radius: 3px;
+    background: var(--color);
+  }
+
+  .progressLabel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    line-height: 30px;
+    text-align: center;
+    color: #fff;
+  }
 </style>
 
 {{ footer }}
