@@ -22,12 +22,13 @@ class ControllerSeoMetaEditor extends Controller {
     $current_type = isset($types[$requestType]) ? $requestType : 'category';
     $column_id    = isset($types[$requestType]) ? $types[$requestType]['column_id'] : 'category_id';
     $path         = isset($types[$requestType]) ? $types[$requestType]['path'] : 'catalog/category';
-
+    $pages_count  = $this->model_seo_meta_editor->getTotalPages($current_type);
 
     $data = [
       'page_type'         => $current_type,
       'column_id'         => $column_id,
       'path'              => $path,
+      'pages_count'       => $pages_count,
       'formulas'          => $formulas['meta_editor_formulas_' . $current_type]['formulas'] ?? [],
       'fetchSaveFormulas' => $this->url->link('seo/meta_editor/fetchSaveFormulas', 'user_token=' . $this->session->data['user_token'] . '&type=' . $current_type, true),
     ];
