@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', async ()=> {
   const interface = await fetch(`index.php?route=seo/meta_editor/fetchGetInterface&user_token=${user_token}`).then(r => r.json());
-  const rows      = await loadBatch('seo/meta_editor','getPages', {type: pageType}, user_token, 100, null, false);
+  const rows      = await loadBatch('seo/meta_editor','getPages', {type: pageType}, user_token, 100, (currentCount) => {
+    progressCount(document.getElementById('progressbar'), currentCount.length, pagesCount)
+  }, false);
   const data = [];
   const index = {};
 
