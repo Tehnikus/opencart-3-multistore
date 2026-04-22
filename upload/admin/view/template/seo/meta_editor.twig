@@ -135,7 +135,11 @@
 
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><i class="fa fa-list"></i> {{ meta_editor }}</h3>
+        <span class="panel-title"><i class="fa fa-list"></i> {{ meta_editor }}</span>
+        <div class="progressBar_container">
+          <label for="progressbar" class="progressLabel">0/0</label>
+          <progress id="progressbar" class="progressBar" value="0" max=""></progress>
+        </div>
       </div>
       <div class="panel-body">
         <div class="table-responsive tableWrapper">
