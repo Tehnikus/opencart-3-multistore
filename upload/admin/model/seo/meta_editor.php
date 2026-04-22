@@ -106,4 +106,86 @@ class ModelSeoMetaEditor extends Model
     return (int) $result['pages_count'];
   }
 
+  /**
+   * Upsert data to description table
+   * @param string $type string type to be upserted
+   * @param array $data array of nested language data arrays [$langId => ['h1' => 'Some H1', 'meta_title' => 'Some meta title']]
+   * @return int Affecteed rows
+   */
+  public function savePages($data, $type) : int {
+    $allowedColumns = [
+      'h1',
+      'meta_title',
+      'meta_description',
+      'meta_keyword',
+      'description',
+      'seo_keywords',
+      'seo_description',
+      'faq',
+      'how_to',
+      'footer',
+    ];
+
+    $types = $this->getTypes();
+
+    if (!isset($types[$type])) {
+      return 0;
+    }
+
+    $table      = DB_PREFIX . $types[$type]['description_table'];
+    $entityKey  = $types[$type]['column_id'];
+    $storeId    = (int) $this->session->data['store_id'];
+
+    // Columns list
+    $columns = array_merge([$entityKey, 'store_id', 'language_id'], $allowedColumns);
+
+    $values = [];
+
+    foreach ($data as $entityId => $langData) {
+      foreach ($langData as $language_id => $row) {
+
+        $rowValues = [
+          (int) $entityId,
+          $storeId,
+          (int) $language_id
+        ];
+
+        foreach ($allowedColumns as $column) {
+          if (array_key_exists($column, $row)) {
+            $value = $row[$column];
+
+            // Escape values
+            $rowValues[] = "'" . $this->db->escape((string) $value) . "'";
+          } else {
+            $rowValues[] = "NULL"; // NULL to skip UPSERT keys that don't exist in $data
+          }
+        }
+
+        $values[] = "(" . implode(', ', $rowValues) . ")";
+      }
+    }
+
+    if (!$values) {
+      return 0;
+    }
+
+    // UPDATE only if column value is not NULL
+    $update = [];
+
+    foreach ($allowedColumns as $column) {
+      $update[] = "`$column` = COALESCE(VALUES(`$column`), `$column`)";
+    }
+
+    $sql = "
+      INSERT INTO `$table`
+      (`" . implode('`, `', $columns) . "`)
+      VALUES " . implode(', ', $values) . "
+      ON DUPLICATE KEY UPDATE " . implode(', ', $update) . "
+    ";
+
+    $this->db->query($sql);
+
+    return (int)$this->db->countAffected();
+  }
+
 }
