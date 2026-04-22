@@ -223,6 +223,53 @@ function renderSelect(options, datasetAttr) {
 }
 
 /**
+ * Save forms asynchronously
+ * @param {Element} formElement form element to be saved. Must have action attribute
+ * @param {Boolean} debug Flag to log to console
+ * @returns 
+ */
+function fetchSave(formElement, debug = false) {
+  const post_action = formElement.action;
+  const formData = new FormData(formElement);
+  if (debug) {
+    console.log('Send to:', post_action);
+    console.log('Data:', console.table([...formData.entries()]));
+  }
+  return fetch(post_action, {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    
+    const savedInputs = formElement.querySelectorAll('input, select, textarea');
+    savedInputs.forEach(input => input.classList.add(data.success ? 'success' : 'error'));
+
+    if (data.message) {
+      const messageDiv = formElement.querySelector('.message');
+      if (messageDiv) {
+        messageDiv.innerHTML = `<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>${data.message}</div>`;
+      }
+    }
+
+    return data; // necessary for sequential form saving
+  })
+  .catch(error => {
+    console.error('Error while sending data:', error);
+  });
+}
+
+/**
+ * Save a list of forms one by one
+ * @param {HTMLCollection} forms 
+ */
+async function saveAllForms(forms) {
+  for (const form of forms) {
+    await fetchSave(form);  // await every form save
+  }
+}
+
+/**
  * Dynamic elements event listeners
  */
 function addAsyncListeners(metaEditorTable, data) {
