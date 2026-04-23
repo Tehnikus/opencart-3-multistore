@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async ()=> {
   tableElements.forEach(tableElement => {
     // Call nimbleTable with params and add event listeners
     const metaEditorInstace = renderEditor(interface, data, tableElement);
-    addAsyncListeners(metaEditorInstace, data);
+    addAsyncListeners(metaEditorInstace, data, interface);
   });
 });
 
@@ -477,7 +477,7 @@ async function saveAllForms(forms) {
 /**
  * Dynamic elements event listeners
  */
-function addAsyncListeners(metaEditorTable, data) {
+function addAsyncListeners(metaEditorTable, data, interface) {
   // Clicks
   document.addEventListener('click', e => {
     // Generate meta buttons
