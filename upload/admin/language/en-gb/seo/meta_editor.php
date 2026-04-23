@@ -34,6 +34,9 @@ $_['button_generate']               = 'Generate';
 // Messages
 $_['message_metadata_saved']        = 'Metadata saved';
 $_['message_formulas_saved']        = 'Formulas saved';
+$_['message_saved']                 = 'Saved';
+$_['message_loaded']                = 'Loaded';
+$_['message_select_rows']           = 'Select pages to be saved';
 
 // Help
 $_['help_syntax_hint']              = 'Tag syntax: <b>{{tag1:tag2:"or a tag replacement"|filter}}</b>. <br>';
