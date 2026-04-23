@@ -37,6 +37,16 @@ class ControllerCommonBatchloader extends Controller
       return;
     }
 
+    $args = [];
+
+    if (!empty($this->request->post['args'])) {
+      $args = json_decode(html_entity_decode($this->request->post['args']), true);
+    }
+
+    if (!is_array($args)) {
+      $args = [];
+    }
+
     $rows = [];
     if (!empty($this->request->post['rows'])) {
       // If POST ['rows'] appeared to be a string, then try to decode JSON string. Else leave as is 
@@ -54,7 +64,7 @@ class ControllerCommonBatchloader extends Controller
     $modelInstance = $this->{"model_" . str_replace('/', '_', $model)};
 
     try {
-      $result = $modelInstance->$method($rows);
+      $result = $modelInstance->$method($rows, ...$args);
       $this->jsonResponse([
         'status' => 'ok',
         'saved' => count($rows),
