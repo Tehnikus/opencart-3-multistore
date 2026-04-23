@@ -230,7 +230,7 @@ function renderRow(interface, row) {
     </td>
     <td colspan=2>
       <div class="name text-center">
-        <span class="h4">${row.lang_data[interface.defaultLanguageId].name}</span>
+        <span class="h3 strong">${row.lang_data[interface.defaultLanguageId].name}</span>
       </div>
       ${langRowHtml}
     </td>
@@ -238,6 +238,10 @@ function renderRow(interface, row) {
       <button type="button" class="savePage btn btn-success" title="${interface.lang.button_save}"><i class="fa fa-save"></i></button>
     </td>
   `;
+
+  if (row.rowType) {
+    tr.classList.add(row.rowType);
+  }
 
   return tr;
 }
