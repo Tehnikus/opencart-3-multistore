@@ -35,7 +35,6 @@ document.addEventListener('DOMContentLoaded', async ()=> {
 });
 
 function renderEditor(interface, data, tableElement) {
-  console.log(data)
 
   // Table instance
   const metaEditorTable = new nimbleTable({
@@ -43,12 +42,8 @@ function renderEditor(interface, data, tableElement) {
     idField:  'column_id',
     pagination: {perPage: 200},
     template: (row) => renderRow(interface, row),
-    addEventListeners: (table) => {
-      // console.log(table)
-    },
-    onFilterEnd: (filteredMap) => {
-      // console.log(filteredMap);
-    },
+    addEventListeners: (table) => {},
+    onFilterEnd: (filteredMap) => {},
   });
 
   // Set each loaded row type to 'existing'. Originally row type is not stored in DB, it's just for filtering purpose 
