@@ -70,8 +70,8 @@ class ModelSeoMetaEditor extends Model
 
       foreach ($lang_data as $lang) {
 
-        $lang['description']     = strlen(strip_tags($lang['description'] ?? ''));
-        $lang['seo_description'] = strlen(strip_tags($lang['seo_description'] ?? ''));
+        $lang['description']     = mb_strlen(strip_tags(html_entity_decode($lang['description'] ?? '')));
+        $lang['seo_description'] = mb_strlen(strip_tags(html_entity_decode($lang['seo_description'] ?? '')));
         $lang['faq']             = !empty($lang['faq']);
         $lang['how_to']          = !empty($lang['how_to']);
         $lang['footer']          = !empty($lang['footer']);
