@@ -164,9 +164,9 @@
 <link href="view/stylesheet/nimbleTable.css" rel="stylesheet" />
 <style>
   .tableWrapper {
-    & tr.updated {background: #d9edf7}
-    & tr.hasError {background: #f5c1bb}
-    & tr.saved {background: #cbeacb}
+    & tr.updated  {background: #d9edf780!important}
+    & tr.hasError {background: #f5c1bb80!important}
+    & tr.saved    {background: #cbeacb80!important}
     & tr {
       & .name {
         padding-bottom: 1rem;
@@ -178,6 +178,7 @@
         display: flex;
         flex-wrap: wrap;
         gap: 1rem;
+        padding-bottom: 1rem;
         & .langFlag {
           flex: 0 1 auto;
           align-content: center;
@@ -197,10 +198,13 @@
           }
         }
         & .seoBadges {
-          flex: 1 0 100%;
+          flex: 0 0 420px;
           justify-content: center;
           display: flex;
           gap: 1rem;
+          align-items: center;
+          flex-wrap: wrap;
+          align-content: center;
         }
       }
     }

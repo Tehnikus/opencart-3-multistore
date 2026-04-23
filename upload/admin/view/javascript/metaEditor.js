@@ -127,10 +127,10 @@ function renderHeader(interface) {
   
   thead.innerHTML = `
     <tr>
-      <th style="width: 20px">
+      <th style="width: 40px">
         <input type="checkbox" style="all: revert" class="selectAllRows" />
       </th>
-      <th style="width: 67%" class="text-center">
+      <th class="text-center">
         <div class="input-group flex">
           <input type="text" class="form-control" data-search-column="lang_data.*.meta_title" placeholder="${interface.lang.input_search} ${interface.lang.input_meta_title}">
           <input type="text" class="form-control" data-search-column="lang_data.*.h1" placeholder="${interface.lang.input_search} ${interface.lang.input_h1}">
@@ -139,7 +139,7 @@ function renderHeader(interface) {
           <input type="text" class="form-control" data-search-column="lang_data.*.meta_description" placeholder="${interface.lang.input_search} ${interface.lang.input_meta_description}">
         </div>
       </th>
-      <th>
+      <th style="width: 430px">
         <div class="input-group flex">
           <select class="form-control" data-search-column="lang_data.*.description">
             <option style="background-color: #ffffff; border-color: #cccccc; color: #555555;" value="">${interface.lang.input_description}</option>
@@ -177,7 +177,7 @@ function renderHeader(interface) {
         </div>
 
       </th>
-      <th>
+      <th style="witdh: 60px">
         <button type="button" class="saveAllPages btn btn-warning" title="${interface.lang.button_save_all}"><i class="fa fa-save"></i></button>
       </th>
     </tr>
