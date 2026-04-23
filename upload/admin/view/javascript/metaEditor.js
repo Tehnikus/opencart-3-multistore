@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async ()=> {
   const interface = await fetch(`index.php?route=seo/meta_editor/fetchGetInterface&user_token=${user_token}`).then(r => r.json());
   const data      = await loadBatch('seo/meta_editor','getPages', {type: pageType}, user_token, 100, (currentCount) => {
-    progressCount(document.getElementById('progressbar'), currentCount.length, pagesCount)
+    progressCount(document.getElementById('progressbar'), currentCount.length, pagesCount, interface.lang.message_loaded)
   }, false);
   
   // Pass static variables provided by PHP to interface that is needed for nimbleTable
