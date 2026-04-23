@@ -617,7 +617,7 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
   });
 
   // Input changes
-  document.addEventListener('change', e => {
+  document.addEventListener('input', e => {
     // Select all filtered rows
     if (e.target.closest('.selectAllRows')) {
       metaEditorTable.table.querySelectorAll('[data-column="selected"]').forEach(checkbox => {
@@ -633,6 +633,16 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
           rowData.selected = null;
         }
       });
+    }
+
+    // Set row type to "updated" on input change
+    if (e.target.closest('[data-id]')) {
+      const row = e.target.closest('[data-id]')
+      const rowId = row.dataset.id;
+      const rowData = metaEditorTable.getRow(rowId);
+      rowData.rowType = "updated"
+      metaEditorTable.updateRow(rowId, rowData, false);
+      row.classList = "updated";
     }
 
     // Language filter. Removes langauge data from each row in data except selected. Then sets new data to nimbleTable
