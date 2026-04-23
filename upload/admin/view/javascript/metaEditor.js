@@ -553,12 +553,68 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
       }
 
     }
-    
-    // Save all pages 
+
+    // Save all pages
     if (e.target.closest('.saveAllPages')) {
-      console.log('savePage')
-      const pagesData = [];
-      saveBatch('seo/meta_editor', 'savePages', pagesData, user_token, batchsize = 1, callback = null, debug = false);
+      const newData = []; // New data to be posted
+      const filteredRowsData = []; // Filtered rows data to set rowType for each row
+
+      // Get only filtered rows
+      metaEditorTable.filteredOrder.forEach(pageId => {
+        // Get row data
+        const rowData = metaEditorTable.getRow(pageId);
+        // Skip rows, if not selected
+        if (!rowData.selected) {return}
+        // Save references to update rowType
+        filteredRowsData.push(rowData);
+        // Compile POST data to flat array of objects
+        for (const langId in rowData.lang_data) {        
+          const langRow = rowData.lang_data[langId];        
+          newData.push({
+            meta_title: langRow.meta_title,
+            h1: langRow.meta_title,
+            meta_description: langRow.meta_description,
+            [columnId]: langRow[columnId],
+            language_id: langRow.language_id,
+          });
+        }
+      });
+
+      // Get unique languages. Required for progress bar to show correct numbers because data is sent by language, not by page
+      const uniqueLanguages = [...new Set(newData.map(row => row.language_id))];
+
+      console.log(newData);
+      // Save batch
+      const response = await saveBatch(
+        model     = 'seo/meta_editor', 
+        method    = 'savePages', 
+        data      = newData, 
+        userToken, 
+        batchsize = 1, 
+        callback  = (currentCount) => {progressCount(document.getElementById('progressbar'), (currentCount / uniqueLanguages.length), (newData.length / uniqueLanguages.length), interface.lang.message_saved)}, 
+        debug     = false, 
+        args      = pageType
+      );
+
+      filteredRowsData.forEach(rowData => {
+        rowData.rowType = "";
+      });
+      
+      if (response !== 0) {
+        filteredRowsData.forEach(rowData => {
+          // Set rowType
+          rowData.rowType = "saved";
+          // Update rows and their elements
+          const tr = metaEditorTable.updateRow(rowData.column_id, rowData, true);
+        });
+      } else {
+        filteredRowsData.forEach(rowData => {
+          // Set rowType
+          rowData.rowType = "hasError";
+          // Update rows and their elements
+          metaEditorTable.updateRow(rowData.column_id, rowData, true);
+        });
+      }
     }
   });
 
