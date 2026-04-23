@@ -143,13 +143,14 @@ function renderHeader(interface) {
         <div class="input-group flex">
           <select class="form-control" data-search-column="lang_data.*.description">
             <option style="background-color: #ffffff; border-color: #cccccc; color: #555555;" value="">${interface.lang.input_description}</option>
-            <option style="background-color: #cbeacb; border-color: #b9e2b9; color: #398c39;" value="">${interface.lang.input_description}</option>
-            <option style="background-color: #f5c1bb; border-color: #f3b5ad; color: #c72f1d;" value="">${interface.lang.input_description}</option>
+            <option style="background-color: #cbeacb; border-color: #b9e2b9; color: #398c39;" value=">2000">${interface.lang.input_description} >2000</option>
+            <option style="background-color: #fce7c8; border-color: #f9d5a2; color: #e0890e;" value=">1000, <2000">${interface.lang.input_description} <2000</option>
+            <option style="background-color: #f5c1bb; border-color: #f3b5ad; color: #c72f1d;" value="<1000">${interface.lang.input_description} <1000</option>
           </select>
           <select class="form-control" data-search-column="lang_data.*.seo_description">
             <option style="background-color: #ffffff; border-color: #cccccc; color: #555555;" value="">${interface.lang.input_seo_description}</option>
             <option style="background-color: #cbeacb; border-color: #b9e2b9; color: #398c39;" value=">2000">${interface.lang.input_seo_description} >2000</option>
-            <option style="background-color: #f5c1bb; border-color: #f3b5ad; color: #c72f1d;" value=">1000">${interface.lang.input_seo_description} >1000</option>
+            <option style="background-color: #fce7c8; border-color: #f9d5a2; color: #e0890e;" value=">1000, <2000">${interface.lang.input_seo_description} <2000</option>
             <option style="background-color: #f5c1bb; border-color: #f3b5ad; color: #c72f1d;" value="<1000">${interface.lang.input_seo_description} <1000</option>
           </select>
           <select class="form-control" data-search-column="lang_data.*.footer">
