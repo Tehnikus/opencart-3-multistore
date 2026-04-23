@@ -10,7 +10,7 @@
  * @param {Bool} debug        If true some verbose messages will be listed in console
  * @returns {Number} Total number of transfered rows 
  */
-async function saveBatch(model, method, data = [], userToken, batchSize = 100, callback, debug = false) {
+async function saveBatch(model, method, data = [], userToken, batchSize = 100, callback, debug = false, ...args) {
   let totalSaved = 0;
 
   for (let i = 0; i < data.length; i += batchSize) {
@@ -19,6 +19,7 @@ async function saveBatch(model, method, data = [], userToken, batchSize = 100, c
     const formData = new FormData();
     // batchloader.php will decode html entities
     formData.append('rows', JSON.stringify(batch));
+    formData.append('args', JSON.stringify(args));
 
     const response = await fetch(
       `index.php?route=common/batchloader/saveBatch&model=${model}&method=${method}&user_token=${userToken}`,
