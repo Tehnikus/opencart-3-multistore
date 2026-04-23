@@ -136,35 +136,39 @@ class ModelSeoMetaEditor extends Model
 
     $table      = DB_PREFIX . $types[$type]['description_table'];
     $entityKey  = $types[$type]['column_id'];
-    $storeId    = (int) $this->session->data['store_id'];
+    $storeId    = $this->session->data['store_id'];
 
-    // Columns list
-    $columns = array_merge([$entityKey, 'store_id', 'language_id'], $allowedColumns);
+    // Primary key columns list
+    $columns = array_merge([$entityKey, 'store_id', 'language_id']);
 
     $values = [];
 
-    foreach ($data as $entityId => $langData) {
-      foreach ($langData as $language_id => $row) {
+    foreach ($data as $row) {
 
-        $rowValues = [
-          (int) $entityId,
-          $storeId,
-          (int) $language_id
-        ];
-
-        foreach ($allowedColumns as $column) {
-          if (array_key_exists($column, $row)) {
-            $value = $row[$column];
-
-            // Escape values
-            $rowValues[] = "'" . $this->db->escape((string) $value) . "'";
-          } else {
-            $rowValues[] = "NULL"; // NULL to skip UPSERT keys that don't exist in $data
-          }
+      // Add columns from POST to INSERT columns list
+      foreach (array_keys($row) as $columnName) {
+        if (in_array($columnName, $allowedColumns) && !in_array($columnName, $columns)) {
+          $columns[] = $columnName;
         }
-
-        $values[] = "(" . implode(', ', $rowValues) . ")";
       }
+
+      // Primary key values list 
+      $rowValues = [
+        $entityKey    => (int) $row[$entityKey],
+        'store_id'    => (int) $storeId,
+        'language_id' => (int) $row['language_id']
+      ];
+
+      // Add row values excluding primary key row values
+      foreach ($columns as $column) {
+        if (array_key_exists($column, $row) && !in_array($column, array_keys($rowValues))) {
+          $value = $row[$column];
+          // Escape values
+          $rowValues[$column] = "'" . $this->db->escape($value) . "'";
+        }
+      }
+
+      $values[] = "(" . implode(', ', $rowValues) . ")";
     }
 
     if (!$values) {
@@ -174,18 +178,21 @@ class ModelSeoMetaEditor extends Model
     // UPDATE only if column value is not NULL
     $update = [];
 
-    foreach ($allowedColumns as $column) {
-      $update[] = "`$column` = COALESCE(VALUES(`$column`), `$column`)";
+    foreach ($columns as $column) {
+      $update[] = "`{$column}` = new_data.`{$column}`";
     }
 
     $sql = "
       INSERT INTO `$table`
       (`" . implode('`, `', $columns) . "`)
       VALUES " . implode(', ', $values) . "
+      AS new_data
       ON DUPLICATE KEY UPDATE " . implode(', ', $update) . "
     ";
 
+    $this->log->write($sql);
     $this->db->query($sql);
+
 
     return (int)$this->db->countAffected();
   }
