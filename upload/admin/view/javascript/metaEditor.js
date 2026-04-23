@@ -481,9 +481,9 @@ async function saveAllForms(forms) {
 /**
  * Dynamic elements event listeners
  */
-function addAsyncListeners(metaEditorTable, data, interface) {
+async function addAsyncListeners(metaEditorTable, data, interface) {
   // Clicks
-  document.addEventListener('click', e => {
+  document.addEventListener('click', async e => {
     // Generate meta buttons
     if (e.target.closest('.generateMeta')) {
       generateMeta2(e.target, metaEditorTable);
@@ -508,8 +508,9 @@ function addAsyncListeners(metaEditorTable, data, interface) {
     // Save single page 
     if (e.target.closest('.savePage')) {
       const newData = [];
+      const rowElement = e.target.closest('tr');
       // Get row id
-      const pageId = e.target.closest('tr').dataset.id;
+      const pageId = rowElement.dataset.id;
       // Get row data
       const rowData = metaEditorTable.getRow(pageId);
 
@@ -529,7 +530,7 @@ function addAsyncListeners(metaEditorTable, data, interface) {
       const uniqueLanguages = [...new Set(newData.map(row => row.language_id))];
 
       // Save batch
-      saveBatch(
+      const response = await saveBatch(
         model     = 'seo/meta_editor', 
         method    = 'savePages', 
         data      = newData, 
@@ -539,6 +540,18 @@ function addAsyncListeners(metaEditorTable, data, interface) {
         debug     = false, 
         args      = pageType
       );
+
+      rowElement.classList = "";
+      rowData.rowType = "";
+      
+      if (response !== 0) {
+        rowData.rowType = "saved";
+        rowElement.classList.add("saved");
+      } else {
+        rowData.rowType = "hasError";
+        rowElement.classList.add("hasError");
+      }
+
     }
     
     // Save all pages 
