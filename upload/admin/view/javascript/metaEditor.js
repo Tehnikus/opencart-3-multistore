@@ -226,8 +226,10 @@ function renderRow(interface, row) {
   }
 
   tr.innerHTML = `
-    <td>
-      <input type="checkbox" style="all: revert" data-column="selected" value="1" ${row.selected ? "checked" : ""} />
+    <td class="checkRow">
+      <label class="labelAll">
+        <input type="checkbox" style="all: revert" data-column="selected" value="1" ${row.selected ? "checked" : ""} />
+      </label>
     </td>
     <td colspan=2>
       <div class="name text-center">
