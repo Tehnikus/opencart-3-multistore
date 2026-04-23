@@ -121,15 +121,10 @@ async function loadBatch(model, method, filter = {}, userToken, batchSize = 100,
  * @param {Number} currentCount current count
  * @param {Number} maxCount max count
  */
-function progressCount(progressbar, currentCount, maxCount) {
+function progressCount(progressbar, currentCount, maxCount, message = '') {
   if (!progressbar || !currentCount || !maxCount) {return}
   progressbar.min = 0;
   progressbar.value = parseInt(currentCount);
   progressbar.max = parseInt(maxCount);
-  document.querySelector(`[for="${progressbar.id}"]`).innerText = `${currentCount}/${maxCount}`;
-  // if (currentCount == maxCount) {
-  //   setTimeout(() => {
-  //     progressbar.parentElement.remove();
-  //   }, 5000);
-  // }
+  document.querySelector(`[for="${progressbar.id}"]`).innerText = `${message} ${currentCount}/${maxCount}`;
 }
