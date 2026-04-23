@@ -503,11 +503,40 @@ function addAsyncListeners(metaEditorTable, data) {
 
     // Save single page 
     if (e.target.closest('.savePage')) {
-      console.log('savePage')
-      const pageData = [];
-      saveBatch('seo/meta_editor', 'savePages', pageData, user_token, batchsize = 1, callback = null, debug = false);
-    }
+      const newData = [];
+      // Get row id
+      const pageId = e.target.closest('tr').dataset.id;
+      // Get row data
+      const rowData = metaEditorTable.getRow(pageId);
 
+      // Compile POST data to flat array of objects
+      for (const langId in rowData.lang_data) {        
+        const langRow = rowData.lang_data[langId];        
+        newData.push({
+          meta_title: langRow.meta_title,
+          h1: langRow.meta_title,
+          meta_description: langRow.meta_description,
+          [columnId]: langRow[columnId],
+          language_id: langRow.language_id,
+        });
+      }
+
+      // Get unique languages. Required for progress bar to show correct numbers because data is sent by language, not by page
+      const uniqueLanguages = [...new Set(newData.map(row => row.language_id))];
+
+      // Save batch
+      saveBatch(
+        model     = 'seo/meta_editor', 
+        method    = 'savePages', 
+        data      = newData, 
+        user_token, 
+        batchsize = 1, 
+        callback  = (currentCount) => {progressCount(document.getElementById('progressbar'), (currentCount / uniqueLanguages.length), (newData.length / uniqueLanguages.length), interface.lang.message_saved)}, 
+        debug     = false, 
+        args      = pageType
+      );
+    }
+    
     // Save all pages 
     if (e.target.closest('.saveAllPages')) {
       console.log('savePage')
