@@ -36,6 +36,7 @@ class ModelSeoMetaEditor extends Model
         m.`" . $type['column_id'] . "` as column_id,
         JSON_ARRAYAGG(
           JSON_OBJECT(
+            '" . $type['column_id'] . "', d.`" . $type['column_id'] . "`,
             'name',               d.`name`,
             'h1',                 d.`h1`,
             'meta_title',         d.`meta_title`,
@@ -48,7 +49,8 @@ class ModelSeoMetaEditor extends Model
             'how_to',             d.`how_to`,
             'footer',             d.`footer`,
             'date_modified',      d.`date_modified`,
-            'language_id',        d.`language_id`
+            'language_id',        d.`language_id`,
+            'store_id',           d.`store_id`
           )
         ) AS lang_data
         FROM `" . DB_PREFIX . $type['main_table'] . "` m
