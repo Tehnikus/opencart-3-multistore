@@ -164,33 +164,44 @@
 <link href="view/stylesheet/nimbleTable.css" rel="stylesheet" />
 <style>
   .tableWrapper {
-    & .langData {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      & .langFlag {
-        flex: 0 1 auto;
-        align-content: center;
+    & tr.updated {background: #d9edf7}
+    & tr.hasError {background: #f5c1bb}
+    & tr.saved {background: #cbeacb}
+    & tr {
+      & .name {
+        padding-bottom: 1rem;
+        & span {
+          font-weight: bold;
+        }
       }
-      & .langSeoData {
-        flex: 1 1 auto;
+      & .langData {
+        display: flex;
         flex-wrap: wrap;
-        display: flex;
-        & .seoInputs {
-          display: flex;
-          flex: 1 0 100%;
-          flex-wrap: wrap;
-          /* gap: 1rem; */
-        }
-        & .seoInputs .input-group {
-          flex: 1 0 100%;
-        }
-      }
-      & .seoBadges {
-        flex: 1 0 100%;
-        justify-content: center;
-        display: flex;
         gap: 1rem;
+        & .langFlag {
+          flex: 0 1 auto;
+          align-content: center;
+        }
+        & .langSeoData {
+          flex: 1 1 auto;
+          flex-wrap: wrap;
+          display: flex;
+          & .seoInputs {
+            display: flex;
+            flex: 1 0 100%;
+            flex-wrap: wrap;
+            /* gap: 1rem; */
+          }
+          & .seoInputs .input-group {
+            flex: 1 0 100%;
+          }
+        }
+        & .seoBadges {
+          flex: 1 0 100%;
+          justify-content: center;
+          display: flex;
+          gap: 1rem;
+        }
       }
     }
   }
@@ -198,13 +209,14 @@
     position: fixed;
     bottom: 20px;
     left: 20px;
-    z-index: 20;
-    max-height: 300px;
+    z-index: 91;
+    max-height: 400px;
+    width: 350px;
     overflow-y: auto;
     height: auto;
     margin: 0;
     padding: 0;
-    
+    box-shadow: 0 0 10px #3337;
     border-radius: 3px;
     scrollbar-gutter: stable;
   }
