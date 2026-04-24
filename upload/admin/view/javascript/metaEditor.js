@@ -111,6 +111,7 @@ function renderHeader(interface) {
   const languageSelect  = interface.languageSelect.cloneNode(true);
   // Add empty values to filter select
   languageSelect.add(Object.assign(document.createElement('option'), {value: '', textContent: interface.lang.option_language}), languageSelect.options[0]);
+  languageSelect.classList.add('languageSelect');
   
   thead.innerHTML = `
     <tr>
@@ -654,9 +655,28 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
     }
 
     // Language filter. Removes langauge data from each row in data except selected. Then sets new data to nimbleTable
-    if (e.target.closest('.languageFilter')) {
-      // const newData = data.map(row => row.lang_data)
+    if (e.target.closest('.languageSelect')) {
+      filterLanguageId = e.target.value;
+
+      const newData = data.map(row => {
+        // shallow copy of original row
+        const newRow = { ...row };        
+        // If language filter is not empty
+        if (filterLanguageId !== '') {
+          // Filter language by id
+          newRow.lang_data = row.lang_data[filterLanguageId] ? {[filterLanguageId]: row.lang_data[filterLanguageId]} : {};
+        } else {
+          // Return all languages
+          newRow.lang_data = {...row.lang_data};
+        }
+
+        return newRow;
+      });
+
+      metaEditorTable.setData(newData);
     }
+
+
   });
 
   // Submits
