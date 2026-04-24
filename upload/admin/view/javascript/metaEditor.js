@@ -181,7 +181,8 @@ function renderHeader(interface) {
 
       </th>
       <th style="width: 60px; text-align: center;">
-        <button type="button" class="saveAllPages btn btn-warning" title="${interface.lang.button_save_all}"><i class="fa fa-save"></i></button>
+        <button type="button" class="undoAllPages btn btn-warning" title="${interface.lang.button_undo}"><i class="fa fa-undo"></i></button>
+        <button type="button" class="saveAllPages btn btn-success" title="${interface.lang.button_save_all}"><i class="fa fa-save"></i></button>
       </th>
     </tr>
   `;
@@ -240,6 +241,7 @@ function renderRow(interface, row) {
       ${langRowHtml}
     </td>
     <td style="text-align: center">
+      <button type="button" class="undoPage btn btn-warning" title="${interface.lang.button_undo}"><i class="fa fa-undo"></i></button>
       <button type="button" class="savePage btn btn-success" title="${interface.lang.button_save}"><i class="fa fa-save"></i></button>
     </td>
   `;
