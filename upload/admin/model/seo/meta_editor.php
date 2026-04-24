@@ -74,7 +74,7 @@ class ModelSeoMetaEditor extends Model
         LIMIT {$start}, {$limit}
     ")->rows;
 
-    foreach ($rows as &$row) {
+    foreach ($rows as $row) {
       $row['lang_data'] = json_decode($row['lang_data'], true) ?? [];
 
       $lang_data = $row['lang_data'];
