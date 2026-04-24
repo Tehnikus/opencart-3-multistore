@@ -217,10 +217,10 @@ function renderRow(interface, row) {
         <div class="seoBadges">
           <span class="badge badge-sm strong ${langRow.description     ? 'alert-success' : 'alert-danger'}">${interface.lang.input_description}: ${langRow.description}</span>
           <span class="badge badge-sm strong ${langRow.seo_description ? 'alert-success' : 'alert-danger'}">${interface.lang.input_seo_description}: ${langRow.seo_description}</span>
-          <span class="badge badge-sm strong ${langRow.footer          ? 'alert-success' : 'alert-danger'}">${interface.lang.input_footer}: ${langRow.footer}</span>
           <span class="badge badge-sm strong ${langRow.seo_keywords    ? 'alert-success' : 'alert-danger'}">${interface.lang.input_seo_keywords}: ${langRow.seo_keywords}</span>
-          <span class="badge badge-sm strong ${langRow.faq             ? 'alert-success' : 'alert-danger'}">${interface.lang.input_faq}: ${langRow.faq}</span>
-          <span class="badge badge-sm strong ${langRow.how_to          ? 'alert-success' : 'alert-danger'}">${interface.lang.input_how_to}: ${langRow.how_to}</span>
+          <span class="badge badge-sm strong ${langRow.footer          ? 'alert-success' : 'alert-danger'}">${interface.lang.input_footer}: ${langRow.footer ? '<i class="fa fa-check"></i>' : '<i class="fa fa-times"></i>'}</span>
+          <span class="badge badge-sm strong ${langRow.faq             ? 'alert-success' : 'alert-danger'}">${interface.lang.input_faq}: ${langRow.faq ? '<i class="fa fa-check"></i>' : '<i class="fa fa-times"></i>'}</span>
+          <span class="badge badge-sm strong ${langRow.how_to          ? 'alert-success' : 'alert-danger'}">${interface.lang.input_how_to}: ${langRow.how_to ? '<i class="fa fa-check"></i>' : '<i class="fa fa-times"></i>'}</span>
         </div>
       </div>
     `;
