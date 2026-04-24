@@ -643,6 +643,9 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
 
     // Set row type to "updated" on input change
     if (e.target.closest('[data-id]')) {
+      // Skip row select checkbox
+      if (e.target.dataset.column === "selected") {return}
+      // Else update row data and appearance
       const row = e.target.closest('[data-id]')
       const rowId = row.dataset.id;
       const rowData = metaEditorTable.getRow(rowId);
