@@ -179,7 +179,7 @@ function renderHeader(interface) {
         </div>
 
       </th>
-      <th style="witdh: 60px">
+      <th style="width: 60px; text-align: center;">
         <button type="button" class="saveAllPages btn btn-warning" title="${interface.lang.button_save_all}"><i class="fa fa-save"></i></button>
       </th>
     </tr>
@@ -232,13 +232,13 @@ function renderRow(interface, row) {
         <input type="checkbox" style="all: revert" data-column="selected" value="1" ${row.selected ? "checked" : ""} />
       </label>
     </td>
-    <td colspan=2>
+    <td colspan="3">
       <div class="name text-center">
         <span class="h3 strong">${row.lang_data[interface.defaultLanguageId].name}</span>
       </div>
       ${langRowHtml}
     </td>
-    <td>
+    <td style="text-align: center">
       <button type="button" class="savePage btn btn-success" title="${interface.lang.button_save}"><i class="fa fa-save"></i></button>
     </td>
   `;
@@ -538,7 +538,7 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
         model     = 'seo/meta_editor', 
         method    = 'savePages', 
         data      = newData, 
-        user_token, 
+        userToken, 
         batchsize = 1, 
         callback  = (currentCount) => {progressCount(document.getElementById('progressbar'), (currentCount / uniqueLanguages.length), (newData.length / uniqueLanguages.length), interface.lang.message_saved)}, 
         debug     = false, 
@@ -587,7 +587,6 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
       // Get unique languages. Required for progress bar to show correct numbers because data is sent by language, not by page
       const uniqueLanguages = [...new Set(newData.map(row => row.language_id))];
 
-      console.log(newData);
       // Save batch
       const response = await saveBatch(
         model     = 'seo/meta_editor', 
