@@ -164,9 +164,9 @@
 <link href="view/stylesheet/nimbleTable.css" rel="stylesheet" />
 <style>
   .tableWrapper {
-    & tr.updated  {background: #d9edf780!important}
-    & tr.hasError {background: #f5c1bb80!important}
-    & tr.saved    {background: #cbeacb80!important}
+    & tr[data-id].updated  {background: #d9edf780}
+    & tr[data-id].hasError {background: #f5c1bb80}
+    & tr[data-id].saved    {background: #cbeacb80}
     & tr {
       & .name {
         padding-bottom: 1rem;
