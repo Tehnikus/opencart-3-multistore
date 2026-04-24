@@ -622,6 +622,18 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
         });
       }
     }
+
+    // Undo row
+    if (e.target.closest('.undoPage')) {
+      undoRow(e.target.closest('tr').dataset.id, data, metaEditorTable);
+    }
+
+    // Undo all rows
+    if (e.target.closest('.undoAllPages')) {
+      metaEditorTable.filteredOrder.forEach(id => {
+        undoRow(id, data, metaEditorTable);
+      })
+    }
   });
 
   // Input changes
@@ -687,5 +699,17 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
       e.preventDefault();
       fetchSave(e.target);
     }
-  })
+  /**
+   * Undo changes in single row
+   * @param {Number} rowId Id of the row to be undone
+   * @param {Array} data The array of original data
+   */
+  function undoRow(rowId, data, metaEditorTable) {    
+    // Filter by language so filtered out lang data is not affected by undo
+    const prevData = filterByLangId(data.filter(row => Number(row.column_id) === Number(rowId)), metaEditorTable.table.querySelector('.languageSelect').value); 
+    prevData.forEach(row => {
+      row.rowType = 'existing';
+      metaEditorTable.updateRow(rowId, row, true);
+    });
+  }
 }
