@@ -670,27 +670,10 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
 
     // Language filter. Removes langauge data from each row in data except selected. Then sets new data to nimbleTable
     if (e.target.closest('.languageSelect')) {
-      filterLanguageId = e.target.value;
-
-      const newData = data.map(row => {
-        // shallow copy of original row
-        const newRow = { ...row };        
-        // If language filter is not empty
-        if (filterLanguageId !== '') {
-          // Filter language by id
-          newRow.lang_data = row.lang_data[filterLanguageId] ? {[filterLanguageId]: row.lang_data[filterLanguageId]} : {};
-        } else {
-          // Return all languages
-          newRow.lang_data = {...row.lang_data};
-        }
-
-        return newRow;
-      });
-
-      metaEditorTable.setData(newData);
+      langId = e.target.value;
+      const newData = filterByLangId(data, langId)
+      metaEditorTable.setData(newData, keepFilters = true);
     }
-
-
   });
 
   // Submits
@@ -699,6 +682,28 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
       e.preventDefault();
       fetchSave(e.target);
     }
+  });
+
+  /**
+   * Filter data and leave only selected language
+   * @param {Array} data Array of objects with original data
+   * @param {String} langId Language id or empty string
+   * @returns {Array} of objects with filtered out languages except lang_data[langId]
+   */
+  function filterByLangId(data, langId) {
+    const newData = data.map(row => {
+      const newRow = { ...row }; // shallow copy of original row
+      if (langId !== '') {
+        newRow.lang_data = row.lang_data[langId] ? {[langId]: row.lang_data[langId]} : {}; // Filter language by id
+      } else {
+        newRow.lang_data = {...row.lang_data}; // Return all languages
+      }
+      return newRow;
+    });
+
+    return newData;
+  }
+
   /**
    * Undo changes in single row
    * @param {Number} rowId Id of the row to be undone
