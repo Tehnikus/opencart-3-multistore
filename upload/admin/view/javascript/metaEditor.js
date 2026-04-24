@@ -236,7 +236,7 @@ function renderRow(interface, row) {
     </td>
     <td colspan="3">
       <div class="name text-center">
-        <span class="h3 strong">${row.lang_data[interface.defaultLanguageId].name}</span>
+        <span class="h3 strong">${row.default_name}</span>
       </div>
       ${langRowHtml}
     </td>
