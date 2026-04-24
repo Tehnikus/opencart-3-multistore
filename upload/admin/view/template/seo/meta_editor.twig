@@ -174,11 +174,16 @@
           font-weight: bold;
         }
       }
+      & .langData + .langData {
+        border-top: 1px solid #ccc;
+        margin-top: 1rem;
+        padding-top: 1rem;
+      }
       & .langData {
         display: flex;
         flex-wrap: wrap;
         gap: 1rem;
-        padding-bottom: 1rem;
+        /* padding-bottom: 1rem; */
         & .langFlag {
           flex: 0 1 auto;
           align-content: center;
@@ -205,6 +210,11 @@
           align-items: center;
           flex-wrap: wrap;
           align-content: center;
+          & .badge {
+            flex: 1 1 30%;
+            height: 30px;
+            align-content: center;
+          }
         }
       }
     }
