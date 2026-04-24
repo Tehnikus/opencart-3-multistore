@@ -31,6 +31,16 @@ $_['button_add_formula']            = 'Add the formula';
 $_['button_remove_formula']         = 'Delete the formula';
 $_['button_generate']               = 'Generate';
 
+// Options
+$_['option_language']               = 'Language';
+$_['option_state']                  = 'State';
+$_['option_state_updated']          = 'Updated';
+$_['option_state_saved']            = 'Saved';
+$_['option_state_hasError']         = 'Has error';
+$_['option_selection']              = 'Selection';
+$_['option_selection_selected']     = 'Selected';
+$_['option_selection_not_selected'] = 'Not selected';
+
 // Messages
 $_['message_metadata_saved']        = 'Metadata saved';
 $_['message_formulas_saved']        = 'Formulas saved';
