@@ -529,7 +529,7 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
         const langRow = rowData.lang_data[langId];        
         newData.push({
           meta_title: langRow.meta_title,
-          h1: langRow.meta_title,
+          h1: langRow.h1,
           meta_description: langRow.meta_description,
           [columnId]: langRow[columnId],
           language_id: langRow.language_id,
@@ -582,7 +582,7 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
           const langRow = rowData.lang_data[langId];        
           newData.push({
             meta_title: langRow.meta_title,
-            h1: langRow.meta_title,
+            h1: langRow.h1,
             meta_description: langRow.meta_description,
             [columnId]: langRow[columnId],
             language_id: langRow.language_id,
