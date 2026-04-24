@@ -117,7 +117,23 @@ function renderHeader(interface) {
       <th style="width: 40px">
         <input type="checkbox" style="all: revert" class="selectAllRows" />
       </th>
-      <th class="text-center">
+      <th style="width: 250px">
+        ${languageSelect.outerHTML}
+        <div class="input-group flex">
+          <select class="form-control" data-search-column="selected">
+            <option value="">${interface.lang.option_selection}</option>
+            <option value="1">${interface.lang.option_selection_selected}</option>
+            <option value="!1">${interface.lang.option_selection_not_selected}</option>
+          </select>
+          <select class="form-control" data-search-column="rowType">
+            <option value="">${interface.lang.option_state}</option>
+            <option style="background-color: #d9edf7; border-color: #bce8f1; color: #214c61;" value="updated">${interface.lang.option_state_updated}</option>
+            <option style="background-color: #cbeacb; border-color: #b9e2b9; color: #398c39;" value="saved">${interface.lang.option_state_saved}</option>
+            <option style="background-color: #f5c1bb; border-color: #f3b5ad; color: #c72f1d;" value="hasError">${interface.lang.option_state_hasError}</option>
+          </select>
+        </div>
+      </th>
+      <th>
         <div class="input-group flex">
           <input type="text" class="form-control" data-search-column="lang_data.*.meta_title" placeholder="${interface.lang.input_search} ${interface.lang.input_meta_title}">
           <input type="text" class="form-control" data-search-column="lang_data.*.h1" placeholder="${interface.lang.input_search} ${interface.lang.input_h1}">
