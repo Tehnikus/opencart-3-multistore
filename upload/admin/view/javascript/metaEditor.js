@@ -205,13 +205,13 @@ function renderRow(interface, row) {
         <div class="langSeoData">
           <div class="seoInputs">
             <div class="input-group flex">
-              <span class="input-group-addon">${interface.lang.input_h1}</span>
+              <span data-addon="lang_data.${langId}.h1" class="input-group-addon">${interface.lang.input_h1}:${langRow.h1.length}</span>
               <input data-column="lang_data.${langId}.h1" value="${langRow.h1}" class="form-control" placeholder="${interface.lang.input_h1}">
-              <span class="input-group-addon">${interface.lang.input_meta_title}</span>
+              <span data-addon="lang_data.${langId}.meta_title" class="input-group-addon">${interface.lang.input_meta_title}:${langRow.meta_title.length}</span>
               <input data-column="lang_data.${langId}.meta_title" value="${langRow.meta_title}" class="form-control" placeholder="${interface.lang.input_meta_title}">
             </div>
             <div class="input-group flex">
-              <span class="input-group-addon">${interface.lang.input_meta_description_short}</span>
+              <span data-addon="lang_data.${langId}.meta_description" class="input-group-addon">${interface.lang.input_meta_description_short}:${langRow.meta_description.length}</span>
               <input data-column="lang_data.${langId}.meta_description" value="${langRow.meta_description}" class="form-control" placeholder="${interface.lang.input_meta_description}">
             </div>
           </div>
@@ -666,6 +666,9 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
       rowData.rowType = "updated"
       metaEditorTable.updateRow(rowId, rowData, false);
       row.classList = "updated";
+
+      const inputAddon = row.querySelector(`[data-addon="${e.target.dataset.column}"]`);
+      inputAddon.innerText = inputAddon.textContent.replace(/:.*/, `:${e.target.value.length}`);
     }
 
     // Language filter. Removes langauge data from each row in data except selected. Then sets new data to nimbleTable
