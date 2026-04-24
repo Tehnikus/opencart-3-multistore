@@ -107,18 +107,10 @@ function applyFormula(formula, text) {
 function renderHeader(interface) {
   const thead = document.createElement('thead');
 
-  // Create filter selects
+  // Create language select
   const languageSelect  = interface.languageSelect.cloneNode(true);
-  const storeSelect     = interface.storeSelect.cloneNode(true);
-  // Add empty values to filter selects
-  languageSelect.add(Object.assign(document.createElement('option'), {value: '', textContent: interface.lang.column_language}), languageSelect.options[0]);
-  storeSelect.add(Object.assign(document.createElement('option'), {value: '', textContent: interface.lang.column_store}), storeSelect.options[0]);
-
-  // Set dataset
-  languageSelect.dataset.searchColumn = 'language_id';
-  storeSelect.dataset.searchColumn    = 'store_id';
-
-  // Row type select options 
+  // Add empty values to filter select
+  languageSelect.add(Object.assign(document.createElement('option'), {value: '', textContent: interface.lang.option_language}), languageSelect.options[0]);
   
   thead.innerHTML = `
     <tr>
