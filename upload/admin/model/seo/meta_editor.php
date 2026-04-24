@@ -29,11 +29,23 @@ class ModelSeoMetaEditor extends Model
     // Limits
     $limit  = max(1, (int) ($filter['limit'] ?? $this->config->get('config_limit_admin') ?? 100));
     $start  = max(0, (int) ($filter['start'] ?? 0));
-
-
+    $currentLang = (int) $this->config->get('config_language_id'); // Current admin language id
+    $currentStore = (int) $this->session->data['store_id']; // Current store id
     $rows = $this->db->query("
       SELECT
         m.`" . $type['column_id'] . "` as column_id,
+        COALESCE(
+          MAX(CASE 
+            WHEN d.language_id = {$currentLang}
+            AND d.store_id = {$currentStore}
+            THEN d.name
+          END),
+          MAX(CASE 
+            WHEN d.language_id = {$currentLang}
+            THEN d.name
+          END),
+          MAX(d.name)
+        ) AS default_name,
         JSON_ARRAYAGG(
           JSON_OBJECT(
             '" . $type['column_id'] . "', d.`" . $type['column_id'] . "`,
