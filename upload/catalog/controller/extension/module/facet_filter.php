@@ -126,7 +126,7 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 		$this->load->model('catalog/product');
 		$facets = $this->model_catalog_product->getFilters($requestFilters);
 
-		// Create array hierarhical from facet list
+		// Create array hierarchical from facet list
 		foreach ($facets as $row) {
 
 			// Skip current category in facets list
