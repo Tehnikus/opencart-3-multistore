@@ -440,7 +440,7 @@ class nimbleTable {
    */
   setData(rows = [], keepFilters = false) {
     for (let i = 0; i < rows.length; i++) {
-      const row = { ...rows[i] };
+      const row = structuredClone(rows[i]);
       let id = Number(row.id || row[this.options.idField]);
 
       // If no row id present then add unique one
