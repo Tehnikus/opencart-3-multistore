@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async ()=> {
   const interface = await fetch(`index.php?route=seo/meta_editor/fetchGetInterface&user_token=${userToken}`).then(r => r.json());
-  const data      = await loadBatch('seo/meta_editor','getPages', {type: pageType}, userToken, 1, (currentCount) => {
+  const data      = await loadBatch('seo/meta_editor','getPages', {type: pageType}, userToken, 100, (currentCount) => {
     progressCount(document.getElementById('progressbar'), currentCount.length, pagesCount, interface.lang.message_loaded)
   }, false);
   
@@ -660,8 +660,8 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
       // Skip row select checkbox
       if (e.target.dataset.column === "selected") {return}
       // Else update row data and appearance
-      const row = e.target.closest('[data-id]')
-      const rowId = row.dataset.id;
+      const row = e.target.closest('[data-id]') // Get row element. The element is alwas present pecause you can't input in invisible element
+      const rowId = row.dataset.id; // Get row id
       const rowData = metaEditorTable.getRow(rowId);
       rowData.rowType = "updated"
       metaEditorTable.updateRow(rowId, rowData, false);

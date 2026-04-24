@@ -202,9 +202,7 @@ class ModelSeoMetaEditor extends Model
       ON DUPLICATE KEY UPDATE " . implode(', ', $update) . "
     ";
 
-    $this->log->write($sql);
     $this->db->query($sql);
-
 
     return (int)$this->db->countAffected();
   }
