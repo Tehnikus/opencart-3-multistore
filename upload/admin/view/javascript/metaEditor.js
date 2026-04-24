@@ -489,6 +489,9 @@ async function saveAllForms(forms) {
  * Dynamic elements event listeners
  */
 async function addAsyncListeners(metaEditorTable, data, interface) {
+
+  const backupData = structuredClone(data);
+
   // Clicks
   document.addEventListener('click', async e => {
     // Generate meta buttons
@@ -625,13 +628,13 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
 
     // Undo row
     if (e.target.closest('.undoPage')) {
-      undoRow(e.target.closest('tr').dataset.id, data, metaEditorTable);
+      undoRow(e.target.closest('tr').dataset.id, backupData, metaEditorTable);
     }
 
     // Undo all rows
     if (e.target.closest('.undoAllPages')) {
       metaEditorTable.filteredOrder.forEach(id => {
-        undoRow(id, data, metaEditorTable);
+        undoRow(id, backupData, metaEditorTable);
       })
     }
   });
