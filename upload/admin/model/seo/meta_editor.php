@@ -99,6 +99,44 @@ class ModelSeoMetaEditor extends Model
   }
 
   /**
+   * Get variables of each page to generate metadata from
+   * @param string $type The type of page to get variables for
+   * @param array $tables The array of tables from $this->types to join main query
+   * @return string SQL subquery
+   */
+  public function buildGenerateVarsRequest($type, $tables) : string {
+    $request = "";
+    if ($type === 'category') {
+      $request = "(
+        SELECT JSON_OBJECT(
+          'price',      AVG(fs.current_price),
+          'minPrice',   MIN(fs.current_price),
+          'maxPrice',   MAX(fs.current_price),
+          'discount',   GREATEST(fs.current_price - pd.price, fs.current_price - ps.price),
+          'rating',     AVG(fs.rating_avg),
+          'reviews',    SUM(fs.review_count),
+          'offers',     COUNT(fs.product_id)
+        )
+        FROM " . DB_PREFIX . "product_to_category p2c
+        JOIN " . DB_PREFIX . "facet_sort fs 
+          ON fs.product_id = p2c.product_id
+          AND fs.store_id = p2c.store_id
+        LEFT JOIN " . DB_PREFIX . "product_discount pd 
+          ON  pd.product_id = p2c.product_id
+          AND pd.store_id   = p2c.store_id
+        LEFT JOIN " . DB_PREFIX . "product_special ps 
+          ON  ps.product_id = p2c.product_id
+          AND ps.store_id   = p2c.store_id
+        WHERE p2c.category_id = m.`" . $tables['column_id'] . "`
+          AND p2c.store_id    = m.store_id 
+          AND fs.current_price > 0
+      )";
+    }
+
+    return $request;
+  }
+
+  /**
    * Get total pages count to for async progress bar
    * @param string $page_type the type of pages to be returned
    * @return int pages coun
