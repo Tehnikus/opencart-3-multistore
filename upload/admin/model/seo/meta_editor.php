@@ -84,7 +84,7 @@ class ModelSeoMetaEditor extends Model
             'price',      AVG(fs.current_price),
             'minPrice',   MIN(fs.current_price),
             'maxPrice',   MAX(fs.current_price),
-            'discount',   GREATEST(fs.current_price - pd.price, fs.current_price - ps.price),
+            'discount',   GREATEST(COALESCE(fs.current_price - pd.price, 0), COALESCE(fs.current_price - ps.price, 0), 0),
             'rating',     AVG(fs.rating_avg),
             'reviews',    SUM(fs.review_count),
             'offers',     COUNT(fs.product_id)
@@ -226,7 +226,7 @@ class ModelSeoMetaEditor extends Model
           'price',    fs.current_price,
           'minPrice', fs.current_price + COALESCE(ppr.total_min_impact, 0),
           'maxPrice', fs.current_price + COALESCE(ppr.total_max_impact, 0),
-          'discount', GREATEST(COALESCE(fs.current_price - pd.price, 0), COALESCE(fs.current_price - ps.price, 0)),
+          'discount', GREATEST(COALESCE(fs.current_price - pd.price, 0), COALESCE(fs.current_price - ps.price, 0), 0),
           'rating',   fs.rating_avg,
           'reviews',  fs.review_count,
           'offers',   1
@@ -296,7 +296,7 @@ class ModelSeoMetaEditor extends Model
             'price',      AVG(fs.current_price),
             'minPrice',   MIN(fs.current_price),
             'maxPrice',   MAX(fs.current_price),
-            'discount',   GREATEST(fs.current_price - pd.price, fs.current_price - ps.price),
+            'discount',   GREATEST(COALESCE(fs.current_price - pd.price, 0), COALESCE(fs.current_price - ps.price, 0), 0),
             'rating',     AVG(fs.rating_avg),
             'reviews',    SUM(fs.review_count),
             'offers',     COUNT(fs.product_id)
