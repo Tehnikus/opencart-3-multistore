@@ -140,68 +140,143 @@ class ModelSeoMetaEditor extends Model
         WHERE m.`store_id` = " . (int) $this->session->data['store_id'] . "
         GROUP BY m.`" . $type['column_id'] . "`, m.`store_id`
         LIMIT {$start}, {$limit}
-    ")->rows;
+    ";
 
-    foreach ($rows as $row) {
-      $row['lang_data'] = json_decode($row['lang_data'], true) ?? [];
-
-      $lang_data = $row['lang_data'];
-      unset($row['lang_data']);
-
-      foreach ($lang_data as $lang) {
-
-        $lang['description']     = mb_strlen(strip_tags(html_entity_decode($lang['description'] ?? '')));
-        $lang['seo_description'] = mb_strlen(strip_tags(html_entity_decode($lang['seo_description'] ?? '')));
-        $lang['faq']             = !empty($lang['faq']);
-        $lang['how_to']          = !empty($lang['how_to']);
-        $lang['footer']          = !empty($lang['footer']);
-        $lang['seo_keywords']    = is_array($lang['seo_keywords']) ? count($lang['seo_keywords']) : (empty($lang['seo_keywords']) ? 0 : 1);
-        
-        $row['lang_data'][$lang['language_id']] = $lang;
-      }
-
-      $result[] = $row;
-    }
-
-    return $result;
+    return $sql;
   }
 
-  /**
-   * Get variables of each page to generate metadata from
-   * @param string $type The type of page to get variables for
-   * @param array $tables The array of tables from $this->types to join main query
-   * @return string SQL subquery
-   */
-  public function buildGenerateVarsRequest($type, $tables) : string {
-    $request = "";
-    if ($type === 'category') {
-      $request = "(
-        SELECT JSON_OBJECT(
-          'price',      AVG(fs.current_price),
-          'minPrice',   MIN(fs.current_price),
-          'maxPrice',   MAX(fs.current_price),
-          'discount',   GREATEST(fs.current_price - pd.price, fs.current_price - ps.price),
-          'rating',     AVG(fs.rating_avg),
-          'reviews',    SUM(fs.review_count),
-          'offers',     COUNT(fs.product_id)
-        )
-        FROM " . DB_PREFIX . "product_to_category p2c
-        JOIN " . DB_PREFIX . "facet_sort fs 
-          ON fs.product_id = p2c.product_id
-          AND fs.store_id = p2c.store_id
-        LEFT JOIN " . DB_PREFIX . "product_discount pd 
-          ON  pd.product_id = p2c.product_id
-          AND pd.store_id   = p2c.store_id
-        LEFT JOIN " . DB_PREFIX . "product_special ps 
-          ON  ps.product_id = p2c.product_id
-          AND ps.store_id   = p2c.store_id
-        WHERE p2c.category_id = m.`" . $tables['column_id'] . "`
-          AND p2c.store_id    = m.store_id 
-          AND fs.current_price > 0
-      )";
-    }
+  private function productRequest($filter) : string {
+    $type         = $this->types[$filter['type']];
+    $limit        = max(1, (int) ($filter['limit'] ?? $this->config->get('config_limit_admin') ?? 100));
+    $start        = max(0, (int) ($filter['start'] ?? 0));
+    $currentLang  = (int) $this->config->get('config_language_id'); // Current admin language id
+    $currentStore = (int) $this->session->data['store_id']; // Current store id
 
-    return $request;
+    $sql = "
+
+      -- Pagination
+      WITH paged_ids AS (
+        SELECT `" . $type['column_id'] . "` AS product_id
+        FROM `" . DB_PREFIX . $type['main_table'] . "`
+        WHERE store_id = {$currentStore}
+        LIMIT {$start}, {$limit}
+      ),
+
+      option_impacts AS (
+        SELECT
+          pov.product_id,
+          pov.store_id,
+          pov.option_id,
+          o.type,
+          po.required,
+          CASE WHEN pov.price_prefix = '-' THEN -pov.price ELSE pov.price END AS price_impact
+        FROM `" . DB_PREFIX . "product_option_value` pov
+        JOIN `" . DB_PREFIX . "option` o          ON o.option_id          = pov.option_id
+        JOIN `" . DB_PREFIX . "product_option` po  ON po.product_option_id = pov.product_option_id
+        -- Join paginated product ids
+        JOIN paged_ids ON paged_ids.product_id = pov.product_id
+        WHERE pov.store_id = {$currentStore}
+      ),
+
+      option_minmax AS (
+        SELECT
+          option_id,
+          product_id,
+          store_id,
+          CASE
+            WHEN type IN ('radio', 'select') THEN
+              CASE
+                WHEN MAX(required) = 1 THEN MIN(price_impact)
+                ELSE LEAST(0, MIN(price_impact))
+              END
+            WHEN type = 'checkbox' THEN
+              COALESCE(SUM(CASE WHEN price_impact < 0 THEN price_impact ELSE 0 END), 0)
+            ELSE 0
+          END AS min_impact,
+          CASE
+            WHEN type IN ('radio', 'select') THEN MAX(price_impact)
+            WHEN type = 'checkbox'           THEN COALESCE(SUM(CASE WHEN price_impact > 0 THEN price_impact ELSE 0 END), 0)
+            ELSE 0
+          END AS max_impact
+        FROM option_impacts
+        GROUP BY product_id, store_id, option_id, type
+      ),
+
+      product_price_ranges AS (
+        SELECT
+          product_id,
+          store_id,
+          COALESCE(SUM(min_impact), 0) AS total_min_impact,
+          COALESCE(SUM(max_impact), 0) AS total_max_impact
+        FROM option_minmax
+        GROUP BY product_id, store_id
+      )
+
+      SELECT
+        m.`" . $type['column_id'] . "` AS column_id,
+        COALESCE(
+          MAX(CASE WHEN d.language_id = {$currentLang} AND d.store_id = {$currentStore} THEN d.name END),
+          MAX(CASE WHEN d.language_id = {$currentLang} THEN d.name END),
+          MAX(d.name)
+        ) AS default_name,
+        JSON_OBJECT(
+          'price',    fs.current_price,
+          'minPrice', fs.current_price + COALESCE(ppr.total_min_impact, 0),
+          'maxPrice', fs.current_price + COALESCE(ppr.total_max_impact, 0),
+          'discount', GREATEST(COALESCE(fs.current_price - pd.price, 0), COALESCE(fs.current_price - ps.price, 0)),
+          'rating',   fs.rating_avg,
+          'reviews',  fs.review_count,
+          'offers',   1
+        ) AS vars,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            '" . $type['column_id'] . "', d.`" . $type['column_id'] . "`,
+            'name',               d.`name`,
+            'h1',                 d.`h1`,
+            'meta_title',         d.`meta_title`,
+            'meta_description',   d.`meta_description`,
+            'meta_keyword',       d.`meta_keyword`,
+            'description',        d.`description`,
+            'seo_keywords',       d.`seo_keywords`,
+            'seo_description',    d.`seo_description`,
+            'faq',                d.`faq`,
+            'how_to',             d.`how_to`,
+            'footer',             d.`footer`,
+            'date_modified',      d.`date_modified`,
+            'language_id',        d.`language_id`,
+            'store_id',           d.`store_id`
+          )
+        ) AS lang_data
+
+      FROM `" . DB_PREFIX . $type['main_table'] . "` m
+      -- Join paginated product ids
+      JOIN paged_ids ON paged_ids.product_id = m.`" . $type['column_id'] . "`
+
+      LEFT JOIN `" . DB_PREFIX . $type['description_table'] . "` d
+        ON  d.`" . $type['column_id'] . "` = m.`" . $type['column_id'] . "`
+        AND d.`store_id` = m.`store_id`
+
+      LEFT JOIN `" . DB_PREFIX . "facet_sort` fs
+        ON  fs.product_id = m.`" . $type['column_id'] . "`
+        AND fs.store_id   = m.`store_id`
+
+      LEFT JOIN `" . DB_PREFIX . "product_discount` pd
+        ON  pd.product_id = m.`" . $type['column_id'] . "`
+        AND pd.store_id   = m.`store_id`
+
+      LEFT JOIN `" . DB_PREFIX . "product_special` ps
+        ON  ps.product_id = m.`" . $type['column_id'] . "`
+        AND ps.store_id   = m.`store_id`
+
+      LEFT JOIN product_price_ranges ppr
+        ON  ppr.product_id = m.`" . $type['column_id'] . "`
+        AND ppr.store_id   = m.`store_id`
+
+      WHERE m.`store_id` = {$currentStore}
+      GROUP BY m.`" . $type['column_id'] . "`, m.`store_id`, fs.current_price, fs.rating_avg, fs.review_count
+    ";
+
+    return $sql;
   }
 
   /**
