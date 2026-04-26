@@ -213,15 +213,14 @@ class ModelCatalogManufacturer extends Model {
 			'manufacturer_to_store',
 		];
 
-
-			// Check manufacturer in other stores
-			$manufacturerInOtherStores = $this->db->query("
-				SELECT
-					manufacturer_id
-				FROM " . DB_PREFIX . "manufacturer_to_store
-				WHERE manufacturer_id  = '" . (int) $manufacturer_id . "'
-					AND store_id 		<> '" . (int) $this->session->data['store_id'] . "' 
-			")->num_rows;
+		// Check manufacturer in other stores
+		$manufacturerInOtherStores = $this->db->query("
+			SELECT
+				manufacturer_id
+			FROM " . DB_PREFIX . "manufacturer_to_store
+			WHERE manufacturer_id  = '" . (int) $manufacturer_id . "'
+				AND store_id 		<> '" . (int) $this->session->data['store_id'] . "' 
+		")->num_rows;
 
 		$this->db->query("START TRANSACTION");
 		
