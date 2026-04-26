@@ -1595,12 +1595,6 @@ CREATE TABLE `oc_location` (
   KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
-
---
--- Table structure for table `oc_manufacturer`
---
-
 DROP TABLE IF EXISTS `oc_manufacturer`;
 CREATE TABLE `oc_manufacturer` (
   `manufacturer_id` INT NOT NULL AUTO_INCREMENT,
@@ -1622,6 +1616,11 @@ CREATE TABLE `oc_manufacturer_description` (
   `meta_title`        VARCHAR(255) NOT NULL,
   `meta_description`  VARCHAR(255) NOT NULL,
   `meta_keyword`      VARCHAR(255) NOT NULL,
+  `seo_keywords`      TEXT NOT NULL,
+  `seo_description`   TEXT NOT NULL,
+  `faq`               TEXT NOT NULL,
+  `how_to`            TEXT NOT NULL,
+  `footer`            TEXT NOT NULL,
   `date_modified`     DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY (`manufacturer_id`, `language_id`, `store_id`),
   KEY (`language_id`, `store_id`)
