@@ -257,6 +257,39 @@ class ModelCatalogManufacturer extends Model {
     return $this->db->countAffected();
   }
 
+	public function getImages($pageId = null) : array {
+		if ($pageId === null) {
+			return [];
+		}
+    $result = [];
+    $storeId = (int) $this->session->data['store_id'];
+    $images = $this->db->query("
+      SELECT
+        *
+      FROM " . DB_PREFIX . "manufacturer_image
+      WHERE `manufacturer_id` = " . (int) $pageId . "
+        AND `store_id`    = " . (int) $storeId . "
+      ORDER BY `sort_order`
+    ")->rows;
+
+    foreach ($images as $row) {
+      $descriptions = $this->db->query("
+        SELECT
+          `language_id`,
+          `description`
+        FROM " . DB_PREFIX . "manufacturer_image_description
+        WHERE `image_id` = " . (int) $row['image_id'] . "
+          AND `store_id` = " . (int) $storeId . "
+      ")->rows;
+      foreach ($descriptions as $description) {
+        $row['description'][$description['language_id']] = $description['description'];
+      }
+      $result[] = $row;
+    }
+
+    return $result;
+  }
+
 	public function deleteManufacturer($manufacturer_id) : bool {
 
 		$tables = [
