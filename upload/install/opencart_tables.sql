@@ -7416,6 +7416,27 @@ CREATE TABLE `oc_category_image_description` (
   PRIMARY KEY (`image_id`, `language_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+DROP TABLE IF EXISTS `oc_manufacturer_image`;
+CREATE TABLE `oc_manufacturer_image` (
+  `image_id`            INT NOT NULL AUTO_INCREMENT,
+  `manufacturer_id`     INT NOT NULL,
+  `store_id`            INT NOT NULL DEFAULT '0',
+  `image`               VARCHAR(255) DEFAULT NULL,
+  `sort_order`          INT NOT NULL DEFAULT '0',
+  PRIMARY KEY (`image_id`),
+  KEY (`manufacturer_id`, `store_id`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `oc_manufacturer_image_description`;
+CREATE TABLE `oc_manufacturer_image_description` (
+  `image_id`            INT NOT NULL,
+  `manufacturer_id`     INT NOT NULL,
+  `language_id`         INT NOT NULL,
+  `store_id`            INT NOT NULL,
+  `description`         TEXT NOT NULL,
+  PRIMARY KEY (`image_id`, `language_id`, `store_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 DROP TABLE IF EXISTS `oc_product_image`;
 CREATE TABLE `oc_product_image` (
   `image_id`          INT NOT NULL AUTO_INCREMENT,
