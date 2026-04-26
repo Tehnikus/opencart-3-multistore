@@ -167,17 +167,22 @@ class ModelSeoMetaEditor extends Model
 
       option_impacts AS (
         SELECT
+
           pov.product_id,
           pov.store_id,
           pov.option_id,
           o.type,
           po.required,
           CASE WHEN pov.price_prefix = '-' THEN -pov.price ELSE pov.price END AS price_impact
+
         FROM `" . DB_PREFIX . "product_option_value` pov
-        JOIN `" . DB_PREFIX . "option` o          ON o.option_id          = pov.option_id
-        JOIN `" . DB_PREFIX . "product_option` po  ON po.product_option_id = pov.product_option_id
+        JOIN `" . DB_PREFIX . "option` o
+          ON o.option_id = pov.option_id
+        JOIN `" . DB_PREFIX . "product_option` po
+          ON po.product_option_id = pov.product_option_id
         -- Join paginated product ids
-        JOIN paged_ids ON paged_ids.product_id = pov.product_id
+        JOIN paged_ids 
+          ON paged_ids.product_id = pov.product_id
         WHERE pov.store_id = {$currentStore}
       ),
 
