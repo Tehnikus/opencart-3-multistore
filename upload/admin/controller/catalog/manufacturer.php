@@ -364,12 +364,12 @@ class ControllerCatalogManufacturer extends Controller {
 
 		$data['languages'] = $this->model_localisation_language->getLanguages();
 
-		if (isset($this->request->post['manufacturer_seo_url'])) {
-			$data['manufacturer_seo_url'] = $this->request->post['manufacturer_seo_url'];
+		if (isset($this->request->post['seo_url'])) {
+			$data['seo_url'] = $this->request->post['seo_url'];
 		} elseif (isset($this->request->get['manufacturer_id'])) {
-			$data['manufacturer_seo_url'] = $this->model_catalog_manufacturer->getManufacturerSeoUrls($this->request->get['manufacturer_id']);
+			$data['seo_url'] = $this->model_catalog_manufacturer->getManufacturerSeoUrls($this->request->get['manufacturer_id']);
 		} else {
-			$data['manufacturer_seo_url'] = array();
+			$data['seo_url'] = array();
 		}
 
 		$data['header'] = $this->load->controller('common/header');
