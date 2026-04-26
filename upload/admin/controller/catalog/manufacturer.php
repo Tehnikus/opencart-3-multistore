@@ -352,6 +352,8 @@ class ControllerCatalogManufacturer extends Controller {
 
 		$data['placeholder'] = HTTPS_CATALOG . 'image/no_image.webp';
 
+		$data['manufacturer_images'] = $this->model_catalog_manufacturer->getImages($this->request->get['manufacturer_id'] ?? null);
+
 		if (isset($this->request->post['sort_order'])) {
 			$data['sort_order'] = $this->request->post['sort_order'];
 		} elseif (!empty($manufacturer_info)) {
