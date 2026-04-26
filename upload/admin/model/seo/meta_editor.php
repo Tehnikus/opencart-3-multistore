@@ -24,15 +24,83 @@ class ModelSeoMetaEditor extends Model
     if (!isset($this->types[$filter['type']])) {
       return $result;
     }
+    $type = $filter['type'];
 
-    $type = $this->types[$filter['type']];
-    // Limits
-    $limit  = max(1, (int) ($filter['limit'] ?? $this->config->get('config_limit_admin') ?? 100));
-    $start  = max(0, (int) ($filter['start'] ?? 0));
-    $currentLang = (int) $this->config->get('config_language_id'); // Current admin language id
+    switch ($type) {
+      case 'product':
+       $sql = $this->productRequest($filter);
+        break;
+      
+      default:
+        $sql = $this->categoryRequest($filter);
+        break;
+    }
+
+    $this->log->write($sql);
+
+    $rows = $this->db->query($sql)->rows;
+
+    foreach ($rows as $row) {
+      $row['vars']      = json_decode($row['vars'], true) ?? [];
+      $row['lang_data'] = json_decode($row['lang_data'], true) ?? [];
+
+      $lang_data = $row['lang_data'];
+      unset($row['lang_data']);
+
+      foreach ($lang_data as $lang) {
+
+        $lang['description']     = mb_strlen(strip_tags(html_entity_decode($lang['description'] ?? '')));
+        $lang['seo_description'] = mb_strlen(strip_tags(html_entity_decode($lang['seo_description'] ?? '')));
+        $lang['faq']             = !empty($lang['faq']);
+        $lang['how_to']          = !empty($lang['how_to']);
+        $lang['footer']          = !empty($lang['footer']);
+        $lang['seo_keywords']    = is_array($lang['seo_keywords']) ? count($lang['seo_keywords']) : (empty($lang['seo_keywords']) ? 0 : 1);
+        
+        $row['lang_data'][$lang['language_id']] = $lang;
+      }
+
+      $result[] = $row;
+    }
+
+    return $result;
+  }
+
+
+  private function categoryRequest($filter) : string {
+
+    $type         = $this->types[$filter['type']];
+    $limit        = max(1, (int) ($filter['limit'] ?? $this->config->get('config_limit_admin') ?? 100));
+    $start        = max(0, (int) ($filter['start'] ?? 0));
+    $currentLang  = (int) $this->config->get('config_language_id'); // Current admin language id
     $currentStore = (int) $this->session->data['store_id']; // Current store id
-    $rows = $this->db->query("
+
+    $sql = "
       SELECT
+        (
+          SELECT JSON_OBJECT(
+            'price',      AVG(fs.current_price),
+            'minPrice',   MIN(fs.current_price),
+            'maxPrice',   MAX(fs.current_price),
+            'discount',   GREATEST(fs.current_price - pd.price, fs.current_price - ps.price),
+            'rating',     AVG(fs.rating_avg),
+            'reviews',    SUM(fs.review_count),
+            'offers',     COUNT(fs.product_id)
+          )
+          FROM " . DB_PREFIX . "product_to_category p2c
+          JOIN " . DB_PREFIX . "facet_sort fs 
+            ON fs.product_id = p2c.product_id
+            AND fs.store_id = p2c.store_id
+          LEFT JOIN " . DB_PREFIX . "product_discount pd 
+            ON  pd.product_id = p2c.product_id
+            AND pd.store_id   = p2c.store_id
+          LEFT JOIN " . DB_PREFIX . "product_special ps 
+            ON  ps.product_id = p2c.product_id
+            AND ps.store_id   = p2c.store_id
+          WHERE p2c.category_id = m.`" . $type['column_id'] . "`
+            AND p2c.store_id    = m.store_id 
+            AND fs.current_price > 0
+        ) AS vars,
+
         m.`" . $type['column_id'] . "` as column_id,
         COALESCE(
           MAX(CASE 
