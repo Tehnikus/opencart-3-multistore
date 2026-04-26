@@ -518,25 +518,23 @@ class ModelCatalogManufacturer extends Model {
 		return $query->row['total'] ?? 0;
 	}
 
-	public function getManufacturerDescriptions($manufacturer_id) : array {
-		$manufacturer_description_data = [];
+	public function getManufacturerDescriptions($manufacturer_id) {
+		$manufacturer_description_data = array();
 
 		$query = $this->db->query("
 			SELECT 
 				* 
 			FROM " . DB_PREFIX . "manufacturer_description 
 			WHERE manufacturer_id = '" . (int) $manufacturer_id . "'
-				AND store_id 		= '" . (int) $this->session->data['store_id'] . "'
+				AND store_id 				= '" . (int) $this->session->data['store_id'] . "'
 		");
 
-		foreach ($query->rows as $result) {
-			$manufacturer_description_data[$result['language_id']] = array(
-				'name'             => $result['name'],
-				'meta_title'       => $result['meta_title'],
-				'meta_description' => $result['meta_description'],
-				'meta_keyword'     => $result['meta_keyword'],
-				'description'      => $result['description']
-			);
+		foreach ($query->rows as $row) {
+			$row['seo_keywords'] = json_decode($row['seo_keywords'] ?? '[]', true);
+			$row['footer'] 			 = json_decode($row['footer'] ?? '[]', true);
+      $row['faq']    			 = json_decode($row['faq'] ?? '[]', true);
+      $row['how_to'] 			 = json_decode($row['how_to'] ?? '[]', true);
+			$manufacturer_description_data[$row['language_id']] = $row;
 		}
 
 		return $manufacturer_description_data;
