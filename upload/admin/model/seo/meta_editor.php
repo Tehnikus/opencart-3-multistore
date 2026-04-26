@@ -51,9 +51,9 @@ class ModelSeoMetaEditor extends Model
 
         $lang['description']     = mb_strlen(strip_tags(html_entity_decode($lang['description'] ?? '')));
         $lang['seo_description'] = mb_strlen(strip_tags(html_entity_decode($lang['seo_description'] ?? '')));
-        $lang['faq']             = !empty($lang['faq']);
-        $lang['how_to']          = !empty($lang['how_to']);
-        $lang['footer']          = !empty($lang['footer']);
+        $lang['faq']             = !empty(json_decode($lang['faq'] ?? '[]', true));
+        $lang['how_to']          = !empty(json_decode($lang['how_to'] ?? '[]', true));
+        $lang['footer']          = !empty(json_decode($lang['footer'] ?? '[]', true));
         $lang['seo_keywords']    = is_array($lang['seo_keywords']) ? count($lang['seo_keywords']) : (empty($lang['seo_keywords']) ? 0 : 1);
         
         $row['lang_data'][$lang['language_id']] = $lang;
