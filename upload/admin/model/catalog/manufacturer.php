@@ -204,28 +204,16 @@ class ModelCatalogManufacturer extends Model {
 	}
 
 	public function deleteManufacturer($manufacturer_id) : bool {
-		$this->db->query("START TRANSACTION");
-		
-		try {
 
-			$this->db->query("
-				DELETE FROM `" . DB_PREFIX . "manufacturer_to_store` 
-				WHERE manufacturer_id = '" . (int) $manufacturer_id . "'
-					AND store_id 				= '" . (int) $this->session->data['store_id'] . "'
-			");
+		$tables = [
+			'manufacturer',
+			'manufacturer_image',
+			'manufacturer_image_description',
+			'manufacturer_description',
+			'manufacturer_to_store',
+		];
 
-			$this->db->query("
-				DELETE FROM `" . DB_PREFIX . "manufacturer_description` 
-				WHERE manufacturer_id = '" . (int) $manufacturer_id . "'
-					AND store_id 				= '" . (int) $this->session->data['store_id'] . "'
-			");
 
-			$this->db->query("
-				DELETE FROM `" . DB_PREFIX . "seo_url` 
-				WHERE query 		= 'manufacturer_id=" . (int) $manufacturer_id . "'
-					AND store_id 	= '" . (int) $this->session->data['store_id'] . "'
-			");
-			
 			// Check manufacturer in other stores
 			$manufacturerInOtherStores = $this->db->query("
 				SELECT
@@ -235,11 +223,25 @@ class ModelCatalogManufacturer extends Model {
 					AND store_id 		<> '" . (int) $this->session->data['store_id'] . "' 
 			")->num_rows;
 
+		$this->db->query("START TRANSACTION");
+		
+		try {
+
+				foreach ($tables as $table) {
+					$this->db->query("
+						DELETE FROM " . DB_PREFIX . $table . "
+						WHERE manufacturer_id = " . (int) $manufacturer_id . "
+							AND store_id 	= '" . (int) $this->session->data['store_id'] . "'"
+					);
+				}
+
+			$this->db->query("
+				DELETE FROM `" . DB_PREFIX . "seo_url` 
+				WHERE query 		= 'manufacturer_id=" . (int) $manufacturer_id . "'
+					AND store_id 	= '" . (int) $this->session->data['store_id'] . "'
+			");
+			
 			if (!$manufacturerInOtherStores) {
-				$tables = [
-					'manufacturer',
-					'manufacturer_description',
-				];
 
 				// Remove all redundant data if present 
 				foreach ($tables as $table) {
