@@ -25,61 +25,38 @@
       <div class="panel-body">
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-manufacturer" class="form-horizontal">
           <ul class="nav nav-tabs">
-            <li class="active"><a href="#tab-description" data-toggle="tab">{{ tab_description }}</a></li>
-            <li><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a></li>
-            <li><a href="#tab-seo" data-toggle="tab">{{ tab_seo }}</a></li>
+            <li class="active"><a href="#tab-description"  data-toggle="tab">{{ tab_description }}</a></li>
+            <li><a href="#tab-images"   data-toggle="tab">{{ tab_image }}</a></li>
+            <li><a href="#tab-faq"      data-toggle="tab">{{ tab_faq }}</a></li>
+            <li><a href="#tab-how_to"   data-toggle="tab">{{ tab_how_to }}</a></li>
+            <li><a href="#tab-footer"   data-toggle="tab">{{ tab_footer }}</a></li>
+            <li><a href="#tab-keywords" data-toggle="tab">{{ tab_keywords }}</a></li>
           </ul>
           <div class="tab-content">
-            <div class="tab-pane active" id="tab-description">
-              <ul class="nav nav-tabs" id="language">
-                {% for language in languages %}
-                <li><a href="#language{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
-                {% endfor %}
-              </ul>
-              <div class="tab-content">
-                {% for language in languages %}
-                  <div class="tab-pane" id="language{{ language.language_id }}">
-                    <div class="form-group required">
-                      <label class="col-sm-2 control-label" for="input-name{{ language.language_id }}">{{ entry_name }}</label>
-                      <div class="col-sm-10">
-                        <input type="text" name="manufacturer_description[{{ language.language_id }}][name]" value="{{ manufacturer_description[language.language_id].name }}" placeholder="{{ entry_name }}" id="input-name{{ language.language_id }}" class="form-control" />
-                        {% if error_name[language.language_id] %}
-                        <div class="text-danger">{{ error_name[language.language_id] }}</div>
-                        {% endif %}
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <label class="col-sm-2 control-label" for="input-description{{ language.language_id }}">{{ entry_description }}</label>
-                      <div class="col-sm-10">
-                        <textarea name="manufacturer_description[{{ language.language_id }}][description]" placeholder="{{ entry_description }}" id="input-description{{ language.language_id }}" data-toggle="summernote" data-lang="{{ summernote }}" class="form-control">{{ manufacturer_description[language.language_id].description }}</textarea>
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <label class="col-sm-2 control-label" for="input-meta-title{{ language.language_id }}">{{ entry_meta_title }}</label>
-                      <div class="col-sm-10">
-                        <input type="text" name="manufacturer_description[{{ language.language_id }}][meta_title]" value="{{ manufacturer_description[language.language_id].meta_title }}" placeholder="{{ entry_meta_title }}" id="input-meta-title{{ language.language_id }}" class="form-control" />
-                        {% if error_meta_title[language.language_id] %}
-                          <div class="text-danger">{{ error_meta_title[language.language_id] }}</div>
-                        {% endif %}
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <label class="col-sm-2 control-label" for="input-meta-description{{ language.language_id }}">{{ entry_meta_description }}</label>
-                      <div class="col-sm-10">
-                        <textarea name="manufacturer_description[{{ language.language_id }}][meta_description]" rows="5" placeholder="{{ entry_meta_description }}" id="input-meta-description{{ language.language_id }}" class="form-control">{{ manufacturer_description[language.language_id].meta_description }}</textarea>
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <label class="col-sm-2 control-label" for="input-meta-keyword{{ language.language_id }}">{{ entry_meta_keyword }}</label>
-                      <div class="col-sm-10">
-                        <textarea name="manufacturer_description[{{ language.language_id }}][meta_keyword]" rows="5" placeholder="{{ entry_meta_keyword }}" id="input-meta-keyword{{ language.language_id }}" class="form-control">{{ manufacturer_description[language.language_id].meta_keyword }}</textarea>
-                      </div>
-                    </div>
-                  </div>
-                {% endfor %}
+
+            <div class="tab-pane" id="tab-general">
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-image">{{ entry_image }}</label>
+                <div class="col-sm-10">
+                  <a href="" id="thumb-image" data-toggle="image" class="img-thumbnail">
+                    <img src="{{ thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" width="250" />
+                  </a>
+                  <input type="hidden" name="image" value="{{ image }}" id="input-image" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
+                </div>
               </div>
             </div>
-            <div class="tab-pane" id="tab-general">
+
+            {% set data        =  manufacturer_description  %}
+            {% set name_prefix = 'manufacturer_description' %}
+            <div class="tab-pane active" id="tab-description">
+              {% include "common/tab_description.twig" with {seo_url: seo_url} %}
               <div class="form-group required">
                 <label class="col-sm-2 control-label">{{ entry_store }}</label>
                 <div class="col-sm-10">
@@ -103,50 +80,13 @@
                   {% endif %}
                 </div>
               </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-image">{{ entry_image }}</label>
-                <div class="col-sm-10">
-                  <a href="" id="thumb-image" data-toggle="image" class="img-thumbnail">
-                    <img src="{{ thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" width="250" />
-                  </a>
-                  <input type="hidden" name="image" value="{{ image }}" id="input-image" />
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
-                <div class="col-sm-10">
-                  <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
-                </div>
-              </div>
             </div>
-            <div class="tab-pane" id="tab-seo">
-              <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_keyword }}</div>
-              <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                  <thead>
-                    <tr>
-                      <td class="text-left">{{ entry_store }}</td>
-                      <td class="text-left">{{ entry_keyword }}</td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                  {% for store in stores %}
-                  <tr>
-                    <td class="text-left">{{ store.name }}</td>
-                    <td class="text-left">{% for language in languages %}
-                      <div class="input-group"><span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
-                        <input type="text" name="manufacturer_seo_url[{{ store.store_id }}][{{ language.language_id }}]" value="{% if manufacturer_seo_url[store.store_id][language.language_id] %}{{ manufacturer_seo_url[store.store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control" />
-                      </div>
-                      {% if error_keyword[store.store_id][language.language_id] %}
-                      <div class="text-danger">{{ error_keyword[store.store_id][language.language_id] }}</div>
-                      {% endif %} 
-                      {% endfor %}</td>
-                  </tr>
-                  {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <div class="tab-pane" id="tab-images">{% include "common/tab_images.twig"  with {name_prefix: 'manufacturer_images', showMainImage: true, mainImage: image, images: manufacturer_images} %}</div>
+            <div class="tab-pane" id="tab-footer">{% include "common/tab_footer.twig" %}</div>
+            <div class="tab-pane" id="tab-faq">{% include "common/tab_faq.twig" %}</div>
+            <div class="tab-pane" id="tab-how_to">{% include "common/tab_how_to.twig" %}</div>
+            <div class="tab-pane" id="tab-keywords">{% include "common/tab_keywords.twig" %}</div>
+
           </div>
         </form>
       </div>
