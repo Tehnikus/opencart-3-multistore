@@ -34,6 +34,9 @@ class ModelSeoMetaEditor extends Model
       case 'manufacturer':
         $sql = $this->manufacturerRequest($filter);
         break;
+      case 'filter_page':
+        $sql = $this->filterPageRequest($filter);
+        break;
       default:
         $sql = $this->categoryRequest($filter);
         break;
@@ -364,6 +367,127 @@ class ModelSeoMetaEditor extends Model
         LIMIT {$start}, {$limit}
     ";
 
+    return $sql;
+  }
+
+  private function filterPageRequest($filter) : string {
+    $type         = $this->types[$filter['type']];
+    $limit        = max(1, (int) ($filter['limit'] ?? $this->config->get('config_limit_admin') ?? 100));
+    $start        = max(0, (int) ($filter['start'] ?? 0));
+    $currentLang  = (int) $this->config->get('config_language_id'); // Current admin language id
+    $currentStore = (int) $this->session->data['store_id']; // Current store id
+    
+    $sql = "
+      -- Pagination
+      WITH paged_ids AS (
+        SELECT `filter_page_id`
+        FROM `" . DB_PREFIX . "seo_filter_page_to_store`
+        WHERE store_id = 0
+        LIMIT {$start}, {$limit}
+      ),
+
+      -- Count facets for each page
+      page_facets AS (
+        SELECT
+          filter_page_id,
+          COUNT(*) AS facet_count
+        FROM " . DB_PREFIX . "seo_filter_page_facet_index
+        WHERE store_id = {$currentStore}
+          AND filter_page_id IN (SELECT filter_page_id FROM paged_ids)
+        GROUP BY filter_page_id
+      ),
+
+      -- Match count for each pair of product and filter page
+      product_facet_matches AS (
+        SELECT
+          sfi.filter_page_id,
+          fi.product_id,
+          COUNT(*) AS matched_count
+        FROM " . DB_PREFIX . "seo_filter_page_facet_index sfi
+        JOIN " . DB_PREFIX . "facet_index fi
+          ON  fi.facet_type     = sfi.facet_type
+          AND fi.facet_value_id = sfi.facet_value_id
+          AND fi.facet_group_id = sfi.facet_group_id
+          AND fi.store_id       = sfi.store_id
+        WHERE sfi.store_id = {$currentStore}
+          AND sfi.filter_page_id IN (SELECT filter_page_id FROM paged_ids)
+        GROUP BY sfi.filter_page_id, fi.product_id
+      ),
+
+      -- List of product for every filter page
+      page_products AS (
+        SELECT
+          pfm.filter_page_id,
+          pfm.product_id
+        FROM product_facet_matches pfm
+        JOIN page_facets pf ON pf.filter_page_id = pfm.filter_page_id
+        WHERE pfm.matched_count = pf.facet_count
+      )
+      
+      -- Main data select
+      SELECT
+        m.`" . $type['column_id'] . "` AS column_id,
+        COALESCE(
+          MAX(CASE WHEN d.language_id = {$currentLang} AND d.store_id = {$currentStore} THEN d.name END),
+          MAX(CASE WHEN d.language_id = {$currentLang} THEN d.name END),
+          MAX(d.name)
+        ) AS default_name,
+
+        (
+          SELECT JSON_OBJECT(
+            'price',      AVG(fs.current_price),
+            'minPrice',   MIN(fs.current_price),
+            'maxPrice',   MAX(fs.current_price),
+            'discount',   GREATEST(COALESCE(fs.current_price - pd.price, 0), COALESCE(fs.current_price - ps.price, 0), 0),
+            'rating',     AVG(fs.rating_avg),
+            'reviews',    SUM(fs.review_count),
+            'offers',     COUNT(fs.product_id)
+          )
+
+          FROM page_products pp
+          LEFT JOIN " . DB_PREFIX . "facet_sort fs 
+            ON fs.product_id = pp.product_id
+            AND fs.store_id = m.store_id 
+          LEFT JOIN " . DB_PREFIX . "product_discount pd 
+            ON  pd.product_id = pp.product_id
+            AND pd.store_id   = m.store_id 
+          LEFT JOIN " . DB_PREFIX . "product_special ps 
+            ON  ps.product_id = pp.product_id
+            AND ps.store_id   = m.store_id 
+          WHERE pp.filter_page_id = m.filter_page_id
+            AND fs.current_price > 0
+        ) AS vars,
+
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            '" . $type['column_id'] . "', d.`" . $type['column_id'] . "`,
+            'name',               d.`name`,
+            'h1',                 d.`h1`,
+            'meta_title',         d.`meta_title`,
+            'meta_description',   d.`meta_description`,
+            'meta_keyword',       d.`meta_keyword`,
+            'description',        d.`description`,
+            'seo_keywords',       d.`seo_keywords`,
+            'seo_description',    d.`seo_description`,
+            'faq',                d.`faq`,
+            'how_to',             d.`how_to`,
+            'footer',             d.`footer`,
+            'date_modified',      d.`date_modified`,
+            'language_id',        d.`language_id`,
+            'store_id',           d.`store_id`
+          )
+        ) AS lang_data
+
+      FROM `" . DB_PREFIX . $type['main_table'] . "` m
+      -- Join paginated filter page ids
+      JOIN paged_ids ON paged_ids.filter_page_id = m.`filter_page_id`
+      LEFT JOIN `" . DB_PREFIX . $type['description_table'] . "` d 
+        ON  d.`" . $type['column_id'] . "` = m.`" . $type['column_id'] . "`
+        AND d.`store_id` = m.`store_id`
+      WHERE m.`store_id` = " . (int) $this->session->data['store_id'] . "
+      GROUP BY m.`" . $type['column_id'] . "`, m.`store_id`
+      
+    ";
     return $sql;
   }
 
