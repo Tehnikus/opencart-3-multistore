@@ -26,11 +26,14 @@ class ModelSeoMetaEditor extends Model
     }
     $type = $filter['type'];
 
+    // Switch by page type
     switch ($type) {
       case 'product':
-       $sql = $this->productRequest($filter);
+        $sql = $this->productRequest($filter);
         break;
-      
+      case 'manufacturer':
+        $sql = $this->manufacturerRequest($filter);
+        break;
       default:
         $sql = $this->categoryRequest($filter);
         break;
@@ -274,6 +277,86 @@ class ModelSeoMetaEditor extends Model
 
       WHERE m.`store_id` = {$currentStore}
       GROUP BY m.`" . $type['column_id'] . "`, m.`store_id`, fs.current_price, fs.rating_avg, fs.review_count
+    ";
+
+    return $sql;
+  }
+
+  private function manufacturerRequest($filter) : string {
+    $type         = $this->types[$filter['type']];
+    $limit        = max(1, (int) ($filter['limit'] ?? $this->config->get('config_limit_admin') ?? 100));
+    $start        = max(0, (int) ($filter['start'] ?? 0));
+    $currentLang  = (int) $this->config->get('config_language_id'); // Current admin language id
+    $currentStore = (int) $this->session->data['store_id']; // Current store id
+
+    $sql = "
+      SELECT
+        (
+          SELECT JSON_OBJECT(
+            'price',      AVG(fs.current_price),
+            'minPrice',   MIN(fs.current_price),
+            'maxPrice',   MAX(fs.current_price),
+            'discount',   GREATEST(fs.current_price - pd.price, fs.current_price - ps.price),
+            'rating',     AVG(fs.rating_avg),
+            'reviews',    SUM(fs.review_count),
+            'offers',     COUNT(fs.product_id)
+          )
+          FROM " . DB_PREFIX . "product p
+          JOIN " . DB_PREFIX . "product_to_store p2s
+            ON p2s.product_id = p.product_id
+            AND  p2s.store_id = {$currentStore}
+          JOIN " . DB_PREFIX . "facet_sort fs 
+            ON  fs.product_id = p.product_id
+            AND fs.store_id   = p2s.store_id
+          LEFT JOIN " . DB_PREFIX . "product_discount pd 
+            ON  pd.product_id = p.product_id
+            AND pd.store_id   = p2s.store_id
+          LEFT JOIN " . DB_PREFIX . "product_special ps 
+            ON  ps.product_id = p.product_id
+            AND ps.store_id   = p2s.store_id
+          WHERE p.manufacturer_id = m.`" . $type['column_id'] . "`
+            AND fs.current_price > 0
+        ) AS vars,
+
+        m.`" . $type['column_id'] . "` as column_id,
+        COALESCE(
+          MAX(CASE 
+            WHEN d.language_id = {$currentLang}
+            AND d.store_id = {$currentStore}
+            THEN d.name
+          END),
+          MAX(CASE 
+            WHEN d.language_id = {$currentLang}
+            THEN d.name
+          END),
+          MAX(d.name)
+        ) AS default_name,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            '" . $type['column_id'] . "', d.`" . $type['column_id'] . "`,
+            'name',               d.`name`,
+            'h1',                 d.`h1`,
+            'meta_title',         d.`meta_title`,
+            'meta_description',   d.`meta_description`,
+            'meta_keyword',       d.`meta_keyword`,
+            'description',        d.`description`,
+            'seo_keywords',       d.`seo_keywords`,
+            'seo_description',    d.`seo_description`,
+            'faq',                d.`faq`,
+            'how_to',             d.`how_to`,
+            'footer',             d.`footer`,
+            'date_modified',      d.`date_modified`,
+            'language_id',        d.`language_id`,
+            'store_id',           d.`store_id`
+          )
+        ) AS lang_data
+        FROM `" . DB_PREFIX . $type['main_table'] . "` m
+        LEFT JOIN `" . DB_PREFIX . $type['description_table'] . "` d 
+          ON  d.`" . $type['column_id'] . "` = m.`" . $type['column_id'] . "`
+          AND d.`store_id` = m.`store_id`
+        WHERE m.`store_id` = " . (int) $this->session->data['store_id'] . "
+        GROUP BY m.`" . $type['column_id'] . "`, m.`store_id`
+        LIMIT {$start}, {$limit}
     ";
 
     return $sql;
