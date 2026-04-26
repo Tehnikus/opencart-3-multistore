@@ -499,15 +499,21 @@ class ModelCatalogManufacturer extends Model {
 	}
 	
 	public function getManufacturerSeoUrls($manufacturer_id) : array {
-		$manufacturer_seo_url_data = [];
+		$result = array();
 		
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "seo_url WHERE query = 'manufacturer_id=" . (int)$manufacturer_id . "'");
+		$query = $this->db->query("
+			SELECT 
+				* 
+			FROM " . DB_PREFIX . "seo_url 
+			WHERE `query` = 'manufacturer_id=" . (int) $manufacturer_id . "'
+				AND `store_id` = " . (int) $this->session->data['store_id'] . "
+		");
 
-		foreach ($query->rows as $result) {
-			$manufacturer_seo_url_data[$result['store_id']][$result['language_id']] = $result['keyword'];
+		foreach ($query->rows as $row) {
+			$result[$row['language_id']] = $row['keyword'];
 		}
 
-		return $manufacturer_seo_url_data;
+		return $result;
 	}
 	
 	public function getTotalManufacturers() : int {
@@ -539,7 +545,6 @@ class ModelCatalogManufacturer extends Model {
 
 		return $manufacturer_description_data;
 	}
-
 
 	/**
    * Filter array recursively and remove empty key => value pairs
