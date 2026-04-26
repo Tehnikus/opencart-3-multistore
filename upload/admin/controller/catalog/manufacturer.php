@@ -394,26 +394,27 @@ class ControllerCatalogManufacturer extends Controller {
 			}
 		}
 
-		if ($this->request->post['manufacturer_seo_url']) {
+		if ($this->request->post['seo_url']) {
+
 			$this->load->model('design/seo_url');
-			
-			foreach ($this->request->post['manufacturer_seo_url'] as $store_id => $language) {
-				foreach ($language as $language_id => $keyword) {
-					if (!empty($keyword)) {
-						if (count(array_keys($language, $keyword)) > 1) {
-							$this->error['keyword'][$store_id][$language_id] = $this->language->get('error_unique');
-						}
+      $storeId = (int) $this->session->data['store_id'];
 
-						$seo_urls = $this->model_design_seo_url->getSeoUrlsByKeyword($keyword);
+      foreach ($this->request->post['seo_url'] as $langId => $currentUrl) {
 
-						foreach ($seo_urls as $seo_url) {
-							if (($seo_url['store_id'] == $store_id) && (!isset($this->request->get['manufacturer_id']) || (($seo_url['query'] != 'manufacturer_id=' . $this->request->get['manufacturer_id'])))) {
-								$this->error['keyword'][$store_id][$language_id] = $this->language->get('error_keyword');
-							}
-						}
-					}
-				}
-			}
+        $currentUrl = trim(mb_strtolower($currentUrl));
+        if (!$currentUrl) continue;
+
+        $pageRequest = (isset($this->request->get['manufacturer_id'])) ? 'manufacturer_id=' . ((int) $this->request->get['manufacturer_id']) : '';
+
+        $isUrlExists = $this->model_design_seo_url->checkUrlDuplicate($currentUrl, $langId, $storeId);
+
+        foreach ($isUrlExists ?? [] as $row) {
+          if ($row['query'] !== $pageRequest) {
+            $this->error['error_url_not_unique'][$langId] = $this->language->get('e_url_not_unique');
+            break;
+          }
+        }
+      }
 		}
 
 		return !$this->error;
