@@ -126,6 +126,9 @@ class ModelCatalogManufacturer extends Model {
 				");
 			}
 
+			// Save manufacturer images
+			$this->editImages($manufacturer_id, $data['manufacturer_images']);
+
 			// Store related data
 			// Remove all unselected stores
 			$this->db->query("
