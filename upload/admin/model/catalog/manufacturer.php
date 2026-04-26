@@ -113,10 +113,16 @@ class ModelCatalogManufacturer extends Model {
 						`language_id` 			= '" . (int) $language_id . "', 
 						`store_id` 					= '" . (int) $this->session->data['store_id'] . "',
 						`name` 							= '" . $this->db->escape($value['name']) . "', 
+						`h1` 								= '" . $this->db->escape($value['h1']) . "', 
 						`description` 			= '" . $this->db->escape($value['description']) . "',
 						`meta_title` 				= '" . $this->db->escape($value['meta_title']) . "', 
 						`meta_description` 	= '" . $this->db->escape($value['meta_description']) . "', 
-						`meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "'
+						`meta_keyword` 			= '" . $this->db->escape($value['meta_keyword']) . "',
+						`seo_description` 	= '" . $this->db->escape($value['seo_description']) . "',
+						`seo_keywords`      = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['seo_keywords'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
+            `footer`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['footer'] ?? []), JSON_UNESCAPED_UNICODE)) . "',
+            `faq`               = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['faq'] ?? [], ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "',
+            `how_to`            = '" . $this->db->escape(json_encode($this->filterArrayRecursively($value['how_to'] ?? [], ['@type', '@context']), JSON_UNESCAPED_UNICODE)) . "'
 				");
 			}
 
@@ -160,14 +166,23 @@ class ModelCatalogManufacturer extends Model {
 				}
 			}
 
-			$this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE query = 'manufacturer_id=" . (int)$manufacturer_id . "'");
-
-			if (isset($data['manufacturer_seo_url'])) {
-				foreach ($data['manufacturer_seo_url'] as $store_id => $language) {
-					foreach ($language as $language_id => $keyword) {
-						if (!empty($keyword)) {
-							$this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'manufacturer_id=" . (int)$manufacturer_id . "', keyword = '" . $this->db->escape($keyword) . "'");
-						}
+			$this->db->query("
+				DELETE FROM `" . DB_PREFIX . "seo_url` 
+				WHERE `query` 		= 'manufacturer_id=" . (int) $manufacturer_id . "'
+					AND `store_id` 	= " . (int) $this->session->data['store_id'] . "
+			");
+	
+			if (isset($data['seo_url'])) {
+				foreach ($data['seo_url'] as $langId => $keyword) {
+					if (!empty($keyword)) {
+						$this->db->query("
+							INSERT INTO " . DB_PREFIX . "seo_url 
+							SET 
+								`store_id` 		= '" . (int) $this->session->data['store_id'] . "', 
+								`language_id` = '" . (int) $langId . "', 
+								`query` 			= 'manufacturer_id=" . (int) $manufacturer_id . "', 
+								`keyword` 		= '" . $this->db->escape($keyword) . "'
+						");
 					}
 				}
 			}
