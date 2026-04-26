@@ -237,7 +237,7 @@ class ModelSeoMetaEditor extends Model
           'discount', GREATEST(COALESCE(fs.current_price - pd.price, 0), COALESCE(fs.current_price - ps.price, 0), 0),
           'rating',   fs.rating_avg,
           'reviews',  fs.review_count,
-          'offers',   1
+          'offers',   COALESCE((SELECT COUNT(*) from " . DB_PREFIX . "product_option_value pov2 WHERE pov2.product_id = m.product_id AND pov2.store_id = m.store_id), 1)
         ) AS vars,
         JSON_ARRAYAGG(
           JSON_OBJECT(
