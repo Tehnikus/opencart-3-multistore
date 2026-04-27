@@ -230,15 +230,19 @@ class ModelSeoMetaEditor extends Model
           MAX(CASE WHEN d.language_id = {$currentLang} THEN d.name END),
           MAX(d.name)
         ) AS default_name,
+
         JSON_OBJECT(
-          'price',    fs.current_price,
-          'minPrice', fs.current_price + COALESCE(ppr.total_min_impact, 0),
-          'maxPrice', fs.current_price + COALESCE(ppr.total_max_impact, 0),
-          'discount', GREATEST(COALESCE(fs.current_price - pd.price, 0), COALESCE(fs.current_price - ps.price, 0), 0),
-          'rating',   fs.rating_avg,
-          'reviews',  fs.review_count,
-          'offers',   COALESCE((SELECT COUNT(*) from " . DB_PREFIX . "product_option_value pov2 WHERE pov2.product_id = m.product_id AND pov2.store_id = m.store_id), 1)
+          'price',        fs.current_price,
+          'minPrice',     fs.current_price + COALESCE(ppr.total_min_impact, 0),
+          'maxPrice',     fs.current_price + COALESCE(ppr.total_max_impact, 0),
+          'discount',     GREATEST(COALESCE(fs.current_price - pd.price, 0), COALESCE(fs.current_price - ps.price, 0), 0),
+          'rating',       fs.rating_avg,
+          'reviews',      fs.review_count,
+          'offers',       COALESCE((SELECT COUNT(*) from " . DB_PREFIX . "product_option_value pov2 WHERE pov2.product_id = m.product_id AND pov2.store_id = m.store_id), 1),
+          'manufacturer', md.name,
+          'parent',       cd.name
         ) AS vars,
+
         JSON_ARRAYAGG(
           JSON_OBJECT(
             '" . $type['column_id'] . "', d.`" . $type['column_id'] . "`,
@@ -282,6 +286,19 @@ class ModelSeoMetaEditor extends Model
       LEFT JOIN product_price_ranges ppr
         ON  ppr.product_id = m.`" . $type['column_id'] . "`
         AND ppr.store_id   = m.`store_id`
+
+      LEFT JOIN " . DB_PREFIX . "product p
+        ON p.product_id = m.`" . $type['column_id'] . "`
+
+      LEFT JOIN " . DB_PREFIX . "manufacturer_description md
+        ON md.manufacturer_id = p.manufacturer_id
+        AND md.language_id    = d.language_id
+        AND md.store_id       = m.store_id
+
+      LEFT JOIN " . DB_PREFIX . "category_description cd
+        ON  cd.category_id     = m.parent_id
+        AND cd.language_id     = d.language_id
+        AND cd.store_id        = m.store_id
 
       WHERE m.`store_id` = {$currentStore}
       GROUP BY m.`" . $type['column_id'] . "`, m.`store_id`, fs.current_price, fs.rating_avg, fs.review_count
