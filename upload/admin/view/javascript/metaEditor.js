@@ -180,6 +180,9 @@ function renderHeader(interface) {
         </div>
 
       </th>
+      <th style="width: 60px">
+        <button type="button" class="clearFilters btn btn-default" title="${interface.lang.button_clear_filters}"><i class="fa fa-times"></i></button>
+      </th>
       <th style="width: 60px; text-align: center;">
         <button type="button" class="undoAllPages btn btn-warning" title="${interface.lang.button_undo}"><i class="fa fa-undo"></i></button>
         <button type="button" class="saveAllPages btn btn-success" title="${interface.lang.button_save_all}"><i class="fa fa-save"></i></button>
@@ -503,6 +506,7 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
     if (e.target.closest('.clearFilters')) {
       metaEditorTable.resetFilter();
       metaEditorTable.setData(data); // Set data in case language filter is used because language filter removes data
+      e.target.closest('thead').querySelector('.languageSelect').selectedIndex = 0;
     }
 
     // Add formula button
