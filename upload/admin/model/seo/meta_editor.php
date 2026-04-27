@@ -90,7 +90,21 @@ class ModelSeoMetaEditor extends Model
             'discount',   GREATEST(COALESCE(fs.current_price - pd.price, 0), COALESCE(fs.current_price - ps.price, 0), 0),
             'rating',     AVG(fs.rating_avg),
             'reviews',    SUM(fs.review_count),
-            'offers',     COUNT(fs.product_id)
+            'offers',     COUNT(fs.product_id),
+            'parent',     (
+              SELECT 
+                cd2.name
+              FROM " . DB_PREFIX . "category_path cp
+              LEFT JOIN " . DB_PREFIX . "category_description cd2 
+                ON cp.path_id = cd2.category_id
+              WHERE cp.category_id   = m.`" . $type['column_id'] . "`
+                AND cp.path_id      <> m.`" . $type['column_id'] . "`
+                AND cp.store_id      = d.store_id
+                AND cd2.language_id  = d.language_id 
+                AND cd2.store_id     = d.store_id
+              ORDER BY cp.level DESC
+              LIMIT 1
+            )
           )
           FROM " . DB_PREFIX . "product_to_category p2c
           JOIN " . DB_PREFIX . "facet_sort fs 
@@ -143,7 +157,7 @@ class ModelSeoMetaEditor extends Model
         LEFT JOIN `" . DB_PREFIX . $type['description_table'] . "` d 
           ON  d.`" . $type['column_id'] . "` = m.`" . $type['column_id'] . "`
           AND d.`store_id` = m.`store_id`
-        WHERE m.`store_id` = " . (int) $this->session->data['store_id'] . "
+        WHERE m.`store_id` = {$currentStore}
         GROUP BY m.`" . $type['column_id'] . "`, m.`store_id`
         LIMIT {$start}, {$limit}
     ";
