@@ -89,23 +89,30 @@ class ControllerSeoMetaEditor extends Controller {
     $this->load->model('setting/store');
     $this->load->model('localisation/currency');
     $this->load->model('seo/meta_editor');
-    $stores     = $this->model_setting_store->getMultistores();
-    $languages  = $this->model_localisation_language->getLanguages();
-    $currencies = $this->model_localisation_currency->getCurrencies();
-    $languagesById = [];
+    $stores         = $this->model_setting_store->getMultistores();
+    $languages      = $this->model_localisation_language->getLanguages();
+    $currencies     = $this->model_localisation_currency->getCurrencies();
+    $languagesById  = [];
+    $currentStore   = [];
     foreach ($languages as $language) {
       $languagesById[$language['language_id']] = $language;
+    }
+    foreach ($stores as $store) {
+      if ($store['store_id'] === (int) $this->session->data['store_id']) {
+        $currentStore  = $store;
+      }
     }
     // Return JSON to fetch
     $this->response->addHeader('Content-Type: application/json');
     $this->response->setOutput(
       json_encode(
         [
-          'lang'          => $lang->data,
-          'stores'        => $stores,
-          'languages'     => $languagesById,
-          'currencies'    => $currencies,
+          'lang'              => $lang->data,
+          'stores'            => $stores,
+          'languages'         => $languagesById,
+          'currencies'        => $currencies,
           'defaultLanguageId' => (int) $this->config->get('config_language_id'),
+          'currentStore'      => $currentStore,
         ]
       )
     );
