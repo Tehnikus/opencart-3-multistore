@@ -205,7 +205,7 @@ function applyFormula(template, data) {
     // e.g. price = 0, or offer count = 0, or reviews = 0, etc.
     if (value === '' || value === null || value === undefined || value === 0) {
       // Accumulate errors
-      
+
       return '';
     }
 
@@ -241,8 +241,10 @@ function renderHeader(interface) {
   
   thead.innerHTML = `
     <tr>
-      <th style="width: 40px">
-        <input type="checkbox" style="all: revert" class="selectAllRows" />
+      <th style="width: 40px; position: relative">
+        <label class="labelAll">
+          <input type="checkbox" style="all: revert" class="selectAllRows" />
+        </label>
       </th>
       <th style="width: 250px">
         ${languageSelect.outerHTML}
@@ -304,9 +306,8 @@ function renderHeader(interface) {
             <option style="background-color: #f5c1bb; border-color: #f3b5ad; color: #c72f1d;" value="false">${interface.lang.input_how_to}</option>
           </select>
         </div>
-
       </th>
-      <th style="width: 60px">
+      <th style="width: 40px">
         <button type="button" class="clearFilters btn btn-default" title="${interface.lang.button_clear_filters}"><i class="fa fa-times"></i></button>
       </th>
       <th style="width: 60px; text-align: center;">
@@ -369,6 +370,9 @@ function renderRow(interface, row) {
       </div>
       ${langRowHtml}
     </td>
+    <td>
+      <a class="btn btn-primary"><i class="fa fa-pencil"></i></a>
+    </td>
     <td style="text-align: center">
       <button type="button" class="undoPage btn btn-warning" title="${interface.lang.button_undo}"><i class="fa fa-undo"></i></button>
       <button type="button" class="savePage btn btn-success" title="${interface.lang.button_save}"><i class="fa fa-save"></i></button>
@@ -402,125 +406,6 @@ function renderSelect(options, datasetAttr) {
   });
 
   return select;
-}
-
-function generateMeta(button, tableElement) {
-  let row = button.closest('td');
-  let targetSelector = '';
-  let selectsValues = {};
-  let selects = row.querySelectorAll('select');
-  
-  
-  let textTemplate = row.querySelector('[name*="generate_text"]').value;
-  let successMessages = [];
-  let errorMessages = [];
-  let successMessagesDiv = row.closest('form').querySelector('.message-success');
-  let errorMessagesDiv   = row.closest('form').querySelector('.message-error');
-
-  selects.forEach(select => {
-    selectsValues[select.dataset.name] = select.value;
-  });
-
-  targetSelector = `[name="meta_data[${selectsValues.store_id}][${selectsValues.language_id}][${selectsValues.target_field}]"]`;
-  
-  let targetInputs = document.querySelectorAll(targetSelector);
-  
-  if (!targetInputs) {return}
-  targetInputs.forEach(targetInput => {
-    // Тут получаем данные из row таблицы
-    let metaData = JSON.parse(targetInput.closest('td').dataset.metas);
-
-    let generateData = {
-      name:             metaData.meta[selectsValues.store_id].languages[selectsValues.language_id].name,
-      category:         metaData.meta[selectsValues.store_id].languages[selectsValues.language_id].category,
-      store:            metaData.meta[selectsValues.store_id].languages[selectsValues.language_id].store,
-      manufacturer:     metaData.meta[selectsValues.store_id].languages[selectsValues.language_id].manufacturer,
-      price:            metaData.prices[selectsValues.store_id].basePrice[selectsValues.currency_id],
-      minPrice:         metaData.prices[selectsValues.store_id].minPrice[selectsValues.currency_id],
-      maxPrice:         metaData.prices[selectsValues.store_id].maxPrice[selectsValues.currency_id],
-      discount:         metaData.prices[selectsValues.store_id].discount[selectsValues.currency_id],
-      rating:           metaData.reviews.rating,
-      reviews:          metaData.reviews.reviews,
-      offers:           metaData.offers,
-    }
-
-    // console.log(generateData);
-    generatedText = applyTemplate(textTemplate, generateData);
-    if (generatedText.match(/{{\s*(\w+)\s*}}/g)) {
-      targetInput.classList.add('error');
-      row.querySelector('[name*="generate_text"]').classList.add('error');
-      errorMessages.push(`<a class="text-danger" href="${window.location.href.split('#')[0]}#${targetInput.closest('tr').id}">${generateData.name}</a>`);
-    } else {
-      targetInput.value = generatedText;
-      targetInput.classList.add('success');
-      row.querySelector('[name*="generate_text"]').classList.add('success');
-      successMessages.push(`<a class="text-success" href="${window.location.href.split('#')[0]}#${targetInput.closest('tr').id}">${generateData.name}</a>`);
-    }
-  })
-
-  successMessagesDiv.innerHTML = '';
-  if (successMessages.length) {
-    successMessagesDiv.innerHTML = `<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button><p><b>${metaEditorJsLang.jsSuccess}</b></p>${successMessages.join('<br>')}</div>`;
-  }
-
-  errorMessagesDiv.innerHTML = '';
-  if (errorMessages.length) {
-    errorMessagesDiv.innerHTML = `<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button><p><b>${metaEditorJsLang.jsErrors}</b></p>${errorMessages.join('<br>')}</div>`;
-  }
-}
-
-function applyTemplate(template, data) {
-  // Replace {{category:manufacturer:"super-duper products"|lower}} with:
-  // If {{category}} is present - then with {{category}} value, e.g. "Desktops"
-  // If {{category}} is NOT present, then with followning key {{manufacturer}}
-  // If no category or manufacturer found, then use text in quotes after semicolon, in this case "super-duper products"
-  // In both cases convert string to lower case - "desktops"
-  return template.replace(/{{(.*?)}}/g, (_, content) => {
-    // Разделим на ключи и фильтр по последнему |
-    let [rawKeys, filter] = content.split('|').map(part => part.trim());
-
-    // Разбиваем каскад fallback'ов: discount:price:"Super deal!"
-    let keys = [];
-    let current = '';
-    let insideQuotes = false;
-
-    for (let char of rawKeys) {
-      if (char === '"' || char === "'") {
-        insideQuotes = !insideQuotes;
-        current += char;
-      } else if (char === ':' && !insideQuotes) {
-        keys.push(current.trim());
-        current = '';
-      } else {
-        current += char;
-      }
-    }
-    if (current) keys.push(current.trim());
-
-    // Пробуем взять значение из данных или использовать строку в кавычках
-    let value = '';
-    for (let key of keys) {
-      // Удалим кавычки, если это строка
-      if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
-        value = key.slice(1, -1);
-        break;
-      } else if (data[key] !== undefined && data[key] !== null && data[key] !== '') {
-        value = data[key];
-        break;
-      }
-    }
-
-    // Применим фильтр
-    if (filter && typeof value === 'string') {
-      switch (filter.toLowerCase()) {
-        case 'upper': value = value.toUpperCase(); break;
-        case 'lower': value = value.toLowerCase(); break;
-        case 'capitalize': value = value.charAt(0).toUpperCase() + value.slice(1); break;
-      }
-    }
-
-    return value;
-  });
 }
 
 /**
@@ -729,7 +614,7 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
         method    = 'savePages', 
         data      = newData, 
         userToken, 
-        batchsize = 1, 
+        batchsize = 100, 
         callback  = (currentCount) => {progressCount(document.getElementById('progressbar'), (currentCount / uniqueLanguages.length), (newData.length / uniqueLanguages.length), interface.lang.message_saved)}, 
         debug     = false, 
         args      = pageType
@@ -793,7 +678,7 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
       // Skip row select checkbox
       if (e.target.dataset.column === "selected") {return}
       // Else update row data and appearance
-      const row = e.target.closest('[data-id]') // Get row element. The element is alwas present pecause you can't input in invisible element
+      const row = e.target.closest('[data-id]') // Get row element. The element is always present pecause you can't input in invisible element
       const rowId = row.dataset.id; // Get row id
       const rowData = metaEditorTable.getRow(rowId);
       rowData.rowType = "updated"
