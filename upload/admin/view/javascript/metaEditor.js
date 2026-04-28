@@ -103,7 +103,7 @@ function generateMeta(button, metaEditorTable, interface) {
     }
 
     const newData = structuredClone(data);
-    const result = applyFormula(formula, generateVars);
+    // const result = applyFormula(formula, generateVars);
 
 
     newData.lang_data[targetLang][targetField] = applyFormula(formula, generateVars);
@@ -124,13 +124,109 @@ function generateMeta(button, metaEditorTable, interface) {
   }
 }
 
-function applyFormula(formula, text) {
-  return {
-    newText,
-    messages: {
+function applyFormula(template, data) {
+  const FILTERS = ['upper', 'lower', 'capitalize', 'number', 'currency'];
+  const result = {
+    text: '',
+    errors: []
+  };
 
+  return template.replace(/{{(.*?)}}/g, (_, content) => {
+
+    // Parse tokens inside curly braces. 
+    // If token is inside quotes, it is considered as literal, left unchanged
+    // If token follows | (vertical bar), it is considered as filter
+    const tokens      = [];
+    let current       = '';
+    let insideQuotes  = false;
+    let quoteChar     = '';
+
+    for (const char of content.trim()) {
+      // Parse literals inside quotes
+      if (!insideQuotes && (char === '"' || char === "'")) {
+        insideQuotes = true;
+        quoteChar = char;
+        current  += char;
+      } else if (insideQuotes && char === quoteChar) {
+        insideQuotes = false;
+        current     += char;
+        // Find filters after vertical bar
+      } else if (!insideQuotes && char === '|') {
+        if (current.trim()) tokens.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
     }
-  }
+
+    // Push tokens to array if found
+    if (current.trim()) {tokens.push(current.trim())}
+
+    // Separate FILTERS from actual data tokens from page data
+    let filter = null;
+    let prefix = '';
+    let suffix = '';
+    const valueTokens = [];
+
+    for (const token of tokens) {
+      const lower = token.toLowerCase();
+      if (FILTERS.includes(lower)) {
+        filter = lower;
+        continue;
+      }
+      const prefixMatch = token.match(/^prefix:["'](.*)["']$/);
+      const suffixMatch = token.match(/^suffix:["'](.*)["']$/);
+      if (prefixMatch) { prefix = prefixMatch[1]; continue; }
+      if (suffixMatch) { suffix = suffixMatch[1]; continue; }
+      valueTokens.push(token);
+    }
+
+    // Ищем первое непустое ненулевое значение
+    let value = '';
+    let isLiteral = false;
+
+    for (const token of valueTokens) {
+      // Литерал в кавычках
+      if ((token.startsWith('"') && token.endsWith('"')) ||
+          (token.startsWith("'") && token.endsWith("'"))) {
+        value = token.slice(1, -1);
+        isLiteral = true;
+        break;
+      }
+      const dataValue = data[token];
+      if (dataValue !== undefined && dataValue !== null && dataValue !== '' && dataValue !== 0) {
+        value = dataValue;
+        break;
+      }
+    }
+
+    // Check if page's data value is not empty or null or zero
+    // Zero is included here to indicate zero values errors because it doesn't add any sence to meta data:
+    // e.g. price = 0, or offer count = 0, or reviews = 0, etc.
+    if (value === '' || value === null || value === undefined || value === 0) {
+      // Accumulate errors
+      
+      return '';
+    }
+
+    // Apply filters
+    if (filter) {
+      switch (filter) {
+        case 'upper':      value = String(value).toUpperCase(); break;
+        case 'lower':      value = String(value).toLowerCase(); break;
+        case 'capitalize': value = String(value).charAt(0).toUpperCase() + String(value).slice(1); break;
+        case 'number':     value = Number(value).toLocaleString(); break;
+        case 'currency':   value = Number(value).toLocaleString('uk-UA', { style: 'currency', currency: 'UAH' }); break;
+      }
+    }
+
+    // Префикс и суффикс только для значений из data
+    if (!isLiteral) {
+      value = prefix + value + suffix;
+    }
+
+    return value;
+  });
 }
 
 
