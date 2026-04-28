@@ -93,26 +93,46 @@ class ControllerSeoMetaEditor extends Controller {
     $languages      = $this->model_localisation_language->getLanguages();
     $currencies     = $this->model_localisation_currency->getCurrencies();
     $languagesById  = [];
+    $currenciesById = [];
     $currentStore   = [];
+    $currenciesLang = [];
     foreach ($languages as $language) {
       $languagesById[$language['language_id']] = $language;
+    }
+    foreach ($currencies as $currency) {
+      $currenciesById[$currency['currency_id']] = $currency;
     }
     foreach ($stores as $store) {
       if ($store['store_id'] === (int) $this->session->data['store_id']) {
         $currentStore  = $store;
       }
     }
+
+    // Get currency language variables so each currency can be formatted in each language independently 
+    foreach ($languages as $language) {
+      $langInstance = new Language($language['code']);
+      $langInstance->load($language['code']);
+      $currenciesLang[$language['language_id']] = [
+        'language_code'             => $language['code'],
+        'decimal_point'             => $langInstance->get('decimal_point'),
+        'thousand_point'            => $langInstance->get('thousand_point'),
+        'config_symbol_left_space'  => (bool) $this->config->get('config_symbol_left_space'),
+        'config_symbol_right_space' => (bool) $this->config->get('config_symbol_right_space'),
+      ];
+    }
+    
     // Return JSON to fetch
     $this->response->addHeader('Content-Type: application/json');
     $this->response->setOutput(
       json_encode(
         [
-          'lang'              => $lang->data,
+          'lang'              => $lang,
           'stores'            => $stores,
           'languages'         => $languagesById,
-          'currencies'        => $currencies,
+          'currencies'        => $currenciesById,
           'defaultLanguageId' => (int) $this->config->get('config_language_id'),
           'currentStore'      => $currentStore,
+          'currenciesLang'    => $currenciesLang,
         ]
       )
     );
