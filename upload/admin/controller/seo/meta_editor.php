@@ -84,6 +84,7 @@ class ControllerSeoMetaEditor extends Controller {
     // $lang->load($this->config->get('config_admin_language'));
     // Then load current controller translation to overwrite same named entries with current controller translation
     $lang->load('seo/meta_editor');
+    $lang = $lang->data;
     // Get languages and stores
     $this->load->model('localisation/language');
     $this->load->model('setting/store');
@@ -120,7 +121,7 @@ class ControllerSeoMetaEditor extends Controller {
         'config_symbol_right_space' => (bool) $this->config->get('config_symbol_right_space'),
       ];
     }
-    
+
     // Return JSON to fetch
     $this->response->addHeader('Content-Type: application/json');
     $this->response->setOutput(
