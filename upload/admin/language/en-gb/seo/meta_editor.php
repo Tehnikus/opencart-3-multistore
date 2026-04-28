@@ -30,6 +30,9 @@ $_['button_save_all']               = 'Save everything';
 $_['button_add_formula']            = 'Add the formula';
 $_['button_remove_formula']         = 'Delete the formula';
 $_['button_generate']               = 'Generate';
+$_['button_undo']                   = 'Undo';
+$_['button_undo_all']               = 'Undo all';
+$_['button_edit']                   = 'Edit page (new tab)';
 $_['button_clear_filters']          = 'Clear filters';
 
 // Options
