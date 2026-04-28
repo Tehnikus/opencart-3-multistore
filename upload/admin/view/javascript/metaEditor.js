@@ -97,20 +97,20 @@ function generateMeta(button, metaEditorTable, interface) {
     const data = filteredRows[rowId];
     // Skip row not checked by checkbox
     if (!data.selected) {continue}
-    // Accumulate variables to object
+    // Accumulate page variables to object that is passed to apply formula
     let generateVars = {
       name:          data.lang_data[selectsValues.language_id].name,
-      price:         data.vars.price,
-      minPrice:      data.vars.minPrice,
-      maxPrice:      data.vars.maxPrice,
-      discount:      data.vars.discount,
+      price:         formatCurrency(data.vars.price,    interface.currencies[targetCurrency], interface.currenciesLang[targetLang]),
+      minPrice:      formatCurrency(data.vars.minPrice, interface.currencies[targetCurrency], interface.currenciesLang[targetLang]),
+      maxPrice:      formatCurrency(data.vars.maxPrice, interface.currencies[targetCurrency], interface.currenciesLang[targetLang]),
+      discount:      formatCurrency(data.vars.discount, interface.currencies[targetCurrency], interface.currenciesLang[targetLang]),
       rating:        data.vars.rating,
       reviews:       data.vars.reviews,
       offers:        data.vars.offers,
       parent:        data.vars.parent,
       manufacturer:  data.vars.manufacturer,
       store:         interface.currentStore.name,
-    }
+    };
 
     const newData = structuredClone(data);
     // const result = applyFormula(formula, generateVars);
@@ -244,29 +244,28 @@ function applyFormula(formula, data) {
 }
 
 /**
- * Format number to currency
+ * Format number to currency equivalent to PHP
  * @param {Number} number actual price number
  * @param {Object} currency Currency object from settings
- * @param {Object} lang Language data with decimal and thousand separator
+ * @param {Object} currencyLanguage Data for price formatting by language with decimal and thousand separator, and other required stuff
  * @returns {String}
  */
-function formatCurrency(number, currency, lang) {
-
+function formatCurrency(number, currency, currencyLanguage) {
   if (number === undefined && number === null && number === '' && number === 0) { return 0 }
 
-  const value     = parseFloat(currency.value) || 1;
-  const decimal   = parseInt(currency.decimal_place) || 2;
-  const amount    = Math.round(parseFloat(number) * value * Math.pow(10, decimal)) / Math.pow(10, decimal);
+  const value   = parseFloat(currency.value) || 1;
+  const decimal = parseInt(currency.decimal_place) || 2;
+  const amount  = Math.round(parseFloat(number) * value * Math.pow(10, decimal)) / Math.pow(10, decimal);
 
-  // number_format аналог
-  const parts     = amount.toFixed(decimal).split('.');
-  parts[0]        = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, lang.thousand_point);
-  const formatted = parts.join(lang.decimal_point);
+  // Format number same as PHP: upload\system\library\cart\currency.php -> format()
+  const parts = amount.toFixed(decimal).split('.');
+  parts[0]    = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, currencyLanguage.thousand_point);
+  const formatted = parts.join(currencyLanguage.decimal_point);
 
   let string = '';
-  if (currency.symbol_left)  string += currency.symbol_left + ' ';
+  if (currency.symbol_left)  string += currency.symbol_left + (currencyLanguage.config_symbol_left_space  ? ' ' : '');
   string += formatted;
-  if (currency.symbol_right) string += ' ' + currency.symbol_right;
+  if (currency.symbol_right) string += (currencyLanguage.config_symbol_right_space ? ' ' : '') + currency.symbol_right;
 
   return string.trim();
 }
