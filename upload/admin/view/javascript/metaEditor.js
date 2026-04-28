@@ -308,10 +308,8 @@ function renderHeader(interface) {
         </div>
       </th>
       <th>
-        <div class="input-group flex">
           <input type="text" class="form-control" data-search-column="lang_data.*.meta_title" placeholder="${interface.lang.input_search} ${interface.lang.input_meta_title}">
           <input type="text" class="form-control" data-search-column="lang_data.*.h1" placeholder="${interface.lang.input_search} ${interface.lang.input_h1}">
-        </div>
         <input type="text" class="form-control" data-search-column="lang_data.*.meta_description" placeholder="${interface.lang.input_search} ${interface.lang.input_meta_description}">
       </th>
       <th style="width: 430px">
@@ -328,18 +326,20 @@ function renderHeader(interface) {
             <option style="background-color: #fce7c8; border-color: #f9d5a2; color: #e0890e;" value=">1000, <2000">${interface.lang.input_seo_description} <2000</option>
             <option style="background-color: #f5c1bb; border-color: #f3b5ad; color: #c72f1d;" value="<1000">${interface.lang.input_seo_description} <1000</option>
           </select>
+        </div>
+        <div class="input-group flex">
           <select class="form-control" data-search-column="lang_data.*.footer">
             <option style="background-color: #ffffff; border-color: #cccccc; color: #555555;" value="">${interface.lang.input_footer}</option>
             <option style="background-color: #cbeacb; border-color: #b9e2b9; color: #398c39;" value="true">${interface.lang.input_footer}</option>
             <option style="background-color: #f5c1bb; border-color: #f3b5ad; color: #c72f1d;" value="false">${interface.lang.input_footer}</option>
           </select>
-        </div>
-        <div class="input-group flex">
           <select class="form-control" data-search-column="lang_data.*.seo_keywords">
             <option style="background-color: #ffffff; border-color: #cccccc; color: #555555;" value="">${interface.lang.input_seo_keywords}</option>
             <option style="background-color: #cbeacb; border-color: #b9e2b9; color: #398c39;" value=">0">${interface.lang.input_seo_keywords}</option>
             <option style="background-color: #f5c1bb; border-color: #f3b5ad; color: #c72f1d;" value="<1">${interface.lang.input_seo_keywords}</option>
           </select>
+        </div>
+        <div class="input-group flex">
           <select class="form-control" data-search-column="lang_data.*.faq">
             <option style="background-color: #ffffff; border-color: #cccccc; color: #555555;" value="">${interface.lang.input_faq}</option>
             <option style="background-color: #cbeacb; border-color: #b9e2b9; color: #398c39;" value="true">${interface.lang.input_faq}</option>
@@ -352,11 +352,9 @@ function renderHeader(interface) {
           </select>
         </div>
       </th>
-      <th style="width: 40px">
-        <button type="button" class="clearFilters btn btn-default" title="${interface.lang.button_clear_filters}"><i class="fa fa-times"></i></button>
-      </th>
       <th style="width: 60px; text-align: center;">
-        <button type="button" class="undoAllPages btn btn-warning" title="${interface.lang.button_undo}"><i class="fa fa-undo"></i></button>
+        <button type="button" class="clearFilters btn btn-default" title="${interface.lang.button_clear_filters}"><i class="fa fa-times"></i></button>
+        <button type="button" class="undoAllPages btn btn-warning" title="${interface.lang.button_undo_all}"><i class="fa fa-undo"></i></button>
         <button type="button" class="saveAllPages btn btn-success" title="${interface.lang.button_save_all}"><i class="fa fa-save"></i></button>
       </th>
     </tr>
@@ -386,10 +384,12 @@ function renderRow(interface, row) {
         <div class="langSeoData">
           <div class="seoInputs">
             <div class="input-group flex">
-              <span data-addon="lang_data.${langId}.h1" class="input-group-addon">${interface.lang.input_h1}:${langRow.h1.length}</span>
-              <input data-column="lang_data.${langId}.h1" value="${langRow.h1}" class="form-control" placeholder="${interface.lang.input_h1}">
               <span data-addon="lang_data.${langId}.meta_title" class="input-group-addon">${interface.lang.input_meta_title}:${langRow.meta_title.length}</span>
               <input data-column="lang_data.${langId}.meta_title" value="${langRow.meta_title}" class="form-control" placeholder="${interface.lang.input_meta_title}">
+            </div>
+            <div class="input-group flex">
+              <span data-addon="lang_data.${langId}.h1" class="input-group-addon">${interface.lang.input_h1}:${langRow.h1.length}</span>
+              <input data-column="lang_data.${langId}.h1" value="${langRow.h1}" class="form-control" placeholder="${interface.lang.input_h1}">
             </div>
             <div class="input-group flex">
               <span data-addon="lang_data.${langId}.meta_description" class="input-group-addon">${interface.lang.input_meta_description_short}:${langRow.meta_description.length}</span>
@@ -421,12 +421,12 @@ function renderRow(interface, row) {
       </div>
       ${langRowHtml}
     </td>
-    <td>
-      <a class="btn btn-primary"><i class="fa fa-pencil"></i></a>
-    </td>
     <td style="text-align: center">
-      <button type="button" class="undoPage btn btn-warning" title="${interface.lang.button_undo}"><i class="fa fa-undo"></i></button>
-      <button type="button" class="savePage btn btn-success" title="${interface.lang.button_save}"><i class="fa fa-save"></i></button>
+      <div class="flex btn-group vertical">
+        <a class="btn btn-primary"><i class="fa fa-pencil" target="_blank" title="${interface.lang.button_edit}"></i></a>
+        <button type="button" class="undoPage btn btn-warning" title="${interface.lang.button_undo}"><i class="fa fa-undo"></i></button>
+        <button type="button" class="savePage btn btn-success" title="${interface.lang.button_save}"><i class="fa fa-save"></i></button>
+      </div>
     </td>
   `;
 
