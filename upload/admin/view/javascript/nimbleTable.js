@@ -25,17 +25,18 @@
 class nimbleTable {
   constructor(options) {
     // Options
-    this.options = options;               
-    this.table = this.options.table;
+    this.options    = options;               
+    this.table      = this.options.table;
     this.pagination = this.options.pagination;
 
     // Inner variables
-    this.rowMap = new Map();              // Main data storage
-    this.order = [];                      // Rows ids in displayed order
-    this.filteredOrder = [...this.order]; // Filtered rows ids
-    this.rowIdCounter = 0;                // Counter to add rows that don't have numerated id
-    this.filters = [];
-    this.eventListenersAdded = false;     // Add event listeners only once
+    this.rowMap         = new Map();       // Main data storage
+    this.rowElements    = new Map();       // Rows elements references storage
+    this.order          = [];              // Rows ids in displayed order
+    this.filteredOrder  = [...this.order]; // Filtered rows ids
+    this.rowIdCounter   = 0;               // Counter to add rows that don't have numerated id
+    this.filters        = [];              // Array of applied filters: [{'column':'value to search in this column'}]
+    this.eventsAdded    = false;           // Add event listeners only once
 
     // Add tbody element to table if it's not present
     if (!this.options.table.querySelector('tbody')) {
@@ -75,13 +76,16 @@ class nimbleTable {
     for (const id of order) {
       const row = this.rowMap.get(id);
       if (!row) continue;
-      fragment.appendChild(this.#renderRow(row));
+      const rowEl = this.#renderRow(row);
+      this.rowElements.set(id, rowEl);
+      fragment.appendChild(rowEl);
     }
 
     this.tbody.appendChild(fragment);
+    
     this.#addEventListeners();
 
-    // Рендерим футер с пагинацией
+    // Render footer with pagination
     if (this.pagination) {
       this.#renderFooter();
     }
@@ -224,7 +228,7 @@ class nimbleTable {
   // --- Add event listeners once ---
   #addEventListeners() {
     // If event listener is already added return
-    if (this.eventListenersAdded) { return false }
+    if (this.eventsAdded) { return false }
     // Add callback event listener
     if (this.options.addEventListeners) { this.options.addEventListeners(this.table) }
 
@@ -262,7 +266,7 @@ class nimbleTable {
       // console.log(`Row updated`, targetRow.dataset.id, newData)
     });
 
-    this.eventListenersAdded = true;
+    this.eventsAdded = true;
     return;
   }
 
@@ -501,6 +505,7 @@ class nimbleTable {
     }
     
     this.rowMap.delete(id); // Remove row data from Map()
+    this.rowElements.delete(id);
     this.order = this.order.filter(x => x !== id); // Remove id from general display order
     this.filteredOrder = this.filteredOrder.filter(x => x !== id); // Remove id from filtered display order
 
@@ -524,7 +529,7 @@ class nimbleTable {
   updateRow(id, newData, updateElement = false) {
     id = Number(id);
     if (!this.rowMap.has(id)) return false;
-    let tr;
+    let tr, newTr;
 
     const oldData = this.rowMap.get(id);
     let updatedData = {};
@@ -532,20 +537,21 @@ class nimbleTable {
     this.rowMap.set(id, updatedData);
 
     if (updateElement) {
-      tr = this.tbody.querySelector(`[data-id="${id}"]`);
+      tr    = this.rowElements.get(id);
+      newTr = this.#renderRow(updatedData);
+      this.rowElements.set(id, newTr);
       if (tr) {
-        const newTr = this.#renderRow(updatedData);
         tr.replaceWith(newTr);
       }
     }
 
-    return tr || false;
+    return newTr || false;
   }
 
   /**
    * Deep merge object values
    * @param {Object} target The target object
-   * @param  {...any} sources A list of sources
+   * @param {...any} sources A list of sources
    * @returns Object
    */
   #deepMerge(target, ...sources) {
@@ -568,13 +574,18 @@ class nimbleTable {
     return this.rowMap.get(id) || null;
   }
 
-  // TODO Return array of rows here instead of single row
-  findRowByKey(key, value) {
-    for (const row of this.rowMap.values()) {
-      if (row[key] === value) return row;
-    }
-    return null;
+  getRowElement(id) {
+    id = Number(id);
+    return this.rowElements.get(id) || null;
   }
+
+  // TODO Return array of rows here instead of single row
+  // findRowByKey(key, value) {
+  //   for (const row of this.rowMap.values()) {
+  //     if (row[key] === value) return row;
+  //   }
+  //   return null;
+  // }
 
   // Pagination
   getPaginatedOrder() {
