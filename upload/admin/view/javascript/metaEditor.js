@@ -244,6 +244,34 @@ function applyFormula(formula, data) {
 }
 
 /**
+ * Format number to currency
+ * @param {Number} number actual price number
+ * @param {Object} currency Currency object from settings
+ * @param {Object} lang Language data with decimal and thousand separator
+ * @returns {String}
+ */
+function formatCurrency(number, currency, lang) {
+
+  if (number === undefined && number === null && number === '' && number === 0) { return 0 }
+
+  const value     = parseFloat(currency.value) || 1;
+  const decimal   = parseInt(currency.decimal_place) || 2;
+  const amount    = Math.round(parseFloat(number) * value * Math.pow(10, decimal)) / Math.pow(10, decimal);
+
+  // number_format аналог
+  const parts     = amount.toFixed(decimal).split('.');
+  parts[0]        = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, lang.thousand_point);
+  const formatted = parts.join(lang.decimal_point);
+
+  let string = '';
+  if (currency.symbol_left)  string += currency.symbol_left + ' ';
+  string += formatted;
+  if (currency.symbol_right) string += ' ' + currency.symbol_right;
+
+  return string.trim();
+}
+
+/**
  * Render table header. Required by nimbleTable.js
  * @param   {Object} interface The interface object with translatable fields, e.g. input placeholders, prerendered selects, etc.
  * @returns {HTMLElement}
