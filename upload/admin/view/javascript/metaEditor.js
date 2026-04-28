@@ -156,7 +156,7 @@ function applyFormula(formula, data) {
 
     for (const char of content.trim()) {
       // Parse literals inside quotes
-      if (!insideQuotes && (char === '"' || char === "'")) {
+      if (!insideQuotes && (char === '"')) {
         insideQuotes = true;
         quoteChar = char;
         current  += char;
@@ -200,9 +200,9 @@ function applyFormula(formula, data) {
     let tokenCheck = '';
 
     for (const token of valueTokens) {
-      // Литерал в кавычках
-      if ((token.startsWith('"') && token.endsWith('"')) ||
-          (token.startsWith("'") && token.endsWith("'"))) {
+      tokenCheck = token;
+      // If token is inside quotes, consider it as literal
+      if ((token.startsWith('"') && token.endsWith('"'))) {
         value = token.slice(1, -1);
         isLiteral = true;
         break;
