@@ -45,8 +45,6 @@ class ModelSeoMetaEditor extends Model
         break;
     }
 
-    $this->log->write($sql);
-
     $rows = $this->db->query($sql)->rows;
 
     foreach ($rows as $row) {
@@ -74,7 +72,14 @@ class ModelSeoMetaEditor extends Model
     return $result;
   }
 
-
+  /**
+   * Category request
+   * Get products list for each category
+   * Products list is required for prices range, rating, max discount, product count, average rating etc.
+   * Also parent category is retrieved
+   * @param array $filter
+   * @return string
+   */
   private function categoryRequest($filter) : string {
 
     $type         = $this->types[$filter['type']];
@@ -168,6 +173,13 @@ class ModelSeoMetaEditor extends Model
     return $sql;
   }
 
+  /**
+   * Product pages request
+   * Get product's essential data: 
+   * price, discount amount if present, minPrice and maxPrice if option values affect base product price, parent category name, manufacturer name, ect.
+   * @param array $filter
+   * @return string
+   */
   private function productRequest($filter) : string {
     $type         = $this->types[$filter['type']];
     $limit        = max(1, (int) ($filter['limit'] ?? $this->config->get('config_limit_admin') ?? 100));
@@ -324,6 +336,13 @@ class ModelSeoMetaEditor extends Model
     return $sql;
   }
 
+  /**
+   * Manufacturer request
+   * Get products list for each manufacturer
+   * Products list is required for prices range, rating, max discount, etc.
+   * @param array $filter
+   * @return string
+   */
   private function manufacturerRequest($filter) : string {
     $type         = $this->types[$filter['type']];
     $limit        = max(1, (int) ($filter['limit'] ?? $this->config->get('config_limit_admin') ?? 100));
@@ -404,6 +423,13 @@ class ModelSeoMetaEditor extends Model
     return $sql;
   }
 
+  /**
+   * Filter SEO pages request
+   * Get products list for each page with same query as the facet filter
+   * Products list is required for prices range, rating, max discount, etc.
+   * @param array $filter
+   * @return string
+   */
   private function filterPageRequest($filter) : string {
     $type         = $this->types[$filter['type']];
     $limit        = max(1, (int) ($filter['limit'] ?? $this->config->get('config_limit_admin') ?? 100));
