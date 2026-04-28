@@ -60,38 +60,68 @@ function renderEditor(interface, data, tableElement) {
   return metaEditorTable;
 }
 
-function generateMeta2(button, metaEditorTable) {
-  const row = button.closest('tr');
-  const targetField     = row.querySelector('[data-name="target_field"]').value;
-  const targetLang      = row.querySelector('[data-name="language_id"]').value;
-  const targetCurrency  = row.querySelector('[data-name="currency_id"]').value;
-  const formula         = row.querySelector('[data-name="formula"]').value;
+function generateMeta(button, metaEditorTable, interface) {
+  const formulaRow = button.closest('tr');
+  const targetField     = formulaRow.querySelector('[data-name="target_field"]').value;
+  const targetLang      = formulaRow.querySelector('[data-name="language_id"]').value;
+  const targetCurrency  = formulaRow.querySelector('[data-name="currency_id"]').value;
+  const formula         = formulaRow.querySelector('[data-name="formula"]').value;
   const filteredRows    = {};
+
+  let selectsValues = {};
+  let selects = formulaRow.querySelectorAll('select');
+  selects.forEach(select => {
+    selectsValues[select.dataset.name] = select.value;
+  });
 
   metaEditorTable.filteredOrder.forEach(id => {
     const row = metaEditorTable.getRow(id);
     filteredRows[id] = row;
-  })
+  });
 
-  console.log(filteredRows);
+
+
+  // console.log(filteredRows);
   
   // console.log(row, targetField, targetLang, targetCurrency, filteredRows);
   for (const rowId in filteredRows) {
     const data = filteredRows[rowId];
     if (!data.selected) {continue}
-    const newData = {...data};
 
-    // console.log(data, newData);
+    let generateVars = {
+      name:          data.lang_data[selectsValues.language_id].name,
+      price:         data.vars.price,
+      minPrice:      data.vars.minPrice,
+      maxPrice:      data.vars.maxPrice,
+      discount:      data.vars.discount,
+      rating:        data.vars.rating,
+      reviews:       data.vars.reviews,
+      offers:        data.vars.offers,
+      parent:        data.vars.parent,
+      manufacturer:  data.vars.manufacturer,
+      store:         interface.currentStore.name,
+    }
 
-    newData.lang_data[targetLang][targetField] = formula;
+    const newData = structuredClone(data);
+    const result = applyFormula(formula, generateVars);
+
+
+    newData.lang_data[targetLang][targetField] = applyFormula(formula, generateVars);
     newData.rowType = "updated";
-    const rowElement = metaEditorTable.updateRow(data.column_id, newData, true);
+
+    const rowElement = metaEditorTable.getRowElement(rowId);
+
+    console.log(rowElement)
+
+    metaEditorTable.updateRow(rowId, newData, true);
+    
     // Highlight changed inputs 
     rowElement.querySelectorAll(`[data-column="lang_data.${targetLang}.${targetField}"]`).forEach(input => {
-
-    })
+      console.log(input)
+      // Set input class
+      input.classList.add("alert-success");
+    });
   }
-  
 }
 
 function applyFormula(formula, text) {
@@ -499,7 +529,7 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
   document.addEventListener('click', async e => {
     // Generate meta buttons
     if (e.target.closest('.generateMeta')) {
-      generateMeta2(e.target, metaEditorTable);
+      generateMeta(e.target, metaEditorTable, interface);
     }
 
     // Clear filters button
