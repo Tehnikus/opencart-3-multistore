@@ -31,6 +31,9 @@ class ModelSeoMetaEditor extends Model
       case 'product':
         $sql = $this->productRequest($filter);
         break;
+      case 'category':
+        $sql = $this->categoryRequest($filter);
+        break;
       case 'manufacturer':
         $sql = $this->manufacturerRequest($filter);
         break;
@@ -38,7 +41,7 @@ class ModelSeoMetaEditor extends Model
         $sql = $this->filterPageRequest($filter);
         break;
       default:
-        $sql = $this->categoryRequest($filter);
+        $sql = $this->defaultRequest($filter);
         break;
     }
 
@@ -519,6 +522,60 @@ class ModelSeoMetaEditor extends Model
       GROUP BY m.`" . $type['column_id'] . "`, m.`store_id`
       
     ";
+    return $sql;
+  }
+
+  /**
+   * Simple default request without vars object - no prices, no parent, no discounts, etc.
+   * Used for all case scenarios where prices are not applicable, e.g. blog articles, blog tags, info pages, so on
+   * @param array $filter
+   * @return string
+   */
+  private function defaultRequest($filter) : string {
+    
+    $type         = $this->types[$filter['type']];
+    $limit        = max(1, (int) ($filter['limit'] ?? $this->config->get('config_limit_admin') ?? 100));
+    $start        = max(0, (int) ($filter['start'] ?? 0));
+    $currentLang  = (int) $this->config->get('config_language_id'); // Current admin language id
+    $currentStore = (int) $this->session->data['store_id']; // Current store id
+
+    $sql = "
+      SELECT
+        JSON_OBJECT() AS vars,
+        m.`" . $type['column_id'] . "` as column_id,
+        COALESCE(
+          MAX(CASE WHEN d.language_id = {$currentLang} AND d.store_id = {$currentStore} THEN d.name END),
+          MAX(CASE WHEN d.language_id = {$currentLang} THEN d.name END),
+          MAX(d.name)
+        ) AS default_name,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            '" . $type['column_id'] . "', d.`" . $type['column_id'] . "`,
+            'name',               d.`name`,
+            'h1',                 d.`h1`,
+            'meta_title',         d.`meta_title`,
+            'meta_description',   d.`meta_description`,
+            'meta_keyword',       d.`meta_keyword`,
+            'description',        d.`description`,
+            'seo_keywords',       d.`seo_keywords`,
+            'seo_description',    d.`seo_description`,
+            'faq',                d.`faq`,
+            'how_to',             d.`how_to`,
+            'footer',             d.`footer`,
+            'date_modified',      d.`date_modified`,
+            'language_id',        d.`language_id`,
+            'store_id',           d.`store_id`
+          )
+        ) AS lang_data
+        FROM `" . DB_PREFIX . $type['main_table'] . "` m
+        LEFT JOIN `" . DB_PREFIX . $type['description_table'] . "` d 
+          ON  d.`" . $type['column_id'] . "` = m.`" . $type['column_id'] . "`
+          AND d.`store_id` = m.`store_id`
+        WHERE m.`store_id` = {$currentStore}
+        GROUP BY m.`" . $type['column_id'] . "`, m.`store_id`
+        LIMIT {$start}, {$limit}
+    ";
+
     return $sql;
   }
 
