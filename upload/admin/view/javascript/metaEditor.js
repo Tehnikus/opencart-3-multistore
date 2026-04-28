@@ -34,6 +34,13 @@ document.addEventListener('DOMContentLoaded', async ()=> {
   });
 });
 
+/**
+ * Create an instance of nimbleTable.js with data, event listeners and rows 
+ * @param {Object} interface The interface object with translatable fields, e.g. input placeholders, prerendered selects, etc.
+ * @param {Array} data Array of pages data rows
+ * @param {HTMLElement} tableElement The table element where nimbleTable.js will be attached
+ * @returns {Object} An instance of nimbleTable.js
+ */
 function renderEditor(interface, data, tableElement) {
 
   // Table instance
@@ -60,6 +67,12 @@ function renderEditor(interface, data, tableElement) {
   return metaEditorTable;
 }
 
+/**
+ * Generate meta data in the checked rows and show errors if present
+ * @param {HTMLElement} button The button next to formula input
+ * @param {Object} metaEditorTable An instance of nimbleTable.js
+ * @param {Object} interface The interface object with translatable fields, e.g. input placeholders, prerendered selects, etc.
+ */
 function generateMeta(button, metaEditorTable, interface) {
   const formulaRow = button.closest('tr');
   const targetField     = formulaRow.querySelector('[data-name="target_field"]').value;
@@ -79,15 +92,12 @@ function generateMeta(button, metaEditorTable, interface) {
     filteredRows[id] = row;
   });
 
-
-
-  // console.log(filteredRows);
-  
-  // console.log(row, targetField, targetLang, targetCurrency, filteredRows);
   for (const rowId in filteredRows) {
+    // Apply only to filtered rows
     const data = filteredRows[rowId];
+    // Skip row not checked by checkbox
     if (!data.selected) {continue}
-
+    // Accumulate variables to object
     let generateVars = {
       name:          data.lang_data[selectsValues.language_id].name,
       price:         data.vars.price,
@@ -105,13 +115,10 @@ function generateMeta(button, metaEditorTable, interface) {
     const newData = structuredClone(data);
     // const result = applyFormula(formula, generateVars);
 
-
     newData.lang_data[targetLang][targetField] = applyFormula(formula, generateVars);
     newData.rowType = "updated";
 
     const rowElement = metaEditorTable.getRowElement(rowId);
-
-    console.log(rowElement)
 
     metaEditorTable.updateRow(rowId, newData, true);
     
@@ -124,14 +131,20 @@ function generateMeta(button, metaEditorTable, interface) {
   }
 }
 
-function applyFormula(template, data) {
+/**
+ * Generate string by formula
+ * @param {String} formula The template to meta data to be generated from
+ * @param {Object} data An object of each page data - translatable language fields and proces
+ * @returns {String} A string with where template string {{keys}} are replaced with actual data[keys] and filters applied 
+ */
+function applyFormula(formula, data) {
   const FILTERS = ['upper', 'lower', 'capitalize', 'number', 'currency'];
   const result = {
     text: '',
     errors: []
   };
 
-  return template.replace(/{{(.*?)}}/g, (_, content) => {
+  return formula.replace(/{{(.*?)}}/g, (_, content) => {
 
     // Parse tokens inside curly braces. 
     // If token is inside quotes, it is considered as literal, left unchanged
@@ -181,9 +194,10 @@ function applyFormula(template, data) {
       valueTokens.push(token);
     }
 
-    // Ищем первое непустое ненулевое значение
-    let value = '';
-    let isLiteral = false;
+    // Find first not empty value
+    let value      = '';
+    let isLiteral  = false;
+    let tokenCheck = '';
 
     for (const token of valueTokens) {
       // Литерал в кавычках
@@ -220,7 +234,7 @@ function applyFormula(template, data) {
       }
     }
 
-    // Префикс и суффикс только для значений из data
+    // Apply prefix and suffix
     if (!isLiteral) {
       value = prefix + value + suffix;
     }
@@ -229,7 +243,11 @@ function applyFormula(template, data) {
   });
 }
 
-
+/**
+ * Render table header. Required by nimbleTable.js
+ * @param   {Object} interface The interface object with translatable fields, e.g. input placeholders, prerendered selects, etc.
+ * @returns {HTMLElement}
+ */
 function renderHeader(interface) {
   const thead = document.createElement('thead');
 
@@ -320,6 +338,12 @@ function renderHeader(interface) {
   return thead;
 }
 
+/**
+ * Render table row. Required by nimbleTable.js
+ * @param {Object} interface The interface object with translatable fields, e.g. input placeholders, prerendered selects, etc.
+ * @param {Object} row An object of row data
+ * @returns {HTMLElement} Actual HTML element of row
+ */
 function renderRow(interface, row) {
   const tr = document.createElement('tr');
   tr.dataset.id = row.column_id || '';
