@@ -131,15 +131,8 @@ class ModelSeoMetaEditor extends Model
 
         m.`" . $type['column_id'] . "` as column_id,
         COALESCE(
-          MAX(CASE 
-            WHEN d.language_id = {$currentLang}
-            AND d.store_id = {$currentStore}
-            THEN d.name
-          END),
-          MAX(CASE 
-            WHEN d.language_id = {$currentLang}
-            THEN d.name
-          END),
+          MAX(CASE WHEN d.language_id = {$currentLang} AND d.store_id = {$currentStore} THEN d.name END),
+          MAX(CASE WHEN d.language_id = {$currentLang} THEN d.name END),
           MAX(d.name)
         ) AS default_name,
         JSON_ARRAYAGG(
@@ -381,15 +374,8 @@ class ModelSeoMetaEditor extends Model
 
         m.`" . $type['column_id'] . "` as column_id,
         COALESCE(
-          MAX(CASE 
-            WHEN d.language_id = {$currentLang}
-            AND d.store_id = {$currentStore}
-            THEN d.name
-          END),
-          MAX(CASE 
-            WHEN d.language_id = {$currentLang}
-            THEN d.name
-          END),
+          MAX(CASE WHEN d.language_id = {$currentLang} AND d.store_id = {$currentStore} THEN d.name END),
+          MAX(CASE WHEN d.language_id = {$currentLang} THEN d.name END),
           MAX(d.name)
         ) AS default_name,
         JSON_ARRAYAGG(
