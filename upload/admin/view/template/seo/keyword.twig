@@ -52,6 +52,7 @@
 <link href="view/stylesheet/nimbleTable.css" rel="stylesheet" />
 
 <style>
+
   .tableWrapper tr.updatedRow {
     background-color: #ffca7f7a;
     &:hover {
@@ -78,19 +79,26 @@
     gap: 1rem;
       & .keywordGroup {
       display: flex;
-      border-radius: 5px;
-      border: 1px solid #ddd;
+      border-radius: 3px;
+      /*! border: 1px solid #ddd; */
       overflow: hidden;
-      & span {
+          & span {
         align-self: center;
-        padding: 0 1rem
+        padding: 0 1rem;
+        display: flex;
+        height: 100%;
+        border: 1px solid #ccc;
+        border-right: none;
+        border-radius: 3px 0 0 3px;
+        align-items: center;
       }
-    }
+}
   }
 
   [data-add-to-page] {
     display: none!important;
   }
+
 </style>
 
 {{ footer }}
