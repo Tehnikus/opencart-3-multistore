@@ -1046,6 +1046,23 @@ html[dir="rtl"] .text-right {
     }
 }
 
+.btn-group.vertical {
+  flex-direction: column;
+}
+
+.btn-group.vertical > .btn:first-child:not(:last-child) {
+    border-radius: 4px 4px 0 0;
+}
+
+.btn-group.vertical > .btn:last-child:not(:first-child) {
+  border-radius: 0 0 4px 4px;
+}
+
+.btn-group.vertical > .btn {
+    display: flex;
+    flex: 1;
+}
+
 table td p {
     margin: 3px 0;
 }
