@@ -13,6 +13,7 @@ $_['column_formulas']               = 'Formulas';
 // Inputs
 $_['input_search']                  = 'Search';
 $_['input_h1']                      = 'H1';
+$_['input_name']                    = 'Name';
 $_['input_meta_title']              = 'Title';
 $_['input_meta_description']        = 'Description';
 $_['input_meta_description_short']  = 'Desc';
@@ -51,6 +52,8 @@ $_['message_formulas_saved']        = 'Formulas saved';
 $_['message_saved']                 = 'Saved';
 $_['message_loaded']                = 'Loaded';
 $_['message_select_rows']           = 'Select pages to be saved';
+$_['message_error_token']           = 'Keyword <b style="user-select: all">{{%s}}</b> is empty in page <b>%s</b> in field <b>%s</b>';
+$_['message_success_token']         = 'Page <b>%s</b> field <b>%s</b> is successfully created';
 
 // Help
 $_['help_syntax_hint']              = 'Tag syntax: <b>{{tag1:tag2:"or a tag replacement"|filter}}</b>. <br>';
