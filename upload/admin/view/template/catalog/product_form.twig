@@ -1326,22 +1326,7 @@
   }
 
   //--></script>
-  <script type="text/javascript"><!--
-  var image_row = {{ image_row }};
 
-  function addImage() {
-	  html = '<tr id="image-row' + image_row + '">';
-	  html += '  <td class="text-center" style="width: 200px"><a href="" id="thumb-image' + image_row + '"data-toggle="image" class="img-thumbnail"><img src="{{ placeholder }}" alt="" title="" data-placeholder="{{ placeholder }}" height="200" loading="lazy"/></a><input type="hidden" name="product_image[' + image_row + '][image]" value="" id="input-image' + image_row + '" /></td>';
-	  html += '  <td class="text-right"><input type="text" name="product_image[' + image_row + '][sort_order]" value="" placeholder="{{ entry_sort_order }}" class="form-control" /></td>';
-	  html += '  <td class="text-center"><button type="button" onclick="$(\'#image-row' + image_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
-	  html += '</tr>';
-
-	  $('#images tbody').append(html);
-
-	  image_row++;
-  }
-
-  //--></script>
   <script type="text/javascript"><!--
   var recurring_row = {{ recurring_row }};
 
