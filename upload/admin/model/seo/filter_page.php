@@ -374,7 +374,10 @@ class ModelSeoFilterPage extends Model {
             ON  fn.facet_type     = fi.facet_type
             AND fn.facet_group_id = fi.facet_group_id
             AND fn.facet_value_id = fi.facet_value_id
+            AND fn.language_id    = {$languageId}
+            AND fn.store_id       = fi.store_id
           WHERE fi.filter_page_id = pd.filter_page_id
+            AND fi.store_id       = p2s.store_id
         ) AS facets,
         (
           SELECT COUNT(*)
