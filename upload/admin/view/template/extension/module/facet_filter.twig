@@ -60,7 +60,7 @@
                       <tr>
                         <td></td>
                         {% for facetType in facetTypes %}
-                          <td style="width: {{ 100 / (facetTypes|length + 2) }}%" class="text-center">{{ attribute(_context, 'text_show_' ~ facetType) }}</td>
+                          <td style="width: {{ 100 / (facetTypes|length + 3) }}%" class="text-center">{{ attribute(_context, 'text_show_' ~ facetType) }}</td>
                         {% endfor %}
                       </tr>
                     </thead>
