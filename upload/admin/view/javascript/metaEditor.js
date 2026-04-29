@@ -458,7 +458,7 @@ function renderRow(interface, row) {
     </td>
     <td style="text-align: center">
       <div class="flex btn-group vertical">
-        <a class="btn btn-primary"><i class="fa fa-pencil" target="_blank" title="${interface.lang.button_edit}"></i></a>
+        <a href="index.php?route=${path}/edit&${columnId}=${row.column_id}&user_token=${userToken}" title="${interface.lang.button_edit}" class="btn btn-primary" target="_blank"><i class="fa fa-pencil"></i></a>
         <button type="button" class="undoPage btn btn-warning" title="${interface.lang.button_undo}"><i class="fa fa-undo"></i></button>
         <button type="button" class="savePage btn btn-success" title="${interface.lang.button_save}"><i class="fa fa-save"></i></button>
       </div>
