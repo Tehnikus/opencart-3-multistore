@@ -143,9 +143,9 @@ function generateMeta(button, metaEditorTable, interface) {
     
     // Highlight changed inputs 
     rowElement.querySelectorAll(`[data-column="lang_data.${targetLang}.${targetField}"]`).forEach(input => {
-      console.log(input)
       // Set input class
-      input.classList.add("alert-success");
+      input.classList.toggle("alert-success", !newText.errors.length);
+      input.classList.toggle("alert-danger", newText.errors.length);
     });
   }
 }
@@ -239,7 +239,6 @@ function applyFormula(formula, data) {
     if (value === '' || value === null || value === undefined || value === 0) {
       // Accumulate errors
       result.errors.push(tokenCheck);
-
       return '';
     }
 
@@ -823,6 +822,7 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
     const prevData = filterByLangId(data.filter(row => Number(row.column_id) === Number(rowId)), metaEditorTable.table.querySelector('.languageSelect').value); 
     prevData.forEach(row => {
       row.rowType = 'existing';
+      row.messages = '';
       metaEditorTable.updateRow(rowId, row, true);
     });
   }
