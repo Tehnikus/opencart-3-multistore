@@ -74,18 +74,24 @@ function renderEditor(interface, data, tableElement) {
  * @param {Object} interface The interface object with translatable fields, e.g. input placeholders, prerendered selects, etc.
  */
 function generateMeta(button, metaEditorTable, interface) {
-  const formulaRow = button.closest('tr');
+  const successMessages = document.querySelector('.message.message-success.fixed');
+  const errorMessages   = document.querySelector('.message.message-error.fixed');
+  const formulaRow      = button.closest('tr');
   const targetField     = formulaRow.querySelector('[data-name="target_field"]').value;
   const targetLang      = formulaRow.querySelector('[data-name="language_id"]').value;
   const targetCurrency  = formulaRow.querySelector('[data-name="currency_id"]').value;
   const formula         = formulaRow.querySelector('[data-name="formula"]').value;
   const filteredRows    = {};
 
-  let selectsValues = {};
-  let selects = formulaRow.querySelectorAll('select');
-  selects.forEach(select => {
-    selectsValues[select.dataset.name] = select.value;
-  });
+  // reset previous messages
+  successMessages.innerHTML = '';
+  errorMessages.innerHTML = '';
+  // const selectsValues   = {};
+  // Get all formula selects
+  // const selects = formulaRow.querySelectorAll('select');
+  // selects.forEach(select => {
+  //   selectsValues[select.dataset.name] = select.value;
+  // });
 
   metaEditorTable.filteredOrder.forEach(id => {
     const row = metaEditorTable.getRow(id);
@@ -99,7 +105,7 @@ function generateMeta(button, metaEditorTable, interface) {
     if (!data.selected) {continue}
     // Accumulate page variables to object that is passed to apply formula
     let generateVars = {
-      name:          data.lang_data[selectsValues.language_id].name,
+      name:          data.lang_data[targetLang].name,
       price:         formatCurrency(data.vars.price,    interface.currencies[targetCurrency], interface.currenciesLang[targetLang]),
       minPrice:      formatCurrency(data.vars.minPrice, interface.currencies[targetCurrency], interface.currenciesLang[targetLang]),
       maxPrice:      formatCurrency(data.vars.maxPrice, interface.currencies[targetCurrency], interface.currenciesLang[targetLang]),
@@ -113,14 +119,27 @@ function generateMeta(button, metaEditorTable, interface) {
     };
 
     const newData = structuredClone(data);
-    // const result = applyFormula(formula, generateVars);
-
-    newData.lang_data[targetLang][targetField] = applyFormula(formula, generateVars);
-    newData.rowType = "updated";
-
-    const rowElement = metaEditorTable.getRowElement(rowId);
+    const newText = applyFormula(formula, generateVars);
+    newData.messages = '';
+    newData.lang_data[targetLang][targetField] = newText.text;
+    if (newText.errors.length) {
+      newData.rowType = "hasError";
+      newText.errors.forEach(token => {
+        const errorText = sprintf(interface.lang.message_error_token, token, data.default_name, interface.lang['input_' + targetField]);
+        // Errors report
+        newData.messages        += `<p class="text-danger">${errorText}</p>`;
+        errorMessages.innerHTML += `<p class="text-danger">${errorText}</p>`;
+      })
+    } else {
+      newData.rowType = "updated";
+      // Success report
+      successText = sprintf(interface.lang.message_success_token, data.default_name, interface.lang['input_' + targetField]);
+      newData.messages          += `<p class="text-success">${successText}</p>`;
+      successMessages.innerHTML += `<p class="text-success">${successText}</p>`;
+    }
 
     metaEditorTable.updateRow(rowId, newData, true);
+    const rowElement = metaEditorTable.getRowElement(rowId);
     
     // Highlight changed inputs 
     rowElement.querySelectorAll(`[data-column="lang_data.${targetLang}.${targetField}"]`).forEach(input => {
@@ -144,7 +163,7 @@ function applyFormula(formula, data) {
     errors: []
   };
 
-  return formula.replace(/{{(.*?)}}/g, (_, content) => {
+  let text = formula.replace(/{{(.*?)}}/g, (_, content) => {
 
     // Parse tokens inside curly braces. 
     // If token is inside quotes, it is considered as literal, left unchanged
@@ -219,6 +238,7 @@ function applyFormula(formula, data) {
     // e.g. price = 0, or offer count = 0, or reviews = 0, etc.
     if (value === '' || value === null || value === undefined || value === 0) {
       // Accumulate errors
+      result.errors.push(tokenCheck);
 
       return '';
     }
@@ -230,7 +250,7 @@ function applyFormula(formula, data) {
         case 'lower':      value = String(value).toLowerCase(); break;
         case 'capitalize': value = String(value).charAt(0).toUpperCase() + String(value).slice(1); break;
         case 'number':     value = Number(value).toLocaleString(); break;
-        case 'currency':   value = Number(value).toLocaleString('uk-UA', { style: 'currency', currency: 'UAH' }); break;
+        // case 'currency':   value = Number(value).toLocaleString('uk-UA', { style: 'currency', currency: 'UAH' }); break;
       }
     }
 
@@ -241,6 +261,9 @@ function applyFormula(formula, data) {
 
     return value;
   });
+
+  result.text = text;
+  return result;
 }
 
 /**
@@ -251,7 +274,7 @@ function applyFormula(formula, data) {
  * @returns {String}
  */
 function formatCurrency(number, currency, currencyLanguage) {
-  if (number === undefined && number === null && number === '' && number === 0) { return 0 }
+  if (number === undefined && number === null || number === '' || number === 0 || number === '0') { return 0 }
 
   const value   = parseFloat(currency.value) || 1;
   const decimal = parseInt(currency.decimal_place) || 2;
@@ -268,6 +291,17 @@ function formatCurrency(number, currency, currencyLanguage) {
   if (currency.symbol_right) string += (currencyLanguage.config_symbol_right_space ? ' ' : '') + currency.symbol_right;
 
   return string.trim();
+}
+
+/**
+ * Equivalent to PHP sprintf
+ * @param {String} text The text to be sprintf-ed
+ * @param  {...any} args strings to which the placeholders will be replaced
+ * @returns 
+ */
+function sprintf(text, ...args) {
+  let i = 0;
+  return text.replace(/%s/g, () => args[i++]);
 }
 
 /**
@@ -292,6 +326,7 @@ function renderHeader(interface) {
         </label>
       </th>
       <th style="width: 250px">
+        <input type="text" class="form-control" data-search-column="default_name" placeholder="${interface.lang.input_search} ${interface.lang.input_name}">
         ${languageSelect.outerHTML}
         <div class="input-group flex">
           <select class="form-control" data-search-column="selected">
@@ -312,7 +347,7 @@ function renderHeader(interface) {
           <input type="text" class="form-control" data-search-column="lang_data.*.h1" placeholder="${interface.lang.input_search} ${interface.lang.input_h1}">
         <input type="text" class="form-control" data-search-column="lang_data.*.meta_description" placeholder="${interface.lang.input_search} ${interface.lang.input_meta_description}">
       </th>
-      <th style="width: 430px">
+      <th style="width: 350px">
         <div class="input-group flex">
           <select class="form-control" data-search-column="lang_data.*.description">
             <option style="background-color: #ffffff; border-color: #cccccc; color: #555555;" value="">${interface.lang.input_description}</option>
@@ -420,6 +455,7 @@ function renderRow(interface, row) {
         <span class="h3 strong">${row.default_name}</span>
       </div>
       ${langRowHtml}
+      <div class="pageMessages">${row.messages ? row.messages : ''}</div>
     </td>
     <td style="text-align: center">
       <div class="flex btn-group vertical">
@@ -680,7 +716,7 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
           // Set rowType
           rowData.rowType = "saved";
           // Update rows and their elements
-          const tr = metaEditorTable.updateRow(rowData.column_id, rowData, true);
+          metaEditorTable.updateRow(rowData.column_id, rowData, true);
         });
       } else {
         filteredRowsData.forEach(rowData => {
@@ -736,6 +772,7 @@ async function addAsyncListeners(metaEditorTable, data, interface) {
       metaEditorTable.updateRow(rowId, rowData, false);
       row.classList = "updated";
 
+      // Count input symbols on input change
       const inputAddon = row.querySelector(`[data-addon="${e.target.dataset.column}"]`);
       inputAddon.innerText = inputAddon.textContent.replace(/:.*/, `:${e.target.value.length}`);
     }
