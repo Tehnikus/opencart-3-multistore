@@ -144,7 +144,12 @@ class ControllerSeoMetaEditor extends Controller {
     $this->load->model('setting/setting');
     $this->language->load('seo/meta_editor');
 		$post_data = $this->request->post;
-		$saveResult = $this->model_setting_setting->editSetting('meta_editor_formulas', ['meta_editor_formulas_' . $this->request->get['type'] => $post_data]);
+
+    // Get all settings so old setting are not overwritten
+    $current_settings = $this->model_setting_setting->getSetting('meta_editor_formulas');
+    $current_settings['meta_editor_formulas_' . $this->request->get['type']] = $post_data;
+    
+		$saveResult = $this->model_setting_setting->editSetting('meta_editor_formulas', $current_settings);
 
 		$json['success'] = true;
 		$json['message'] = $this->language->get('message_formulas_saved');
