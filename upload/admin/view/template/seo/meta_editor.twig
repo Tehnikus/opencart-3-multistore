@@ -154,7 +154,6 @@
 <script defer type="text/javascript" src="view/javascript/batchloader.js"></script>
 <script defer type="text/javascript" src="view/javascript/metaEditor.js"></script>
 <script>
-  const user_token = "{{ user_token }}";
   const pageType   = "{{ page_type }}";
   const columnId   = "{{ column_id }}";
   const pagesCount = {{ pages_count }};
@@ -176,13 +175,13 @@
       }
       & .langData + .langData {
         border-top: 1px solid #ccc;
-        margin-top: 1rem;
-        padding-top: 1rem;
+        margin-top: 4px;
+        padding-top: 4px;
       }
       & .langData {
         display: flex;
         flex-wrap: wrap;
-        gap: 1rem;
+        gap: 4px;
         /* padding-bottom: 1rem; */
         & .langFlag {
           flex: 0 1 auto;
@@ -207,7 +206,7 @@
           }
         }
         & .seoBadges {
-          flex: 0 0 420px;
+          flex: 0 0 340px;
           justify-content: center;
           display: flex;
           gap: 4px;
@@ -253,10 +252,12 @@
     scrollbar-gutter: stable;
   }
   .message-success {
-    scrollbar-color: gray #cbeacb;  
+    scrollbar-color: gray #cbeacb;
+    background: #cbeacb;
   }
   .message-error {
-    scrollbar-color: gray #cbeacb;  
+    scrollbar-color: gray #f5c1bb;
+    background: #f5c1bb;
   }
   .message.fixed .alert {
     margin-bottom: 0;
