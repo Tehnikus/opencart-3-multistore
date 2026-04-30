@@ -1444,7 +1444,7 @@ class ModelCatalogProduct extends Model {
 						FIELD(pd2.`store_id`, 	 '" . (int) $this->session->data['store_id'] ."') DESC,
 						FIELD(pd2.`language_id`, pd.language_id) DESC
 					LIMIT 1
-				) AS `placeholder_name`,
+				) AS `name`,
 				(
 					SELECT 
 						pd2.`meta_title` 
@@ -1454,7 +1454,17 @@ class ModelCatalogProduct extends Model {
 						FIELD(pd2.`store_id`, 	 '" . (int) $this->session->data['store_id'] ."') DESC,
 						FIELD(pd2.`language_id`, pd.language_id) DESC
 					LIMIT 1
-				) AS `placeholder_meta_title`,
+				) AS `meta_title`,
+				(
+					SELECT 
+						pd2.`h1` 
+					FROM " . DB_PREFIX . "product_description pd2
+					WHERE pd2.`product_id` = " . $product_id . "
+					ORDER BY 
+						FIELD(pd2.`store_id`, 	 '" . (int) $this->session->data['store_id'] ."') DESC,
+						FIELD(pd2.`language_id`, pd.language_id) DESC
+					LIMIT 1
+				) AS `h1`,
 				(
 					SELECT 
 						pd2.`meta_description` 
@@ -1464,16 +1474,17 @@ class ModelCatalogProduct extends Model {
 						FIELD(pd2.`store_id`, 	 '" . (int) $this->session->data['store_id'] ."') DESC,
 						FIELD(pd2.`language_id`, pd.language_id) DESC
 					LIMIT 1
-				) AS `placeholder_meta_description`
+				) AS `meta_description`
 			FROM " . DB_PREFIX . "product_description pd
 			WHERE pd.product_id = '" . (int) $product_id . "'
 		");
 
 		foreach ($query->rows as $result) {
 			$placeholders[$result['language_id']] = [
-				'placeholder_name'             => $result['placeholder_name'],
-				'placeholder_meta_title'       => $result['placeholder_meta_title'],
-				'placeholder_meta_description' => $result['placeholder_meta_description'],
+				'name'             => $result['name'],
+				'h1'             	 => $result['h1'],
+				'meta_title'       => $result['meta_title'],
+				'meta_description' => $result['meta_description'],
 			];
 		}
 
