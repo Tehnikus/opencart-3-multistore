@@ -41,12 +41,15 @@
             H1
           </span>
           {% include "common/button_create_seo_url.twig" with {seo_url_input: 'seo_url[' ~ language.language_id ~ ']' } %}
+          {% if inputPlaceholders[language.language_id].meta_description %}
+            <span class="pasteAdjacent input-group-addon btn" title="{{ button_paste_from_adjacent_store }}"><i class="fa fa-paste"></i></span>
+          {% endif %}
           {% include "common/button_translate.twig"      with {sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][name]' } %}
           <input 
             type="text" 
             name="{{ name_prefix }}[{{ language.language_id }}][name]" 
             value="{{ data[language.language_id].name }}" 
-            placeholder="{{ entry_name }}" 
+            placeholder="{{ inputPlaceholders[language.language_id].name|default(entry_name) }}" 
             id="input-name_{{ language.language_id }}" 
             class="form-control" 
             data-language-code="{{ language.code|split('-')[0] }}"
@@ -111,13 +114,16 @@
         <label class="col-sm-2 control-label" for="input-meta-title{{ language.language_id }}">{{ entry_meta_title }}</label>
         <div class="col-sm-10">
           <div class="input-group flex">
+            {% if inputPlaceholders[language.language_id].meta_description %}
+              <span class="pasteAdjacent input-group-addon btn" title="{{ button_paste_from_adjacent_store }}"><i class="fa fa-paste"></i></span>
+            {% endif %}
             {% include "common/button_translate.twig" with {sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][meta_title]' } %}
-            <span class="input-group-addon faceclick btn">😊</span>
+            <span class="input-group-addon faceclick btn" title="{{ button_emoji }}">😊</span>
             <input 
               type="text" 
               name="{{ name_prefix }}[{{ language.language_id }}][meta_title]" 
               value="{{ data[language.language_id].meta_title }}" 
-              placeholder="{{ entry_meta_title }}" 
+              placeholder="{{ inputPlaceholders[language.language_id].meta_title|default(entry_meta_title) }}" 
               id="input-meta-title_{{ language.language_id }}" 
               class="form-control" />
           </div>
@@ -132,13 +138,16 @@
         <label class="col-sm-2 control-label" for="input-h1{{ language.language_id }}">{{ entry_h1 }}</label>
         <div class="col-sm-10">
           <div class="input-group flex">
+            {% if inputPlaceholders[language.language_id].meta_description %}
+              <span class="pasteAdjacent input-group-addon btn" title="{{ button_paste_from_adjacent_store }}"><i class="fa fa-paste"></i></span>
+            {% endif %}
             {% include "common/button_translate.twig" with {sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][h1]' } %}
-            <span class="input-group-addon faceclick btn">😊</span>
+            <span class="input-group-addon faceclick btn" title="{{ button_emoji }}">😊</span>
             <input 
               type="text" 
               name="{{ name_prefix }}[{{ language.language_id }}][h1]" 
               value="{{ data[language.language_id].h1 }}" 
-              placeholder="{{ entry_h1 }}" 
+              placeholder="{{ inputPlaceholders[language.language_id].h1|default(entry_h1) }}" 
               id="input-h1_{{ language.language_id }}" 
               class="form-control" 
             />
@@ -165,12 +174,16 @@
         <label class="col-sm-2 control-label" for="input-meta-description{{ language.language_id }}">{{ entry_meta_description }}</label>
         <div class="col-sm-10">
           <div class="input-group flex">
+            {% if inputPlaceholders[language.language_id].meta_description %}
+              <span class="pasteAdjacent input-group-addon btn" title="{{ button_paste_from_adjacent_store }}"><i class="fa fa-paste"></i></span>
+            {% endif %}
             {% include "common/button_translate.twig" with {sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][meta_description]' }%}
-            <span class="input-group-addon faceclick btn">😊</span>
+            <span class="input-group-addon faceclick btn" title="{{ button_emoji }}">😊</span>
             <textarea 
-              style="font-size: 18px" 
+              style="font-size: 16px" 
               name="{{ name_prefix }}[{{ language.language_id }}][meta_description]" 
-              rows="3" placeholder="{{ entry_meta_description }}" 
+              rows="2" 
+              placeholder="{{ inputPlaceholders[language.language_id].meta_description|default(entry_meta_description) }}" 
               id="input-meta-description_{{ language.language_id }}" 
               class="form-control">{{ data[language.language_id].meta_description }}</textarea>
           </div>
@@ -183,11 +196,11 @@
         <div class="col-sm-10">
           <div class="input-group flex">
             {% include "common/button_translate.twig" with {sourceInput: name_prefix ~ '[' ~ defaultLanguage.language_id ~ '][meta_keyword]' }%}
-            <span class="input-group-addon faceclick btn">😊</span>
+            <span class="input-group-addon faceclick btn" title="{{ button_emoji }}">😊</span>
             <textarea 
-              style="font-size: 18px" 
+              style="font-size: 16px" 
               name="{{ name_prefix }}[{{ language.language_id }}][meta_keyword]" 
-              rows="3" 
+              rows="2" 
               placeholder="{{ entry_meta_keyword }}" 
               id="input-meta-keyword_{{ language.language_id }}" 
               class="form-control">{{ data[language.language_id].meta_keyword }}</textarea>
