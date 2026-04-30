@@ -142,6 +142,43 @@ async function googleTranslate(text, targetLang = 'en', sourceLang = 'auto', att
     return null;
   }
 }
+// Translate buttons event listeners
+document.addEventListener('DOMContentLoaded', async () => {
+  document.addEventListener('click', async e => {
+    // Translate string
+    if (e.target.closest('.translateString')) {
+      const targetInput = e.target.closest('div').querySelector('input, textarea');
+      try {
+        let translatedText = await googleTranslate(
+          targetInput.value 
+            || document.querySelector(`[name='${e.target.closest('[data-source-input]').dataset.sourceInput}']`).value, 
+          e.target.closest('[data-target-lang]').dataset.targetLang, 
+          e.target.closest('[data-source-lang]').dataset.sourceLang
+        );
+        if (translatedText) {
+          targetInput.value = translatedText;
+          targetInput.classList.add('alert-success');
+        }
+      } catch(e) {
+        console.log(e)
+      }
+    }
+    // Paste values from adjacent store
+    if (e.target.closest('.pasteAdjacent')) {
+      const input = e.target.closest('div').querySelector('input, textarea');
+      if (input.value) {return}
+      input.value = input.placeholder;
+    }
+  });
+  document.addEventListener('input', e => {
+    // Set select background and text color if option has corresponding inline style 
+    if (e.target.tagName === 'SELECT') {
+      e.target.style.backgroundColor = e.target.selectedOptions[0].style?.backgroundColor;
+      e.target.style.color = e.target.selectedOptions[0].style?.color;
+      e.target.style.borderColor = e.target.selectedOptions[0].style?.color;
+    }
+  });
+});
 
 /**
  * Add cloned row to target table
