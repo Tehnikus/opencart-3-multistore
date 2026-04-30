@@ -1037,12 +1037,19 @@ html[dir="rtl"] .text-right {
     }
     & .input-group-addon {
         display: flex;
-        min-width: 40px;
+        min-width: 30px;
         align-items: center;
         justify-content: center;
         height: auto;
-        padding: 8px 11px;
+        padding: 4px 6px;
         font-size: 1.5rem;
+    }
+    & input, & textarea {
+        font-weight: 600;
+        &::placeholder {
+            font-weight: normal;
+            color: #999;
+        }
     }
 }
 
