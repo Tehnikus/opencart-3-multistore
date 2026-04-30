@@ -290,6 +290,8 @@ $_['button_copy_to_meta_title']     = 'Copy to Meta title';
 $_['button_copy_to_h1']             = 'Copy to H1';
 $_['button_translate']              = 'Translate from default language';
 $_['button_add_lang_postfix']       = 'Add language postfix to URL';
+$_['button_emoji']                  = 'Emoji';
+$_['button_paste_from_adjacent_store'] = 'Paste value from adjacent store';
 
 // Common inputs translations
 $_['entry_status']                  = 'Status';
