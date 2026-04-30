@@ -482,7 +482,7 @@ class ModelCatalogProduct extends Model {
 	}
 
 	public function getProducts($data = []) : array {
-		$data 			= array_filter($data); // Remove empty array entries 
+		$data 			= array_filter($data, fn($v) => $v !== '' && $v !== null); // Remove empty array entries, skipping zero, as zero is also a value
 		$store_id 	= (int) $this->config->get('config_store_id');
 		$filters 		= [];
 		$facets 		= [];
