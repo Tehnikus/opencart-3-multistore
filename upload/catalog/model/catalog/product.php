@@ -536,6 +536,11 @@ class ModelCatalogProduct extends Model {
 			}
 		}
 
+		// Fallback if $facets is empty, so SQL query is not broken
+		if (empty($facets)) {
+			return [];
+		}
+
 		$where[] = "(" . implode(" OR ", $facets) . ")";
 		$where[] = "store_id = {$store_id}";
 
