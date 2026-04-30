@@ -226,7 +226,7 @@ class ModelCatalogProduct extends Model {
 
 				(
 					SELECT JSON_OBJECTAGG(
-						pi.product_image_id, JSON_OBJECT(
+						pi.image_id, JSON_OBJECT(
 							'image', 			pi.`image`,
 							'sort_order', pi.`sort_order`
 						)
