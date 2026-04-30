@@ -93,7 +93,7 @@ class ModelCatalogManufacturer extends Model {
 			$this->db->query("
 				UPDATE " . DB_PREFIX . "manufacturer 
 				SET 
-					`name` 				= '" . $this->db->escape($data['name']) . "', 
+					`name` 				= '" . $this->db->escape($data['manufacturer_description'][(int) $this->config->get('config_language_id')]['name']) . "', 
 					`sort_order` 	= '" . (int) $data['sort_order'] . "',
 					`image` 			= '" . (isset($data['image']) ? ($this->db->escape($data['image'])) : '') . "'
 				WHERE manufacturer_id = '" . (int)$manufacturer_id . "'
