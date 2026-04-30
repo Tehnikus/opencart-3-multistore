@@ -561,7 +561,7 @@ class ModelCatalogProduct extends Model {
 				$data['limit'] = 20;
 			}
 
-			$limit = " LIMIT " . (int) $data['start'] . "," . (int) $data['limit'];
+			$limit = " LIMIT " . (int) $data['limit'] . " OFFSET " . (int) $data['start'];
 		}
 
 		// Main query. Get product ids, sort, limit
