@@ -482,124 +482,313 @@ class ModelCatalogProduct extends Model {
 		return $product;
 	}
 
-	public function getProducts($data = []) : array {
-		$data 			= array_filter($data, fn($v) => $v !== '' && $v !== null); // Remove empty array entries, skipping zero, as zero is also a value
-		$store_id 	= (int) $this->config->get('config_store_id');
-		$filters 		= [];
-		$facets 		= [];
-		$where 			= [];
-		$order 			= '';
-		$limit			= '';
-		$products 	= [];
-		$sortOrders = $this->getSortOrders(); // Allowed sort orders
+	// public function getProducts($data = []) : array {
+	// 	$data 			= array_filter($data, fn($v) => $v !== '' && $v !== null); // Remove empty array entries, skipping zero, as zero is also a value
+	// 	$store_id 	= (int) $this->config->get('config_store_id');
+	// 	$filters 		= [];
+	// 	$facets 		= [];
+	// 	$where 			= [];
+	// 	$order 			= '';
+	// 	$limit			= '';
+	// 	$products 	= [];
+	// 	$sortOrders = $this->getSortOrders(); // Allowed sort orders
 
-		// Facet filters
-		foreach ($data as $filterKey => $filterData) {
-			if (str_starts_with($filterKey, 'filter_') && !empty($filterData)) {
-				$filters[$filterKey] = $filterData;
-			}
-		}
+	// 	// Facet filters
+	// 	foreach ($data as $filterKey => $filterData) {
+	// 		if (str_starts_with($filterKey, 'filter_') && !empty($filterData)) {
+	// 			$filters[$filterKey] = $filterData;
+	// 		}
+	// 	}
 
-		foreach ($filters as $filterKey => $filter) {
+	// 	foreach ($filters as $filterKey => $filter) {
 			
-			// Sanitize and unique facet ids
-			$filterIds = array_values(array_unique(array_map('intval', explode(',', $filter))));
+	// 		// Sanitize and unique facet ids
+	// 		$filterIds = array_values(array_unique(array_map('intval', explode(',', $filter))));
 
-			if ($filterKey === 'filter_category_id') {
-				$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 1)";
-			}
-			if ($filterKey === 'filter_filter') {
-				$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 2)";
-			}
-			if ($filterKey === 'filter_option') {
-				$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 3)";
-			}
-			if ($filterKey === 'filter_attribute') {
-				$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 4)";
-			}
-			if ($filterKey === 'filter_manufacturer_id') {
-				$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 5)";
-			}
-			if ($filterKey === 'filter_tag') {
-				$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 6)";
-			}
-			if ($filterKey === 'filter_supplier') {
-				$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 7)";
-			}
-			if ($filterKey === 'filter_is_available') {
-				$facets[] = "(facet_value_id = 1 AND facet_type = 8)";
-			}
-			if ($filterKey === 'filter_has_discount') {
-				$facets[] = "(facet_value_id = 1 AND facet_type = 9)";
-			}
-			if ($filterKey === 'filter_is_featured') {
-				$facets[] = "(facet_value_id = 1 AND facet_type = 10)";
-			}
-		}
+	// 		if ($filterKey === 'filter_category_id') {
+	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 1)";
+	// 		}
+	// 		if ($filterKey === 'filter_filter') {
+	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 2)";
+	// 		}
+	// 		if ($filterKey === 'filter_option') {
+	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 3)";
+	// 		}
+	// 		if ($filterKey === 'filter_attribute') {
+	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 4)";
+	// 		}
+	// 		if ($filterKey === 'filter_manufacturer_id') {
+	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 5)";
+	// 		}
+	// 		if ($filterKey === 'filter_tag') {
+	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 6)";
+	// 		}
+	// 		if ($filterKey === 'filter_supplier') {
+	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 7)";
+	// 		}
+	// 		if ($filterKey === 'filter_is_available') {
+	// 			$facets[] = "(facet_value_id = 1 AND facet_type = 8)";
+	// 		}
+	// 		if ($filterKey === 'filter_has_discount') {
+	// 			$facets[] = "(facet_value_id = 1 AND facet_type = 9)";
+	// 		}
+	// 		if ($filterKey === 'filter_is_featured') {
+	// 			$facets[] = "(facet_value_id = 1 AND facet_type = 10)";
+	// 		}
+	// 	}
 
-		// Fallback if $facets is empty, so SQL query is not broken
-		if (empty($facets)) {
+	// 	// Fallback if $facets is empty, so SQL query is not broken
+	// 	if (empty($facets)) {
+	// 		return [];
+	// 	}
+
+	// 	$where[] = "(" . implode(" OR ", $facets) . ")";
+	// 	$where[] = "store_id = {$store_id}";
+
+	// 	// Sort order
+	// 	$sortOrder = $data['sort'] ?? $this->config->get('config_default_product_sort') ?? 'sort_order';
+	// 	if (in_array($sortOrder, array_keys($sortOrders))) {
+	// 		$order = $sortOrders[$sortOrder];
+	// 	} else {
+	// 		$order = 'sort_order';
+	// 	}
+
+	// 	if (isset($data['start']) || isset($data['limit'])) {
+	// 		if (!isset($data['start']) || $data['start'] < 0) {
+	// 			$data['start'] = 0;
+	// 		}
+
+	// 		if (!isset($data['limit']) || $data['limit'] < 1) {
+	// 			$data['limit'] = 20;
+	// 		}
+
+	// 		$limit = " LIMIT " . (int) $data['limit'] . " OFFSET " . (int) $data['start'];
+	// 	}
+
+	// 	// Main query. Get product ids, sort, limit
+	// 	$sql = "
+	// 		WITH facet_temp (`product_id`, `facet_type`, `facet_group_id`) AS (
+	// 			SELECT
+	// 				`product_id`, `facet_type`, `facet_group_id`
+	// 			FROM " . DB_PREFIX . "facet_index
+	// 			WHERE " . implode(" AND ", $where) . "
+	// 			ORDER BY NULL
+	// 		),
+
+	// 		group_count AS (
+	// 			SELECT COUNT(DISTINCT `facet_type`, `facet_group_id`) AS cnt
+	// 			FROM `facet_temp`
+	// 			ORDER BY NULL
+	// 		)
+
+	// 		SELECT 
+	// 			f.`product_id`
+	// 		FROM facet_temp f
+	// 		LEFT JOIN " . DB_PREFIX . "facet_sort pst
+	// 			ON  pst.`product_id` = f.`product_id`
+	// 			AND pst.`store_id` 	 = {$store_id}
+
+	// 		GROUP BY f.`product_id`
+	// 		HAVING COUNT(DISTINCT f.`facet_type`, f.`facet_group_id`) = (SELECT `cnt` FROM group_count)
+	// 		ORDER BY {$order}
+	// 		{$limit}
+	// 	";
+
+	// 	$productRows = $this->db->query($sql)->rows;
+	// 	foreach ($productRows as $row) {
+	// 		$products[] = $this->getProduct((int) $row['product_id']);
+	// 	}
+
+	// 	return $products;
+	// }
+
+	/**
+	 * Get products list
+	 * Includes both facet filter and FULLTEXT search
+	 * @param array $data The array of filters and search words
+	 * @return array<array|bool>
+	 */
+	public function getProducts(array $data = []) : array {
+
+    $data     = array_filter($data, fn($v) => $v !== '' && $v !== null);
+    $store_id = (int)$this->config->get('config_store_id');
+    $facets   = [];
+    $where    = [];
+
+    // Facet map
+    $facetMap = $this->facetTypes;
+    
+		// Facet filter
+		// Prepare requests by facet types present in $data 
+    foreach ($facetMap as $key => $type) {
+			if (!empty($data[$key])) {
+				if (!in_array($type, [8, 9, 10])) {
+					// Facet types that may have multiple values
+					$ids      = array_values(array_unique(array_map('intval', explode(',', $data[$key]))));
+					$facets[] = "(facet_value_id IN(" . implode(',', $ids) . ") AND facet_type = {$type})";
+				} else {
+					// Facet types that have only one value - 0 or 1
+					$facets[] = "(facet_value_id = 1 AND facet_type = {$type})";
+				}
+			}
+    }
+
+    // Fulltext search query
+    $hasSearch   = !empty($data['filter_name']);
+    $searchCTE   = '';
+    $searchJoin  = '';
+
+    if ($hasSearch) {
+			$language_id = (int)$this->config->get('config_language_id');
+			$boolQuery   = $this->buildBooleanQuery($data['filter_name'], true);  // AND mode
+
+			// Create MATCH expression, used in SELECT and in WHERE
+			$matchExpr = "
+				MATCH(`name`)         AGAINST('{$boolQuery}' IN BOOLEAN MODE) * 10 +
+				MATCH(`manufacturer`) AGAINST('{$boolQuery}' IN BOOLEAN MODE) * 5  +
+				MATCH(`category`)     AGAINST('{$boolQuery}' IN BOOLEAN MODE) * 3  +
+				MATCH(`extra`)        AGAINST('{$boolQuery}' IN BOOLEAN MODE) * 1
+			";
+
+			$searchCTE = "
+				search_results AS (
+					SELECT
+						`product_id`,
+						({$matchExpr}) AS relevance
+					FROM `" . DB_PREFIX . "product_search_index`
+					WHERE `language_id` = {$language_id}
+						AND `store_id`    = {$store_id}
+						AND ({$matchExpr}) > 0
+				),
+			";
+
+			// INNER JOIN - products must match both search and facets 
+			$searchJoin = "JOIN search_results sr ON sr.product_id = f.product_id";
+    }
+
+    // Precaution: at least one filter type must be present
+    if (empty($facets) && !$hasSearch) {
 			return [];
-		}
+    }
 
-		$where[] = "(" . implode(" OR ", $facets) . ")";
-		$where[] = "store_id = {$store_id}";
+    // WHERE expression for facet filter
+    $where[] = "store_id = {$store_id}";
+    if (!empty($facets)) {
+			$where[] = "(" . implode(" OR ", $facets) . ")";
+    }
 
-		// Sort order
-		$sortOrder = $data['sort'] ?? $this->config->get('config_default_product_sort') ?? 'sort_order';
-		if (in_array($sortOrder, array_keys($sortOrders))) {
-			$order = $sortOrders[$sortOrder];
-		} else {
-			$order = 'sort_order';
-		}
+    // Sort order
+    $sortOrders  = $this->getSortOrders(); // includes 'relevance' => 'sr.relevance DESC'
+    $sortKey     = $data['sort'] ?? $this->config->get('config_default_product_sort') ?? 'sort_order';
 
-		if (isset($data['start']) || isset($data['limit'])) {
-			if (!isset($data['start']) || $data['start'] < 0) {
-				$data['start'] = 0;
-			}
+    if ($hasSearch && $sortKey === 'relevance') {
+			// Default sort order for search is relevance
+			$order = 'sr.relevance DESC';
+    } elseif (in_array($sortKey, array_keys($sortOrders))) {
+			// User selected sort order 
+			$order = $sortOrders[$sortKey];
+    } else {
+			// Else default sort order is sort_order
+			$order = 'pst.sort_order ASC';
+    }
 
-			if (!isset($data['limit']) || $data['limit'] < 1) {
-				$data['limit'] = 20;
-			}
+    // Pagination
+    $start = max(0, (int)($data['start'] ?? 0));
+    $limit = max(1, (int)($data['limit'] ?? 20));
 
-			$limit = " LIMIT " . (int) $data['limit'] . " OFFSET " . (int) $data['start'];
-		}
+    // If no facet selected then search all products in store
+    if (!empty($facets)) {
+			$facetCTE = "
+				facet_temp AS (
+					SELECT `product_id`, `facet_type`, `facet_group_id`
+					FROM `" . DB_PREFIX . "facet_index`
+					WHERE " . implode(" AND ", $where) . "
+				),
+				group_count AS (
+					SELECT COUNT(DISTINCT `facet_type`, `facet_group_id`) AS cnt
+					FROM facet_temp
+				)
+			";
+			$havingClause = "HAVING COUNT(DISTINCT f.`facet_type`, f.`facet_group_id`) = (SELECT cnt FROM group_count)";
+			$facetFrom    = "FROM facet_temp f";
+    } else {
+			// Search without facets - HAVING clause is not needed
+			$facetCTE     = "group_count AS (SELECT 0 AS cnt)";
+			$havingClause = '';
+			$facetFrom    = "FROM search_results f";
+    }
 
-		// Main query. Get product ids, sort, limit
-		$sql = "
-			WITH facet_temp (`product_id`, `facet_type`, `facet_group_id`) AS (
-				SELECT
-					`product_id`, `facet_type`, `facet_group_id`
-				FROM " . DB_PREFIX . "facet_index
-				WHERE " . implode(" AND ", $where) . "
-				ORDER BY NULL
-			),
+		// Main query
+    $sql = "
+			WITH
+				{$searchCTE}
+				{$facetCTE}
 
-			group_count AS (
-				SELECT COUNT(DISTINCT `facet_type`, `facet_group_id`) AS cnt
-				FROM `facet_temp`
-				ORDER BY NULL
-			)
-
-			SELECT 
-				f.`product_id`
-			FROM facet_temp f
-			LEFT JOIN " . DB_PREFIX . "facet_sort pst
+			SELECT f.`product_id`
+			{$facetFrom}
+			{$searchJoin}
+			LEFT JOIN `" . DB_PREFIX . "facet_sort` pst
 				ON  pst.`product_id` = f.`product_id`
-				AND pst.`store_id` 	 = {$store_id}
-
+				AND pst.`store_id`   = {$store_id}
 			GROUP BY f.`product_id`
-			HAVING COUNT(DISTINCT f.`facet_type`, f.`facet_group_id`) = (SELECT `cnt` FROM group_count)
+			{$havingClause}
 			ORDER BY {$order}
-			{$limit}
-		";
+			LIMIT {$limit} OFFSET {$start}
+    ";
 
-		$productRows = $this->db->query($sql)->rows;
-		foreach ($productRows as $row) {
+    $productRows = $this->db->query($sql)->rows;
+
+		// Get product data
+    $products = [];
+    foreach ($productRows as $row) {
 			$products[] = $this->getProduct((int) $row['product_id']);
+    }
+
+    return $products;
+	}
+
+	/**
+	 * Build BOOLEAN MODE expression from search string:
+	 * "red sweater"  =>  "+red* +sweater*" (AND)
+	 * "red sweater"  =>  "red* sweater*"   (OR)
+	 */
+	private function buildBooleanQuery(string $query, bool $and = true): string {
+		$words = $this->tokenize($query);
+
+		if (empty($words)) {
+			return '';
 		}
 
-		return $products;
+		$prefix = $and ? '+' : '';
+
+		return implode(
+			' ',
+			array_map(
+				fn(string $w) => $prefix . $this->db->escape($w) . '*',
+				$words
+			)
+		);
+	}
+
+	/**
+	 * Tokenize: clear reserved symbols for BOOLEAN MODE, lowercase, filter short words, only unique words
+	 * Minimal word lenght must match ngram_token_size in my.cnf (default 2).
+	 */
+	private function tokenize(string $query, int $min_length = 2): array {
+		// Remove BOOLEAN MODE reserved symbols
+		$query = str_replace(['+', '-', '>', '<', '(', ')', '~', '*', '"', '@', '\\'], ' ', $query);
+
+		$words = explode(' ', mb_strtolower(trim($query)));
+
+		// Only unique words
+		return array_values(
+			array_unique(
+				array_filter(
+					$words,
+					fn(string $w) => mb_strlen($w) >= $min_length
+				)
+			)
+		);
 	}
 	
 	public function getProductSpecials($data = []) : array {
