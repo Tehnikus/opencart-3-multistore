@@ -27,7 +27,7 @@ class ModelCatalogProduct extends Model {
 				+ (pst.`rating_avg` * LOG(pst.`review_count` + 1)) * EXP(-0.02 * DATEDIFF(NOW(), COALESCE(pst.`date_last_review`, NOW()))) DESC, 
 				pst.`sort_order` ASC
 			',
-			'relevance'  			=> 'sr.relevance DESC',
+			'relevance'  			=> 'f.`relevance` DESC',
 			// 'name'						=> 'pd.`name` ASC',
 			// 'quantity'				=> 'p.`quantity` > p.`minimum` DESC, pst.`sort_order` ASC',
 		];
