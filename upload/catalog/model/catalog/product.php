@@ -797,6 +797,18 @@ class ModelCatalogProduct extends Model {
 		return $productData;
 	}
 
+	public function getPopularProducts($data) {
+		$data['sort'] = 'trends_by_date';
+		$productData = $this->getProducts($data);
+		return $productData;
+	}
+
+	public function getBestSellerProducts($data) : array {
+		$data['sort'] = 'sales';
+		$productData = $this->getProducts($data);
+		return $productData;
+	}
+
 	public function getProductAttributes($product_id) : array {
 		$product = $this->getProduct($product_id);
 		$attributes = $product['attributes'] ?? [];
