@@ -835,11 +835,27 @@ class ModelCatalogProduct extends Model {
 		return $images;
 	}
 
+	// Related products list in the bottom of product page
 	public function getProductRelated($product_id) {
 		$product_data = array();
 
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_related pr LEFT JOIN " . DB_PREFIX . "product p ON (pr.related_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pr.product_id = '" . (int)$product_id . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'");
+		// Get product related ids
+		$query = $this->db->query("
+			SELECT 
+				pr.related_id 
+			FROM " . DB_PREFIX . "product_related pr 
+			JOIN " . DB_PREFIX . "product p 
+				ON p.product_id = pr.related_id
+				AND p.status 		= 1
+			JOIN " . DB_PREFIX . "product_to_store p2s 
+				ON p2s.product_id = pr.product_id
+				AND p2s.store_id  = pr.store_id
+				AND p2s.status 		= 1
+			WHERE pr.product_id = '" . (int) $product_id . "' 
+				AND pr.store_id 	= '" . (int) $this->config->get('config_store_id') . "'
+		");
 
+		// Get products data
 		foreach ($query->rows as $result) {
 			$product_data[$result['related_id']] = $this->getProduct($result['related_id']);
 		}
