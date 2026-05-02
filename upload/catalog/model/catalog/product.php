@@ -791,7 +791,7 @@ class ModelCatalogProduct extends Model {
 		return $productData;
 	}
 
-	public function getLatestProducts($limit) {
+	public function getLatestProducts($data) {
 		$data['sort'] = 'date_added';
 		$productData = $this->getProducts($data);
 		return $productData;
