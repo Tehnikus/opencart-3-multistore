@@ -610,13 +610,13 @@ class ModelCatalogProduct extends Model {
 	 */
 	public function getProducts(array $data = []) : array {
 
-    $data     = array_filter($data, fn($v) => $v !== '' && $v !== null);
-    $store_id = (int)$this->config->get('config_store_id');
-    $facets   = [];
-    $where    = [];
-
-    // Facet map
-    $facetMap = $this->facetTypes;
+    $data     	= array_filter($data, fn($v) => $v !== '' && $v !== null);
+    $store_id 	= (int)$this->config->get('config_store_id');
+    $facets   	= [];
+    $where    	= [];
+		$cteList 		= [];
+    $sortOrders = $this->getSortOrders(); // includes 'relevance' => 'sr.relevance DESC'
+    $facetMap 	= $this->facetTypes;
     
 		// Facet filter
 		// Prepare requests by facet types present in $data 
@@ -633,72 +633,42 @@ class ModelCatalogProduct extends Model {
 			}
     }
 
-    // Fulltext search query
-    $hasSearch   = !empty($data['filter_name']);
-    $searchCTE   = '';
-    $searchJoin  = '';
+    // Flags to toggle different CTEs and JOINS
+		$hasSearch = !empty($data['filter_name']);
+		$hasFacets = !empty($facets);
 
-    if ($hasSearch) {
+		// Precaution: at least one filter type must be present
+		if (!$hasFacets && !$hasSearch) {
+			return [];
+		}
+
+		if ($hasSearch) {
 			$language_id = (int)$this->config->get('config_language_id');
-			$boolQuery   = $this->buildBooleanQuery($data['filter_name'], true);  // AND mode
+			$boolQuery   = $this->buildSearchQuery($data['filter_name']);
 
-			// Create MATCH expression, used in SELECT and in WHERE
 			$matchExpr = "
-				MATCH(`name`)         AGAINST('{$boolQuery}' IN BOOLEAN MODE) * 10 +
-				MATCH(`manufacturer`) AGAINST('{$boolQuery}' IN BOOLEAN MODE) * 5  +
-				MATCH(`category`)     AGAINST('{$boolQuery}' IN BOOLEAN MODE) * 3  +
-				MATCH(`extra`)        AGAINST('{$boolQuery}' IN BOOLEAN MODE) * 1
+				MATCH(`name`)         AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 10 +
+				MATCH(`manufacturer`) AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 5  +
+				MATCH(`category`)     AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 5  +
+				MATCH(`extra`)        AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 1
 			";
 
-			$searchCTE = "
+			$cteList[] = "
 				search_results AS (
-					SELECT
-						`product_id`,
-						({$matchExpr}) AS relevance
+					SELECT `product_id`, ({$matchExpr}) AS relevance
 					FROM `" . DB_PREFIX . "product_search_index`
 					WHERE `language_id` = {$language_id}
 						AND `store_id`    = {$store_id}
 						AND ({$matchExpr}) > 0
-				),
+				)
 			";
+		}
 
-			// INNER JOIN - products must match both search and facets 
-			$searchJoin = "JOIN search_results sr ON sr.product_id = f.product_id";
-    }
+		if ($hasFacets) {
+			$where[]   = "store_id = {$store_id}";
+			$where[]   = "(" . implode(" OR ", $facets) . ")";
 
-    // Precaution: at least one filter type must be present
-    if (empty($facets) && !$hasSearch) {
-			return [];
-    }
-
-    // WHERE expression for facet filter
-    $where[] = "store_id = {$store_id}";
-    if (!empty($facets)) {
-			$where[] = "(" . implode(" OR ", $facets) . ")";
-    }
-
-    // Sort order
-    $sortOrders  = $this->getSortOrders(); // includes 'relevance' => 'sr.relevance DESC'
-    $sortKey     = $data['sort'] ?? $this->config->get('config_default_product_sort') ?? 'sort_order';
-
-    if ($hasSearch && $sortKey === 'relevance') {
-			// Default sort order for search is relevance
-			$order = 'sr.relevance DESC';
-    } elseif (in_array($sortKey, array_keys($sortOrders))) {
-			// User selected sort order 
-			$order = $sortOrders[$sortKey];
-    } else {
-			// Else default sort order is sort_order
-			$order = 'pst.sort_order ASC';
-    }
-
-    // Pagination
-    $start = max(0, (int)($data['start'] ?? 0));
-    $limit = max(1, (int)($data['limit'] ?? 20));
-
-    // If no facet selected then search all products in store
-    if (!empty($facets)) {
-			$facetCTE = "
+			$cteList[] = "
 				facet_temp AS (
 					SELECT `product_id`, `facet_type`, `facet_group_id`
 					FROM `" . DB_PREFIX . "facet_index`
@@ -709,32 +679,66 @@ class ModelCatalogProduct extends Model {
 					FROM facet_temp
 				)
 			";
+		}
+
+		// FROM / JOIN
+		// f. always points on main data source:
+		// if search is present => f.search_results (with f.relevance sort available)
+		// if only facets => f.facet_temp
+		if ($hasSearch) {
+			$from         = "FROM search_results f";
+			$facetJoin    = $hasFacets
+				? "JOIN facet_temp ft ON ft.`product_id` = f.`product_id`"
+				: "";
+			$havingClause = $hasFacets
+				? "HAVING COUNT(DISTINCT ft.`facet_type`, ft.`facet_group_id`) = (SELECT cnt FROM group_count)"
+				: "";
+		} else {
+			$from         = "FROM facet_temp f";
+			$facetJoin    = "";
 			$havingClause = "HAVING COUNT(DISTINCT f.`facet_type`, f.`facet_group_id`) = (SELECT cnt FROM group_count)";
-			$facetFrom    = "FROM facet_temp f";
-    } else {
-			// Search without facets - HAVING clause is not needed
-			$facetCTE     = "group_count AS (SELECT 0 AS cnt)";
-			$havingClause = '';
-			$facetFrom    = "FROM search_results f";
-    }
+		}
+
+		// GROUP BY
+		// f.relevance is added only when search is present
+		// MySQL ONLY_FULL_GROUP_BY requires non-aggregatet columns fromSELECT to be present in GROUP BY
+		$groupBy = $hasSearch
+			? "GROUP BY f.`product_id`, f.`relevance`"
+			: "GROUP BY f.`product_id`";
+
+		// ORDER BY 
+		$sortKey = $data['sort'] 
+			?? ($hasSearch ? 'relevance' : $this->config->get('config_default_product_sort')) 
+			?? 'sort_order';
+
+		if ($hasSearch && $sortKey === 'relevance') {
+			$order = 'f.`relevance` DESC';
+		} elseif (in_array($sortKey, array_keys($sortOrders))) {
+			$order = $sortOrders[$sortKey];
+		} else {
+			$order = 'pst.`sort_order` ASC';
+		}
+
+		// Pagination
+		$start = max(0, (int)($data['start'] ?? 0));
+		$limit = max(1, (int)($data['limit'] ?? 20));
 
 		// Main query
-    $sql = "
-			WITH
-				{$searchCTE}
-				{$facetCTE}
-
+		$sql = "
+			WITH " . implode(',', $cteList) . "
 			SELECT f.`product_id`
-			{$facetFrom}
-			{$searchJoin}
+			{$from}
+			{$facetJoin}
 			LEFT JOIN `" . DB_PREFIX . "facet_sort` pst
 				ON  pst.`product_id` = f.`product_id`
 				AND pst.`store_id`   = {$store_id}
-			GROUP BY f.`product_id`
+			{$groupBy}
 			{$havingClause}
 			ORDER BY {$order}
 			LIMIT {$limit} OFFSET {$start}
-    ";
+		";
+
+		// echo '<pre>' . htmlspecialchars(print_r($sql, true)) . '</pre>';
 
     $productRows = $this->db->query($sql)->rows;
 
