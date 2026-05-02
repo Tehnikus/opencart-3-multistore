@@ -873,8 +873,15 @@ class ModelCatalogProduct extends Model {
 		}
 	}
 
+	// Only used in google_base.php
 	public function getCategories($product_id) {
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "'");
+		$query = $this->db->query("
+			SELECT 
+				* 
+			FROM " . DB_PREFIX . "product_to_category 
+			WHERE product_id = '" . (int) $product_id . "'
+				AND store_id = '" . (int) $this->config->get('config_store_id') . "'
+		");
 
 		return $query->rows;
 	}
