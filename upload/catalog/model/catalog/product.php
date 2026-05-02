@@ -756,22 +756,12 @@ class ModelCatalogProduct extends Model {
 	 * "red sweater"  =>  "+red* +sweater*" (AND)
 	 * "red sweater"  =>  "red* sweater*"   (OR)
 	 */
-	private function buildBooleanQuery(string $query, bool $and = true): string {
+	private function buildSearchQuery(string $query): string {
 		$words = $this->tokenize($query);
-
-		if (empty($words)) {
-			return '';
-		}
-
-		$prefix = $and ? '+' : '';
-
-		return implode(
-			' ',
-			array_map(
-				fn(string $w) => $prefix . $this->db->escape($w) . '*',
-				$words
-			)
-		);
+		return implode(' ', array_map(
+			fn(string $w) => $this->db->escape($w),
+			$words
+		));
 	}
 
 	/**
