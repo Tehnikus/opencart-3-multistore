@@ -573,55 +573,200 @@ class ModelCatalogProduct extends Model {
     return (int) $result['total'] ?? 0;
 	}
 
+	// public function getProducts(array $data = []) : array {
+
+  //   $data     	= array_filter($data, fn($v) => $v !== '' && $v !== null);
+  //   $store_id 	= (int)$this->config->get('config_store_id');
+  //   $facets   	= [];
+  //   $where    	= [];
+	// 	 $cteList 		= [];
+  //   $sortOrders = $this->getSortOrders(); // includes 'relevance' => 'sr.relevance DESC'
+  //   $facetMap 	= $this->facetTypes;
+    
+	// 	// Facet filter
+	// 	// Prepare requests by facet types present in $data 
+  //   foreach ($facetMap as $key => $type) {
+	// 		if (!empty($data[$key])) {
+	// 			if (!in_array($type, [8, 9, 10])) {
+	// 				// Facet types that may have multiple values
+	// 				$ids      = array_values(array_unique(array_map('intval', explode(',', $data[$key]))));
+	// 				$facets[] = "(facet_value_id IN(" . implode(',', $ids) . ") AND facet_type = {$type})";
+	// 			} else {
+	// 				// Facet types that have only one value - 0 or 1
+	// 				$facets[] = "(facet_value_id = 1 AND facet_type = {$type})";
+	// 			}
+	// 		}
+  //   }
+
+  //   // Flags to toggle different CTEs and JOINS
+	// 	$hasSearch = !empty($data['filter_name']);
+	// 	$hasFacets = !empty($facets);
+
+	// 	// Precaution: at least one filter type must be present
+	// 	if (!$hasFacets && !$hasSearch) {
+	// 		return [];
+	// 	}
+
+	// 	if ($hasSearch) {
+	// 		$language_id = (int)$this->config->get('config_language_id');
+	// 		$boolQuery   = $this->buildSearchQuery($data['filter_name']);
+
+	// 		$matchExpr = "
+	// 			MATCH(`name`)         AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 10 +
+	// 			MATCH(`manufacturer`) AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 5  +
+	// 			MATCH(`category`)     AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 5  +
+	// 			MATCH(`extra`)        AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 1
+	// 		";
+
+	// 		$cteList[] = "
+	// 			search_results AS (
+	// 				SELECT `product_id`, ({$matchExpr}) AS relevance
+	// 				FROM `" . DB_PREFIX . "product_search_index`
+	// 				WHERE `language_id` = {$language_id}
+	// 					AND `store_id`    = {$store_id}
+	// 					AND ({$matchExpr}) > 0
+	// 			)
+	// 		";
+	// 	}
+
+	// 	if ($hasFacets) {
+	// 		$where[]   = "store_id = {$store_id}";
+	// 		$where[]   = "(" . implode(" OR ", $facets) . ")";
+
+	// 		$cteList[] = "
+	// 			facet_temp AS (
+	// 				SELECT `product_id`, `facet_type`, `facet_group_id`
+	// 				FROM `" . DB_PREFIX . "facet_index`
+	// 				WHERE " . implode(" AND ", $where) . "
+	// 			),
+	// 			group_count AS (
+	// 				SELECT COUNT(DISTINCT `facet_type`, `facet_group_id`) AS cnt
+	// 				FROM facet_temp
+	// 			)
+	// 		";
+	// 	}
+
+	// 	// FROM / JOIN
+	// 	// f. always points on main data source:
+	// 	// if search is present => f.search_results (with f.relevance sort available)
+	// 	// if only facets => f.facet_temp
+	// 	if ($hasSearch) {
+	// 		$from         = "FROM search_results f";
+	// 		$facetJoin    = $hasFacets
+	// 			? "JOIN facet_temp ft ON ft.`product_id` = f.`product_id`"
+	// 			: "";
+	// 		$havingClause = $hasFacets
+	// 			? "HAVING COUNT(DISTINCT ft.`facet_type`, ft.`facet_group_id`) = (SELECT cnt FROM group_count)"
+	// 			: "";
+	// 	} else {
+	// 		$from         = "FROM facet_temp f";
+	// 		$facetJoin    = "";
+	// 		$havingClause = "HAVING COUNT(DISTINCT f.`facet_type`, f.`facet_group_id`) = (SELECT cnt FROM group_count)";
+	// 	}
+
+	// 	// GROUP BY
+	// 	// f.relevance is added only when search is present
+	// 	// MySQL ONLY_FULL_GROUP_BY requires non-aggregatet columns fromSELECT to be present in GROUP BY
+	// 	$groupBy = $hasSearch
+	// 		? "GROUP BY f.`product_id`, f.`relevance`"
+	// 		: "GROUP BY f.`product_id`";
+
+	// 	// ORDER BY 
+	// 	$sortKey = $data['sort'] 
+	// 		?? ($hasSearch ? 'relevance' : $this->config->get('config_default_product_sort')) 
+	// 		?? 'sort_order';
+
+	// 	if ($hasSearch && $sortKey === 'relevance') {
+	// 		$order = 'f.`relevance` DESC';
+	// 	} elseif (in_array($sortKey, array_keys($sortOrders))) {
+	// 		$order = $sortOrders[$sortKey];
+	// 	} else {
+	// 		$order = 'pst.`sort_order` ASC';
+	// 	}
+
+	// 	// Pagination
+	// 	$start = max(0, (int)($data['start'] ?? 0));
+	// 	$limit = max(1, (int)($data['limit'] ?? 20));
+
+	// 	// Main query
+	// 	$sql = "
+	// 		WITH " . implode(',', $cteList) . "
+	// 		SELECT 
+	// 			f.`product_id`,
+	// 			COUNT(*) OVER() AS total_count
+	// 		{$from}
+	// 		{$facetJoin}
+	// 		LEFT JOIN `" . DB_PREFIX . "facet_sort` pst
+	// 			ON  pst.`product_id` = f.`product_id`
+	// 			AND pst.`store_id`   = {$store_id}
+	// 		{$groupBy}
+	// 		{$havingClause}
+	// 		ORDER BY {$order}
+	// 		LIMIT {$limit} OFFSET {$start}
+	// 	";
+
+	// 	// echo '<pre>' . htmlspecialchars(print_r($sql, true)) . '</pre>';
+
+  //   $productRows = $this->db->query($sql)->rows;
+
+	// 	// Get product data
+  //   $products = [];
+  //   foreach ($productRows as $row) {
+	// 		$products[] = $this->getProduct((int) $row['product_id']);
+  //   }
+
+  //   return $products;
+	// }
+
 	/**
 	 * Returns total number of products matching the given filters and search query.
 	 * Used for pagination.
 	 * @return int
 	 */
-	public function getTotalProducts(array $data = []) : int {
-		$data     = array_filter($data, fn($v) => $v !== '' && $v !== null);
-		$store_id = (int)$this->config->get('config_store_id');
-		$facets   = [];
-		$where    = [];
+	// public function getTotalProducts(array $data = []) : int {
+	// 	$data     = array_filter($data, fn($v) => $v !== '' && $v !== null);
+	// 	$store_id = (int)$this->config->get('config_store_id');
+	// 	$facets   = [];
+	// 	$where    = [];
 
-		foreach ($this->facetTypes as $key => $type) {
-			if (!empty($data[$key])) {
-				if (!in_array($type, [8, 9, 10])) {
-					$ids      = array_values(array_unique(array_map('intval', explode(',', $data[$key]))));
-					$facets[] = "(facet_value_id IN(" . implode(',', $ids) . ") AND facet_type = {$type})";
-				} else {
-					$facets[] = "(facet_value_id = 1 AND facet_type = {$type})";
-				}
-			}
-		}
+	// 	foreach ($this->facetTypes as $key => $type) {
+	// 		if (!empty($data[$key])) {
+	// 			if (!in_array($type, [8, 9, 10])) {
+	// 				$ids      = array_values(array_unique(array_map('intval', explode(',', $data[$key]))));
+	// 				$facets[] = "(facet_value_id IN(" . implode(',', $ids) . ") AND facet_type = {$type})";
+	// 			} else {
+	// 				$facets[] = "(facet_value_id = 1 AND facet_type = {$type})";
+	// 			}
+	// 		}
+	// 	}
 
-		$hasSearch = !empty($data['filter_name']);
-		$hasFacets = !empty($facets);
+	// 	$hasSearch = !empty($data['filter_name']);
+	// 	$hasFacets = !empty($facets);
 
-		if (!$hasFacets && !$hasSearch) {
-			return 0;
-		}
+	// 	if (!$hasFacets && !$hasSearch) {
+	// 		return 0;
+	// 	}
 
-		[$cteList, $from, $facetJoin, $havingClause] = $this->buildQueryParts(
-				$data, $store_id, $facets, $where, $hasSearch, $hasFacets
-		);
+	// 	[$cteList, $from, $facetJoin, $havingClause] = $this->buildQueryParts(
+	// 			$data, $store_id, $facets, $where, $hasSearch, $hasFacets
+	// 	);
 
-		$sql = "
-			WITH " . implode(',', $cteList) . "
-			SELECT COUNT(*) AS total FROM (
-				SELECT f.`product_id`
-				{$from}
-				{$facetJoin}
-				LEFT JOIN `" . DB_PREFIX . "facet_sort` pst
-					ON  pst.`product_id` = f.`product_id`
-					AND pst.`store_id`   = {$store_id}
-				" . ($hasSearch ? "GROUP BY f.`product_id`, f.`relevance`" : "GROUP BY f.`product_id`") . "
-				{$havingClause}
-			) AS counted
-		";
+	// 	$sql = "
+	// 		WITH " . implode(',', $cteList) . "
+	// 		SELECT COUNT(*) AS total FROM (
+	// 			SELECT f.`product_id`
+	// 			{$from}
+	// 			{$facetJoin}
+	// 			LEFT JOIN `" . DB_PREFIX . "facet_sort` pst
+	// 				ON  pst.`product_id` = f.`product_id`
+	// 				AND pst.`store_id`   = {$store_id}
+	// 			" . ($hasSearch ? "GROUP BY f.`product_id`, f.`relevance`" : "GROUP BY f.`product_id`") . "
+	// 			{$havingClause}
+	// 		) AS counted
+	// 	";
 
-		return (int)$this->db->query($sql)->row['total'] ?? 0;
-	}
+	// 	return (int)$this->db->query($sql)->row['total'] ?? 0;
+	// }
 
 	/**
 	 * Builds reusable CTE + FROM + JOIN + HAVING parts
