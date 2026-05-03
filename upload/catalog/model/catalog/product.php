@@ -416,17 +416,21 @@ class ModelCatalogProduct extends Model {
 		 * Decode JSON aggregated data
 		 * Faster then bouncing requests to get separate product data and easier to store cached data
 		 */
-		$product['images'] 							= json_decode($product['images'] 			?? '[]', true);
-		$product['specials'] 						= json_decode($product['specials'] 		?? '[]', true);
-		$product['discounts'] 					= json_decode($product['discounts'] 	?? '[]', true);
-		$product['options'] 						= json_decode($product['options'] 		?? '[]', true);
-		$product['attributes'] 					= json_decode($product['attributes'] 	?? '[]', true);
-		$product['reward'] 							= json_decode($product['rewards'] 		?? '[]', true)[$customer_group_id] ?? null;
+		$product['footer'] 							= json_decode($product['footer'] 			 ?? '[]', true);
+		$product['faq'] 								= json_decode($product['faq'] 			   ?? '[]', true);
+		$product['how_to'] 							= json_decode($product['how_to'] 			 ?? '[]', true);
+		$product['seo_keywords'] 				= json_decode($product['seo_keywords'] ?? '[]', true);
+		$product['images'] 							= json_decode($product['images'] 			 ?? '[]', true);
+		$product['specials'] 						= json_decode($product['specials'] 		 ?? '[]', true);
+		$product['discounts'] 					= json_decode($product['discounts'] 	 ?? '[]', true);
+		$product['options'] 						= json_decode($product['options'] 		 ?? '[]', true);
+		$product['attributes'] 					= json_decode($product['attributes'] 	 ?? '[]', true);
+		$product['reward'] 							= json_decode($product['rewards'] 		 ?? '[]', true)[$customer_group_id] ?? null;
 		// Get valid discount float prices and dates in YYYY-MM-DD format
-		$product['discount'] 						= $this->getValidDiscount($product['discounts'], $customer_group_id)['price'] 	 ?? null;
-		$product['special'] 						= $this->getValidDiscount($product['specials'],  $customer_group_id)['price'] 	 ?? null;
-		$product['discount_date_end'] 	= $this->getValidDiscount($product['discounts'], $customer_group_id)['date_end'] ?? null;
-		$product['special_date_end'] 		= $this->getValidDiscount($product['specials'],  $customer_group_id)['date_end'] ?? null;
+		$product['discount'] 						= $this->getValidDiscount($product['discounts'], $customer_group_id)['price'] 	 ?? null; // Single valid discount price
+		$product['discount_date_end'] 	= $this->getValidDiscount($product['discounts'], $customer_group_id)['date_end'] ?? null; // Discount date end
+		$product['special'] 						= $this->getValidDiscount($product['specials'],  $customer_group_id)['price'] 	 ?? null; // Single valid special price
+		$product['special_date_end'] 		= $this->getValidDiscount($product['specials'],  $customer_group_id)['date_end'] ?? null; // Special date end
 		// Sort data
 		usort(array: $product['images'], 		 callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
 		usort(array: $product['options'], 	 callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
@@ -439,6 +443,7 @@ class ModelCatalogProduct extends Model {
 			array_column($product['discounts'], 'price'),  	 SORT_ASC,
 		);
 
+		// Set cache
 		$this->cache->set($cacheName, $product);
 
 		// Filter specials and discounts - return arrays filtered by customer group id and now() date
