@@ -162,7 +162,6 @@ class ModelCatalogProduct extends Model {
 
 		$sql = "
 			SELECT
-				
 				p.`product_id`,
 				p.`model`,
 				p.`sku`,
@@ -439,20 +438,20 @@ class ModelCatalogProduct extends Model {
 		$product['attributes'] 					= json_decode($product['attributes'] 	?? '[]', true);
 		$product['reward'] 							= json_decode($product['rewards'] 		?? '[]', true)[$customer_group_id] ?? null;
 		// Get valid discount float prices and dates in YYYY-MM-DD format
-		$product['discount'] 						= $this->getValidDiscount($product['discounts'], $customer_group_id)['price'] 		?? null;
-		$product['special'] 						= $this->getValidDiscount($product['specials'],  $customer_group_id)['price'] 		?? null;
+		$product['discount'] 						= $this->getValidDiscount($product['discounts'], $customer_group_id)['price'] 	 ?? null;
+		$product['special'] 						= $this->getValidDiscount($product['specials'],  $customer_group_id)['price'] 	 ?? null;
 		$product['discount_date_end'] 	= $this->getValidDiscount($product['discounts'], $customer_group_id)['date_end'] ?? null;
 		$product['special_date_end'] 		= $this->getValidDiscount($product['specials'],  $customer_group_id)['date_end'] ?? null;
 		// Sort data
-		usort(array: $product['images'], 		callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
-		usort(array: $product['options'], 		callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
+		usort(array: $product['images'], 		 callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
+		usort(array: $product['options'], 	 callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
 		usort(array: $product['attributes'], callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
-		usort(array: $product['specials'], 	callback: fn ($a, $b) =>  $a['priority'] 	<=> $b['priority']);
+		usort(array: $product['specials'], 	 callback: fn ($a, $b) =>  $a['priority'] 	<=> $b['priority']);
 		array_multisort(
 			$product['discounts'],
-			array_column($product['discounts'], 'quantity'),  SORT_ASC,
-			array_column($product['discounts'], 'priority'),  SORT_ASC,
-			array_column($product['discounts'], 'price'),  SORT_ASC,
+			array_column($product['discounts'], 'quantity'), SORT_ASC,
+			array_column($product['discounts'], 'priority'), SORT_ASC,
+			array_column($product['discounts'], 'price'),  	 SORT_ASC,
 		);
 
 		$this->cache->set($cacheName, $product);
@@ -481,126 +480,6 @@ class ModelCatalogProduct extends Model {
 		});
 		return $product;
 	}
-
-	// public function getProducts($data = []) : array {
-	// 	$data 			= array_filter($data, fn($v) => $v !== '' && $v !== null); // Remove empty array entries, skipping zero, as zero is also a value
-	// 	$store_id 	= (int) $this->config->get('config_store_id');
-	// 	$filters 		= [];
-	// 	$facets 		= [];
-	// 	$where 			= [];
-	// 	$order 			= '';
-	// 	$limit			= '';
-	// 	$products 	= [];
-	// 	$sortOrders = $this->getSortOrders(); // Allowed sort orders
-
-	// 	// Facet filters
-	// 	foreach ($data as $filterKey => $filterData) {
-	// 		if (str_starts_with($filterKey, 'filter_') && !empty($filterData)) {
-	// 			$filters[$filterKey] = $filterData;
-	// 		}
-	// 	}
-
-	// 	foreach ($filters as $filterKey => $filter) {
-			
-	// 		// Sanitize and unique facet ids
-	// 		$filterIds = array_values(array_unique(array_map('intval', explode(',', $filter))));
-
-	// 		if ($filterKey === 'filter_category_id') {
-	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 1)";
-	// 		}
-	// 		if ($filterKey === 'filter_filter') {
-	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 2)";
-	// 		}
-	// 		if ($filterKey === 'filter_option') {
-	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 3)";
-	// 		}
-	// 		if ($filterKey === 'filter_attribute') {
-	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 4)";
-	// 		}
-	// 		if ($filterKey === 'filter_manufacturer_id') {
-	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 5)";
-	// 		}
-	// 		if ($filterKey === 'filter_tag') {
-	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 6)";
-	// 		}
-	// 		if ($filterKey === 'filter_supplier') {
-	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 7)";
-	// 		}
-	// 		if ($filterKey === 'filter_is_available') {
-	// 			$facets[] = "(facet_value_id = 1 AND facet_type = 8)";
-	// 		}
-	// 		if ($filterKey === 'filter_has_discount') {
-	// 			$facets[] = "(facet_value_id = 1 AND facet_type = 9)";
-	// 		}
-	// 		if ($filterKey === 'filter_is_featured') {
-	// 			$facets[] = "(facet_value_id = 1 AND facet_type = 10)";
-	// 		}
-	// 	}
-
-	// 	// Fallback if $facets is empty, so SQL query is not broken
-	// 	if (empty($facets)) {
-	// 		return [];
-	// 	}
-
-	// 	$where[] = "(" . implode(" OR ", $facets) . ")";
-	// 	$where[] = "store_id = {$store_id}";
-
-	// 	// Sort order
-	// 	$sortOrder = $data['sort'] ?? $this->config->get('config_default_product_sort') ?? 'sort_order';
-	// 	if (in_array($sortOrder, array_keys($sortOrders))) {
-	// 		$order = $sortOrders[$sortOrder];
-	// 	} else {
-	// 		$order = 'sort_order';
-	// 	}
-
-	// 	if (isset($data['start']) || isset($data['limit'])) {
-	// 		if (!isset($data['start']) || $data['start'] < 0) {
-	// 			$data['start'] = 0;
-	// 		}
-
-	// 		if (!isset($data['limit']) || $data['limit'] < 1) {
-	// 			$data['limit'] = 20;
-	// 		}
-
-	// 		$limit = " LIMIT " . (int) $data['limit'] . " OFFSET " . (int) $data['start'];
-	// 	}
-
-	// 	// Main query. Get product ids, sort, limit
-	// 	$sql = "
-	// 		WITH facet_temp (`product_id`, `facet_type`, `facet_group_id`) AS (
-	// 			SELECT
-	// 				`product_id`, `facet_type`, `facet_group_id`
-	// 			FROM " . DB_PREFIX . "facet_index
-	// 			WHERE " . implode(" AND ", $where) . "
-	// 			ORDER BY NULL
-	// 		),
-
-	// 		group_count AS (
-	// 			SELECT COUNT(DISTINCT `facet_type`, `facet_group_id`) AS cnt
-	// 			FROM `facet_temp`
-	// 			ORDER BY NULL
-	// 		)
-
-	// 		SELECT 
-	// 			f.`product_id`
-	// 		FROM facet_temp f
-	// 		LEFT JOIN " . DB_PREFIX . "facet_sort pst
-	// 			ON  pst.`product_id` = f.`product_id`
-	// 			AND pst.`store_id` 	 = {$store_id}
-
-	// 		GROUP BY f.`product_id`
-	// 		HAVING COUNT(DISTINCT f.`facet_type`, f.`facet_group_id`) = (SELECT `cnt` FROM group_count)
-	// 		ORDER BY {$order}
-	// 		{$limit}
-	// 	";
-
-	// 	$productRows = $this->db->query($sql)->rows;
-	// 	foreach ($productRows as $row) {
-	// 		$products[] = $this->getProduct((int) $row['product_id']);
-	// 	}
-
-	// 	return $products;
-	// }
 
 	/**
 	 * Get products list
@@ -726,7 +605,9 @@ class ModelCatalogProduct extends Model {
 		// Main query
 		$sql = "
 			WITH " . implode(',', $cteList) . "
-			SELECT f.`product_id`
+			SELECT 
+				f.`product_id`,
+				COUNT(*) OVER() AS total_count
 			{$from}
 			{$facetJoin}
 			LEFT JOIN `" . DB_PREFIX . "facet_sort` pst
@@ -904,7 +785,7 @@ class ModelCatalogProduct extends Model {
 		);
 	}
 	
-	public function getProductSpecials($data = []) : array {
+	public function getProductSpecials($data) : array {
 		$data['filter_has_discount'] = 1;
 		$productData = $this->getProducts($data);
 		return $productData;
@@ -1005,104 +886,6 @@ class ModelCatalogProduct extends Model {
 		return $query->rows;
 	}
 
-	public function getTotalProducts($data = array()) {
-		$sql = "SELECT COUNT(DISTINCT p.product_id) AS total";
-
-		if (!empty($data['filter_category_id'])) {
-			if (!empty($data['filter_sub_category'])) {
-				$sql .= " FROM " . DB_PREFIX . "category_path cp LEFT JOIN " . DB_PREFIX . "product_to_category p2c ON (cp.category_id = p2c.category_id)";
-			} else {
-				$sql .= " FROM " . DB_PREFIX . "product_to_category p2c";
-			}
-
-			if (!empty($data['filter_filter'])) {
-				$sql .= " LEFT JOIN " . DB_PREFIX . "product_filter pf ON (p2c.product_id = pf.product_id) LEFT JOIN " . DB_PREFIX . "product p ON (pf.product_id = p.product_id)";
-			} else {
-				$sql .= " LEFT JOIN " . DB_PREFIX . "product p ON (p2c.product_id = p.product_id)";
-			}
-		} else {
-			$sql .= " FROM " . DB_PREFIX . "product p";
-		}
-
-		$sql .= " LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'";
-
-		if (!empty($data['filter_category_id'])) {
-			if (!empty($data['filter_sub_category'])) {
-				$sql .= " AND cp.path_id = '" . (int)$data['filter_category_id'] . "'";
-			} else {
-				$sql .= " AND p2c.category_id = '" . (int)$data['filter_category_id'] . "'";
-			}
-
-			if (!empty($data['filter_filter'])) {
-				$implode = array();
-
-				$filters = explode(',', $data['filter_filter']);
-
-				foreach ($filters as $filter_id) {
-					$implode[] = (int)$filter_id;
-				}
-
-				$sql .= " AND pf.filter_id IN (" . implode(',', $implode) . ")";
-			}
-		}
-
-		if (!empty($data['filter_name']) || !empty($data['filter_tag'])) {
-			$sql .= " AND (";
-
-			if (!empty($data['filter_name'])) {
-				$implode = array();
-
-				$words = explode(' ', trim(preg_replace('/\s+/', ' ', $data['filter_name'])));
-
-				foreach ($words as $word) {
-					$implode[] = "pd.name LIKE '%" . $this->db->escape($word) . "%'";
-				}
-
-				if ($implode) {
-					$sql .= " " . implode(" AND ", $implode) . "";
-				}
-
-				if (!empty($data['filter_description'])) {
-					$sql .= " OR pd.description LIKE '%" . $this->db->escape($data['filter_name']) . "%'";
-				}
-			}
-
-			if (!empty($data['filter_name']) && !empty($data['filter_tag'])) {
-				$sql .= " OR ";
-			}
-
-			if (!empty($data['filter_tag'])) {
-				$implode = array();
-
-				$words = explode(' ', trim(preg_replace('/\s+/', ' ', $data['filter_tag'])));
-
-				if ($implode) {
-					$sql .= " " . implode(" AND ", $implode) . "";
-				}
-			}
-
-			if (!empty($data['filter_name'])) {
-				$sql .= " OR LCASE(p.model) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
-				$sql .= " OR LCASE(p.sku) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
-				$sql .= " OR LCASE(p.upc) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
-				$sql .= " OR LCASE(p.ean) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
-				$sql .= " OR LCASE(p.jan) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
-				$sql .= " OR LCASE(p.isbn) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
-				$sql .= " OR LCASE(p.mpn) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
-			}
-
-			$sql .= ")";
-		}
-
-		if (!empty($data['filter_manufacturer_id'])) {
-			$sql .= " AND p.manufacturer_id = '" . (int)$data['filter_manufacturer_id'] . "'";
-		}
-
-		$query = $this->db->query($sql);
-
-		return $query->row['total'];
-	}
-
 	public function getProfile($product_id, $recurring_id) {
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "recurring r JOIN " . DB_PREFIX . "product_recurring pr ON (pr.recurring_id = r.recurring_id AND pr.product_id = '" . (int)$product_id . "') WHERE pr.recurring_id = '" . (int)$recurring_id . "' AND status = '1' AND pr.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'");
 
@@ -1125,18 +908,6 @@ class ModelCatalogProduct extends Model {
 		}
 	}
 
-	// Some strange check that product is associated to category in case if SEO URLs is turned off?
-	public function checkProductCategory($product_id, $category_ids) {
-		
-		$implode = array();
-
-		foreach ($category_ids as $category_id) {
-			$implode[] = (int)$category_id;
-		}
-		
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "' AND category_id IN(" . implode(',', $implode) . ")");
-  	    return $query->row;
-	}
 	public function getFilters($data = []) {
 		$store_id    				 = (int) $this->config->get('config_store_id');
 		$language_id 				 = (int) $this->config->get('config_language_id');
@@ -1245,7 +1016,7 @@ class ModelCatalogProduct extends Model {
 				FROM selected_facets
 			),
 			
-			/* Выбранные пользователем фасеты */
+			/* User selected facets */
 			facet_temp (`product_id`, `facet_type`, `facet_group_id`) AS (
 				SELECT
 					`product_id`, `facet_type`, `facet_group_id`
@@ -1298,16 +1069,16 @@ class ModelCatalogProduct extends Model {
 					AND fi.facet_group_id = b.facet_group_id
 					AND fi.store_id       = {$store_id}
 			
-				-- Берем базовые товары
+				-- Get base products
 				INNER JOIN base_products bp
 					ON bp.product_id = fi.product_id
 			
-				-- Берем текущие товары (что уже показано)
+				-- Get current products (already shown)
 				LEFT JOIN current_products c
 					ON c.product_id = fi.product_id
 			
 				WHERE
-					-- 1. AND между группами: товар покрывает все чужие выбранные группы
+					-- 1. AND between groups: the product matches all foreign groups
 					NOT EXISTS (
 						SELECT 1
 						FROM selected_groups sg
@@ -1417,4 +1188,343 @@ class ModelCatalogProduct extends Model {
 		$query = $this->db->query($sql);
 		return $query->rows;
 	}
+
+	
+	// public function getProducts($data = []) : array {
+	// 	$data 			= array_filter($data, fn($v) => $v !== '' && $v !== null); // Remove empty array entries, skipping zero, as zero is also a value
+	// 	$store_id 	= (int) $this->config->get('config_store_id');
+	// 	$filters 		= [];
+	// 	$facets 		= [];
+	// 	$where 			= [];
+	// 	$order 			= '';
+	// 	$limit			= '';
+	// 	$products 	= [];
+	// 	$sortOrders = $this->getSortOrders(); // Allowed sort orders
+
+	// 	// Facet filters
+	// 	foreach ($data as $filterKey => $filterData) {
+	// 		if (str_starts_with($filterKey, 'filter_') && !empty($filterData)) {
+	// 			$filters[$filterKey] = $filterData;
+	// 		}
+	// 	}
+
+	// 	foreach ($filters as $filterKey => $filter) {
+			
+	// 		// Sanitize and unique facet ids
+	// 		$filterIds = array_values(array_unique(array_map('intval', explode(',', $filter))));
+
+	// 		if ($filterKey === 'filter_category_id') {
+	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 1)";
+	// 		}
+	// 		if ($filterKey === 'filter_filter') {
+	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 2)";
+	// 		}
+	// 		if ($filterKey === 'filter_option') {
+	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 3)";
+	// 		}
+	// 		if ($filterKey === 'filter_attribute') {
+	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 4)";
+	// 		}
+	// 		if ($filterKey === 'filter_manufacturer_id') {
+	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 5)";
+	// 		}
+	// 		if ($filterKey === 'filter_tag') {
+	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 6)";
+	// 		}
+	// 		if ($filterKey === 'filter_supplier') {
+	// 			$facets[] = "(facet_value_id IN(" . implode(',', $filterIds) .") AND facet_type = 7)";
+	// 		}
+	// 		if ($filterKey === 'filter_is_available') {
+	// 			$facets[] = "(facet_value_id = 1 AND facet_type = 8)";
+	// 		}
+	// 		if ($filterKey === 'filter_has_discount') {
+	// 			$facets[] = "(facet_value_id = 1 AND facet_type = 9)";
+	// 		}
+	// 		if ($filterKey === 'filter_is_featured') {
+	// 			$facets[] = "(facet_value_id = 1 AND facet_type = 10)";
+	// 		}
+	// 	}
+
+	// 	// Fallback if $facets is empty, so SQL query is not broken
+	// 	if (empty($facets)) {
+	// 		return [];
+	// 	}
+
+	// 	$where[] = "(" . implode(" OR ", $facets) . ")";
+	// 	$where[] = "store_id = {$store_id}";
+
+	// 	// Sort order
+	// 	$sortOrder = $data['sort'] ?? $this->config->get('config_default_product_sort') ?? 'sort_order';
+	// 	if (in_array($sortOrder, array_keys($sortOrders))) {
+	// 		$order = $sortOrders[$sortOrder];
+	// 	} else {
+	// 		$order = 'sort_order';
+	// 	}
+
+	// 	if (isset($data['start']) || isset($data['limit'])) {
+	// 		if (!isset($data['start']) || $data['start'] < 0) {
+	// 			$data['start'] = 0;
+	// 		}
+
+	// 		if (!isset($data['limit']) || $data['limit'] < 1) {
+	// 			$data['limit'] = 20;
+	// 		}
+
+	// 		$limit = " LIMIT " . (int) $data['limit'] . " OFFSET " . (int) $data['start'];
+	// 	}
+
+	// 	// Main query. Get product ids, sort, limit
+	// 	$sql = "
+	// 		WITH facet_temp (`product_id`, `facet_type`, `facet_group_id`) AS (
+	// 			SELECT
+	// 				`product_id`, `facet_type`, `facet_group_id`
+	// 			FROM " . DB_PREFIX . "facet_index
+	// 			WHERE " . implode(" AND ", $where) . "
+	// 			ORDER BY NULL
+	// 		),
+
+	// 		group_count AS (
+	// 			SELECT COUNT(DISTINCT `facet_type`, `facet_group_id`) AS cnt
+	// 			FROM `facet_temp`
+	// 			ORDER BY NULL
+	// 		)
+
+	// 		SELECT 
+	// 			f.`product_id`
+	// 		FROM facet_temp f
+	// 		LEFT JOIN " . DB_PREFIX . "facet_sort pst
+	// 			ON  pst.`product_id` = f.`product_id`
+	// 			AND pst.`store_id` 	 = {$store_id}
+
+	// 		GROUP BY f.`product_id`
+	// 		HAVING COUNT(DISTINCT f.`facet_type`, f.`facet_group_id`) = (SELECT `cnt` FROM group_count)
+	// 		ORDER BY {$order}
+	// 		{$limit}
+	// 	";
+
+	// 	$productRows = $this->db->query($sql)->rows;
+	// 	foreach ($productRows as $row) {
+	// 		$products[] = $this->getProduct((int) $row['product_id']);
+	// 	}
+
+	// 	return $products;
+	// }
+
+		/**
+	 * Get all facets with names and product count
+	 * This method counts products that will be displayed if facet is applied, like [filter [+3]] or [filter [-2]]
+	 * Use same $data array as getProducts() method
+	 * @param mixed $data
+	 * @return array of filter type, group, values, names and product count
+	 */
+	// public function getFilters2($data = []) {
+	// 	$store_id    				 = (int) $this->config->get('config_store_id');
+	// 	$language_id 				 = (int) $this->config->get('config_language_id');
+	// 	$facetTypes 				 = $this->getFacetTypes();
+	// 	$conditions 				 = [];
+	// 	$base_facet_type     = null; // Page type, category = 1, manufacturer = 5, has_discount = 9, is_featured = 10
+	// 	$base_facet_value_id = null; // Page id if applicable, i.e. category_id. If not applicable then 0 
+		
+	// 	// Set base facet to filter base product set on this page
+	// 	if ($this->request->get['route'] === 'product/category') {
+	// 		$path 							 = $this->request->get['category_id'] ?? $this->request->get['path'] ?? '';
+	// 		$category_id 				 = explode('_', (string) $path);
+	// 		$category_id 				 = end($category_id);
+	// 		$base_facet_type 		 = 1;
+	// 		$base_facet_value_id = (int) $category_id;
+	// 	}
+
+	// 	if ($this->request->get['route'] === 'product/manufacturer') {
+	// 		$base_facet_type 		 = 5;
+	// 		$base_facet_value_id = (int) $this->request->get['manufacturer_id'];
+	// 	}
+
+	// 	if ($this->request->get['route'] === 'product/special') {
+	// 		$base_facet_type     = 9;
+	// 		$base_facet_value_id = 0;
+	// 	}
+
+	// 	if ($this->request->get['route'] === 'product/featured') {
+	// 		$base_facet_type     = 10;
+	// 		$base_facet_value_id = 0;
+	// 	}
+
+	// 	if ($base_facet_type === null || $base_facet_value_id === null) {
+	// 		$this->log->write("model->product->getFilters(), Unknown request: \r\n" . htmlspecialchars(print_r($this->request->get, true)));
+	// 		return [];
+	// 	}
+
+	// 	// Base facet is intentionally included in selected_conditions
+	// 	// so that base page context is part of selected_groups for AND-between-groups logic
+	// 	$conditions[] = "(facet_type = {$base_facet_type} AND facet_value_id IN (" . $base_facet_value_id . "))";
+		
+	// 	foreach ($data as $key => $ids) {
+	// 		if (!isset($facetTypes[$key])) continue;
+	// 		if ($facetTypes[$key] == $base_facet_type && $ids == $base_facet_value_id) continue;
+
+	// 		$type = (int) $facetTypes[$key];
+	// 		$ids = array_values(array_unique(array_map('intval', explode(',', $ids))));
+
+	// 		if (!$ids) continue;
+
+	// 		$conditions[] = "(facet_type = {$type} AND facet_value_id IN (" . implode(',', $ids) . "))";
+
+	// 	}
+
+	// 	$selected_conditions = $conditions ? implode(" OR ", $conditions) : "1";
+
+	// 	$sql = "
+			
+	// 		-- Base facet list for current page
+	// 		WITH base_facet_list AS (
+	// 			SELECT
+	// 				i.facet_value_id,
+	// 				i.facet_type,
+	// 				i.facet_group_id,
+	// 				COUNT(DISTINCT(i.product_id)) AS base_count
+	// 			FROM " . DB_PREFIX . "facet_index i
+	// 			WHERE EXISTS(
+	// 				SELECT
+	// 					1
+	// 				FROM " . DB_PREFIX . "facet_index p
+	// 				WHERE p.product_id = i.product_id
+	// 					-- Current base page
+	// 					AND p.facet_type     = {$base_facet_type} -- Base page type, category = 1, manufacturer = 5, has_discount = 9, is_featured = 10
+	// 					AND p.facet_value_id = {$base_facet_value_id} -- Base facet entity id: category_id, manufacturer_id. If facet_type = has_discount, then 0
+	// 					AND store_id         = {$store_id} -- store id condition
+	// 			)
+	// 			AND store_id = {$store_id}
+	// 			GROUP BY i.facet_type, i.facet_group_id, i.facet_value_id
+	// 			ORDER BY NULL
+	// 		),
+			
+	// 		-- Current facets selected by user
+	// 		selected_facets AS (
+	// 			SELECT
+	// 				`facet_type`, `facet_group_id`, facet_value_id
+	// 			FROM " . DB_PREFIX . "facet_index
+	// 			WHERE (
+	// 				-- Base facet AND selected facets joined with OR, example:
+	// 				-- (facet_value_id IN(1) AND facet_type = 1)    -- base facet: type = category (1), category_id = (1)
+	// 				-- OR (facet_value_id IN(2) AND facet_type = 5) -- selected facet: type = manufacturer (5), manufacturer_id = 2
+	// 				-- OR (facet_value_id IN(9) AND facet_type = 2) -- selected facet: type - filter (2), filter_id - 9,10
+	// 				{$selected_conditions}
+	// 			) 
+	// 			AND store_id = {$store_id} -- store id condition
+				
+	// 			GROUP BY facet_type, facet_group_id, facet_value_id
+	// 			ORDER BY NULL
+	// 		),
+			
+	// 		selected_groups AS (
+	// 			SELECT DISTINCT facet_type, facet_group_id
+	// 			FROM selected_facets
+	// 		),
+			
+	// 		count_products AS (
+	// 			SELECT
+	// 				b.facet_type,
+	// 				b.facet_group_id,
+	// 				b.facet_value_id,
+	// 				COUNT(DISTINCT fi.product_id) AS current_count
+	// 			FROM base_facet_list b
+			
+	// 			-- Get product_id list for each facet from base facets list
+	// 			INNER JOIN " . DB_PREFIX . "facet_index fi USE INDEX (facetCandidates)
+	// 				ON  fi.facet_value_id = b.facet_value_id
+	// 				AND fi.facet_type     = b.facet_type
+	// 				AND fi.facet_group_id = b.facet_group_id
+	// 				AND fi.store_id       = {$store_id}
+			
+	// 			-- Every product MUST exist in base product list
+	// 			INNER JOIN " . DB_PREFIX . "facet_index base_page
+	// 				ON  base_page.product_id     = fi.product_id
+	// 				AND base_page.facet_type     = {$base_facet_type}
+	// 				AND base_page.facet_value_id = {$base_facet_value_id}
+	// 				AND base_page.store_id       = {$store_id}
+			
+	// 			-- For each selected group (except the candidate's own group):
+	// 			-- Product MUST have at least one selected facet from this group (AND between groups)
+	// 			WHERE NOT EXISTS (
+	// 				SELECT 1
+	// 				FROM selected_groups sg
+	// 				WHERE
+	// 					-- Skip the candidate's group.
+	// 					NOT (sg.facet_type = b.facet_type AND sg.facet_group_id = b.facet_group_id)
+	// 					-- Check: Does the product have at least one selected facet from this foreign group?
+	// 					-- If NO, the product is skippet.
+	// 					AND NOT EXISTS (
+	// 						SELECT 1
+	// 						FROM " . DB_PREFIX . "facet_index fi2
+	// 						INNER JOIN selected_facets sf
+	// 							ON  sf.facet_type     = fi2.facet_type
+	// 							AND sf.facet_group_id = fi2.facet_group_id
+	// 							AND sf.facet_value_id = fi2.facet_value_id
+	// 						WHERE fi2.product_id = fi.product_id
+	// 							AND fi2.store_id   = {$store_id}
+	// 							AND fi2.facet_type     = sg.facet_type
+	// 							AND fi2.facet_group_id = sg.facet_group_id
+	// 					)
+	// 			)
+			
+	// 			GROUP BY b.facet_type, b.facet_group_id, b.facet_value_id
+	// 			ORDER BY NULL
+	// 		)
+			
+	// 		SELECT
+	// 			b.facet_value_id,
+	// 			b.facet_type,
+	// 			b.facet_group_id,
+	// 			b.base_count,
+	// 			c.current_count,
+	// 			n.name AS facet_name,
+	// 			n.group_name AS facet_group_name,
+	// 			n.sort_order AS facet_sort_order,
+	// 			n.group_sort_order AS group_sort_order,
+	// 			CASE WHEN sf.facet_value_id IS NOT NULL THEN 1 ELSE 0 END AS facet_is_selected,
+	// 			CASE WHEN sg.facet_group_id IS NOT NULL THEN 1 ELSE 0 END AS group_is_selected
+	// 		FROM base_facet_list b
+			
+	// 		-- Facet names table, doesn't affect anything, just displays facet names
+	// 		LEFT JOIN " . DB_PREFIX . "facet_name n
+	// 			ON n.facet_type      = b.facet_type
+	// 			AND n.facet_group_id = b.facet_group_id
+	// 			AND n.facet_value_id = b.facet_value_id
+	// 			AND n.language_id    = {$language_id} -- language id condition
+	// 			AND n.store_id       = {$store_id}    -- store id condition
+				
+	// 		-- Join selected facets to mark them as selected
+	// 		LEFT JOIN selected_facets sf
+	// 			ON  sf.facet_type     = b.facet_type
+	// 			AND sf.facet_group_id = b.facet_group_id
+	// 			AND sf.facet_value_id = b.facet_value_id
+				
+	// 		-- Join selected groups to mark them as selected
+	// 		LEFT JOIN selected_groups sg
+	// 			ON  sg.facet_type     = b.facet_type
+	// 			AND sg.facet_group_id = b.facet_group_id
+
+	// 		-- Count products taking in account applied facets
+	// 		LEFT JOIN count_products c
+	// 			ON c.facet_value_id  = b.facet_value_id
+	// 			AND c.facet_type     = b.facet_type
+	// 			AND c.facet_group_id = b.facet_group_id
+	// 	";
+
+	// 	$query = $this->db->query($sql);
+	// 	return $query->rows;
+	// }
+
+	// Some strange check that product is associated to category in case if SEO URLs is turned off?
+	// public function checkProductCategory($product_id, $category_ids) {
+		
+	// 	$implode = array();
+
+	// 	foreach ($category_ids as $category_id) {
+	// 		$implode[] = (int)$category_id;
+	// 	}
+		
+	// 	$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "' AND category_id IN(" . implode(',', $implode) . ")");
+  // 	    return $query->row;
+	// }
 }
