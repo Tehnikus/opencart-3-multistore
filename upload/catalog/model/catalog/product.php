@@ -560,6 +560,20 @@ class ModelCatalogProduct extends Model {
 	}
 
 	/**
+	 * Count total products
+	 * This method is left for separate calls, otherwise total products can be obtained in single request like this:
+	 * $result   = $this->model->getProducts($data, true);
+	 * $products = $result['products'];
+	 * $total    = $result['total'];
+	 * @param array $data
+	 * @return int
+	 */
+	public function getTotalProducts(array $data = []): int {
+    $result = $this->getProducts($data, true);
+    return (int) $result['total'] ?? 0;
+	}
+
+	/**
 	 * Returns total number of products matching the given filters and search query.
 	 * Used for pagination.
 	 * @return int
