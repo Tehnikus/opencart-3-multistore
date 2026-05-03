@@ -752,6 +752,75 @@ class ModelCatalogProduct extends Model {
 	}
 
 	/**
+	 * Builds reusable CTE + FROM + JOIN + HAVING parts
+	 * shared between getProducts() and getTotalProducts().
+	 * @return array
+	 */
+	private function buildQueryParts(
+		array  $data,
+		int    $store_id,
+		array  $facets,
+		array  $where,
+		bool   $hasSearch,
+		bool   $hasFacets
+	) : array {
+    $cteList = [];
+
+    if ($hasSearch) {
+			$language_id = (int)$this->config->get('config_language_id');
+			$boolQuery   = $this->buildSearchQuery($data['filter_name']);
+
+			$matchExpr = "
+				MATCH(`name`)         AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 10 +
+				MATCH(`manufacturer`) AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 5  +
+				MATCH(`category`)     AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 5  +
+				MATCH(`extra`)        AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 1
+			";
+
+			$cteList[] = "
+				search_results AS (
+					SELECT `product_id`, ({$matchExpr}) AS relevance
+					FROM `" . DB_PREFIX . "product_search_index`
+					WHERE `language_id` = {$language_id}
+						AND `store_id`    = {$store_id}
+						AND ({$matchExpr}) > 0
+				)
+			";
+    }
+
+    if ($hasFacets) {
+			$where[] = "store_id = {$store_id}";
+			$where[] = "(" . implode(" OR ", $facets) . ")";
+
+			$cteList[] = "
+				facet_temp AS (
+					SELECT `product_id`, `facet_type`, `facet_group_id`
+					FROM `" . DB_PREFIX . "facet_index`
+					WHERE " . implode(" AND ", $where) . "
+				),
+				group_count AS (
+					SELECT COUNT(DISTINCT `facet_type`, `facet_group_id`) AS cnt
+					FROM facet_temp
+				)
+			";
+    }
+
+    if ($hasSearch) {
+			$from         = "FROM search_results f";
+			$facetJoin    = $hasFacets ? "JOIN facet_temp ft ON ft.`product_id` = f.`product_id`" : "";
+			$havingClause = $hasFacets ? "HAVING COUNT(DISTINCT ft.`facet_type`, ft.`facet_group_id`) = (SELECT cnt FROM group_count)" : "";
+    } else {
+			$from         = "FROM facet_temp f";
+			$facetJoin    = "";
+			$havingClause = "HAVING COUNT(DISTINCT f.`facet_type`, f.`facet_group_id`) = (SELECT cnt FROM group_count)";
+		}
+
+		// echo '<pre>' . htmlspecialchars(print_r([$cteList, $from, $facetJoin, $havingClause], true)) . '</pre>';
+
+    return [$cteList, $from, $facetJoin, $havingClause];
+	}
+
+	/**
 	 * Build BOOLEAN MODE expression from search string:
 	 * "red sweater"  =>  "+red* +sweater*" (AND)
 	 * "red sweater"  =>  "red* sweater*"   (OR)
