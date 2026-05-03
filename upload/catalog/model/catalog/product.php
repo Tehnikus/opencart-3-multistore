@@ -84,7 +84,7 @@ class ModelCatalogProduct extends Model {
 	 * @param int $customerGroupId
 	 * @return array|null
 	 */
-	private function getValidDiscount(array $rows, int $customerGroupId): ?array {
+	private function getValidDiscount(array $rows, int $customerGroupId) : ?array {
     $now = time();
 
     $valid = array_filter($rows, function ($r) use ($customerGroupId, $now) : bool {
@@ -135,27 +135,12 @@ class ModelCatalogProduct extends Model {
 			 * Filter specials and discounts from cached data so cache shoul not invalidate if (current time > date end)
 			 * TODO use $this->getValidDiscount() here for clarity, as these are mostly the same functions
 			 */ 
-			$now = date('Y-m-d H:i:s');
-			$product['specials'] = array_filter($product['specials'], function ($var) use ($now) {
-				return 
-					strtotime($var['date_start']) <= strtotime($now)
-					&& (
-						strtotime($var['date_end']) >= strtotime($now) 
-						|| $var['date_end'] === null
-						|| str_contains($var['date_end'], '0000-00-00')
-					)
-				;
-			});
-			$product['discounts'] = array_filter($product['discounts'], function ($var) use ($now) {
-				return 
-					strtotime($var['date_start']) <= strtotime($now)
-					&& (
-						strtotime($var['date_end']) >= strtotime($now) 
-						|| $var['date_end'] === null
-						|| str_contains($var['date_end'], '0000-00-00')
-					)
-				;
-			});
+			// $now = date('Y-m-d H:i:s');
+			// Get valid discount float prices and dates in YYYY-MM-DD format
+			$product['discount'] 						= $this->getValidDiscount($product['discounts'], $customer_group_id)['price'] 	 ?? null;
+			$product['special'] 						= $this->getValidDiscount($product['specials'],  $customer_group_id)['price'] 	 ?? null;
+			$product['discount_date_end'] 	= $this->getValidDiscount($product['discounts'], $customer_group_id)['date_end'] ?? null;
+			$product['special_date_end'] 		= $this->getValidDiscount($product['specials'],  $customer_group_id)['date_end'] ?? null;
 
 			return $product;
 		}
@@ -456,8 +441,10 @@ class ModelCatalogProduct extends Model {
 
 		$this->cache->set($cacheName, $product);
 
-		// Filter specials and discounts
+		// Filter specials and discounts - return arrays filtered by customer group id and now() date
+		// These arrays are used to show multiple discounts at once
 		$now = date('Y-m-d H:i:s');
+		// Array of specials
 		$product['specials'] = array_filter($product['specials'], function ($var) use ($now) {
 			return 
 				strtotime($var['date_start']) <= strtotime($now)
@@ -468,6 +455,7 @@ class ModelCatalogProduct extends Model {
 				)
 			;
 		});
+		// Array of discounts
 		$product['discounts'] = array_filter($product['discounts'], function ($var) use ($now) {
 			return 
 				strtotime($var['date_start']) <= strtotime($now)
