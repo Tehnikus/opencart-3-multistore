@@ -1237,8 +1237,9 @@ class ModelCatalogProduct extends Model {
 						ON ad.`attribute_id` = pa.attribute_id
 						AND ad.`language_id` = '" . (int) $this->config->get('config_language_id') . "'
 						AND ad.`store_id` 	 = '" . (int) $this->session->data['store_id'] . "'
-					WHERE pa.`product_id` = p2s.product_id
-						AND pa.`store_id` 	= '" . (int) $this->session->data['store_id'] . "'
+					WHERE pa.`product_id`  = p2s.product_id
+						AND pa.`store_id` 	 = '" . (int) $this->session->data['store_id'] . "'
+						AND pa.`language_id` = '" . (int) $this->config->get('config_language_id') . "'
 				) AS product_attributes,
 				-- Product options list
 				(SELECT 
