@@ -752,6 +752,56 @@ class ModelCatalogProduct extends Model {
 	}
 
 	/**
+	 * Returns total number of products matching the given filters and search query.
+	 * Used for pagination.
+	 * @return int
+	 */
+	public function getTotalProducts(array $data = []) : int {
+		$data     = array_filter($data, fn($v) => $v !== '' && $v !== null);
+		$store_id = (int)$this->config->get('config_store_id');
+		$facets   = [];
+		$where    = [];
+
+		foreach ($this->facetTypes as $key => $type) {
+			if (!empty($data[$key])) {
+				if (!in_array($type, [8, 9, 10])) {
+					$ids      = array_values(array_unique(array_map('intval', explode(',', $data[$key]))));
+					$facets[] = "(facet_value_id IN(" . implode(',', $ids) . ") AND facet_type = {$type})";
+				} else {
+					$facets[] = "(facet_value_id = 1 AND facet_type = {$type})";
+				}
+			}
+		}
+
+		$hasSearch = !empty($data['filter_name']);
+		$hasFacets = !empty($facets);
+
+		if (!$hasFacets && !$hasSearch) {
+			return 0;
+		}
+
+		[$cteList, $from, $facetJoin, $havingClause] = $this->buildQueryParts(
+				$data, $store_id, $facets, $where, $hasSearch, $hasFacets
+		);
+
+		$sql = "
+			WITH " . implode(',', $cteList) . "
+			SELECT COUNT(*) AS total FROM (
+				SELECT f.`product_id`
+				{$from}
+				{$facetJoin}
+				LEFT JOIN `" . DB_PREFIX . "facet_sort` pst
+					ON  pst.`product_id` = f.`product_id`
+					AND pst.`store_id`   = {$store_id}
+				" . ($hasSearch ? "GROUP BY f.`product_id`, f.`relevance`" : "GROUP BY f.`product_id`") . "
+				{$havingClause}
+			) AS counted
+		";
+
+		return (int)$this->db->query($sql)->row['total'] ?? 0;
+	}
+
+	/**
 	 * Builds reusable CTE + FROM + JOIN + HAVING parts
 	 * shared between getProducts() and getTotalProducts().
 	 * @return array
