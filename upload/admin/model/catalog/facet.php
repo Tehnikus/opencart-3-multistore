@@ -94,6 +94,7 @@ Class ModelCatalogFacet extends Model {
           pov.`option_id`       AS `facet_group_id`,
           3                     AS `facet_type`
         FROM " . DB_PREFIX . "product_option_value pov
+        GROUP BY pov.`product_id`, pov.`store_id`, pov.`option_id`, pov.`option_value_id`
 
         UNION ALL
 
