@@ -488,39 +488,45 @@ class ModelCatalogProduct extends Model {
 	 * @param array $data The array of filters and search words
 	 * @return array<array|bool>
 	 */
-	public function getProducts(array $data = [], $withTotal = false): array {
-    $data     = array_filter($data, fn($v) => $v !== '' && $v !== null);
-    $store_id = (int)$this->config->get('config_store_id');
-    $facets   = [];
-    $where    = [];
-		$selectTotal = $withTotal ? ", COUNT(*) OVER() AS total_count" : "";
+	public function getProducts(array $data = [], $withTotal = false) {
+    $data         = array_filter($data, fn($v) => $v !== '' && $v !== null);
+    $store_id     = (int)$this->config->get('config_store_id');
+		$facets 		  = $this->buildFacetExpression($data);
+		$ctes 			  = $this->buildCteExpression($data);  // CTE expressions for fulltext search and/or facets
+		$searchExpression = $this->buildMatchExpression($data);
+		$hasSearch 	  = !empty($searchExpression);
+    $hasFacets 	  = !empty($facets);
+		$start 				= max(0, (int)($data['start'] ?? 0));
+    $limit 				= max(1, (int)($data['limit'] ?? 20));
 
-    foreach ($this->facetTypes as $key => $type) {
-			if (!empty($data[$key])) {
-				if (!in_array($type, [8, 9, 10])) {
-					$ids      = array_values(array_unique(array_map('intval', explode(',', $data[$key]))));
-					$facets[] = "(facet_value_id IN(" . implode(',', $ids) . ") AND facet_type = {$type})";
-				} else {
-					$facets[] = "(facet_value_id = 1 AND facet_type = {$type})";
-				}
-			}
-    }
-
-    $hasSearch = !empty($data['filter_name']);
-    $hasFacets = !empty($facets);
-
-    if (!$hasFacets && !$hasSearch) {
+		// Safely return
+		if (!$hasSearch && !$hasFacets) {
 			return [];
-    }
+		}
 
-    [$cteList, $from, $facetJoin, $havingClause] = $this->buildQueryParts(
-			$data, $store_id, $facets, $where, $hasSearch, $hasFacets
-    );
+		// Columns to select
+		$selectColumns = ['f.`product_id`'];
+		if ($withTotal) {
+			$selectColumns[] = "COUNT(*) OVER() AS total_count";
+		}
 
-    // Sort
-    $sortKey = $data['sort'] ?? ($hasSearch ? 'relevance' : $this->config->get('config_default_product_sort')) ?? 'sort_order';
 
-    if ($hasSearch && $sortKey === 'relevance') {
+		// Main query part depending on present search, facets or search + facets
+		if ($hasSearch) {
+			$from      = "search_results f";
+			$join    	 = $hasFacets ? "JOIN facet_temp ft ON f.`product_id` = ft.`product_id`" : "";
+			$groupBy 	 = "f.`product_id`, f.`relevance`";
+			$having 	 = $hasFacets ? "HAVING COUNT(DISTINCT ft.`facet_type`, ft.`facet_group_id`) = (SELECT cnt FROM group_count)" : "";
+    } else {
+			$from      = "facet_temp f";
+			$join    	 = "";
+			$groupBy 	 = "f.`product_id`";
+			$having 	 = "HAVING COUNT(DISTINCT f.`facet_type`, f.`facet_group_id`) = (SELECT cnt FROM group_count)";
+		}
+		
+		// Sort key
+		$sortKey = $data['sort'] ?? ($hasSearch ? 'relevance' : $this->config->get('config_default_product_sort')) ?? 'sort_order';
+		if ($hasSearch && $sortKey === 'relevance') {
 			$order = 'f.`relevance` DESC';
     } elseif (in_array($sortKey, array_keys($this->getSortOrders()))) {
 			$order = $this->getSortOrders()[$sortKey];
@@ -528,26 +534,21 @@ class ModelCatalogProduct extends Model {
 			$order = 'pst.`sort_order` ASC';
     }
 
-    $groupBy = $hasSearch ? "GROUP BY f.`product_id`, f.`relevance`" : "GROUP BY f.`product_id`";
 
-    $start = max(0, (int)($data['start'] ?? 0));
-    $limit = max(1, (int)($data['limit'] ?? 20));
-
-    $sql = "
-			WITH " . implode(',', $cteList) . "
+		$sql = "
+			WITH " . implode(', ', $ctes) . "
 			SELECT 
-				f.`product_id`
-				{$selectTotal}
-			{$from}
-			{$facetJoin}
-			LEFT JOIN `" . DB_PREFIX . "facet_sort` pst
+				" . implode(', ', $selectColumns) . "
+			FROM {$from}
+			{$join}
+			LEFT JOIN `oc_facet_sort` pst
 				ON  pst.`product_id` = f.`product_id`
 				AND pst.`store_id`   = {$store_id}
-			{$groupBy}
-			{$havingClause}
+			GROUP BY {$groupBy}
+			{$having}
 			ORDER BY {$order}
 			LIMIT {$limit} OFFSET {$start}
-    ";
+		";
 
     $rows     = $this->db->query($sql)->rows;
     $products = [];
