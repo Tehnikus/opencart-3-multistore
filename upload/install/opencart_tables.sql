@@ -7443,7 +7443,7 @@ CREATE TABLE `oc_product_image` (
   `image`             VARCHAR(255) DEFAULT NULL,
   `sort_order`        INT NOT NULL DEFAULT '0',
   PRIMARY KEY (`image_id`),
-  KEY (`product_id`, `store_id`, `sort_order`)
+  KEY `getProduct` (`product_id`, `store_id`, `sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `oc_product_image_description`;
