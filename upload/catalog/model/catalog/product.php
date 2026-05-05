@@ -1117,6 +1117,298 @@ class ModelCatalogProduct extends Model {
 		return $query->rows;
 	}
 
+	// public function getFilters($data = []) {
+	// 	$store_id    				 = (int) $this->config->get('config_store_id');
+	// 	$language_id 				 = (int) $this->config->get('config_language_id');
+	// 	$facetTypes 				 = $this->getFacetTypes();
+	// 	$conditions 				 = [];
+	// 	$base_facet_type     = null; // Page type, category = 1, manufacturer = 5, has_discount = 9, is_featured = 10
+	// 	$base_facet_value_id = null; // Page id if applicable, i.e. category_id. If not applicable then 0 
+	// 	$hasSearch = !empty($data['filter_name']);
+	// 	$hasFacets = !empty(array_intersect_key($data, $this->facetTypes));
+
+	// 	/**
+	// 	 * Сделать условия для поиска и для фасетов:
+	// 	 * 1. base_facet_list
+	// 	 * 2. Вынести в отдельный CTE запрос WHRER EXISTS(...) - к этому CTE будет JOIN внутри запроса base_facet_list
+	// 	 * 3. Добавить опциональный CTE для поиска товаров,  к этому CTE будет JOIN внутри запроса base_facet_list
+	// 	 * 4. Фача
+	// 	 * 5. current_products заменить на опциональный search_result + current_products (товары фастов, если есть фасеты)
+	// 	 */
+		
+	// 	// Set base facet to filter base product set on this page
+	// 	if ($this->request->get['route'] === 'product/category') {
+	// 		$path 							 = $this->request->get['category_id'] ?? $this->request->get['path'] ?? '';
+	// 		$category_id 				 = explode('_', (string) $path);
+	// 		$category_id 				 = end($category_id);
+	// 		$base_facet_type 		 = 1;
+	// 		$base_facet_value_id = (int) $category_id;
+	// 	}
+
+	// 	if ($this->request->get['route'] === 'product/manufacturer') {
+	// 		$base_facet_type 		 = 5;
+	// 		$base_facet_value_id = (int) $this->request->get['manufacturer_id'];
+	// 	}
+
+	// 	if ($this->request->get['route'] === 'product/special') {
+	// 		$base_facet_type     = 9;
+	// 		$base_facet_value_id = 1;
+	// 	}
+
+	// 	if ($this->request->get['route'] === 'product/featured') {
+	// 		$base_facet_type     = 10;
+	// 		$base_facet_value_id = 1;
+	// 	}
+
+	// 	if ($base_facet_type === null || $base_facet_value_id === null) {
+	// 		$this->log->write("model->product->getFilters(), Unknown request: \r\n" . htmlspecialchars(print_r($this->request->get, true)));
+	// 		return [];
+	// 	}
+
+	// 	// Base facet is intentionally included in selected_conditions
+	// 	// so that base page context is part of selected_groups for AND-between-groups logic
+	// 	$conditions[] = "(facet_type = {$base_facet_type} AND facet_value_id IN (" . $base_facet_value_id . "))";
+		
+	// 	foreach ($data as $key => $ids) {
+	// 		if (!isset($facetTypes[$key])) continue;
+	// 		if ($facetTypes[$key] == $base_facet_type && $ids == $base_facet_value_id) continue;
+
+	// 		$type = (int) $facetTypes[$key];
+	// 		$ids = array_values(array_unique(array_map('intval', explode(',', $ids))));
+
+	// 		if (!$ids) continue;
+
+	// 		$conditions[] = "(facet_type = {$type} AND facet_value_id IN (" . implode(',', $ids) . "))";
+
+	// 	}
+
+	// 	$selected_conditions = $conditions ? implode(" OR ", $conditions) : "1";
+
+	// 	$sql = "
+	// 		/* Base facet list to be displayed on the page - all the facets from current page */
+	// 		WITH base_facet_list AS (
+	// 			SELECT
+	// 				i.facet_value_id,
+	// 				i.facet_type,
+	// 				i.facet_group_id,
+	// 				COUNT(DISTINCT(i.product_id)) AS base_count
+	// 			FROM " . DB_PREFIX . "facet_index i
+	// 			WHERE EXISTS(
+	// 				SELECT
+	// 					1
+	// 				FROM " . DB_PREFIX . "facet_index p
+	// 				WHERE p.product_id = i.product_id
+	// 					-- Current base page
+	// 					AND p.facet_type     = {$base_facet_type} 		-- Base page type, category = 1, manufacturer = 5, has_discount = 9, is_featured = 10
+	// 					AND p.facet_value_id = {$base_facet_value_id} -- Base facet entity id: category_id, manufacturer_id. If facet_type = has_discount, then 0
+	// 					AND store_id 				 = {$store_id} 						-- store id condition
+	// 			)
+	// 			AND store_id = {$store_id}
+	// 			GROUP BY i.facet_type, i.facet_group_id, i.facet_value_id
+	// 			ORDER BY NULL
+	// 		),
+			
+	// 		/* 
+	// 			Current facets selected by user 
+	// 			Used to count
+	// 		*/
+	// 		selected_facets AS (
+	// 			SELECT
+	// 				`facet_type`, `facet_group_id`, facet_value_id
+	// 			FROM " . DB_PREFIX . "facet_index
+	// 			WHERE (
+	// 				/*
+	// 					Base facet AND selected facets joined with OR, example:
+	// 					(facet_value_id IN(1) AND facet_type = 1)    -- base facet: type = category (1), category_id = (1)
+	// 					OR (facet_value_id IN(2) AND facet_type = 5) -- selected facet: type = manufacturer (5), manufacturer_id = 2
+	// 					OR (facet_value_id IN(9,10) AND facet_type = 2) -- selected facet: type - filter (2), filter_id - 9,10
+	// 				*/
+	// 				{$selected_conditions}
+	// 			) 
+	// 			AND store_id = {$store_id} -- store id condition
+				
+	// 			GROUP BY facet_type, facet_group_id, facet_value_id
+	// 			ORDER BY NULL
+	// 		),
+			
+	// 		selected_groups AS (
+	// 			SELECT DISTINCT facet_type, facet_group_id
+	// 			FROM selected_facets
+	// 		),
+			
+	// 		/* User selected facets */
+	// 		facet_temp (`product_id`, `facet_type`, `facet_group_id`) AS (
+	// 			SELECT
+	// 				`product_id`, `facet_type`, `facet_group_id`
+	// 			FROM " . DB_PREFIX . "facet_index
+	// 			WHERE (
+	// 				{$selected_conditions}
+	// 			) AND store_id = {$store_id}
+	// 			ORDER BY NULL
+	// 		),
+			
+	// 		group_count AS (
+	// 			SELECT COUNT(DISTINCT `facet_type`, `facet_group_id`) AS cnt
+	// 			FROM `facet_temp`
+	// 			ORDER BY NULL
+	// 		),
+			
+	// 		/* Current products to ignore already displayed products */
+	// 		current_products AS (
+	// 			SELECT 
+	// 				f.`product_id`
+	// 			FROM facet_temp f
+	// 			GROUP BY f.`product_id`
+	// 			HAVING COUNT(DISTINCT f.`facet_type`, f.`facet_group_id`) = (SELECT `cnt` FROM group_count)
+	// 			ORDER BY null
+	// 		),
+			
+	// 		/* Base products */
+	// 		base_products AS (
+	// 			SELECT p.product_id
+	// 			FROM " . DB_PREFIX . "facet_index p
+	// 			WHERE p.facet_type = {$base_facet_type}
+	// 			AND p.facet_value_id = {$base_facet_value_id}
+	// 			AND p.store_id = {$store_id}
+	// 		),
+			
+	// 		count_products AS (
+	// 			SELECT
+	// 				b.facet_type,
+	// 				b.facet_group_id,
+	// 				b.facet_value_id,
+			
+	// 				COUNT(DISTINCT fi.product_id) AS current_count
+			
+	// 			FROM base_facet_list b
+			
+	// 			INNER JOIN " . DB_PREFIX . "facet_index fi 
+	// 			-- USE INDEX (PRIMARY)
+	// 				ON  fi.facet_value_id = b.facet_value_id
+	// 				AND fi.facet_type     = b.facet_type
+	// 				AND fi.facet_group_id = b.facet_group_id
+	// 				AND fi.store_id       = {$store_id}
+			
+	// 			-- Get base products
+	// 			INNER JOIN base_products bp
+	// 				ON bp.product_id = fi.product_id
+			
+	// 			-- Get current products (already shown)
+	// 			LEFT JOIN current_products c
+	// 				ON c.product_id = fi.product_id
+			
+	// 			WHERE
+	// 				-- 1. AND between groups: the product matches all foreign groups
+	// 				NOT EXISTS (
+	// 					SELECT 1
+	// 					FROM selected_groups sg
+	// 					WHERE
+	// 						NOT (sg.facet_type = b.facet_type AND sg.facet_group_id = b.facet_group_id)
+	// 						AND NOT EXISTS (
+	// 							SELECT 1
+	// 							FROM " . DB_PREFIX . "facet_index fi2
+			
+	// 							INNER JOIN selected_facets sf
+	// 								ON  sf.facet_type     = fi2.facet_type
+	// 								AND sf.facet_group_id = fi2.facet_group_id
+	// 								AND sf.facet_value_id = fi2.facet_value_id
+								
+	// 							WHERE fi2.product_id     = fi.product_id
+	// 								AND fi2.store_id       = {$store_id}
+	// 								AND fi2.facet_type     = sg.facet_type
+	// 								AND fi2.facet_group_id = sg.facet_group_id
+	// 						)
+	// 				)
+	// 				-- 2. For OR groups exclude products that already shown
+	// 				AND NOT (
+	// 					EXISTS (
+	// 						SELECT 1 FROM selected_groups sg2
+	// 						WHERE sg2.facet_type     = b.facet_type
+	// 						AND   sg2.facet_group_id = b.facet_group_id
+	// 					)
+	// 					AND fi.product_id IN (SELECT product_id FROM current_products)
+	// 				)
+			
+	// 			GROUP BY b.facet_type, b.facet_group_id, b.facet_value_id
+	// 			ORDER BY null
+	// 		),
+			
+	// 		available_facets AS (
+	// 			SELECT DISTINCT
+	// 				fi.facet_value_id,
+	// 				fi.facet_type,
+	// 				fi.facet_group_id
+	// 			FROM current_products cp
+	// 			-- Only facets that satisfy current products
+	// 			INNER JOIN " . DB_PREFIX . "facet_index fi
+	// 				ON  fi.product_id = cp.product_id
+	// 				AND fi.store_id   = {$store_id}
+	// 			-- Only current page facets
+	// 			INNER JOIN base_facet_list b
+	// 				ON  b.facet_value_id = fi.facet_value_id
+	// 				AND b.facet_type     = fi.facet_type
+	// 				AND b.facet_group_id = fi.facet_group_id
+	// 		)
+			
+	// 		SELECT
+	// 			b.facet_value_id,
+	// 			b.facet_type,
+	// 			b.facet_group_id,
+	// 			b.base_count,
+	// 			COALESCE(c.current_count, 0) AS current_count,
+	// 			n.name AS facet_name,
+	// 			n.group_name AS facet_group_name,
+	// 			n.sort_order AS facet_sort_order,
+	// 			n.group_sort_order AS group_sort_order,
+	// 			CASE WHEN sf.facet_value_id IS NOT NULL THEN 1 ELSE 0 END AS facet_is_selected,
+	// 			CASE WHEN sg.facet_group_id IS NOT NULL THEN 1 ELSE 0 END AS group_is_selected,
+	// 			/* The facet is available if:
+	// 			1. There are some products after facet is applied (current_count > 0) OR
+	// 			2. Facet products intersect with current_products (products exist, but is is excluded as a duplicate of the OR-group - facet's parent group)
+	// 			*/
+	// 			CASE
+	// 				WHEN c.current_count > 0  THEN 1
+	// 				WHEN af.facet_value_id IS NOT NULL THEN 1
+	// 				ELSE 0
+	// 			END AS facet_is_available
+	// 		FROM base_facet_list b
+			
+	// 		-- Facet names table, doesn't affect anything, just displays facet names
+	// 		LEFT JOIN " . DB_PREFIX . "facet_name n
+	// 			ON n.facet_type      = b.facet_type
+	// 			AND n.facet_group_id = b.facet_group_id
+	// 			AND n.facet_value_id = b.facet_value_id
+	// 			AND n.language_id    = {$language_id} -- language id condition
+	// 			AND n.store_id       = {$store_id}    -- store id condition
+				
+	// 		-- Join selected facets to mark them as selected
+	// 		LEFT JOIN selected_facets sf
+	// 			ON  sf.facet_type     = b.facet_type
+	// 			AND sf.facet_group_id = b.facet_group_id
+	// 			AND sf.facet_value_id = b.facet_value_id
+				
+	// 		-- Join selected groups to mark them as selected
+	// 		LEFT JOIN selected_groups sg
+	// 			ON  sg.facet_type     = b.facet_type
+	// 			AND sg.facet_group_id = b.facet_group_id
+			
+	// 		-- Count products taking in account applied facets
+	// 		LEFT JOIN count_products c
+	// 			ON c.facet_value_id  = b.facet_value_id
+	// 			AND c.facet_type     = b.facet_type
+	// 			AND c.facet_group_id = b.facet_group_id
+			
+	// 		-- Add flag if facet is available, despite all its product are already displayed
+	// 		LEFT JOIN available_facets af
+	// 			ON  af.facet_value_id = b.facet_value_id
+	// 			AND af.facet_type     = b.facet_type
+	// 			AND af.facet_group_id = b.facet_group_id
+	// 	";
+
+	// 	$query = $this->db->query($sql);
+	// 	return $query->rows;
+	// }
+
 	
 	// public function getProducts($data = []) : array {
 	// 	$data 			= array_filter($data, fn($v) => $v !== '' && $v !== null); // Remove empty array entries, skipping zero, as zero is also a value
@@ -1237,6 +1529,207 @@ class ModelCatalogProduct extends Model {
 
 	// 	return $products;
 	// }
+
+		// public function getProducts(array $data = []) : array {
+
+  //   $data     	= array_filter($data, fn($v) => $v !== '' && $v !== null);
+  //   $store_id 	= (int)$this->config->get('config_store_id');
+  //   $facets   	= [];
+  //   $where    	= [];
+	// 	 $cteList 		= [];
+  //   $sortOrders = $this->getSortOrders(); // includes 'relevance' => 'sr.relevance DESC'
+  //   $facetMap 	= $this->facetTypes;
+    
+	// 	// Facet filter
+	// 	// Prepare requests by facet types present in $data 
+  //   foreach ($facetMap as $key => $type) {
+	// 		if (!empty($data[$key])) {
+	// 			if (!in_array($type, [8, 9, 10])) {
+	// 				// Facet types that may have multiple values
+	// 				$ids      = array_values(array_unique(array_map('intval', explode(',', $data[$key]))));
+	// 				$facets[] = "(facet_value_id IN(" . implode(',', $ids) . ") AND facet_type = {$type})";
+	// 			} else {
+	// 				// Facet types that have only one value - 0 or 1
+	// 				$facets[] = "(facet_value_id = 1 AND facet_type = {$type})";
+	// 			}
+	// 		}
+  //   }
+
+  //   // Flags to toggle different CTEs and JOINS
+	// 	$hasSearch = !empty($data['filter_name']);
+	// 	$hasFacets = !empty($facets);
+
+	// 	// Precaution: at least one filter type must be present
+	// 	if (!$hasFacets && !$hasSearch) {
+	// 		return [];
+	// 	}
+
+	// 	if ($hasSearch) {
+	// 		$language_id = (int)$this->config->get('config_language_id');
+	// 		$boolQuery   = $this->buildSearchQuery($data['filter_name']);
+
+	// 		$matchExpr = "
+	// 			MATCH(`name`)         AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 10 +
+	// 			MATCH(`manufacturer`) AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 5  +
+	// 			MATCH(`category`)     AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 5  +
+	// 			MATCH(`extra`)        AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 1
+	// 		";
+
+	// 		$cteList[] = "
+	// 			search_results AS (
+	// 				SELECT `product_id`, ({$matchExpr}) AS relevance
+	// 				FROM `" . DB_PREFIX . "product_search_index`
+	// 				WHERE `language_id` = {$language_id}
+	// 					AND `store_id`    = {$store_id}
+	// 					AND ({$matchExpr}) > 0
+	// 			)
+	// 		";
+	// 	}
+
+	// 	if ($hasFacets) {
+	// 		$where[]   = "store_id = {$store_id}";
+	// 		$where[]   = "(" . implode(" OR ", $facets) . ")";
+
+	// 		$cteList[] = "
+	// 			facet_temp AS (
+	// 				SELECT `product_id`, `facet_type`, `facet_group_id`
+	// 				FROM `" . DB_PREFIX . "facet_index`
+	// 				WHERE " . implode(" AND ", $where) . "
+	// 			),
+	// 			group_count AS (
+	// 				SELECT COUNT(DISTINCT `facet_type`, `facet_group_id`) AS cnt
+	// 				FROM facet_temp
+	// 			)
+	// 		";
+	// 	}
+
+	// 	// FROM / JOIN
+	// 	// f. always points on main data source:
+	// 	// if search is present => f.search_results (with f.relevance sort available)
+	// 	// if only facets => f.facet_temp
+	// 	if ($hasSearch) {
+	// 		$from         = "FROM search_results f";
+	// 		$facetJoin    = $hasFacets
+	// 			? "JOIN facet_temp ft ON ft.`product_id` = f.`product_id`"
+	// 			: "";
+	// 		$havingClause = $hasFacets
+	// 			? "HAVING COUNT(DISTINCT ft.`facet_type`, ft.`facet_group_id`) = (SELECT cnt FROM group_count)"
+	// 			: "";
+	// 	} else {
+	// 		$from         = "FROM facet_temp f";
+	// 		$facetJoin    = "";
+	// 		$havingClause = "HAVING COUNT(DISTINCT f.`facet_type`, f.`facet_group_id`) = (SELECT cnt FROM group_count)";
+	// 	}
+
+	// 	// GROUP BY
+	// 	// f.relevance is added only when search is present
+	// 	// MySQL ONLY_FULL_GROUP_BY requires non-aggregatet columns fromSELECT to be present in GROUP BY
+	// 	$groupBy = $hasSearch
+	// 		? "GROUP BY f.`product_id`, f.`relevance`"
+	// 		: "GROUP BY f.`product_id`";
+
+	// 	// ORDER BY 
+	// 	$sortKey = $data['sort'] 
+	// 		?? ($hasSearch ? 'relevance' : $this->config->get('config_default_product_sort')) 
+	// 		?? 'sort_order';
+
+	// 	if ($hasSearch && $sortKey === 'relevance') {
+	// 		$order = 'f.`relevance` DESC';
+	// 	} elseif (in_array($sortKey, array_keys($sortOrders))) {
+	// 		$order = $sortOrders[$sortKey];
+	// 	} else {
+	// 		$order = 'pst.`sort_order` ASC';
+	// 	}
+
+	// 	// Pagination
+	// 	$start = max(0, (int)($data['start'] ?? 0));
+	// 	$limit = max(1, (int)($data['limit'] ?? 20));
+
+	// 	// Main query
+	// 	$sql = "
+	// 		WITH " . implode(',', $cteList) . "
+	// 		SELECT 
+	// 			f.`product_id`,
+	// 			COUNT(*) OVER() AS total_count
+	// 		{$from}
+	// 		{$facetJoin}
+	// 		LEFT JOIN `" . DB_PREFIX . "facet_sort` pst
+	// 			ON  pst.`product_id` = f.`product_id`
+	// 			AND pst.`store_id`   = {$store_id}
+	// 		{$groupBy}
+	// 		{$havingClause}
+	// 		ORDER BY {$order}
+	// 		LIMIT {$limit} OFFSET {$start}
+	// 	";
+
+	// 	// echo '<pre>' . htmlspecialchars(print_r($sql, true)) . '</pre>';
+
+  //   $productRows = $this->db->query($sql)->rows;
+
+	// 	// Get product data
+  //   $products = [];
+  //   foreach ($productRows as $row) {
+	// 		$products[] = $this->getProduct((int) $row['product_id']);
+  //   }
+
+  //   return $products;
+	// }
+
+	/**
+	 * Returns total number of products matching the given filters and search query.
+	 * Used for pagination.
+	 * @return int
+	 */
+	// public function getTotalProducts(array $data = []) : int {
+	// 	$data     = array_filter($data, fn($v) => $v !== '' && $v !== null);
+	// 	$store_id = (int)$this->config->get('config_store_id');
+	// 	$facets   = [];
+	// 	$where    = [];
+
+	// 	foreach ($this->facetTypes as $key => $type) {
+	// 		if (!empty($data[$key])) {
+	// 			if (!in_array($type, [8, 9, 10])) {
+	// 				$ids      = array_values(array_unique(array_map('intval', explode(',', $data[$key]))));
+	// 				$facets[] = "(facet_value_id IN(" . implode(',', $ids) . ") AND facet_type = {$type})";
+	// 			} else {
+	// 				$facets[] = "(facet_value_id = 1 AND facet_type = {$type})";
+	// 			}
+	// 		}
+	// 	}
+
+	// 	$hasSearch = !empty($data['filter_name']);
+	// 	$hasFacets = !empty($facets);
+
+	// 	if (!$hasFacets && !$hasSearch) {
+	// 		return 0;
+	// 	}
+
+	// 	[$cteList, $from, $facetJoin, $havingClause] = $this->buildQueryParts(
+	// 			$data, $store_id, $facets, $where, $hasSearch, $hasFacets
+	// 	);
+
+	// 	$sql = "
+	// 		WITH " . implode(',', $cteList) . "
+	// 		SELECT COUNT(*) AS total FROM (
+	// 			SELECT f.`product_id`
+	// 			{$from}
+	// 			{$facetJoin}
+	// 			LEFT JOIN `" . DB_PREFIX . "facet_sort` pst
+	// 				ON  pst.`product_id` = f.`product_id`
+	// 				AND pst.`store_id`   = {$store_id}
+	// 			" . ($hasSearch ? "GROUP BY f.`product_id`, f.`relevance`" : "GROUP BY f.`product_id`") . "
+	// 			{$havingClause}
+	// 		) AS counted
+	// 	";
+
+	// 	return (int)$this->db->query($sql)->row['total'] ?? 0;
+	// }
+
+	/**
+	 * Builds reusable CTE + FROM + JOIN + HAVING parts
+	 * shared between getProducts() and getTotalProducts().
+	 * @return array
+	 */
 
 		/**
 	 * Get all facets with names and product count
@@ -1454,5 +1947,151 @@ class ModelCatalogProduct extends Model {
 		
 	// 	$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "' AND category_id IN(" . implode(',', $implode) . ")");
   // 	    return $query->row;
+	// }
+
+	
+	/**
+	 * Get products list
+	 * Includes both facet filter and FULLTEXT search
+	 * @param array $data The array of filters and search words
+	 * @return array<array|bool>
+	 */
+	// public function getProducts(array $data = [], $withTotal = false): array {
+  //   $data        = array_filter($data, fn($v) => $v !== '' && $v !== null);
+  //   $store_id    = (int)$this->config->get('config_store_id');
+  //   $facets      = [];
+  //   $where       = [];
+	// 	$selectTotal = $withTotal ? ", COUNT(*) OVER() AS total_count" : "";
+
+  //   foreach ($this->facetTypes as $key => $type) {
+	// 		if (!empty($data[$key])) {
+	// 			if (!in_array($type, [8, 9, 10])) {
+	// 				$ids      = array_values(array_unique(array_map('intval', explode(',', $data[$key]))));
+	// 				$facets[] = "(facet_value_id IN(" . implode(',', $ids) . ") AND facet_type = {$type})";
+	// 			} else {
+	// 				$facets[] = "(facet_value_id = 1 AND facet_type = {$type})";
+	// 			}
+	// 		}
+  //   }
+
+  //   $hasSearch = !empty($data['filter_name']);
+  //   $hasFacets = !empty($facets);
+
+  //   if (!$hasFacets && !$hasSearch) {
+	// 		return [];
+  //   }
+
+  //   [$cteList, $from, $facetJoin, $havingClause] = $this->buildQueryParts(
+	// 		$data, $store_id, $facets, $where, $hasSearch, $hasFacets
+  //   );
+
+  //   // Sort
+  //   $sortKey = $data['sort'] ?? ($hasSearch ? 'relevance' : $this->config->get('config_default_product_sort')) ?? 'sort_order';
+
+  //   if ($hasSearch && $sortKey === 'relevance') {
+	// 		$order = 'f.`relevance` DESC';
+  //   } elseif (in_array($sortKey, array_keys($this->getSortOrders()))) {
+	// 		$order = $this->getSortOrders()[$sortKey];
+  //   } else {
+	// 		$order = 'pst.`sort_order` ASC';
+  //   }
+
+  //   $groupBy = $hasSearch ? "GROUP BY f.`product_id`, f.`relevance`" : "GROUP BY f.`product_id`";
+
+  //   $start = max(0, (int)($data['start'] ?? 0));
+  //   $limit = max(1, (int)($data['limit'] ?? 20));
+
+  //   $sql = "
+	// 		WITH " . implode(',', $cteList) . "
+	// 		SELECT 
+	// 			f.`product_id`
+	// 			{$selectTotal}
+	// 		{$from}
+	// 		{$facetJoin}
+	// 		LEFT JOIN `" . DB_PREFIX . "facet_sort` pst
+	// 			ON  pst.`product_id` = f.`product_id`
+	// 			AND pst.`store_id`   = {$store_id}
+	// 		{$groupBy}
+	// 		{$havingClause}
+	// 		ORDER BY {$order}
+	// 		LIMIT {$limit} OFFSET {$start}
+  //   ";
+
+	// 	echo '<pre>' . htmlspecialchars(print_r($sql, true)) . '</pre>';
+
+	// 	$this->getProducts2($data, true);
+
+  //   $rows     = $this->db->query($sql)->rows;
+  //   $products = [];
+
+  //   foreach ($rows as $row) {
+	// 		$products[] = $this->getProduct((int)$row['product_id']);
+  //   }
+
+  //   // Return total if withTotal flag is true
+  //   if ($withTotal) {
+	// 		return [
+	// 			'products' => $products,
+	// 			'total'    => (int)($rows[0]['total_count'] ?? 0),
+	// 		];
+  //   }
+
+  //   return $products;
+	// }
+	
+
+	// private function buildQueryParts(array $data, int $store_id, array $facets, array $where, bool $hasSearch, bool $hasFacets) : array {
+  //   $cteList = [];
+
+  //   if ($hasSearch) {
+	// 		$language_id = (int)$this->config->get('config_language_id');
+	// 		$boolQuery   = $this->buildSearchQuery($data['filter_name']);
+
+	// 		$matchExpr = "
+	// 			MATCH(`name`)         AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 10 +
+	// 			MATCH(`manufacturer`) AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 5  +
+	// 			MATCH(`category`)     AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 5  +
+	// 			MATCH(`extra`)        AGAINST('{$boolQuery}' IN NATURAL LANGUAGE MODE) * 1
+	// 		";
+
+	// 		$cteList[] = "
+	// 			search_results AS (
+	// 				SELECT `product_id`, ({$matchExpr}) AS relevance
+	// 				FROM `" . DB_PREFIX . "product_search_index`
+	// 				WHERE `language_id` = {$language_id}
+	// 					AND `store_id`    = {$store_id}
+	// 					AND ({$matchExpr}) > 0
+	// 			)
+	// 		";
+  //   }
+
+  //   if ($hasFacets) {
+	// 		$where[] = "store_id = {$store_id}";
+	// 		$where[] = "(" . implode(" OR ", $facets) . ")";
+
+	// 		$cteList[] = "
+	// 			facet_temp AS (
+	// 				SELECT `product_id`, `facet_type`, `facet_group_id`
+	// 				FROM `" . DB_PREFIX . "facet_index`
+	// 				WHERE " . implode(" AND ", $where) . "
+	// 			),
+	// 			group_count AS (
+	// 				SELECT COUNT(DISTINCT `facet_type`, `facet_group_id`) AS cnt
+	// 				FROM facet_temp
+	// 			)
+	// 		";
+  //   }
+
+  //   if ($hasSearch) {
+	// 		$from         = "FROM search_results f";
+	// 		$facetJoin    = $hasFacets ? "JOIN facet_temp ft ON ft.`product_id` = f.`product_id`" : "";
+	// 		$havingClause = $hasFacets ? "HAVING COUNT(DISTINCT ft.`facet_type`, ft.`facet_group_id`) = (SELECT cnt FROM group_count)" : "";
+  //   } else {
+	// 		$from         = "FROM facet_temp f";
+	// 		$facetJoin    = "";
+	// 		$havingClause = "HAVING COUNT(DISTINCT f.`facet_type`, f.`facet_group_id`) = (SELECT cnt FROM group_count)";
+	// 	}
+
+  //   return [$cteList, $from, $facetJoin, $havingClause];
 	// }
 }
