@@ -250,6 +250,7 @@ class ModelCatalogProduct extends Model {
 							'date_end',            pd.`date_end`
 						)
 					) FROM " . DB_PREFIX . "product_discount pd
+					FORCE INDEX (getProduct)
 					 WHERE pd.`product_id` = p2s.`product_id`
 					 AND pd.`store_id` 		 = p2s.`store_id`
 				) AS discounts,
@@ -277,6 +278,7 @@ class ModelCatalogProduct extends Model {
 							) AS `attributes_json`
 				
 						FROM " . DB_PREFIX . "product_attribute pa
+						FORCE INDEX (getProduct)
 				
 						LEFT JOIN " . DB_PREFIX . "attribute_description ad
 							ON ad.`attribute_id` = pa.`attribute_id`
@@ -284,7 +286,7 @@ class ModelCatalogProduct extends Model {
 							AND ad.`store_id` = pa.`store_id`
 				
 						LEFT JOIN " . DB_PREFIX . "attribute_group_description agd
-							ON agd.`attribute_group_id` = pa.`attribute_group_id`
+							ON  agd.`attribute_group_id` = pa.`attribute_group_id`
 							AND agd.`language_id` = pa.`language_id`
 							AND agd.`store_id` = pa.`store_id`
 				
@@ -302,14 +304,14 @@ class ModelCatalogProduct extends Model {
 
 				(
 					SELECT JSON_OBJECTAGG(
-						po.product_option_id, JSON_OBJECT(
+						po.`product_option_id`, JSON_OBJECT(
 
 							'product_option_id', 		po.`product_option_id`,
 							'option_id', 						po.`option_id`,
 							'value', 								po.`value`,
 							'required', 						po.`required`,
 							'type', 								o.`type`,
-							'sort_order', 					(SELECT o2s.`sort_order` FROM " . DB_PREFIX . "option_to_store o2s WHERE o2s.`option_id` = po.`option_id` AND o2s.`store_id` = po.`store_id` LIMIT 1),
+							'sort_order', 					o2s.`sort_order`,
 							'name', 								od.`name`,
 						
 							'product_option_value', (
@@ -327,25 +329,29 @@ class ModelCatalogProduct extends Model {
 										'points_prefix',						pov.`points_prefix`,
 										'weight',										pov.`weight`,
 										'weight_prefix',						pov.`weight_prefix`,
-										'image',										(SELECT ov.`image` FROM " . DB_PREFIX . "option_value ov WHERE ov.`option_value_id` = pov.`option_value_id` AND ov.`store_id` = p2s.`store_id`),
-										'sort_order',								(SELECT ov.`sort_order` FROM " . DB_PREFIX . "option_value ov WHERE ov.`option_value_id` = pov.`option_value_id` AND ov.`store_id` = p2s.`store_id`),
-										'name',											(SELECT ovd.`name` FROM " . DB_PREFIX . "option_value_description ovd WHERE ovd.`option_value_id` = pov.`option_value_id` AND ovd.`language_id` = pd.`language_id` AND ovd.`store_id` = p2s.`store_id`)
+										'image',										(SELECT ov.`image` FROM " . DB_PREFIX . "option_value ov WHERE ov.`option_value_id` = pov.`option_value_id` AND ov.`store_id` = p2s.`store_id` LIMIT 1),
+										'sort_order',								(SELECT ov.`sort_order` FROM " . DB_PREFIX . "option_value ov WHERE ov.`option_value_id` = pov.`option_value_id` AND ov.`store_id` = p2s.`store_id` LIMIT 1),
+										'name',											(SELECT ovd.`name` FROM " . DB_PREFIX . "option_value_description ovd WHERE ovd.`option_value_id` = pov.`option_value_id` AND ovd.`language_id` = pd.`language_id` AND ovd.`store_id` = p2s.`store_id` LIMIT 1)
 									)
 								)
 								FROM " . DB_PREFIX . "product_option_value pov
-								WHERE pov.product_id 				= po.product_id
-									AND pov.product_option_id = po.product_option_id
-									AND pov.store_id 					= po.store_id
+								FORCE INDEX (getProduct)
+								WHERE pov.`product_id` 				= po.`product_id`
+									AND pov.`product_option_id` = po.`product_option_id`
+									AND pov.`store_id` 					= po.`store_id`
 							)
 						)
 					)
 					FROM " . DB_PREFIX . "product_option po
-					JOIN `" . DB_PREFIX . "option` o
+					LEFT JOIN `" . DB_PREFIX . "option` o 
+					FORCE INDEX (PRIMARY)
 						ON o.`option_id` 			= po.`option_id`
-					JOIN " . DB_PREFIX . "option_to_store o2s
+					LEFT JOIN " . DB_PREFIX . "option_to_store o2s 
+					FORCE INDEX (PRIMARY)
 						ON 	o2s.`option_id` 	= po.`option_id`
-						AND o2s.store_id 		= p2s.store_id
-					JOIN " . DB_PREFIX . "option_description od
+						AND o2s.`store_id` 		= p2s.`store_id`
+					LEFT JOIN " . DB_PREFIX . "option_description od 
+					FORCE INDEX (PRIMARY)
 						ON 	od.`option_id` 		= po.`option_id`
 						AND od.`language_id`	= pd.`language_id`
 						AND od.`store_id` 		= p2s.`store_id`
@@ -362,6 +368,7 @@ class ModelCatalogProduct extends Model {
 						)
 					)
 						FROM " . DB_PREFIX . "product_reward pr
+						FORCE INDEX (getProduct)
 						WHERE pr.`product_id` = p2s.`product_id`
 							AND pr.`store_id` 	= p2s.`store_id`
 				) AS rewards, 
@@ -391,6 +398,7 @@ class ModelCatalogProduct extends Model {
 				) AS length_class
 
 			FROM " . DB_PREFIX . "product_to_store p2s
+			FORCE INDEX (PRIMARY)
 			LEFT JOIN " . DB_PREFIX . "facet_sort pst
 				ON 	pst.`product_id` = p2s.`product_id`
 				AND pst.`store_id` 	 = p2s.`store_id`
