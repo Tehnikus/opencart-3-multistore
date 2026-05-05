@@ -825,7 +825,7 @@ class ModelCatalogCategory extends Model {
 				c2s.column,
 				(
 					SELECT 
-						GROUP_CONCAT(t.name ORDER BY t.level SEPARATOR '&nbsp;&#9656;&nbsp; ')
+						GROUP_CONCAT(t.name ORDER BY t.level SEPARATOR '&nbsp;&#9656;&nbsp;')
 					FROM (
 						SELECT
 							cp.level,
