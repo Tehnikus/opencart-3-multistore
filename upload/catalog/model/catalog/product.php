@@ -626,15 +626,32 @@ class ModelCatalogProduct extends Model {
 
 		return $string;
 	}
-			$where[] = "store_id = {$store_id}";
-			$where[] = "(" . implode(" OR ", $facets) . ")";
 
-			$cteList[] = "
+	private function buildCteExpression($data) : array {
+		$cteList 		 			= [];
+		$language_id 			= (int) $this->config->get('config_language_id');
+		$store_id 	 			= (int) $this->config->get('config_store_id');
+		$facets 		 			= $this->buildFacetExpression($data);
+		$searchExpression = $this->buildMatchExpression($data);
+		$hasSearch 	 			= !empty($searchExpression);
+		$hasFacets   			= !empty($facets);
+
+		// Build CTE expression requied for facet search
+		if ($hasFacets) {
+			$where = [];
+			$where[] = "store_id = {$store_id}";
+			$where[] = "(" . $facets . ")";
+
+			$cteList['facet_temp'] = "
 				facet_temp AS (
 					SELECT `product_id`, `facet_type`, `facet_group_id`
 					FROM `" . DB_PREFIX . "facet_index`
 					WHERE " . implode(" AND ", $where) . "
-				),
+					ORDER BY NULL
+				)
+			";
+
+			$cteList['group_count'] = "
 				group_count AS (
 					SELECT COUNT(DISTINCT `facet_type`, `facet_group_id`) AS cnt
 					FROM facet_temp
@@ -642,53 +659,21 @@ class ModelCatalogProduct extends Model {
 			";
     }
 
-    if ($hasSearch) {
-			$from         = "FROM search_results f";
-			$facetJoin    = $hasFacets ? "JOIN facet_temp ft ON ft.`product_id` = f.`product_id`" : "";
-			$havingClause = $hasFacets ? "HAVING COUNT(DISTINCT ft.`facet_type`, ft.`facet_group_id`) = (SELECT cnt FROM group_count)" : "";
-    } else {
-			$from         = "FROM facet_temp f";
-			$facetJoin    = "";
-			$havingClause = "HAVING COUNT(DISTINCT f.`facet_type`, f.`facet_group_id`) = (SELECT cnt FROM group_count)";
+		// Build CTE expression required for FULLTEXT search
+		if ($hasSearch) {
+			$cteList['search_results'] = "
+				search_results AS (
+					SELECT `product_id`, ({$searchExpression}) AS relevance
+					FROM `" . DB_PREFIX . "product_search_index`
+					WHERE `language_id` = {$language_id}
+						AND `store_id`    = {$store_id}
+						AND ({$searchExpression}) > 0
+				)
+			";
 		}
 
-		// echo '<pre>' . htmlspecialchars(print_r([$cteList, $from, $facetJoin, $havingClause], true)) . '</pre>';
-
-    return [$cteList, $from, $facetJoin, $havingClause];
+		return $cteList;
 	}
-
-	/**
-	 * Build BOOLEAN MODE expression from search string:
-	 * "red sweater"  =>  "+red* +sweater*" (AND)
-	 * "red sweater"  =>  "red* sweater*"   (OR)
-	 */
-	private function buildSearchQuery(string $query): string {
-		$words = $this->tokenize($query);
-		return implode(' ', array_map(
-			fn(string $w) => $this->db->escape($w),
-			$words
-		));
-	}
-
-	/**
-	 * Tokenize: clear reserved symbols for BOOLEAN MODE, lowercase, filter short words, only unique words
-	 * Minimal word lenght must match ngram_token_size in my.cnf (default 2).
-	 */
-	private function tokenize(string $query, int $min_length = 2): array {
-		// Remove BOOLEAN MODE reserved symbols
-		$query = str_replace(['+', '-', '>', '<', '(', ')', '~', '*', '"', '@', '\\'], ' ', $query);
-
-		$words = explode(' ', mb_strtolower(trim($query)));
-
-		// Only unique words
-		return array_values(
-			array_unique(
-				array_filter(
-					$words,
-					fn(string $w) => mb_strlen($w) >= $min_length
-				)
-			)
-		);
 	}
 	
 	public function getProductSpecials($data) : array {
