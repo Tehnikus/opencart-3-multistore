@@ -674,6 +674,23 @@ class ModelCatalogProduct extends Model {
 
 		return $cteList;
 	}
+
+	private function buildFacetExpression($data) : string {
+		$facets = [];
+		foreach ($this->facetTypes as $key => $type) {
+			if (!empty($data[$key])) {
+				if (!in_array($type, [8, 9, 10])) {
+					// Facets that may have multiple values
+					$ids      = array_values(array_unique(array_map('intval', explode(',', $data[$key]))));
+					$facets[] = "(facet_value_id IN(" . implode(',', $ids) . ") AND facet_type = {$type})";
+				} else {
+					// Facets that have only one value - 1
+					$facets[] = "(facet_value_id = 1 AND facet_type = {$type})";
+				}
+			}
+    }
+
+		return !empty($facets) ? implode(' OR ', $facets) : "";
 	}
 	
 	public function getProductSpecials($data) : array {
