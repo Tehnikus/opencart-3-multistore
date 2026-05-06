@@ -136,33 +136,20 @@ class ControllerProductCategory extends Controller {
 			$results = $this->model_catalog_category->getCategories($category_id);
 
 			foreach ($results as $result) {
-				$filter_data = array(
-					'filter_category_id'  => $result['category_id'],
-					'filter_sub_category' => true
-				);
-
 				$data['categories'][] = array(
-					'name' => $result['name'] . ($this->config->get('config_product_count') ? ' (' . $this->model_catalog_product->getTotalProducts($filter_data) . ')' : ''),
+					'name' => $result['name'],
 					'href' => $this->url->link('product/category', 'path=' . $this->request->get['path'] . '_' . $result['category_id'] . $url)
 				);
 			}
 
 			$data['products'] = array();
 
-			$filter_data = array(
-				'filter_category_id' => $category_id,
-				'filter_filter'      => $filter,
-				'sort'               => $sort,
-				'order'              => $order,
-				'start'              => ($page - 1) * $limit,
-				'limit'              => $limit
-			);
+			$request = $this->model_catalog_product->buildProductRequest($this->request->get);
+			$results = $this->model_catalog_product->getProducts($request, true);
+			$products = $results['products'];
+			$product_total = $results['total'];
 
-			$product_total = $this->model_catalog_product->getTotalProducts($filter_data);
-
-			$results = $this->model_catalog_product->getProducts($filter_data);
-
-			foreach ($results as $result) {
+			foreach ($products as $result) {
 				if ($result['image']) {
 					$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'));
 				} else {
