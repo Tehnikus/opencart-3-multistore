@@ -139,19 +139,12 @@ class ControllerProductManufacturer extends Controller {
 
 			$data['products'] = array();
 
-			$filter_data = array(
-				'filter_manufacturer_id' => $manufacturer_id,
-				'sort'                   => $sort,
-				'order'                  => $order,
-				'start'                  => ($page - 1) * $limit,
-				'limit'                  => $limit
-			);
+			$request = $this->model_catalog_product->buildProductRequest($this->request->get);
+			$results = $this->model_catalog_product->getProducts($request, true);
+			$products = $results['products'];
+			$product_total = $results['total'];
 
-			$product_total = $this->model_catalog_product->getTotalProducts($filter_data);
-
-			$results = $this->model_catalog_product->getProducts($filter_data);
-
-			foreach ($results as $result) {
+			foreach ($products as $result) {
 				if ($result['image']) {
 					$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'));
 				} else {
