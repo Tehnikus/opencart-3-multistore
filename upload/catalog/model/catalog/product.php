@@ -88,7 +88,14 @@ class ModelCatalogProduct extends Model {
 			'product/latest' 				=> ['sort' => 'date_added'],
 			'product/bestseller' 		=> ['sort' => 'sales'],
 			'product/popular' 			=> ['sort' => 'trends_all_time'],
+			'product/search'				=> ['filter_name' => $request['search']],
 		];
+
+		if (isset($request['path'])) {
+			$category_id = explode('_', (string) $request['path']);
+			$category_id = end($category_id);
+			$result['category_id'] = $category_id;
+		}
 		
 		foreach ($request ?? [] as $requestKey => $requestValue) {
 			if (isset($this->facetTypes[$requestKey])) {
@@ -119,6 +126,8 @@ class ModelCatalogProduct extends Model {
 		if (isset($request['route']) && isset($routeToParams[$request['route']])) {
 			$result = [...$result, ...$routeToParams[$request['route']]];
 		}
+
+		$result['page'] = (int) ($request['page'] ?? 1);
 
 		$result = array_filter($result);
 
