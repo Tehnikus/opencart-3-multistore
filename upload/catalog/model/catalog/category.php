@@ -33,7 +33,8 @@ class ModelCatalogCategory extends Model {
 				cd.`how_to`,
 				cd.`footer`,
 				cd.`date_modified`,
-				cd.`language_id`
+				cd.`language_id`,
+				(SELECT COUNT(fi.`product_id`) FROM " . DB_PREFIX . "facet_index fi WHERE fi.`facet_value_id` = c.`category_id` AND fi.`facet_type` = 1 AND fi.`store_id` = c2s.`store_id`) AS product_count
 			FROM " . DB_PREFIX . "category_to_store c2s
 			INNER JOIN " . DB_PREFIX . "category c
 				ON c.`category_id` = c2s.`category_id`
