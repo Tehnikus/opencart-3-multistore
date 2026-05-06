@@ -66,6 +66,66 @@ class ModelCatalogProduct extends Model {
 		return $this->facetTypes;
 	}
 
+	/**
+	 * Prebuild array of params for getProducts() and getFilters() to remove repeating code
+	 * Used in: 
+	 * controller/category
+	 * controller/special
+	 * controller/latest
+	 * controller/bestseller
+	 * controller/popular
+	 * controller/featured
+	 * controller/manufacturer
+	 * 
+	 * @param mixed $request
+	 * @return array
+	 */
+	public function buildProductRequest($request) : array {
+		$result = [];
+		$routeToParams = [
+			'product/featured' 			=> ['is_featured' => 1],
+			'product/special' 			=> ['has_discount' => 1],
+			'product/latest' 				=> ['sort' => 'date_added'],
+			'product/bestseller' 		=> ['sort' => 'sales'],
+			'product/popular' 			=> ['sort' => 'trends_all_time'],
+		];
+		
+		foreach ($request ?? [] as $requestKey => $requestValue) {
+
+			if (isset($this->facetTypes[$requestKey])) {
+				$result[$requestKey] = $requestValue;
+			}
+		}
+		
+		if (isset($request['start'])) {
+			$result['start'] = (int) $request['start'];
+		}
+
+		if (isset($request['limit'])) {
+			$result['limit'] = (int) $request['limit'];
+		}
+
+		if (isset($request['filter_name'])) {
+			$result['filter_name'] = (string) $request['filter_name'];
+		}
+
+		if (isset($request['sort']) && isset($this->sortOrders[strtolower((string) $request['sort'])])) {
+			$result['sort'] = strtolower((string) $request['sort']);
+		}
+
+		if (isset($request['order']) && in_array(strtoupper((string) $request['order']), ['ASC', 'DESC'])) {
+			$result['order'] = strtoupper((string) $request['order']);
+		}
+
+		if (isset($request['route']) && isset($routeToParams[$request['route']])) {
+			$result = [...$result, ...$routeToParams[$request['route']]];
+		}
+
+		$result = array_filter($result);
+
+		return $result ?? [];
+	}
+
 	public function updateViewed($product_id) {
 		$this->db->query("
 			INSERT INTO " . DB_PREFIX . "facet_sort (product_id, store_id, views, date_last_view)
