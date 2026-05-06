@@ -80,7 +80,7 @@ class ModelCatalogProduct extends Model {
 	 * @param mixed $request
 	 * @return array
 	 */
-	public function buildProductRequest($request) : array {
+	public function prepareGetProductsRequest($request) : array {
 		$result = [];
 		$routeToParams = [
 			'product/featured' 			=> ['is_featured' => 1],

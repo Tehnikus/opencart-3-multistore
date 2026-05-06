@@ -139,7 +139,7 @@ class ControllerProductManufacturer extends Controller {
 
 			$data['products'] = array();
 
-			$request = $this->model_catalog_product->buildProductRequest($this->request->get);
+			$request = $this->model_catalog_product->prepareGetProductsRequest($this->request->get);
 			$results = $this->model_catalog_product->getProducts($request, true);
 			$products = $results['products'];
 			$product_total = $results['total'];
