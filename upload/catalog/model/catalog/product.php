@@ -585,11 +585,16 @@ class ModelCatalogProduct extends Model {
 		}
 		
 		// Sort key
+		// If $data['sort'] is set, rhen use it as $sortKey. If $data['sort'] is not set, then if has search, set default sort to relevance. 
+		// If does not have search set to default config, otherwise to default 'sort_order'
 		$sortKey = $data['sort'] ?? ($hasSearch ? 'relevance' : $this->config->get('config_default_product_sort')) ?? 'sort_order';
-		if ($hasSearch && $sortKey === 'relevance') {
-			$order = 'f.`relevance` DESC';
-    } elseif (in_array($sortKey, array_keys($this->getSortOrders()))) {
+		// If sort order is in allowed sort orders list, then use it
+		if (in_array($sortKey, array_keys($this->getSortOrders()))) {
 			$order = $this->getSortOrders()[$sortKey];
+			// Restrict 'relevance' for product list without search, because relevance column is not available in that query
+			if (!$hasSearch && $sortKey === 'relevance') {
+				$order = 'pst.`sort_order` ASC';
+			}
     } else {
 			$order = 'pst.`sort_order` ASC';
     }
