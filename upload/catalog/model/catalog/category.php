@@ -48,7 +48,13 @@ class ModelCatalogCategory extends Model {
 			LIMIT 1
 		");
 
-		$this->cache->set($categoryCacheName, $query->row);
+		$data = $query->row;
+		$data['seo_keywords'] = json_decode($data['seo_keywords'], true);
+		$data['faq'] 					= json_decode($data['faq'], true);
+		$data['how_to'] 			= json_decode($data['how_to'], true);
+		$data['footer'] 			= json_decode($data['footer'], true);
+
+		$this->cache->set($categoryCacheName, $data);
 
 		return $query->row ?? [];
 	}
