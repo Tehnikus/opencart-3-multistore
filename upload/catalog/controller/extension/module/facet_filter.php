@@ -121,7 +121,12 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 
 		// Add category id to requested filters
 		if ($category_id !== null) {
-			$requestFilters['filter_category_id'] = $category_id;
+			$requestFilters['category_id'] = $category_id;
+		}
+
+		// Add search request to requested filters, so facets also appear on search page
+		if (isset($this->request->get['search']) && !empty($this->request->get['search'])) {
+			$requestFilters['filter_name'] = $this->request->get['search'];
 		}
 
 		// Get facets and product count for requested filters
@@ -132,12 +137,14 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 		foreach ($facets as $row) {
 
 			// Skip current category in facets list
-			if ($row['facet_type'] === 'category_id' && $row['facet_value_id'] === $requestFilters['filter_category_id']) {
-				continue;
-			}
+			// Temporarily commented to show current category in selected facets.
+			// TODO Later hide current category on category type page, check subcategory filtering
+			// if ($row['facet_type'] === 'category_id' && $row['facet_value_id'] === $requestFilters['filter_category_id']) {
+			// 	continue;
+			// }
 
 			// Apply settings - skip facets that are not in $settings array
-			if (!isset($settings[$row['facet_type']]) || $settings[$row['facet_type']] !== '1') {
+			if (!isset($settings[$row['facet_type']])) {
 				continue;
 			}
 
