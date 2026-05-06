@@ -88,7 +88,7 @@ class ModelCatalogProduct extends Model {
 			'product/latest' 				=> ['sort' => 'date_added'],
 			'product/bestseller' 		=> ['sort' => 'sales'],
 			'product/popular' 			=> ['sort' => 'trends_all_time'],
-			'product/search'				=> ['filter_name' => $request['search']],
+			'product/search'				=> ['filter_name' => $request['search'] ?? ''],
 		];
 
 		if (isset($request['path'])) {
