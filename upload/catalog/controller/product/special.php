@@ -69,18 +69,13 @@ class ControllerProductSpecial extends Controller {
 
 		$data['products'] = array();
 
-		$filter_data = array(
-			'sort'  => $sort,
-			'order' => $order,
-			'start' => ($page - 1) * $limit,
-			'limit' => $limit
-		);
+		$request = $this->model_catalog_product->buildProductRequest($this->request->get);
+		
+		$results = $this->model_catalog_product->getProductSpecials($request, true);
+		$products = $results['products'];
+		$product_total = $results['total'];
 
-		$product_total = $this->model_catalog_product->getTotalProductSpecials();
-
-		$results = $this->model_catalog_product->getProductSpecials($filter_data);
-
-		foreach ($results as $result) {
+		foreach ($products as $result) {
 			if ($result['image']) {
 				$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'));
 			} else {
