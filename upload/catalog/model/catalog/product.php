@@ -91,7 +91,6 @@ class ModelCatalogProduct extends Model {
 		];
 		
 		foreach ($request ?? [] as $requestKey => $requestValue) {
-
 			if (isset($this->facetTypes[$requestKey])) {
 				$result[$requestKey] = $requestValue;
 			}
@@ -570,7 +569,6 @@ class ModelCatalogProduct extends Model {
 			$selectColumns[] = "COUNT(*) OVER() AS total_count";
 		}
 
-
 		// Main query part depending on present search, facets or search + facets
 		if ($hasSearch) {
 			$from      = "search_results f";
@@ -598,7 +596,6 @@ class ModelCatalogProduct extends Model {
     } else {
 			$order = 'pst.`sort_order` ASC';
     }
-
 
 		$sql = "
 			WITH " . implode(', ', $ctes) . "
@@ -646,7 +643,6 @@ class ModelCatalogProduct extends Model {
     $result = $this->getProducts($data, true);
     return (int) $result['total'] ?? 0;
 	}
-
 
 	private function buildMatchExpression(array $data, int $ngramLength = 2) : string {
 		$query = $data['filter_name'] ?? "";
