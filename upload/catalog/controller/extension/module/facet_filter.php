@@ -93,9 +93,10 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 	}
 
 	public function getFacets() : array {
+		$this->load->model('catalog/product');
+		$facetTypes 		= $this->model_catalog_product->getFacetTypes();
 		$requestFilters = []; // Data from $this->request->get
 		$filterSets 		= []; // Result to be returned
-		$facetTypes 		= ['category_id', 'filter', 'option', 'attribute', 'manufacturer_id', 'tag_id', 'supplier_id', 'is_available', 'has_discount', 'is_featured'];
 		$route 					= explode('/', $this->request->get['route'] ?? []); // Route to apply page settings 
 		$route 					= end($route) ?? null;
 		$path 					= $this->request->get['category_id'] ?? $this->request->get['path'] ?? ''; // Path to fallback to current category id
@@ -113,8 +114,8 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 
 		// Get requested filters
 		foreach ($this->request->get as $filterKey => $filterData) {
-			if (in_array($filterKey, $facetTypes)) {
-				$requestFilters['filter_'.$filterKey] = $filterData;
+			if (isset($facetTypes[$filterKey])) {
+				$requestFilters[$filterKey] = $filterData;
 			}
 		}
 
