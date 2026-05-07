@@ -34,7 +34,7 @@ class ModelCatalogProduct extends Model {
 
 		/**
 		 * Allowed facet types 
-		 * Integers correspond facet type in ENUM column `facet_type` in DB without 'filter_' prefix 
+		 * Integers correspond facet type in ENUM column `facet_type` in DB
 		 */
 		$this->facetTypes = [
 			'category_id'   		=> 1,
@@ -80,58 +80,66 @@ class ModelCatalogProduct extends Model {
 	 * @param mixed $request
 	 * @return array
 	 */
-	public function prepareGetProductsRequest($request) : array {
-		$result = [];
-		$routeToParams = [
-			'product/featured' 			=> ['is_featured' => 1],
-			'product/special' 			=> ['has_discount' => 1],
-			'product/latest' 				=> ['sort' => 'date_added'],
+	public function prepareGetProductsRequest(array $request): array {
+    $result = [];
+
+    $routeToParams = [
+			'product/featured'   		=> ['is_featured' => 1],
+			'product/special'    		=> ['has_discount' => 1],
+			'product/latest'     		=> ['sort' => 'date_added'],
 			'product/bestseller' 		=> ['sort' => 'sales'],
-			'product/popular' 			=> ['sort' => 'trends_all_time'],
-			'product/search'				=> ['filter_name' => $request['search'] ?? ''],
-		];
+			'product/popular'    		=> ['sort' => 'trends_all_time'],
+    ];
 
-		if (isset($request['path'])) {
-			$category_id = explode('_', (string) $request['path']);
-			$category_id = end($category_id);
-			$result['category_id'] = $category_id;
-		}
-		
-		foreach ($request ?? [] as $requestKey => $requestValue) {
-			if (isset($this->facetTypes[$requestKey])) {
-				$result[$requestKey] = $requestValue;
+    // Category from path
+    if (isset($request['path'])) {
+			$parts = explode('_', (string) $request['path']);
+			$result['category_id'] = (int) end($parts);
+    }
+
+    // Facet filters from request
+    foreach ($request as $key => $value) {
+			if (isset($this->facetTypes[$key])) {
+				$result[$key] = $value;
 			}
-		}
-		
-		if (isset($request['start'])) {
+    }
+
+    // Search query 'filter_name' is canonical, 'search' is alias
+    $searchQuery = $request['filter_name'] ?? $request['search'] ?? '';
+    if ($searchQuery !== '') {
+			$result['filter_name'] = (string) $searchQuery;
+    }
+
+    // Pagination
+    if (isset($request['start'])) {
 			$result['start'] = (int) $request['start'];
-		}
+    }
+    if (isset($request['limit'])) {
+			$result['limit'] = (int) $request['limit'] ?? 20;
+    }
 
-		if (isset($request['limit'])) {
-			$result['limit'] = (int) $request['limit'];
-		}
+    $result['page'] = (int) ($request['page'] ?? 1);
 
-		if (isset($request['filter_name'])) {
-			$result['filter_name'] = (string) $request['filter_name'];
-		}
-
-		if (isset($request['sort']) && isset($this->sortOrders[strtolower((string) $request['sort'])])) {
-			$result['sort'] = strtolower((string) $request['sort']);
-		}
-
-		if (isset($request['order']) && in_array(strtoupper((string) $request['order']), ['ASC', 'DESC'])) {
+    // Sort order
+    if (isset($request['sort']) && isset($this->sortOrders[strtolower((string) $request['sort'])])) {
+			$result['sort'] = strtolower((string)$request['sort']);
+    }
+    if (isset($request['order']) && in_array(strtoupper((string) $request['order']), ['ASC', 'DESC'])) {
 			$result['order'] = strtoupper((string) $request['order']);
-		}
+    }
 
-		if (isset($request['route']) && isset($routeToParams[$request['route']])) {
-			$result = [...$result, ...$routeToParams[$request['route']]];
-		}
+    // Route-specific params applied last, but don't override user-set sort
+    if (isset($request['route']) && isset($routeToParams[$request['route']])) {
+			$routeDefaults = $routeToParams[$request['route']];
+			foreach ($routeDefaults as $key => $value) {
+				// Only if sort isn't selected by user explicitly
+				if (!isset($result[$key])) {
+					$result[$key] = $value;
+				}
+			}
+    }
 
-		$result['page'] = (int) ($request['page'] ?? 1);
-
-		$result = array_filter($result);
-
-		return $result ?? [];
+    return array_filter($result, fn($v) => $v !== '' && $v !== null);
 	}
 
 	public function updateViewed($product_id) {
@@ -1064,7 +1072,7 @@ class ModelCatalogProduct extends Model {
 	}
 	
 	public function getProductSpecials($data, $withTotal) : array {
-		$data['filter_has_discount'] = 1;
+		$data['has_discount'] = 1;
 		$productData = $this->getProducts($data, $withTotal);
 		return $productData;
 	}
