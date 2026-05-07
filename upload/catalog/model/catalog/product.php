@@ -247,13 +247,14 @@ class ModelCatalogProduct extends Model {
 				p.`length_class_id`,
 				p.`subtract`,
 				p.`minimum`,
-				p.`viewed`,
 				p.`date_added`,
 				
 				p2s.`sort_order`,
 				p2s.`parent_id`,
-				p2s.`status`,				
+				p2s.`status`,
 				p2s.`date_modified`,
+				p2s.`is_available`,
+				p2s.`is_featured`,
 
 				COALESCE(p2s.`image`, p.`image`) AS image,
 				COALESCE(NULLIF(p2s.`price`, 0), p.`price`) AS price,
@@ -273,7 +274,7 @@ class ModelCatalogProduct extends Model {
 				pst.`views`,
 				pst.`orders`,
 				pst.`returns`,
-				pst.`review_count` AS reviews, 
+				pst.`review_count` AS reviews,
 				pst.`rating_avg` AS rating,
 
 				(
