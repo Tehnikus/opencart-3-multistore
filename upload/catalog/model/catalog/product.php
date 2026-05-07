@@ -560,6 +560,108 @@ class ModelCatalogProduct extends Model {
 	}
 
 	/**
+	 * Prepare product miniature data: format prices, resize images, etc.
+	 * @param mixed $productData
+	 * @return array{additional_thumbs: array, attributes: mixed, date_modified: mixed, description: bool|string, href: string, is_available: mixed, is_featured: mixed, location: mixed, manufacturer: mixed, manufacturer_id: mixed, meta_description: mixed, meta_title: mixed, minimum: mixed, model: mixed, name: mixed, options: array, price: bool|float|string, price_value: float, product_id: mixed, quantity: mixed, rating: bool|float, reviews: mixed, special: bool|float|string, special_date_end: mixed, stock_status: mixed, stock_status_id: mixed, tax: bool|float|string, thumb: array{image: mixed, title: mixed, thumb_height: mixed, thumb_width: mixed}}
+	 */
+	public function prepareProductMiniature($productData) : array {
+		$this->load->model('tool/image');
+		$product 			= [];
+		$theme        = $this->config->get('config_theme');
+		$thumbWidth   = $this->config->get("theme_{$theme}_image_product_width");
+		$thumbHeight  = $this->config->get("theme_{$theme}_image_product_height");
+		$descLength   = $this->config->get("theme_{$theme}_product_description_length");
+			
+		// Images
+		$thumb = [];
+		$additionalThumbs = [];
+		$mainImage 		= $productData['image'] ?? 'no_image.webp';
+		$thumb = [
+			'image' => $this->model_tool_image->resize($mainImage, $thumbWidth, $thumbHeight),
+			'title' => $productData['name'],
+		];
+		foreach ($productData['images'] ?? [] as $img) {
+			$additionalThumb = $img['image'] ?? 'no_image.webp';
+			$additionalThumbs[] = [
+				'image' 		=> $this->model_tool_image->resize($additionalThumb, $thumbWidth, $thumbHeight),
+				'title' 		=> $img['description'],
+				'sortOrder' => $img['sort_order'],
+			];
+		}
+
+		$rating 			= ($this->config->get('config_review_status')) ? round((float) $productData['rating'], 1) : false;
+		$description  = mb_substr(trim(strip_tags(html_entity_decode($productData['description'], ENT_QUOTES, 'UTF-8'))), 0, $descLength, 'UTF-8');
+		
+		// Prices
+		$price = ($this->customer->isLogged() || !$this->config->get('config_customer_price')) ? $this->currency->format($this->tax->calculate($productData['price'], $productData['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']) : false;
+		if (!is_null($productData['special']) && (float) $productData['special'] >= 0) {
+			$special 		= $this->currency->format($this->tax->calculate($productData['special'], $productData['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+			$tax_price 	= (float) $productData['special'];
+		} else {
+			$special 		= false;
+			$tax_price 	= (float) $productData['price'];
+		}
+		$tax = ($this->config->get('config_tax')) ? $this->currency->format($tax_price, $this->session->data['currency']) : false;
+
+		// Options
+		$options = [];
+		foreach ($productData['options'] ?? [] as $optionGroup) {
+			foreach ($optionGroup['product_option_value'] as $key => $optionValue) {
+				$optionValue['price_value'] = $optionValue['price'];
+				$optionValue['price']       = $this->currency->format(
+					$this->tax->calculate($optionValue['price'], $productData['tax_class_id'], $this->config->get('config_tax')),
+					$this->session->data['currency']
+				);
+				$optionGroup['product_option_value'][$key] = $optionValue;
+			}
+			$options[$optionGroup['product_option_id']] = $optionGroup; 
+		}
+
+		$product = array(
+			'product_id'  			=> $productData['product_id'],
+			// Images
+			'thumb'       			=> $thumb,
+			'additional_thumbs' => $additionalThumbs,
+			'thumb_width'  			=> $thumbWidth,
+			'thumb_height' 			=> $thumbHeight,
+			// Descriptions
+			'name'        			=> $productData['name'],
+			'model'							=> $productData['model'],
+			'location'					=> $productData['location'],
+			'quantity'					=> $productData['quantity'],
+			'description' 			=> $description,
+			'meta_title'				=> $productData['meta_title'],
+			'meta_description'	=> $productData['meta_description'],
+			'manufacturer' 			=> $productData['manufacturer'],
+			'manufacturer_id' 	=> $productData['manufacturer_id'],
+			'date_modified'			=> $productData['date_modified'],
+			// Options
+			'options'						=> $options, 
+			// Attributes
+			'attributes'				=> $productData['attributes'],
+			// Prices
+			'price'       			=> $price,
+			'price_value'				=> $tax_price,
+			'special'     			=> $special,
+			'special_date_end'	=> $productData['special_date_end'],
+			'tax'         			=> $tax,
+			// Order availability
+			'minimum'     			=> ($productData['minimum'] > 0) ? $productData['minimum'] : 1,
+			'stock_status'			=> $productData['stock_status'],
+			'stock_status_id'		=> $productData['stock_status_id'],
+			'is_available'			=> $productData['is_available'],
+			'is_featured'				=> $productData['is_featured'],
+			// Reviews
+			'rating'      			=> $rating,
+			'reviews'						=> $productData['reviews'],
+			// URL
+			'href'        			=> $this->url->link('product/product', 'product_id=' . $productData['product_id'])
+		);
+
+		return $product;
+	}
+
+	/**
 	 * Get products list
 	 * Includes both facet filter and FULLTEXT search
 	 * @param array $data The array of filters and search words
