@@ -86,9 +86,9 @@ class ModelCatalogProduct extends Model {
     $routeToParams = [
 			'product/featured'   		=> ['is_featured' 	=> 1],
 			'product/special'    		=> ['has_discount' 	=> 1],
-			'product/latest'     		=> ['sort' => 'date_added', 			'show_all' => true], // The 'show_all' flag is required for pages that have no base facet
-			'product/bestseller' 		=> ['sort' => 'sales', 						'show_all' => true], // The 'show_all' flag is required for pages that have no base facet
-			'product/popular'    		=> ['sort' => 'trends_all_time', 	'show_all' => true], // The 'show_all' flag is required for pages that have no base facet
+			'product/latest'     		=> ['sort' => 'date_added', 			'show_all' => true, 'max_products' => (int) ($this->config->get('config_max_products_latest') ?? 100)], // The 'show_all' flag is required for pages that have no base facet
+			'product/bestseller' 		=> ['sort' => 'sales', 						'show_all' => true, 'max_products' => (int) ($this->config->get('config_max_products_bestseller') ?? 100)], // The 'show_all' flag is required for pages that have no base facet
+			'product/popular'    		=> ['sort' => 'trends_all_time', 	'show_all' => true, 'max_products' => (int) ($this->config->get('config_max_products_popular') ?? 100)], // The 'show_all' flag is required for pages that have no base facet
     ];
 
     // Category from path
