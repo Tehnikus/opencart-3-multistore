@@ -681,12 +681,13 @@ class ModelCatalogProduct extends Model {
 		$searchExpression = $this->buildMatchExpression($data);
 		$hasSearch 	  = !empty($searchExpression);
     $hasFacets 	  = !empty($facets);
+		$hasShowAll		= !empty($data['show_all']);
 		$start 				= max(0, (int)($data['start'] ?? 0));
     $limit 				= max(1, (int)($data['limit'] ?? 20));
 
 		// Safely return
-		if (!$hasSearch && !$hasFacets) {
-			return [];
+		if (!$hasSearch && !$hasFacets && !$hasShowAll) {
+			return $withTotal ? ['products' => [], 'total' => 0] : [];
 		}
 
 		// Columns to select
@@ -706,6 +707,24 @@ class ModelCatalogProduct extends Model {
 			$join    	 = "";
 			$groupBy 	 = "f.`product_id`";
 			$having 	 = "HAVING COUNT(DISTINCT f.`facet_type`, f.`facet_group_id`) = (SELECT cnt FROM group_count)";
+		}
+
+		// Flag to show all products without facet params
+		// Used only on pages that don't have initial facet by design: product/bestseller, product/latest, product/popular
+		if (!$hasSearch && !$hasFacets && $hasShowAll) {
+			$ctes = [];
+			$ctes[] = "
+				facet_temp AS (
+					SELECT `product_id`, `facet_type`, `facet_group_id`
+					FROM " . DB_PREFIX . "facet_index
+					WHERE store_id = {$store_id}
+					ORDER BY NULL
+				)
+			";
+			$from      = "facet_temp f";
+			$join    	 = "";
+			$groupBy 	 = "f.`product_id`";
+			$having 	 = "";
 		}
 		
 		// Sort key
