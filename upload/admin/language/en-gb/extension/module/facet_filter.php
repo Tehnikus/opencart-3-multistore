@@ -1,11 +1,12 @@
 <?php
 // Heading
-$_['heading_title']    = 'Facet filter';
+$_['heading_title']               = 'Facet filter';
 
 // Text
-$_['text_success']     = 'Filter settings saved';
-$_['text_edit']        = 'Settings';
+$_['text_success']                = 'Filter settings saved';
+$_['text_edit']                   = 'Settings';
 
+// Page types
 $_['text_manufacturer_settings']  = 'Manufacturers';
 $_['text_special_settings']       = 'Specials (discounts)';
 $_['text_search_settings']        = 'Search settings';
@@ -14,7 +15,9 @@ $_['text_bestseller_settings']    = 'Bestsellers';
 $_['text_latest_settings']        = 'Latest';
 $_['text_featured_settings']      = 'Featured';
 $_['text_trending_settings']      = 'Trending';
+$_['label_checkAll']              = 'All';
 
+// Facet types
 $_['text_show_filter']            = 'Filters';
 $_['text_show_option']            = 'Options';
 $_['text_show_attribute']         = 'Attributes';
@@ -26,12 +29,13 @@ $_['text_show_has_discount']      = 'Has discount';
 $_['text_show_tag']               = 'Tags';
 $_['text_show_supplier_id']       = 'Supplier';
 
-
+// Individual category settings
 $_['text_individual_categories']  = 'Individual category settings';
 $_['text_add_category']           = 'Add category';
+
 // Entry
-$_['entry_status']     = 'Status';
-$_['entry_cache']      = 'Cache filter list';
+$_['entry_status']                = 'Status';
+$_['entry_cache']                 = 'Cache filter list';
 
 // Error
-$_['error_permission'] = 'Warning: You do not have permission to modify filter module!';
+$_['error_permission']            = 'Warning: You do not have permission to modify filter module!';
