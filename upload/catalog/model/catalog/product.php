@@ -709,22 +709,42 @@ class ModelCatalogProduct extends Model {
 			$having 	 = "HAVING COUNT(DISTINCT f.`facet_type`, f.`facet_group_id`) = (SELECT cnt FROM group_count)";
 		}
 
+		// Next block is used ONLY if no facet expression present on pages that have no base facet by design, but only specific sort order e.g. bestsellers, latest, trending
 		// Flag to show all products without facet params
 		// Used only on pages that don't have initial facet by design: product/bestseller, product/latest, product/popular
 		if (!$hasSearch && !$hasFacets && $hasShowAll) {
-			$ctes = [];
+			$maxProducts = (int) ($data['max_products'] ?? 100);
+
+			// Sort order for main CTE. Sort order is required because CTE does not support LIMIT without ORDER BY
+			$cteSortKey = $data['sort'] 
+				?? $this->config->get('config_default_product_sort') 
+				?? 'sort_order';
+			
+			$cteOrder = in_array($cteSortKey, array_keys($this->getSortOrders()))
+				? $this->getSortOrders()[$cteSortKey]
+				: 'pst.`sort_order` ASC';
+
+			// Reset CTEs - remove group_count because without facet expression there is no group count present
+			$ctes   = [];
+			// Add limit to main CTE so avoid showing all products at once
+			// Also works with pagination correctly limiting max products before pagination applied
 			$ctes[] = "
 				facet_temp AS (
-					SELECT `product_id`, `facet_type`, `facet_group_id`
-					FROM " . DB_PREFIX . "facet_index
-					WHERE store_id = {$store_id}
-					ORDER BY NULL
+					SELECT fi.`product_id`, fi.`facet_type`, fi.`facet_group_id`
+					FROM `" . DB_PREFIX . "facet_index` fi
+					JOIN `" . DB_PREFIX . "facet_sort` pst
+						ON  pst.`product_id` = fi.`product_id`
+						AND pst.`store_id`   = {$store_id}
+					WHERE fi.`store_id` = {$store_id}
+					ORDER BY {$cteOrder}
+					LIMIT {$maxProducts} -- Limit products
 				)
 			";
-			$from      = "facet_temp f";
-			$join    	 = "";
-			$groupBy 	 = "f.`product_id`";
-			$having 	 = "";
+
+			$from    = "facet_temp f";
+			$join    = "";
+			$groupBy = "f.`product_id`";
+			$having  = "";
 		}
 		
 		// Sort key
