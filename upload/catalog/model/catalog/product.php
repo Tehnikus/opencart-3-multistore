@@ -84,11 +84,11 @@ class ModelCatalogProduct extends Model {
     $result = [];
 
     $routeToParams = [
-			'product/featured'   		=> ['is_featured' => 1],
-			'product/special'    		=> ['has_discount' => 1],
-			'product/latest'     		=> ['sort' => 'date_added'],
-			'product/bestseller' 		=> ['sort' => 'sales'],
-			'product/popular'    		=> ['sort' => 'trends_all_time'],
+			'product/featured'   		=> ['is_featured' 	=> 1],
+			'product/special'    		=> ['has_discount' 	=> 1],
+			'product/latest'     		=> ['sort' => 'date_added', 			'show_all' => true], // The 'show_all' flag is required for pages that have no base facet
+			'product/bestseller' 		=> ['sort' => 'sales', 						'show_all' => true], // The 'show_all' flag is required for pages that have no base facet
+			'product/popular'    		=> ['sort' => 'trends_all_time', 	'show_all' => true], // The 'show_all' flag is required for pages that have no base facet
     ];
 
     // Category from path
