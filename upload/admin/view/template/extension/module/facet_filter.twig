@@ -68,7 +68,12 @@
                       {% for pageType in pageTypes %}
                         <tr>
                           {# Title #}
-                          <td><b>{{ attribute(_context, 'text_' ~ pageType ~ '_settings') }}</b></td>
+                          <td>
+                            <b>{{ attribute(_context, 'text_' ~ pageType ~ '_settings') }}</b>
+                            <label for="{{ pageType }}_checkAll" style="float: right; font-weight: normal">{{ label_checkAll }}
+                              <input type="checkbox" onchange="this.closest('tr').querySelectorAll('input[type=&quot;checkbox&quot;]').forEach(e => {e.checked = this.checked})" id="{{ pageType }}_checkAll" style="all: revert;">
+                            </label>
+                          </td>
                           {# Checkboxes #}
                           {% for facetType in facetTypes %}
                             <td class="text-center"><input style="all: revert" type="checkbox" name="module_facet_filter_settings[{{ pageType }}][{{ facetType }}]" value="1" {% if settings[pageType][facetType] %} checked {% endif %} /></td>
