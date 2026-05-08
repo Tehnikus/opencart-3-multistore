@@ -36,7 +36,7 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 		// Form data
 		$data['module_facet_filter_status'] = $this->request->post['module_facet_filter_status'] ?? $settings['module_facet_filter_status'] ?? [];
 		$data['settings'] 									= $this->request->post['module_facet_filter_settings'] ?? $settings['module_facet_filter_settings'] ?? [];
-		$data['pageTypes'] 								  = ['category', 'manufacturer', 'special', 'search'];
+		$data['pageTypes'] 								  = ['category', 'manufacturer', 'special', 'search', 'bestseller', 'latest', 'featured', 'trending'];
 		$data['facetTypes'] 								= array_flip($this->model_catalog_facet->getFacetTypes());
 		$data['user_token'] 								= $this->session->data['user_token'];
 
