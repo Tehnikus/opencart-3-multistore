@@ -289,13 +289,19 @@ class ModelCatalogProduct extends Model {
 				(
 					SELECT JSON_OBJECTAGG(
 						pi.image_id, JSON_OBJECT(
-							'image', 			pi.`image`,
-							'sort_order', pi.`sort_order`
+							'image_id',			pi.`image_id`,
+							'image', 				pi.`image`,
+							'sort_order', 	pi.`sort_order`,
+							'description', 	pid.`description`
 						)
 					)
 					FROM " . DB_PREFIX . "product_image pi
-					WHERE pi.`product_id` = p2s.`product_id`
-						AND pi.`store_id`   = p2s.`store_id`
+					LEFT JOIN " . DB_PREFIX . "product_image_description pid
+						ON  pid.`image_id` 		= pi.`image_id`
+						AND pid.`language_id` = pd.`language_id`
+						AND pid.`store_id` 		= p2s.`store_id`
+					WHERE pi.`product_id` 	= p2s.`product_id`
+						AND pi.`store_id`   	= p2s.`store_id`
 				) AS images,
 
 				(
