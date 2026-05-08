@@ -6,10 +6,14 @@ $_['heading_title']    = 'Facet filter';
 $_['text_success']     = 'Filter settings saved';
 $_['text_edit']        = 'Settings';
 
-$_['text_manufacturer_settings']  = 'Manufacturer settings';
-$_['text_special_settings']       = 'Specials (discounts) settings';
+$_['text_manufacturer_settings']  = 'Manufacturers';
+$_['text_special_settings']       = 'Specials (discounts)';
 $_['text_search_settings']        = 'Search settings';
 $_['text_category_settings']      = 'Default category settings';
+$_['text_bestseller_settings']    = 'Bestsellers';
+$_['text_latest_settings']        = 'Latest';
+$_['text_featured_settings']      = 'Featured';
+$_['text_trending_settings']      = 'Trending';
 
 $_['text_show_filter']            = 'Filters';
 $_['text_show_option']            = 'Options';
