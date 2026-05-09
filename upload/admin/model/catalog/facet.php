@@ -213,6 +213,32 @@ Class ModelCatalogFacet extends Model {
         JOIN " . DB_PREFIX . "product_to_store p2s
           ON p2s.`product_id` = p.`product_id`
         WHERE p2s.`is_featured` <> 0
+
+        UNION ALL
+
+        /* BESTSELLER - Top-N orders count from every product category */
+        SELECT
+          p2c.`product_id`    AS `product_id`,
+          p2c.`store_id`      AS `store_id`,
+          1                   AS `facet_value_id`,
+          p2c.`category_id`   AS `facet_group_id`,
+          11                  AS `facet_type`
+        FROM " . DB_PREFIX . "product_to_category p2c
+        JOIN " . DB_PREFIX . "facet_sort pst
+          ON  pst.`product_id` = p2c.`product_id`
+          AND pst.`store_id`   = p2c.`store_id`
+        WHERE (
+          SELECT 
+            COUNT(*)
+          FROM " . DB_PREFIX . "product_to_category p2c2
+          JOIN " . DB_PREFIX . "facet_sort pst2
+            ON  pst2.`product_id` = p2c2.`product_id`
+            AND pst2.`store_id`   = p2c.`store_id`
+          WHERE p2c2.`category_id` = p2c.`category_id`
+            AND p2c2.`store_id`    = p2c.`store_id`
+            AND pst2.`orders`       > pst.`orders`
+        ) < " . (int) ($this->config->get('config_bestseller_count') ?? 10) . "
+        AND pst.`orders` > 0
       ) src
 
       JOIN " . DB_PREFIX . "product_to_store p2s
