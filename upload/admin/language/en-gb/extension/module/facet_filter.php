@@ -7,27 +7,34 @@ $_['text_success']                = 'Filter settings saved';
 $_['text_edit']                   = 'Settings';
 
 // Page types
-$_['text_manufacturer_settings']  = 'Manufacturers';
-$_['text_special_settings']       = 'Specials (discounts)';
-$_['text_search_settings']        = 'Search settings';
-$_['text_category_settings']      = 'Default category settings';
-$_['text_bestseller_settings']    = 'Bestsellers';
-$_['text_latest_settings']        = 'Latest';
-$_['text_featured_settings']      = 'Featured';
-$_['text_trending_settings']      = 'Trending';
+$_['page_manufacturer']           = 'Manufacturers';
+$_['page_special']                = 'Specials (discounts)';
+$_['page_search']                 = 'Search settings';
+$_['page_category']               = 'Default category settings';
+$_['page_bestseller']             = 'Bestsellers';
+$_['page_latest']                 = 'Latest';
+$_['page_featured']               = 'Featured';
+$_['page_flag_bestseller']        = 'Bestseller';
+$_['page_flag_latest']            = 'Latest';
+$_['page_flag_top_rated']         = 'Top rated';
+$_['page_trending']               = 'Trending';
 $_['label_checkAll']              = 'All';
 
 // Facet types
-$_['text_show_filter']            = 'Filters';
-$_['text_show_option']            = 'Options';
-$_['text_show_attribute']         = 'Attributes';
-$_['text_show_manufacturer_id']   = 'Manufacturers';
-$_['text_show_category_id']       = 'Subcategories';
-$_['text_show_is_featured']       = 'Featured';
-$_['text_show_is_available']      = 'Available';
-$_['text_show_has_discount']      = 'Has discount';
-$_['text_show_tag']               = 'Tags';
-$_['text_show_supplier_id']       = 'Supplier';
+$_['facet_filter']                = 'Filters';
+$_['facet_option']                = 'Options';
+$_['facet_attribute']             = 'Attributes';
+$_['facet_manufacturer_id']       = 'Manufacturers';
+$_['facet_category_id']           = 'Subcategories';
+$_['facet_is_featured']           = 'Featured';
+$_['facet_is_available']          = 'Available';
+$_['facet_has_discount']          = 'Has discount';
+$_['facet_tag']                   = 'Tags';
+$_['facet_supplier_id']           = 'Supplier';
+$_['facet_flag_bestseller']       = 'Bestseller';
+$_['facet_flag_latest']           = 'Latest';
+$_['facet_flag_top_rated']        = 'Top rated';
+
 
 // Individual category settings
 $_['text_individual_categories']  = 'Individual category settings';
