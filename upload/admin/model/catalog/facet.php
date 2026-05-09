@@ -17,6 +17,9 @@ Class ModelCatalogFacet extends Model {
 			'is_available'  		=> 8,
 			'has_discount'  		=> 9,
 			'is_featured'   		=> 10,
+      'bestseller'        => 11,
+      'latest'            => 12,
+      'top_rated'         => 13,
 		];
   }
 
