@@ -239,6 +239,25 @@ Class ModelCatalogFacet extends Model {
             AND pst2.`orders`       > pst.`orders`
         ) < " . (int) ($this->config->get('config_bestseller_count') ?? 10) . "
         AND pst.`orders` > 0
+
+        UNION ALL
+
+        /* LATEST PRODUCTS - the products added during last N days */
+        SELECT
+          p2s.`product_id`    AS `product_id`,
+          p2s.`store_id`      AS `store_id`,
+          1                   AS `facet_value_id`,
+          p2c.`category_id`   AS `facet_group_id`,
+          12                  AS `facet_type`
+        FROM " . DB_PREFIX . "product_to_store p2s
+        JOIN " . DB_PREFIX . "product_to_category p2c
+          ON p2c.`product_id` = p2s.`product_id`
+          AND p2c.`store_id`  = p2s.`store_id`
+        JOIN " . DB_PREFIX . "facet_sort pst
+          ON  pst.`product_id` = p2s.`product_id`
+          AND pst.`store_id`   = p2s.`store_id`
+        WHERE pst.`date_added`   >= DATE_SUB(NOW(), INTERVAL " . (int) ($this->config->get('config_new_days') ?? 100) . " DAY)
+
       ) src
 
       JOIN " . DB_PREFIX . "product_to_store p2s
