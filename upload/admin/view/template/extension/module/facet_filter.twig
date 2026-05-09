@@ -55,12 +55,12 @@
               <label class="col-sm-1 control-label" for="input-status">{{ text_edit }}</label>
               <div class="col-sm-11">
                 <div class="table-responsive">
-                  <table class="table table-bordered table-hover">
+                  <table id="facetSettings" class="table table-bordered table-hover">
                     <thead>
                       <tr>
                         <td></td>
                         {% for facetType in facetTypes %}
-                          <td style="width: {{ 100 / (facetTypes|length + 3) }}%" class="text-center">{{ attribute(_context, 'text_show_' ~ facetType) }}</td>
+                          <td style="width: {{ 100 / (facetTypes|length + 4) }}%" class="text-center">{{ attribute(_context, 'facet_' ~ facetType) }}</td>
                         {% endfor %}
                       </tr>
                     </thead>
@@ -69,24 +69,30 @@
                         <tr>
                           {# Title #}
                           <td>
-                            <b>{{ attribute(_context, 'text_' ~ pageType ~ '_settings') }}</b>
-                            <label for="{{ pageType }}_checkAll" style="float: right; font-weight: normal">{{ label_checkAll }}
-                              <input type="checkbox" onchange="this.closest('tr').querySelectorAll('input[type=&quot;checkbox&quot;]').forEach(e => {e.checked = this.checked})" id="{{ pageType }}_checkAll" style="all: revert;">
-                            </label>
+                            <div class="pageType">
+                              <b>{{ attribute(_context, 'page_' ~ pageType) }}</b>
+                              <label for="{{ pageType }}_checkAll" style="float: right; font-weight: normal">{{ label_checkAll }}
+                                <input type="checkbox" onchange="this.closest('tr').querySelectorAll('input[type=&quot;checkbox&quot;]').forEach(e => {e.checked = this.checked})" id="{{ pageType }}_checkAll" style="all: revert;">
+                              </label>
+                            </div>
                           </td>
                           {# Checkboxes #}
                           {% for facetType in facetTypes %}
-                            <td class="text-center"><input style="all: revert" type="checkbox" name="module_facet_filter_settings[{{ pageType }}][{{ facetType }}]" value="1" {% if settings[pageType][facetType] %} checked {% endif %} /></td>
+                            <td class="facetType">
+                              <label for="{{ pageType }}_{{ facetType }}">
+                                <input id="{{ pageType }}_{{ facetType }}" style="all: revert" type="checkbox" name="module_facet_filter_settings[{{ pageType }}][{{ facetType }}]" value="1" {% if settings[pageType][facetType] %} checked {% endif %} />
+                              </label>
+                            </td>
                           {% endfor %}
                         </tr>
                       {% endfor %}
                       
                       {# Individual category settings #}
-                      <tr><td colspan="11" class="text-center"><b>{{ text_individual_categories }}</b></td></tr>
+                      <tr><td colspan="14" class="text-center"><b>{{ text_individual_categories }}</b></td></tr>
                       {% for id, category in settings.distinct_categories %}
                         <tr class="niftyItem" data-id="{{ id }}">
                           <td>
-                            <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
+                            <div class="pageType">
                               <b>{{ category.name }}</b>
                               <div class="btn-group pull-right">
                                 <a style="padding: 5px 8px;" class="btn btn-primary" target="_blank" href="/admin/index.php?route=catalog/category/edit&category_id=${row.category_id}&user_token=${userToken}"><i class="fa fa-pencil"></i></a>
@@ -95,14 +101,18 @@
                             </div>
                           </td>
                           {% for facetType in facetTypes %}
-                            <td class="text-center"><input style="all: revert" type="checkbox" name="module_facet_filter_settings[distinct_categories][{{ id }}][{{ facetType }}]" value="1" {% if settings.distinct_categories[id][facetType] %} checked {% endif %} /></td>
+                            <td class="facetType">
+                              <label for="{{id}}_distinctCategory_{{ facetType }}">
+                                <input id="{{id}}_distinctCategory_{{ facetType }}" style="all: revert" type="checkbox" name="module_facet_filter_settings[distinct_categories][{{ id }}][{{ facetType }}]" value="1" {% if settings.distinct_categories[id][facetType] %} checked {% endif %} />
+                              </label>
+                            </td>
                           {% endfor %}
                         </tr>
                       {% endfor %}
                     </tbody>
                     <tfoot>
                       <tr>
-                        <td colspan="11">
+                        <td colspan="14">
                           <input id="categoryAutocomplete" type="text" class="form-control niftyAutocomplete" placeholder="{{ text_add_category }}" />
                         </td>
                       </tr>
@@ -139,7 +149,7 @@
         selectTemplate: (row) => `
           <tr>
             <td>
-              <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
+              <div class="pageType">
                 <b>${row.name}</b>
                 <div class="btn-group pull-right">
                   <a style="padding: 5px 8px;" class="btn btn-primary" target="_blank" href="/admin/index.php?route=catalog/category/edit&category_id=${row.category_id}&user_token=${userToken}"><i class="fa fa-pencil"></i></a>
@@ -148,7 +158,11 @@
               </div>
             </td>
             {% for facetType in facetTypes %}
-              <td class="text-center"><input style="all: revert" type="checkbox" name="module_facet_filter_settings[distinct_categories][${row.category_id}][{{ facetType }}]" value="1" checked /></td>
+              <td class="facetType">
+                <label for="${row.category_id}_distinctCategory_{{ facetType }}">
+                  <input id="${row.category_id}_distinctCategory_{{ facetType }}" style="all: revert" type="checkbox" name="module_facet_filter_settings[distinct_categories][${row.category_id}][{{ facetType }}]" value="1" checked />
+                </label>
+              </td>
             {% endfor %}
           </tr>
         `,
@@ -160,4 +174,29 @@
   });
 </script>
 
+<style>
+table#facetSettings {
+  td {
+    padding: 0;
+    height: 43px;
+    .pageType {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5px;
+    }
+    label {
+      height: 43px;
+      margin: 0;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    &.facetType label:has(input:checked) {
+      background: #1e91cf10;
+    }
+  }
+}
+</style>
 {{ footer }}
