@@ -691,7 +691,7 @@ Class ModelCatalogFacet extends Model {
 
   public function cleanupFacetIndex(?int $store_id = null): void {
 
-    $storeWhere = $store_id !== null ? "AND fi.store_id = " . (int)$store_id : "";
+    $storeWhere = $store_id !== null ? "AND fi.store_id = " . (int) $store_id : "";
 
     // 1. Delete removed products or those that are turned off (not displayed)
     $this->db->query("
@@ -836,7 +836,7 @@ Class ModelCatalogFacet extends Model {
     $currentFacetType = (int)($search['facet_type'] ?? 0);
 
     foreach ($selectedFacets ?? [] as $facetType => $groups) {
-      if ((int)$facetType === $currentFacetType) continue;
+      if ((int) $facetType === $currentFacetType) continue;
 
       foreach ($groups as $groupId => $values) {
         $values = array_filter(array_map('intval', $values));
@@ -846,9 +846,9 @@ Class ModelCatalogFacet extends Model {
           EXISTS (
             SELECT 1
             FROM " . DB_PREFIX . "facet_index f
-            WHERE f.product_id = i.product_id
-              AND f.facet_type = " . (int)$facetType . "
-              AND f.facet_group_id = " . (int)$groupId . "
+            WHERE f.product_id     = i.product_id
+              AND f.facet_type     = " . (int) $facetType . "
+              AND f.facet_group_id = " . (int) $groupId . "
               AND f.facet_value_id IN (" . implode(',', $values) . ")
           )
         ";
