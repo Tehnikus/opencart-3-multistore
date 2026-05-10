@@ -659,27 +659,22 @@ Class ModelCatalogFacet extends Model {
 
         UNION ALL
 
-        SELECT
+        SELECT 
           2 AS `facet_type`,
-          fd.`name`,
-          fgd.`name` AS `group_name`,
-          f.filter_id AS `facet_value_id`,
-          f.`filter_group_id` AS `facet_group_id`,
-          fd.`language_id`,
-          f.`store_id`,
-          f.`sort_order`,
-          f2s.`sort_order` AS `group_sort_order`
-        FROM " . DB_PREFIX . "filter f
-        JOIN " . DB_PREFIX . "filter_description fd 
-          ON  fd.`filter_id` = f.`filter_id`
-          AND fd.`store_id`  = f.`store_id`
-        JOIN " . DB_PREFIX . "filter_group_to_store f2s 
-          ON  f2s.`filter_group_id` = f.`filter_group_id`
-          AND f2s.`store_id`        = f.`store_id`
-        JOIN " . DB_PREFIX . "filter_group_description fgd 
-          ON fgd.filter_group_id  = f.filter_group_id
-          AND fgd.`store_id`      = f.`store_id`
-          AND fgd.`language_id`   = fd.`language_id`
+          md.`name` AS `name`,
+          NULL AS `group_name`,
+          m.`manufacturer_id` AS `facet_value_id`,
+          0 AS `facet_group_id`,
+          md.`language_id` AS `language_id`,
+          m2s.`store_id` AS `store_id`,
+          m.`sort_order` AS `sort_order`,
+          0 AS `group_sort_order`
+        FROM " . DB_PREFIX . "manufacturer m
+        JOIN " . DB_PREFIX . "manufacturer_to_store m2s
+          ON m2s.`manufacturer_id` = m.`manufacturer_id`
+        JOIN " . DB_PREFIX . "manufacturer_description md
+          ON md.`manufacturer_id` = m.`manufacturer_id`
+          AND md.`store_id` = m2s.`store_id`
       
         UNION ALL
       
@@ -735,23 +730,28 @@ Class ModelCatalogFacet extends Model {
       
         UNION ALL
       
-        SELECT 
+        SELECT
           5 AS `facet_type`,
-          md.`name` AS `name`,
-          NULL AS `group_name`,
-          m.`manufacturer_id` AS `facet_value_id`,
-          0 AS `facet_group_id`,
-          md.`language_id` AS `language_id`,
-          m2s.`store_id` AS `store_id`,
-          m.`sort_order` AS `sort_order`,
-          0 AS `group_sort_order`
-        FROM " . DB_PREFIX . "manufacturer m
-        JOIN " . DB_PREFIX . "manufacturer_to_store m2s
-          ON m2s.`manufacturer_id` = m.`manufacturer_id`
-        JOIN " . DB_PREFIX . "manufacturer_description md
-          ON md.`manufacturer_id` = m.`manufacturer_id`
-          AND md.`store_id` = m2s.`store_id`
-
+          fd.`name`,
+          fgd.`name` AS `group_name`,
+          f.filter_id AS `facet_value_id`,
+          f.`filter_group_id` AS `facet_group_id`,
+          fd.`language_id`,
+          f.`store_id`,
+          f.`sort_order`,
+          f2s.`sort_order` AS `group_sort_order`
+        FROM " . DB_PREFIX . "filter f
+        JOIN " . DB_PREFIX . "filter_description fd 
+          ON  fd.`filter_id` = f.`filter_id`
+          AND fd.`store_id`  = f.`store_id`
+        JOIN " . DB_PREFIX . "filter_group_to_store f2s 
+          ON  f2s.`filter_group_id` = f.`filter_group_id`
+          AND f2s.`store_id`        = f.`store_id`
+        JOIN " . DB_PREFIX . "filter_group_description fgd 
+          ON fgd.filter_group_id  = f.filter_group_id
+          AND fgd.`store_id`      = f.`store_id`
+          AND fgd.`language_id`   = fd.`language_id`
+          
         UNION ALL
 
         SELECT 
