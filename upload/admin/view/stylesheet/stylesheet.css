@@ -169,7 +169,7 @@ a:hover, a:focus {
 }
 
 #column-left {
-    width: 235px;
+    width: 205px;
     height: 100%;
     overflow: auto;
     background-color: #242d37;
@@ -219,7 +219,7 @@ a:hover, a:focus {
 
     #column-left + #content, #column-left + #content + #footer, #header {
         left: 0px;
-        margin-left: 235px;
+        margin-left: 205px;
     }
 
     #column-left.active + #content, #column-left.active + #content + #footer {
@@ -321,7 +321,7 @@ a:hover, a:focus {
 }
 
 #menu li li li ul a {
-    padding-left: 40px;
+    padding-left: 30px;
 }
 
 #menu li li li li ul a {
