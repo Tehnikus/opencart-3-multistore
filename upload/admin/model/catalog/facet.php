@@ -8,10 +8,10 @@ Class ModelCatalogFacet extends Model {
 
     $this->facetTypes = [
 			'category_id'   		=> 1,
-			'filter'        		=> 2,
+			'manufacturer_id'	  => 2,
 			'option'        		=> 3,
 			'attribute'     		=> 4,
-			'manufacturer_id'	  => 5,
+			'filter'        		=> 5,
 			'tag'               => 6,
 			'supplier_id'       => 7,
 			'is_available'  		=> 8,
@@ -183,15 +183,18 @@ Class ModelCatalogFacet extends Model {
             AND c2s.`store_id`    = p2c.`store_id`
         ",
 
-        // Filters
+        // Manufacturer
         2 => "
           SELECT
-            pf.`product_id`      AS `product_id`,
-            pf.`store_id`        AS `store_id`,
-            pf.`filter_id`       AS `facet_value_id`,
-            pf.`filter_group_id` AS `facet_group_id`,
-            2                    AS `facet_type`
-          FROM `" . DB_PREFIX . "product_filter` pf
+            p.`product_id`      AS `product_id`,
+            p2s.`store_id`      AS `store_id`,
+            p.`manufacturer_id` AS `facet_value_id`,
+            0                   AS `facet_group_id`,
+            2                   AS `facet_type`
+          FROM `" . DB_PREFIX . "product` p
+          JOIN `" . DB_PREFIX . "product_to_store` p2s
+            ON p2s.`product_id` = p.`product_id`
+          WHERE p.`manufacturer_id` <> 0
         ",
 
         // Option
@@ -218,18 +221,15 @@ Class ModelCatalogFacet extends Model {
           WHERE pa.`language_id` = {$language_id}
         ",
 
-        // Manufacturer
+        // Filters
         5 => "
           SELECT
-            p.`product_id`      AS `product_id`,
-            p2s.`store_id`      AS `store_id`,
-            p.`manufacturer_id` AS `facet_value_id`,
-            0                   AS `facet_group_id`,
-            5                   AS `facet_type`
-          FROM `" . DB_PREFIX . "product` p
-          JOIN `" . DB_PREFIX . "product_to_store` p2s
-            ON p2s.`product_id` = p.`product_id`
-          WHERE p.`manufacturer_id` <> 0
+            pf.`product_id`      AS `product_id`,
+            pf.`store_id`        AS `store_id`,
+            pf.`filter_id`       AS `facet_value_id`,
+            pf.`filter_group_id` AS `facet_group_id`,
+            5                    AS `facet_type`
+          FROM `" . DB_PREFIX . "product_filter` pf
         ",
 
         // SEO tags

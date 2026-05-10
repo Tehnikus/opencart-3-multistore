@@ -38,10 +38,10 @@ class ModelCatalogProduct extends Model {
 		 */
 		$this->facetTypes = [
 			'category_id'   		=> 1,
-			'filter'        		=> 2,
+			'manufacturer_id'	  => 2,
 			'option'        		=> 3,
 			'attribute'     		=> 4,
-			'manufacturer_id'	  => 5,
+			'filter'        		=> 5,
 			'tag'           		=> 6,
 			'supplier_id'       => 7,
 			'is_available'  		=> 8,
