@@ -74,8 +74,8 @@ class ModelCatalogManufacturer extends Model {
 			// Rebuild facet indexes
 			$this->load->model('catalog/facet');
 			$store_id = (int) $this->session->data['store_id'];
-			$this->model_catalog_facet->buildFacetNames(facet_value_id: $manufacturer_id, facet_type: 5, store_id: $store_id);
-			$this->model_catalog_facet->buildFacetIndex(facet_value_id: $manufacturer_id, facet_type: 5, store_id: $store_id);
+			$this->model_catalog_facet->buildFacetNames(facet_value_id: $manufacturer_id, facet_type: 2, store_id: $store_id);
+			$this->model_catalog_facet->buildFacetIndex(facet_value_id: $manufacturer_id, facet_type: 2, store_id: $store_id);
 			
 			return $manufacturer_id;
 		} catch (\Throwable $e) {
@@ -195,8 +195,8 @@ class ModelCatalogManufacturer extends Model {
 			// Rebuild facet indexes
 			$this->load->model('catalog/facet');
 			$store_id = (int) $this->session->data['store_id'];
-			$this->model_catalog_facet->buildFacetNames(facet_value_id: $manufacturer_id, facet_type: 5, store_id: $store_id);
-			$this->model_catalog_facet->buildFacetIndex(facet_value_id: $manufacturer_id, facet_type: 5, store_id: $store_id);
+			$this->model_catalog_facet->buildFacetNames(facet_value_id: $manufacturer_id, facet_type: 2, store_id: $store_id);
+			$this->model_catalog_facet->buildFacetIndex(facet_value_id: $manufacturer_id, facet_type: 2, store_id: $store_id);
 			
 			return $manufacturer_id;
 			
@@ -361,8 +361,8 @@ class ModelCatalogManufacturer extends Model {
 			// Rebuild facet indexes
 			$this->load->model('catalog/facet');
 			$store_id = (int) $this->session->data['store_id'];
-			$this->model_catalog_facet->buildFacetNames(facet_value_id: $manufacturer_id, facet_type: 5, store_id: $store_id);
-			$this->model_catalog_facet->buildFacetIndex(facet_value_id: $manufacturer_id, facet_type: 5, store_id: $store_id);
+			$this->model_catalog_facet->buildFacetNames(facet_value_id: $manufacturer_id, facet_type: 2, store_id: $store_id);
+			$this->model_catalog_facet->buildFacetIndex(facet_value_id: $manufacturer_id, facet_type: 2, store_id: $store_id);
 
 			return true;
 
