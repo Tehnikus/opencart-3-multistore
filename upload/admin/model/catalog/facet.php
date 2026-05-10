@@ -27,6 +27,15 @@ Class ModelCatalogFacet extends Model {
     return $this->facetTypes;
   }
 
+  /**
+   * Build facet index by product, by facet value or the whole index at once if no parameters set
+   * @param int|null $product_id
+   * @param int|null $facet_value_id
+   * @param int|null $facet_group_id
+   * @param int|null $facet_type
+   * @param int|null $store_id
+   * @return void
+   */
   public function buildFacetIndex(?int $product_id = null, ?int $facet_value_id = null, ?int $facet_group_id = null, ?int $facet_type = null, ?int $store_id = null) : void {
     $language_id = (int) $this->config->get('config_language_id');
     $store_id    = $store_id ?? (int) $this->config->get('config_store_id');
@@ -391,6 +400,13 @@ Class ModelCatalogFacet extends Model {
 
     $this->db->query("ANALYZE TABLE `" . DB_PREFIX . "facet_index`");
   }
+
+  /**
+   * Build list of product sort columns, e.g. by price, by rating, discounts first, etc.
+   * @param int|null $product_id
+   * @param int|null $store_id
+   * @return void
+   */
   public function buildFacetSorts($product_id = null, $store_id = null) : void {
     $where = [];
     $where[] = "1";
@@ -577,6 +593,14 @@ Class ModelCatalogFacet extends Model {
 
   }
 
+  /**
+   * Build list of facet names for fast access (no need to dig the whole DB to obtain option value names, attributes etc.)
+   * @param int|null $facet_value_id
+   * @param int|null $facet_group_id
+   * @param int|null $facet_type
+   * @param int|null $store_id
+   * @return void
+   */
   public function buildFacetNames($facet_value_id = null, $facet_group_id = null, $facet_type = null, $store_id = null) : void {
     $where = [];
 
@@ -765,127 +789,132 @@ Class ModelCatalogFacet extends Model {
 
   }
 
-  public function cleanupFacetIndex(?int $store_id = null): void {
+  /**
+   * Cleanup facet index - remove disabled or deleted products, categories, options, filters, manufacturers, etc.
+   * @param mixed $store_id
+   * @return void
+   */
+  public function cleanupFacetIndex(?int $store_id = null) : void {
 
     $storeWhere = $store_id !== null ? "AND fi.store_id = " . (int) $store_id : "";
 
     // 1. Delete removed products or those that are turned off (not displayed)
     $this->db->query("
-        DELETE fi
-        FROM " . DB_PREFIX . "facet_index fi
-        LEFT JOIN " . DB_PREFIX . "product_to_store p2s
-          ON p2s.product_id = fi.product_id
-          AND p2s.store_id = fi.store_id
-        WHERE (p2s.product_id IS NULL OR p2s.status = 0)
-        $storeWhere
+      DELETE fi
+      FROM " . DB_PREFIX . "facet_index fi
+      LEFT JOIN " . DB_PREFIX . "product_to_store p2s
+        ON p2s.product_id = fi.product_id
+        AND p2s.store_id = fi.store_id
+      WHERE (p2s.product_id IS NULL OR p2s.status = 0)
+      $storeWhere
     ");
 
     // 2. Delete categories
     $this->db->query("
-        DELETE fi
-        FROM " . DB_PREFIX . "facet_index fi
-        LEFT JOIN " . DB_PREFIX . "category_to_store c2s
-          ON c2s.category_id = fi.facet_value_id
-          AND c2s.store_id fi.store_id
-        WHERE fi.facet_type = 1
-        AND (c2s.category_id IS NULL OR c2s.status = 0)
-        $storeWhere
+      DELETE fi
+      FROM " . DB_PREFIX . "facet_index fi
+      LEFT JOIN " . DB_PREFIX . "category_to_store c2s
+        ON c2s.category_id = fi.facet_value_id
+        AND c2s.store_id fi.store_id
+      WHERE fi.facet_type = 1
+      AND (c2s.category_id IS NULL OR c2s.status = 0)
+      $storeWhere
     ");
 
     // 3. Filters
     $this->db->query("
-        DELETE fi
-        FROM " . DB_PREFIX . "facet_index fi
-        LEFT JOIN " . DB_PREFIX . "filter f
-          ON f.filter_id = fi.facet_value_id
-          AND f.store_id = fi.store_id
-        WHERE fi.facet_type = 2
-        AND f.filter_id IS NULL
-        $storeWhere
+      DELETE fi
+      FROM " . DB_PREFIX . "facet_index fi
+      LEFT JOIN " . DB_PREFIX . "filter f
+        ON f.filter_id = fi.facet_value_id
+        AND f.store_id = fi.store_id
+      WHERE fi.facet_type = 2
+      AND f.filter_id IS NULL
+      $storeWhere
     ");
 
     // 4. Option values
     $this->db->query("
-        DELETE fi
-        FROM " . DB_PREFIX . "facet_index fi
-        LEFT JOIN " . DB_PREFIX . "option_value ov
-          ON ov.option_value_id = fi.facet_value_id
-          AND ov.store_id = fi.store_id
-        WHERE fi.facet_type = 3
-        AND ov.option_value_id IS NULL
-        $storeWhere
+      DELETE fi
+      FROM " . DB_PREFIX . "facet_index fi
+      LEFT JOIN " . DB_PREFIX . "option_value ov
+        ON ov.option_value_id = fi.facet_value_id
+        AND ov.store_id = fi.store_id
+      WHERE fi.facet_type = 3
+      AND ov.option_value_id IS NULL
+      $storeWhere
     ");
 
     // 5. Attributes
     $this->db->query("
-        DELETE fi
-        FROM " . DB_PREFIX . "facet_index fi
-        LEFT JOIN " . DB_PREFIX . "attribute_to_store a
-          ON a.attribute_id = fi.facet_value_id
-          AND a.store_id = fi.store_id
-        WHERE fi.facet_type = 4
-        AND a.attribute_id IS NULL
-        $storeWhere
+      DELETE fi
+      FROM " . DB_PREFIX . "facet_index fi
+      LEFT JOIN " . DB_PREFIX . "attribute_to_store a
+        ON a.attribute_id = fi.facet_value_id
+        AND a.store_id = fi.store_id
+      WHERE fi.facet_type = 4
+      AND a.attribute_id IS NULL
+      $storeWhere
     ");
 
     // 5. Manufacturers
     $this->db->query("
-        DELETE fi
-        FROM " . DB_PREFIX . "facet_index fi
-        LEFT JOIN " . DB_PREFIX . "manufacturer_to_store m
-          ON m.manufacturer_id = fi.facet_value_id
-          AND m.store_id = fi.store_id
-        WHERE fi.facet_type = 5
-        AND m.manufacturer_id IS NULL
-        $storeWhere
+      DELETE fi
+      FROM " . DB_PREFIX . "facet_index fi
+      LEFT JOIN " . DB_PREFIX . "manufacturer_to_store m
+        ON m.manufacturer_id = fi.facet_value_id
+        AND m.store_id = fi.store_id
+      WHERE fi.facet_type = 5
+      AND m.manufacturer_id IS NULL
+      $storeWhere
     ");
 
     // 6. SEO tags
     $this->db->query("
-        DELETE fi
-        FROM " . DB_PREFIX . "facet_index fi
-        LEFT JOIN " . DB_PREFIX . "seo_tag_to_store st
-          ON st.seo_tag_id = fi.facet_value_id
-          AND st.store_id = fi.store_id
-        WHERE fi.facet_type = 6
-        AND st.seo_tag_id IS NULL
-        $storeWhere
+      DELETE fi
+      FROM " . DB_PREFIX . "facet_index fi
+      LEFT JOIN " . DB_PREFIX . "seo_tag_to_store st
+        ON st.seo_tag_id = fi.facet_value_id
+        AND st.store_id = fi.store_id
+      WHERE fi.facet_type = 6
+      AND st.seo_tag_id IS NULL
+      $storeWhere
     ");
 
-    // 7. Suppliers (TODO...)
+    // 7. Suppliers (TODO)
     $this->db->query("
-        DELETE fi
-        FROM " . DB_PREFIX . "facet_index fi
-        LEFT JOIN " . DB_PREFIX . "supplier_to_store s
-          ON s.supplier_id = fi.facet_value_id
-          AND s.store_id = fi.store_id
-        WHERE fi.facet_type = 7
-        AND s.supplier_id IS NULL
-        $storeWhere
+      DELETE fi
+      FROM " . DB_PREFIX . "facet_index fi
+      LEFT JOIN " . DB_PREFIX . "supplier_to_store s
+        ON s.supplier_id = fi.facet_value_id
+        AND s.store_id = fi.store_id
+      WHERE fi.facet_type = 7
+      AND s.supplier_id IS NULL
+      $storeWhere
     ");
 
-    // 8. Discounts (if products doesn't have discount)
+    // 8. Discounts (if products don't have discount)
     $this->db->query("
-        DELETE fi
-        FROM " . DB_PREFIX . "facet_index fi
-        WHERE fi.facet_type = 9
-        AND NOT EXISTS (
-          SELECT 1
-          FROM " . DB_PREFIX . "product_special ps
-          WHERE ps.product_id = fi.product_id
-            AND ps.store_id = fi.store_id
-            AND (ps.date_start = '0000-00-00' OR ps.date_start < NOW())
-            AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW())
-        )
-        AND NOT EXISTS (
-          SELECT 1
-          FROM " . DB_PREFIX . "product_discount pd
-          WHERE pd.product_id = fi.product_id
-            AND pd.store_id = fi.store_id
-            AND (pd.date_start = '0000-00-00' OR pd.date_start < NOW())
-            AND (pd.date_end = '0000-00-00' OR pd.date_end > NOW())
-        )
-        $storeWhere
+      DELETE fi
+      FROM " . DB_PREFIX . "facet_index fi
+      WHERE fi.facet_type = 9
+      AND NOT EXISTS (
+        SELECT 1
+        FROM " . DB_PREFIX . "product_special ps
+        WHERE ps.product_id = fi.product_id
+          AND ps.store_id = fi.store_id
+          AND (ps.date_start = '0000-00-00' OR ps.date_start < NOW())
+          AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW())
+      )
+      AND NOT EXISTS (
+        SELECT 1
+        FROM " . DB_PREFIX . "product_discount pd
+        WHERE pd.product_id = fi.product_id
+          AND pd.store_id = fi.store_id
+          AND (pd.date_start = '0000-00-00' OR pd.date_start < NOW())
+          AND (pd.date_end = '0000-00-00' OR pd.date_end > NOW())
+      )
+      $storeWhere
     ");
 
     // 9. Featured
@@ -901,6 +930,12 @@ Class ModelCatalogFacet extends Model {
     ");
   }
 
+  /**
+   * Facets autocomplete in upload\admin\controller\seo\filter_page.php
+   * @param array $search ['facet_type' => int, 'name' => string] search facet by type and name
+   * @param mixed $selectedFacets ['facet_type' => ['facet_group_id' => ['facet_value_id' => int]]] - inline with input name, e.g. name="selected_facet[1][3][5]" value="5"
+   * @return array
+   */
   public function getFacets($search = [], $selectedFacets = []) : array {
     $storeId          = (int) $this->session->data['store_id'];
     $languageId       = (int) $this->config->get('config_language_id');
