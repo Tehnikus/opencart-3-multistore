@@ -35,6 +35,56 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			if ($this->user->hasPermission('access', 'catalog/manufacturer')) {
+				$catalog[] = array(
+					'name'	   => $this->language->get('text_manufacturer'),
+					'href'     => $this->url->link('catalog/manufacturer', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+			
+			if ($this->user->hasPermission('access', 'seo/filter_page')) {
+				$catalog[] = array(
+					'name'	   => $this->language->get('text_seo_pages'),
+					'href'     => $this->url->link('seo/filter_page', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'catalog/download')) {
+				$catalog[] = array(
+					'name'	   => $this->language->get('text_download'),
+					'href'     => $this->url->link('catalog/download', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'catalog/recurring')) {
+				$catalog[] = array(
+					'name'	   => $this->language->get('text_recurring'),
+					'href'     => $this->url->link('catalog/recurring', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'catalog/review')) {
+				$catalog[] = array(
+					'name'	   => $this->language->get('text_review'),
+					'href'     => $this->url->link('catalog/review', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($catalog) {
+				$data['menus'][] = array(
+					'id'       => 'menu-catalog',
+					'icon'	   => 'fa-tags',
+					'name'	   => $this->language->get('text_catalog'),
+					'href'     => '',
+					'children' => $catalog
+				);
+			}
+
 			$filters = [];
 			if ($this->user->hasPermission('access', 'catalog/attribute')) {
 				$filters[] = array(
@@ -77,48 +127,6 @@ class ControllerCommonColumnLeft extends Controller {
 					'name'	   => $this->language->get('text_facet_filter'),
 					'href'     => $this->url->link('extension/module/facet_filter', 'user_token=' . $this->session->data['user_token'], true),
 					'children' => array()
-				);
-			}
-
-			if ($this->user->hasPermission('access', 'catalog/manufacturer')) {
-				$catalog[] = array(
-					'name'	   => $this->language->get('text_manufacturer'),
-					'href'     => $this->url->link('catalog/manufacturer', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
-			if ($this->user->hasPermission('access', 'catalog/download')) {
-				$catalog[] = array(
-					'name'	   => $this->language->get('text_download'),
-					'href'     => $this->url->link('catalog/download', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
-			if ($this->user->hasPermission('access', 'catalog/recurring')) {
-				$catalog[] = array(
-					'name'	   => $this->language->get('text_recurring'),
-					'href'     => $this->url->link('catalog/recurring', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
-			if ($this->user->hasPermission('access', 'catalog/review')) {
-				$catalog[] = array(
-					'name'	   => $this->language->get('text_review'),
-					'href'     => $this->url->link('catalog/review', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
-			if ($catalog) {
-				$data['menus'][] = array(
-					'id'       => 'menu-catalog',
-					'icon'	   => 'fa-tags',
-					'name'	   => $this->language->get('text_catalog'),
-					'href'     => '',
-					'children' => $catalog
 				);
 			}
 
@@ -176,14 +184,6 @@ class ControllerCommonColumnLeft extends Controller {
 
 			// SEO
 			$seo = array();
-			if ($this->user->hasPermission('access', 'seo/filter_page')) {
-				$seo[] = array(
-					'name'	   => $this->language->get('text_seo_pages'),
-					'href'     => $this->url->link('seo/filter_page', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
 			if ($this->user->hasPermission('access', 'seo/meta_editor')) {
 				$seo[] = array(
 					'name'	   => $this->language->get('text_meta_editor'),
