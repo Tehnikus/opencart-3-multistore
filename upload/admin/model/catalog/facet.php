@@ -44,7 +44,7 @@ Class ModelCatalogFacet extends Model {
     $newDays          = (int) $this->config->get('config_facet_latest_days_count')  ?: 100;      // How many days product is considered new 
     $minReviews       = (int) $this->config->get('config_facet_min_reviews_count')  ?: 1;        // Minimal reviews count to receive badge
     $topRatedCount    = (int) $this->config->get('config_facet_top_rated_count')    ?: 10;       // Top rated products count per category
-    $completeStatus   = implode(',', ($this->config->get('config_complete_status') ?: [3,5]));  // Set default complete status so query does not break
+    $completeStatus   = implode(',', ($this->config->get('config_complete_status')  ?: [3,5]));  // Set default complete status so query does not break
 
     // WHERE for INSERT filtering
     $where = [];
@@ -85,7 +85,7 @@ Class ModelCatalogFacet extends Model {
           JOIN `oc_order_product` op
             ON op.order_id = o.order_id
           WHERE o.store_id        = {$store_id}
-            AND o.order_status_id IN({$completeStatus})
+            -- AND o.order_status_id IN({$completeStatus})
           GROUP BY op.product_id, o.store_id
         ),
 
