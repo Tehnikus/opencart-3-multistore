@@ -27,294 +27,370 @@ Class ModelCatalogFacet extends Model {
     return $this->facetTypes;
   }
 
-  public function buildFacetIndex($product_id = null, $facet_value_id = null, $facet_group_id = null, $facet_type = null, $store_id = null) : void {
+  public function buildFacetIndex(?int $product_id = null, ?int $facet_value_id = null, ?int $facet_group_id = null, ?int $facet_type = null, ?int $store_id = null) : void {
+    $language_id = (int) $this->config->get('config_language_id');
+    $store_id    = $store_id ?? (int) $this->config->get('config_store_id');
+    // Types 11, 12,13 - separate CTE queries
+    $bestsellerCount  = (int) $this->config->get('config_facet_bestseller_count')   ?: 10;       // Bestseller product count per category
+    $newDays          = (int) $this->config->get('config_facet_latest_days_count')  ?: 100;      // How many days product is considered new 
+    $minReviews       = (int) $this->config->get('config_facet_min_reviews_count')  ?: 1;        // Minimal reviews count to receive badge
+    $topRatedCount    = (int) $this->config->get('config_facet_top_rated_count')    ?: 10;       // Top rated products count per category
+    $completeStatus   = implode(',', ($this->config->get('config_complete_status') ?: [3,5]));  // Set default complete status so query does not break
+
+    // WHERE for INSERT filtering
     $where = [];
-    $where[] = "1";
-    if ($product_id !== null) {
-      $where[] = "src.product_id = " . (int) $product_id . "";
+    if ($product_id     !== null) $where[] = "src.`product_id`        = " . $product_id;
+    if ($store_id       !== null) $where[] = "src.`store_id`          = " . $store_id;
+    if ($facet_value_id !== null) $where[] = "src.`facet_value_id`    = " . $facet_value_id;
+    if ($facet_group_id !== null) $where[] = "src.`facet_group_id`    = " . $facet_group_id;
+    if ($facet_type     !== null) $where[] = "src.`facet_type`        = " . $facet_type;
+    $whereSQL = $where ? implode(" AND ", $where) : "1";
+
+    $deleteWhere   = [];
+    if ($product_id     !== null) $deleteWhere[] = "`product_id`      = " . $product_id;
+    if ($store_id       !== null) $deleteWhere[] = "`store_id`        = " . $store_id;
+    if ($facet_value_id !== null) $deleteWhere[] = "`facet_value_id`  = " . $facet_value_id;
+    if ($facet_group_id !== null) $deleteWhere[] = "`facet_group_id`  = " . $facet_group_id;
+    if ($facet_type     !== null) $deleteWhere[] = "`facet_type`      = " . $facet_type;
+
+    // Full rebuild without parameters: TRUNCATE is faster then DELETE
+    if (empty($deleteWhere)) {
+      $this->db->query("TRUNCATE TABLE `" . DB_PREFIX . "facet_index`");
+    } else {
+      $this->db->query("
+        DELETE FROM `" . DB_PREFIX . "facet_index`
+        WHERE " . implode(" AND ", $deleteWhere) . "
+      ");
     }
-    if ($store_id !== null) {
-      $where[] = "src.store_id = " . (int) $store_id . "";
-    }
-    if ($facet_value_id !== null) {
-      $where[] = "src.facet_value_id = " . (int) $facet_value_id . "";
-    }
-    if ($facet_group_id !== null) {
-      $where[] = "src.facet_group_id = " . (int) $facet_group_id . "";
-    }
-    if ($facet_type !== null) {
-      $where[] = "src.facet_type = " . (int) $facet_type . "";
-    }
 
-    $this->db->query("
-      DELETE FROM " . DB_PREFIX . "facet_index src
-      WHERE " . implode(" AND ", $where) . "
-    ");
+    // CTEs for facets that require them
+    $ctes = [
+      // Bestseller CTE
+      11 => "
+        order_qty AS (
+          SELECT
+            op.product_id,
+            o.store_id,
+            SUM(op.quantity) AS qty
+          FROM `oc_order` o
+          JOIN `oc_order_product` op
+            ON op.order_id = o.order_id
+          WHERE o.store_id        = {$store_id}
+            AND o.order_status_id IN({$completeStatus})
+          GROUP BY op.product_id, o.store_id
+        ),
 
-    $sql = "
-
-      INSERT INTO " . DB_PREFIX . "facet_index
-      (`product_id`, `store_id`, `facet_value_id`, `facet_group_id`, `facet_type`)
-
-      SELECT
-        src.`product_id`,
-        src.`store_id`,
-        src.`facet_value_id`,
-        src.`facet_group_id`,
-        src.`facet_type`
-      FROM (
-
-        /* CATEGORIES */
-        SELECT
-          p2c.`product_id`            AS `product_id`,
-          p2c.`store_id`              AS `store_id`,
-          p2c.`category_id`           AS `facet_value_id`,
-          COALESCE(c2s.parent_id, 0)  AS `facet_group_id`,
-          1                           AS `facet_type`
-        FROM " . DB_PREFIX . "product_to_category p2c
-        LEFT JOIN " . DB_PREFIX . "category_to_store c2s
-          ON c2s.`category_id` = p2c.`category_id`
-          AND c2s.`store_id`   = p2c.`store_id`
-
-        UNION ALL
-
-        /* FILTERS */
-        SELECT
-          pf.`product_id`       AS `product_id`,
-          pf.`store_id`         AS `store_id`,
-          pf.`filter_id`        AS `facet_value_id`,
-          pf.`filter_group_id`  AS `facet_group_id`,
-          2                     AS `facet_type`
-        FROM " . DB_PREFIX . "product_filter pf
-
-        UNION ALL
-
-        /* OPTIONS */
-        SELECT
-          pov.`product_id`      AS `product_id`,
-          pov.`store_id`        AS `store_id`,
-          pov.`option_value_id` AS `facet_value_id`,
-          pov.`option_id`       AS `facet_group_id`,
-          3                     AS `facet_type`
-        FROM " . DB_PREFIX . "product_option_value pov
-        GROUP BY pov.`product_id`, pov.`store_id`, pov.`option_id`, pov.`option_value_id`
-
-        UNION ALL
-
-        /* ATTRIBUTES */
-        SELECT
-          pa.`product_id`         AS `product_id`,
-          pa.`store_id`           AS `store_id`,
-          pa.`attribute_id`       AS `facet_value_id`,
-          pa.`attribute_group_id` AS `facet_group_id`,
-          4                       AS `facet_type`
-        FROM " . DB_PREFIX . "product_attribute pa
-        WHERE pa.`language_id` = " . (int) $this->config->get('config_language_id') . "
-
-        UNION ALL
-
-        /* MANUFACTURER */
-        SELECT
-          p.`product_id`          AS `product_id`,
-          p2s.`store_id`          AS `store_id`,
-          p.`manufacturer_id`     AS `facet_value_id`,
-          0                       AS `facet_group_id`,
-          5                       AS `facet_type`
-        FROM " . DB_PREFIX . "product p
-        JOIN " . DB_PREFIX . "product_to_store p2s
-          ON p2s.`product_id` = p.`product_id`
-        WHERE p.`manufacturer_id` <> 0
-
-        UNION ALL
-
-        /* SEO TAGS */
-        SELECT
-          pst.`product_id`        AS `product_id`,
-          pst.`store_id`          AS `store_id`,
-          pst.`seo_tag_id`        AS `facet_value_id`,
-          0                       AS `facet_group_id`,
-          6                       AS `facet_type`
-        FROM " . DB_PREFIX . "product_seo_tag pst
-        JOIN " . DB_PREFIX . "product_to_store p2s
-          ON pst.`product_id` = p2s.`product_id`
-        JOIN " . DB_PREFIX . "seo_tag_to_store st
-          ON st.`seo_tag_id` = pst.`seo_tag_id`
-        WHERE st.`show_as_facet` = 1
-
-        UNION ALL
-
-        /* SUPPLIER */
-        SELECT
-          p.`product_id`          AS `product_id`,
-          p2s.`store_id`          AS `store_id`,
-          p.`supplier_id`         AS `facet_value_id`,
-          0                       AS `facet_group_id`,
-          7                       AS `facet_type`
-        FROM " . DB_PREFIX . "product p
-        JOIN " . DB_PREFIX . "product_to_store p2s
-          ON p2s.`product_id` = p.`product_id`
-        WHERE p.`supplier_id` <> 0
-
-        UNION ALL
-
-        /* AVAILABILITY */
-        SELECT
-          p.`product_id`          AS `product_id`,
-          p2s.`store_id`          AS `store_id`,
-          p2s.`is_available`      AS `facet_value_id`,
-          0                       AS `facet_group_id`,
-          8                       AS `facet_type`
-        FROM " . DB_PREFIX . "product p
-        JOIN " . DB_PREFIX . "product_to_store p2s
-          ON p2s.`product_id` = p.`product_id`
-
-        UNION ALL
-
-        /* DISCOUNT */
-        SELECT
-          p.`product_id`          AS `product_id`,
-          p2s.`store_id`          AS `store_id`,
-          1                       AS `facet_value_id`,
-          0                       AS `facet_group_id`,
-          9                       AS `facet_type`
-        FROM " . DB_PREFIX . "product p
-        JOIN " . DB_PREFIX . "product_to_store p2s
-          ON p2s.`product_id` = p.`product_id`
-        WHERE (
-          EXISTS(
-            SELECT 1
-            FROM " . DB_PREFIX . "product_special ps
-            WHERE ps.`product_id`   = p.`product_id`
-              AND ps.`store_id`     = p2s.`store_id`
-              AND (ps.`date_start`  = '0000-00-00' OR ps.date_start < NOW())
-              AND (ps.`date_end`    = '0000-00-00' OR ps.date_end   > NOW())
-          )
-          OR
-          EXISTS(
-            SELECT 1
-            FROM " . DB_PREFIX . "product_discount pd
-            WHERE pd.`product_id`   = p.`product_id`
-              AND pd.`store_id`     = p2s.`store_id`
-              AND (pd.`date_start`  ='0000-00-00' OR pd.`date_start` < NOW())
-              AND (pd.`date_end`    ='0000-00-00' OR pd.`date_end`   > NOW())
-          )
+        bestseller AS (
+          SELECT
+            p2c.`product_id`,
+            p2c.`store_id`,
+            p2c.`category_id`,
+            oq.qty,
+            RANK() OVER (
+              PARTITION BY p2c.`store_id`, p2c.`category_id`
+              ORDER BY oq.qty DESC
+            ) AS `rank`
+          FROM `oc_product_to_category` p2c
+          JOIN order_qty oq
+            ON  oq.product_id = p2c.product_id
+            AND oq.store_id   = p2c.store_id
+          -- JOIN `oc_product_to_store` p2s
+          --   ON  p2s.product_id = p2c.product_id
+          --   AND p2s.store_id   = p2c.store_id
+          --   AND p2s.status     = 1
         )
+      ",
 
-        UNION ALL
+      // Top rated CTE
+      // top_rated uses facet_sort.rating_avg and facet_sort.review_count
+      // facet_sort is intentionally used instead of directly aggregating from oc_review - it's an incremental cache
+      // that is updated in upload\admin\model\catalog\review.php on review add/approve/delete
+      // Recalculating from oc_review with each facet_index rebuild is redundant for a large number of reviews
+      13 => "
+        global AS (
+          -- Global average rating for Bayesian formula
+          -- Weighted by review count to avoid bias from products with few reviews
+          SELECT
+            `store_id`,
+            SUM(`rating_avg` * `review_count`) / SUM(`review_count`) AS global_avg
+          FROM `oc_facet_sort`
+          WHERE `review_count` >= {$minReviews}
+            AND `store_id` = {$store_id}
+        ),
 
-        /* FEATURED */
-        SELECT
-          p.`product_id`      AS `product_id`,
-          p2s.`store_id`      AS `store_id`,
-          p2s.`is_featured`   AS `facet_value_id`,
-          0                   AS `facet_group_id`,
-          10                  AS `facet_type`
-        FROM " . DB_PREFIX . "product p
-        JOIN " . DB_PREFIX . "product_to_store p2s
-          ON p2s.`product_id` = p.`product_id`
-        WHERE p2s.`is_featured` <> 0
+        bayesian AS (
+          SELECT
+            p2c.`product_id`,
+            p2c.`store_id`,
+            p2c.`category_id`,
+            -- Bayesian score: (v * R + m * C) / (v + m)
+            -- v = review_count, R = rating_avg, m = minReviews, C = global_avg
+            (pst.`review_count` * pst.`rating_avg` + {$minReviews} * g.`global_avg`)
+                / (pst.`review_count` + {$minReviews}) AS score
+          FROM `oc_product_to_category` p2c
+          JOIN `oc_facet_sort` pst
+            ON  pst.`product_id` = p2c.`product_id`
+            AND pst.`store_id`   = p2c.`store_id`
+          -- JOIN `oc_product_to_store` p2s
+          --   ON  p2s.`product_id` = p2c.`product_id`
+          --   AND p2s.`store_id`   = p2c.`store_id`
+          --   AND p2s.`status`     = 1
+          JOIN global g ON g.`store_id` = p2c.`store_id`
+          WHERE pst.`review_count`  >= {$minReviews}
+            AND pst.`store_id`  = {$store_id}
+        ),
 
-        UNION ALL
+        top_rated AS (
+          SELECT
+            `product_id`,
+            `store_id`,
+            `category_id`,
+            `score`,
+            RANK() OVER (
+              PARTITION BY `store_id`, `category_id`
+              ORDER BY `score` DESC
+            ) AS `rank`
+          FROM bayesian
+        )
+      ",
 
-        /* BESTSELLER - Top-N orders count from every product category */
-        SELECT
-          p2c.`product_id`    AS `product_id`,
-          p2c.`store_id`      AS `store_id`,
-          1                   AS `facet_value_id`,
-          p2c.`category_id`   AS `facet_group_id`,
-          11                  AS `facet_type`
-        FROM " . DB_PREFIX . "product_to_category p2c
-        JOIN " . DB_PREFIX . "facet_sort pst
-          ON  pst.`product_id` = p2c.`product_id`
-          AND pst.`store_id`   = p2c.`store_id`
-        WHERE (
+    ];
+
+    // Subqueries
+    // Can be used as single facet update or in bulk with UNION ALL
+    $subqueries = [
+
+        // Categories
+        1 => "
+          SELECT
+            p2c.`product_id`           AS `product_id`,
+            p2c.`store_id`             AS `store_id`,
+            p2c.`category_id`          AS `facet_value_id`,
+            COALESCE(c2s.parent_id, 0) AS `facet_group_id`,
+            1                          AS `facet_type`
+          FROM `" . DB_PREFIX . "product_to_category` p2c
+          LEFT JOIN `" . DB_PREFIX . "category_to_store` c2s
+            ON  c2s.`category_id` = p2c.`category_id`
+            AND c2s.`store_id`    = p2c.`store_id`
+        ",
+
+        // Filters
+        2 => "
+          SELECT
+            pf.`product_id`      AS `product_id`,
+            pf.`store_id`        AS `store_id`,
+            pf.`filter_id`       AS `facet_value_id`,
+            pf.`filter_group_id` AS `facet_group_id`,
+            2                    AS `facet_type`
+          FROM `" . DB_PREFIX . "product_filter` pf
+        ",
+
+        // Option
+        3 => "
+          SELECT
+            pov.`product_id`      AS `product_id`,
+            pov.`store_id`        AS `store_id`,
+            pov.`option_value_id` AS `facet_value_id`,
+            pov.`option_id`       AS `facet_group_id`,
+            3                     AS `facet_type`
+          FROM `" . DB_PREFIX . "product_option_value` pov
+          GROUP BY pov.`product_id`, pov.`store_id`, pov.`option_id`, pov.`option_value_id`
+        ",
+
+        // Attributes
+        4 => "
+          SELECT
+            pa.`product_id`         AS `product_id`,
+            pa.`store_id`           AS `store_id`,
+            pa.`attribute_id`       AS `facet_value_id`,
+            pa.`attribute_group_id` AS `facet_group_id`,
+            4                       AS `facet_type`
+          FROM `" . DB_PREFIX . "product_attribute` pa
+          WHERE pa.`language_id` = {$language_id}
+        ",
+
+        // Manufacturer
+        5 => "
+          SELECT
+            p.`product_id`      AS `product_id`,
+            p2s.`store_id`      AS `store_id`,
+            p.`manufacturer_id` AS `facet_value_id`,
+            0                   AS `facet_group_id`,
+            5                   AS `facet_type`
+          FROM `" . DB_PREFIX . "product` p
+          JOIN `" . DB_PREFIX . "product_to_store` p2s
+            ON p2s.`product_id` = p.`product_id`
+          WHERE p.`manufacturer_id` <> 0
+        ",
+
+        // SEO tags
+        6 => "
+          SELECT
+            pst.`product_id`  AS `product_id`,
+            pst.`store_id`    AS `store_id`,
+            pst.`seo_tag_id`  AS `facet_value_id`,
+            0                 AS `facet_group_id`,
+            6                 AS `facet_type`
+          FROM `" . DB_PREFIX . "product_seo_tag` pst
+          JOIN `" . DB_PREFIX . "product_to_store` p2s
+            ON  pst.`product_id` = p2s.`product_id`
+          JOIN `" . DB_PREFIX . "seo_tag_to_store` st
+            ON  st.`seo_tag_id` = pst.`seo_tag_id`
+          WHERE st.`show_as_facet` = 1
+        ",
+
+        // Supplier (TODO)
+        7 => "
+          SELECT
+            p.`product_id`   AS `product_id`,
+            p2s.`store_id`   AS `store_id`,
+            p.`supplier_id`  AS `facet_value_id`,
+            0                AS `facet_group_id`,
+            7                AS `facet_type`
+          FROM `" . DB_PREFIX . "product` p
+          JOIN `" . DB_PREFIX . "product_to_store` p2s
+            ON p2s.`product_id` = p.`product_id`
+          WHERE p.`supplier_id` <> 0
+        ",
+
+        // Availability (when availability=0 it means product is present and has quantity but order is restricted)
+        8 => "
+          SELECT
+            p.`product_id`     AS `product_id`,
+            p2s.`store_id`     AS `store_id`,
+            p2s.`is_available` AS `facet_value_id`,
+            0                  AS `facet_group_id`,
+            8                  AS `facet_type`
+          FROM `" . DB_PREFIX . "product` p
+          JOIN `" . DB_PREFIX . "product_to_store` p2s
+            ON p2s.`product_id` = p.`product_id`
+        ",
+
+        // Discount
+        9 => "
+          SELECT
+            p.`product_id` AS `product_id`,
+            p2s.`store_id` AS `store_id`,
+            1              AS `facet_value_id`,
+            0              AS `facet_group_id`,
+            9              AS `facet_type`
+          FROM `" . DB_PREFIX . "product` p
+          JOIN `" . DB_PREFIX . "product_to_store` p2s
+            ON p2s.`product_id` = p.`product_id`
+          WHERE (
+            EXISTS (
+              SELECT 1 FROM `" . DB_PREFIX . "product_special` ps
+              WHERE ps.`product_id` = p.`product_id`
+                AND ps.`store_id`   = p2s.`store_id`
+                AND (ps.`date_start` = '0000-00-00' OR ps.`date_start` < NOW())
+                AND (ps.`date_end`   = '0000-00-00' OR ps.`date_end`   > NOW())
+            )
+            OR EXISTS (
+              SELECT 1 FROM `" . DB_PREFIX . "product_discount` pd
+              WHERE pd.`product_id` = p.`product_id`
+                AND pd.`store_id`   = p2s.`store_id`
+                AND (pd.`date_start` = '0000-00-00' OR pd.`date_start` < NOW())
+                AND (pd.`date_end`   = '0000-00-00' OR pd.`date_end`   > NOW())
+            )
+          )
+        ",
+
+        // Featured
+        10 => "
+          SELECT
+            p.`product_id`    AS `product_id`,
+            p2s.`store_id`    AS `store_id`,
+            p2s.`is_featured` AS `facet_value_id`,
+            0                 AS `facet_group_id`,
+            10                AS `facet_type`
+          FROM `" . DB_PREFIX . "product` p
+          JOIN `" . DB_PREFIX . "product_to_store` p2s
+            ON p2s.`product_id` = p.`product_id`
+          WHERE p2s.`is_featured` <> 0
+        ",
+
+        // Bestsellers (has CTE) 
+        11 => "
           SELECT 
-            COUNT(*)
-          FROM " . DB_PREFIX . "product_to_category p2c2
-          JOIN " . DB_PREFIX . "facet_sort pst2
-            ON  pst2.`product_id` = p2c2.`product_id`
-            AND pst2.`store_id`   = p2c.`store_id`
-          WHERE p2c2.`category_id` = p2c.`category_id`
-            AND p2c2.`store_id`    = p2c.`store_id`
-            AND pst2.`orders`       > pst.`orders`
-        ) < " . (int) ($this->config->get('config_bestseller_count') ?? 10) . "
-        AND pst.`orders` > 0
+            `product_id`      AS product_id, 
+            `store_id`        AS store_id, 
+            `rank`            AS facet_value_id, 
+            `category_id`     AS facet_group_id, 
+            11                AS facet_type
+          FROM bestseller
+          WHERE `rank` <= {$bestsellerCount}
+        ",
 
-        UNION ALL
+        // Latest products
+        12 => "
+          SELECT
+            p2c.`product_id`  AS `product_id`,
+            p2c.`store_id`    AS `store_id`,
+            1                 AS `facet_value_id`,
+            p2c.`category_id` AS `facet_group_id`,
+            12                AS `facet_type`
+          FROM `oc_product_to_category` p2c
+          JOIN `oc_product` p
+            ON  p.`product_id` = p2c.`product_id`
+          JOIN `oc_product_to_store` p2s
+            ON  p2s.`product_id` = p2c.`product_id`
+            AND p2s.`store_id`   = p2c.`store_id`
+            AND p2s.`status`     = 1
+          WHERE p.`date_added` >= DATE_SUB(NOW(), INTERVAL {$newDays} DAY)
+        ",
 
-        /* LATEST PRODUCTS - the products added during last N days */
+        // Top rated (has CTE)
+        13 => "
+          SELECT 
+            `product_id`      AS product_id, 
+            `store_id`        AS store_id, 
+            `rank`            AS facet_value_id, 
+            `category_id`     AS facet_group_id, 
+            13                AS facet_type
+          FROM top_rated
+          WHERE `rank` <= {$topRatedCount}
+        ",
+    ];
+
+    // INSERT wrap
+    $wrapSubquery = function(string $subquery, string $cte) use ($whereSQL) : string {
+      $cteExpression = !empty($cte) ? "WITH " . $cte . "" : "";
+      $sql =  "
+        INSERT INTO `" . DB_PREFIX . "facet_index`
+          (`product_id`, `store_id`, `facet_value_id`, `facet_group_id`, `facet_type`)
+        {$cteExpression}
         SELECT
-          p2s.`product_id`    AS `product_id`,
-          p2s.`store_id`      AS `store_id`,
-          1                   AS `facet_value_id`,
-          p2c.`category_id`   AS `facet_group_id`,
-          12                  AS `facet_type`
-        FROM " . DB_PREFIX . "product_to_store p2s
-        JOIN " . DB_PREFIX . "product_to_category p2c
-          ON p2c.`product_id` = p2s.`product_id`
-          AND p2c.`store_id`  = p2s.`store_id`
-        JOIN " . DB_PREFIX . "facet_sort pst
-          ON  pst.`product_id` = p2s.`product_id`
-          AND pst.`store_id`   = p2s.`store_id`
-        WHERE pst.`date_added`   >= DATE_SUB(NOW(), INTERVAL " . (int) ($this->config->get('config_new_days') ?? 100) . " DAY)
+          src.`product_id`,
+          src.`store_id`,
+          src.`facet_value_id`,
+          src.`facet_group_id`,
+          src.`facet_type`
+        FROM ({$subquery}) src
+        JOIN `" . DB_PREFIX . "product_to_store` p2s
+          ON  p2s.`product_id` = src.`product_id`
+          AND p2s.`store_id`   = src.`store_id`
+          AND p2s.`status`     = 1
+        WHERE {$whereSQL}
+      ";
 
-        UNION ALL
+      return $sql;
+    };
 
-        /* TOP RATED - Bayesian ranking, top-N in each category */
-        SELECT
-          p2c.`product_id`    AS `product_id`,
-          p2c.`store_id`      AS `store_id`,
-          1                   AS `facet_value_id`,
-          p2c.`category_id`   AS `facet_group_id`,
-          13                  AS `facet_type`
-        FROM " . DB_PREFIX . "product_to_category p2c
-        JOIN " . DB_PREFIX . "facet_sort pst
-          ON  pst.`product_id` = p2c.`product_id`
-          AND pst.`store_id`   = p2c.`store_id`
-        -- Global average rating for the Bayesian formula
-        CROSS JOIN (
-          SELECT AVG(rating_avg) AS global_avg
-          FROM " . DB_PREFIX . "facet_sort
-          WHERE reviews > 0
-        ) AS global
-        WHERE pst.`reviews` >= " . (int) $this->config->get('config_review_min_count') . "
-        AND (
-          SELECT COUNT(*)
-          FROM " . DB_PREFIX . "product_to_category p2c2
-          JOIN " . DB_PREFIX . "facet_sort pst2
-            ON  pst2.`product_id` = p2c2.`product_id`
-            AND pst2.`store_id`   = p2c.`store_id`
-          CROSS JOIN (
-            SELECT AVG(rating_avg) AS global_avg
-            FROM " . DB_PREFIX . "facet_sort
-            WHERE reviews > 0
-          ) AS global2
-          WHERE p2c2.`category_id` = p2c.`category_id`
-            AND p2c2.`store_id`    = p2c.`store_id`
-            AND pst2.`reviews`     >= " . (int) $this->config->get('config_review_min_count') . "
-            -- Bayesian score compare
-            AND 
-              (pst2.`reviews` * pst2.`rating_avg` + 10 * global2.`global_avg`) / (pst2.`reviews` + 10)
-                >
-              (pst.`reviews` * pst.`rating_avg` + 10 * global.`global_avg`) / (pst.`reviews` + 10)
-        ) < " . (int) $this->config->get('config_top_rated_count') . "
+    // Execute queries
+    if ($facet_type !== null) {
+      // Single facet update
+      if (isset($subqueries[$facet_type])) {
+        $this->db->query($wrapSubquery($subqueries[$facet_type], $ctes[$facet_type] ?? ''));
+      }
+    } else {
+      // Full rebuild first all simple facets joined with UNION ALL
+      $union    = implode(" UNION ALL ", $subqueries);
+      $ctesSQL  = implode(", ", $ctes);
+      $this->db->query($wrapSubquery($union, $ctesSQL));
+    }
 
-      ) src
-
-      JOIN " . DB_PREFIX . "product_to_store p2s
-        ON p2s.`product_id` = src.`product_id`
-        AND p2s.`store_id` = src.`store_id`
-        AND p2s.`status` = 1
-      WHERE " . implode(" AND ", $where) . "
-    ";
-
-    $this->db->query($sql);
-
-    $this->db->query("ANALYZE TABLE " . DB_PREFIX . "facet_index");
-    $this->db->query("FLUSH TABLE " . DB_PREFIX . "facet_index");
-
+    $this->db->query("ANALYZE TABLE `" . DB_PREFIX . "facet_index`");
   }
-
   public function buildFacetSorts($product_id = null, $store_id = null) : void {
     $where = [];
     $where[] = "1";
