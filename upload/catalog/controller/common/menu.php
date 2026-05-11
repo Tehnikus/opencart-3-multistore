@@ -23,7 +23,7 @@ class ControllerCommonMenu extends Controller {
 
 					$children_data[] = array(
 						'name'  => $child['name'],
-						'href'  => $this->url->link('product/category', 'category_id=' . $child['category_id']),
+						'href'  => $this->url->link('product/category', 'path=' . $child['category_id']),
 						'product_count' => $child['product_count'],
 					);
 				}
@@ -33,7 +33,7 @@ class ControllerCommonMenu extends Controller {
 					'name'     => $category['name'],
 					'children' => $children_data,
 					'column'   => $category['column'] ? $category['column'] : 1,
-					'href'     => $this->url->link('product/category', 'category_id=' . $category['category_id'])
+					'href'     => $this->url->link('product/category', 'path=' . $category['category_id'])
 				);
 			}
 		}
