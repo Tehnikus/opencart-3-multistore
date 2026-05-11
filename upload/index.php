@@ -30,7 +30,7 @@ if (isBot()) {
 	if (
 		!function_exists('ini_set') || 
 		!function_exists('ini_get') || 
-		in_array('ini_set', array_map('trim', explode(',', ini_get('disable_functions')))) ||
+		// in_array('ini_set', array_map('trim', explode(',', ini_get('disable_functions')))) ||
 		!ini_get('open_basedir')
 	) {
 		return;
