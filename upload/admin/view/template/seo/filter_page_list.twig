@@ -56,9 +56,12 @@
                               {% for facet in filter_page.facets %}
                                 <span class="badge badge-sm {% if facet.facet_type == 1 %}strong alert-success{% endif %}">
                                   {{ facet.name }}
-                                  {% if facet.facet_type == 8 %}{{ autocomplete_is_available }}{% endif %}
-                                  {% if facet.facet_type == 9 %}{{ autocomplete_has_discount }}{% endif %}
-                                  {% if facet.facet_type == 10 %}{{ autocomplete_is_featured }}{% endif %}
+                                  {% if facet.facet_type == 8 %}{{ type_is_available }}{% endif %}
+                                  {% if facet.facet_type == 9 %}{{ type_has_discount }}{% endif %}
+                                  {% if facet.facet_type == 10 %}{{ type_is_featured }}{% endif %}
+                                  {% if facet.facet_type == 11 %}{{ type_bestseller }}{% endif %}
+                                  {% if facet.facet_type == 12 %}{{ type_latest }}{% endif %}
+                                  {% if facet.facet_type == 13 %}{{ type_top_rated }}{% endif %}
                                 </span>
                                 {% if facet.facet_type == 1 %}<br>{% endif %}
                               {% endfor %}
