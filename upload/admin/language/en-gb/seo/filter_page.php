@@ -34,14 +34,17 @@ $_['tab_general']               = 'General';
 $_['tab_description']           = 'Description';
 
 // Autocomplete
-$_['autocomplete_category_id']        = 'Category';
-$_['autocomplete_filter']             = 'Filter';
-$_['autocomplete_option']             = 'Option';
-$_['autocomplete_attribute']          = 'Attribute';
-$_['autocomplete_manufacturer_id']    = 'Manufacturer';
-$_['autocomplete_tag']                = 'Tag';
-$_['autocomplete_supplier_id']        = 'Supplier';
-$_['autocomplete_is_available']       = 'Is available';
-$_['autocomplete_has_discount']       = 'Has discount';
-$_['autocomplete_is_featured']        = 'Is featured';
+$_['type_category_id']        = 'Category';
+$_['type_filter']             = 'Filter';
+$_['type_option']             = 'Option';
+$_['type_attribute']          = 'Attribute';
+$_['type_manufacturer_id']    = 'Manufacturer';
+$_['type_tag']                = 'Tag';
+$_['type_supplier_id']        = 'Supplier';
+$_['type_is_available']       = 'Is available';
+$_['type_has_discount']       = 'Has discount';
+$_['type_is_featured']        = 'Is featured';
+$_['type_bestseller']         = 'Bestseller';
+$_['type_latest']             = 'Latest';
+$_['type_top_rated']          = 'Top rated';
 
