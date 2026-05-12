@@ -6,6 +6,9 @@ Class ModelCatalogFacet extends Model {
   public function __construct($registry) {
     parent::__construct($registry);
 
+    /**
+     * List of all facet types
+     */
     $this->facetTypes = [
 			'category_id'   		=> 1,
 			'manufacturer_id'	  => 2,
@@ -17,10 +20,19 @@ Class ModelCatalogFacet extends Model {
 			'is_available'  		=> 8,
 			'has_discount'  		=> 9,
 			'is_featured'   		=> 10,
-      'bestseller'        => 11,
-      'latest'            => 12,
+      'latest'            => 11,
+      'bestseller'        => 12,
       'top_rated'         => 13,
 		];
+
+    $this->booleanFacets = [
+			'is_available'  		=> 8,
+			'has_discount'  		=> 9,
+			'is_featured'   		=> 10,
+      'latest'            => 11,
+			'bestseller'        => 12,
+      'top_rated'         => 13,
+    ];
   }
 
   public function getFacetTypes() : array {
