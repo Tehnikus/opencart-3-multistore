@@ -555,29 +555,48 @@ Class ModelCatalogFacet extends Model {
     $wrapSubquery = function(string $subquery, string $cte) use ($whereSQL) : string {
       $cteExpression = !empty($cte) ? "WITH " . $cte . "" : "";
       $sql =  "
-        INSERT INTO `" . DB_PREFIX . "facet_flags`
-          (`product_id`, `flag_type`, `category_id`, `rank`, `store_id`)
+        INSERT INTO `" . DB_PREFIX . "product_flags`
+          (`product_id`, `flag_type`, `category_id`, `rank`, `store_id`, `is_forced`)
         {$cteExpression}
         SELECT
           src.`product_id`,
           src.`flag_type`,
           src.`category_id`,
           src.`rank`,
-          src.`store_id`
+          src.`store_id`,
+          0 AS `is_forced`
         FROM ({$subquery}) src
         JOIN `" . DB_PREFIX . "product_to_store` p2s
           ON  p2s.`product_id` = src.`product_id`
           AND p2s.`store_id`   = src.`store_id`
           AND p2s.`status`     = 1
         WHERE {$whereSQL}
+          AND NOT EXISTS (
+            SELECT 1 FROM `" . DB_PREFIX . "product_flags` pf
+            WHERE pf.`product_id`  = src.`product_id`
+              AND pf.`store_id`    = src.`store_id`
+              AND pf.`flag_type`   = src.`flag_type`
+              AND pf.`category_id` = src.`category_id`
+              AND pf.`is_forced`   = 1
+          )
+          ON DUPLICATE KEY UPDATE
+            `product_id` = src.`product_id`, 
+            `flag_type`  = src.`flag_type`, 
+            `category_id`= src.`category_id`, 
+            `rank`       = src.`rank`, 
+            `store_id`   = src.`store_id`
       ";
 
       return $sql;
     };
 
+    // Delete previous data
     $this->db->query("
-      DELETE FROM `" . DB_PREFIX . "facet_flags` src
+      DELETE FROM `" . DB_PREFIX . "product_flags` src
       WHERE " . implode(" AND ", $where) . "
+        AND src.`is_forced` = 0
+        " . ($flag_type   !== null ? "AND `flag_type`   = {$flag_type}"   : "") . "
+        " . ($category_id !== null ? "AND `category_id` = {$category_id}" : "") . "
     ");
 
     // Execute queries
@@ -592,7 +611,6 @@ Class ModelCatalogFacet extends Model {
       $ctesSQL  = implode(", ", $ctes);
       $this->db->query($wrapSubquery($union, $ctesSQL));
     }
-    $this->db->query("ANALYZE TABLE `" . DB_PREFIX . "facet_flags`");
   }
 
   /**
