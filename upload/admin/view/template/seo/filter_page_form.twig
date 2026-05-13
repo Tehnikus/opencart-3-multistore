@@ -158,6 +158,43 @@
         });
       });
     });
+
+    // Count matching products for checkbox facet types
+    async function countMatchingProducts(row) {
+      const selectedFacets = document.querySelectorAll('input[name^=filter_page_facet]');
+      const formData = new FormData();
+      if (selectedFacets.length) {
+        selectedFacets.forEach(facet => {          
+          if (facet.type === 'text') {
+            formData.append(facet.name, facet.value);
+          }
+          if (facet.type === 'checkbox' && facet.checked) {
+            formData.append(facet.name, facet.value);
+          }
+        });
+      }
+      // Append current selected row if present
+      if (row) {
+        formData.append(`filter_page_facet[${row.facet_type}][${row.facet_group_id}][${row.facet_value_id}]`, row.facet_value_id);
+      }
+      // Fetch autocomplete. Because it fetches all available facets for current selection we don't need to query every checkbox separately. Neat!
+      const result = fetch(`/admin/index.php?route=seo/filter_page/autocomplete&user_token=${userToken}`, {method: 'POST', body: formData})
+      .then(r => {
+        return r.json();
+      })
+      .then(r => {
+        console.log(r);
+        
+        const facetProductCount = r.map(({ facet_type, count_product }) => ({ facet_type, count_product }));
+        // Count products for checkbox facets only, because  autocomplete facets already have product count displayed in search results
+        const checkboxFacets = document.querySelectorAll('input[name^=filter_page_facet][type="checkbox"]');
+        checkboxFacets.forEach(checkbox => {
+          const currentCheckboxCount = facetProductCount.filter(item => item.facet_type === checkbox.dataset.facetType);
+          console.log(checkbox, currentCheckboxCount)
+          checkbox.parentElement.querySelector('.productCount').innerText = currentCheckboxCount[0]?.count_product || 0;
+        });
+      });
+    }
   </script>
 
   <link href="view/javascript/codemirror/lib/codemirror.css" rel="stylesheet" />
