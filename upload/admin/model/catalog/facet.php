@@ -53,10 +53,10 @@ Class ModelCatalogFacet extends Model {
     $store_id    = $store_id ?? (int) $this->config->get('config_store_id');
     
     $newDays          = (int) $this->config->get('config_facet_latest_days_count')  ?: 100;      // How many days product is considered new 
-    // $bestsellerCount  = (int) $this->config->get('config_facet_bestseller_count')   ?: 10;       // Bestseller product count per category
-    // $minReviews       = (int) $this->config->get('config_facet_min_reviews_count')  ?: 1;        // Minimal reviews count to receive badge
-    // $topRatedCount    = (int) $this->config->get('config_facet_top_rated_count')    ?: 10;       // Top rated products count per category
-    // $completeStatus   = implode(',', ($this->config->get('config_complete_status')  ?: [3,5]));  // Set default complete status so query does not break
+    $bestsellerCount  = (int) $this->config->get('config_facet_bestseller_count')   ?: 10;       // Bestseller product count per category
+    $minReviews       = (int) $this->config->get('config_facet_min_reviews_count')  ?: 1;        // Minimal reviews count to receive badge
+    $topRatedCount    = (int) $this->config->get('config_facet_top_rated_count')    ?: 10;       // Top rated products count per category
+    $completeStatus   = implode(',', ($this->config->get('config_complete_status')  ?: [3,5]));  // Set default complete status so query does not break
 
     // WHERE for INSERT filtering
     $where = [];
@@ -87,93 +87,93 @@ Class ModelCatalogFacet extends Model {
     // CTEs for facets that require them
     $ctes = [
       // // Bestseller CTE
-      // 12 => "
-      //   order_qty AS (
-      //     SELECT
-      //       op.product_id,
-      //       o.store_id,
-      //       SUM(op.quantity) AS qty
-      //     FROM `oc_order` o
-      //     JOIN `oc_order_product` op
-      //       ON op.order_id = o.order_id
-      //     WHERE o.store_id        = {$store_id}
-      //       -- AND o.order_status_id IN({$completeStatus})
-      //     GROUP BY op.product_id, o.store_id
-      //   ),
+      12 => "
+        order_qty AS (
+          SELECT
+            op.product_id,
+            o.store_id,
+            SUM(op.quantity) AS qty
+          FROM `oc_order` o
+          JOIN `oc_order_product` op
+            ON op.order_id = o.order_id
+          WHERE o.store_id        = {$store_id}
+            -- AND o.order_status_id IN({$completeStatus})
+          GROUP BY op.product_id, o.store_id
+        ),
 
-      //   bestseller AS (
-      //     SELECT
-      //       p2c.`product_id`,
-      //       p2c.`store_id`,
-      //       p2c.`category_id`,
-      //       oq.qty,
-      //       RANK() OVER (
-      //         PARTITION BY p2c.`store_id`, p2c.`category_id`
-      //         ORDER BY oq.qty DESC
-      //       ) AS `rank`
-      //     FROM `oc_product_to_category` p2c
-      //     JOIN order_qty oq
-      //       ON  oq.product_id = p2c.product_id
-      //       AND oq.store_id   = p2c.store_id
-      //     -- JOIN `oc_product_to_store` p2s
-      //     --   ON  p2s.product_id = p2c.product_id
-      //     --   AND p2s.store_id   = p2c.store_id
-      //     --   AND p2s.status     = 1
-      //   )
-      // ",
+        bestseller AS (
+          SELECT
+            p2c.`product_id`,
+            p2c.`store_id`,
+            p2c.`category_id`,
+            oq.qty,
+            RANK() OVER (
+              PARTITION BY p2c.`store_id`, p2c.`category_id`
+              ORDER BY oq.qty DESC
+            ) AS `rank`
+          FROM `oc_product_to_category` p2c
+          JOIN order_qty oq
+            ON  oq.product_id = p2c.product_id
+            AND oq.store_id   = p2c.store_id
+          -- JOIN `oc_product_to_store` p2s
+          --   ON  p2s.product_id = p2c.product_id
+          --   AND p2s.store_id   = p2c.store_id
+          --   AND p2s.status     = 1
+        )
+      ",
 
-      // // Top rated CTE
-      // // top_rated uses facet_sort.rating_avg and facet_sort.review_count
-      // // facet_sort is intentionally used instead of directly aggregating from oc_review - it's an incremental cache
-      // // that is updated in upload\admin\model\catalog\review.php on review add/approve/delete
-      // // Recalculating from oc_review with each facet_index rebuild is redundant for a large number of reviews
-      // 13 => "
-      //   global AS (
-      //     -- Global average rating for Bayesian formula
-      //     -- Weighted by review count to avoid bias from products with few reviews
-      //     SELECT
-      //       `store_id`,
-      //       SUM(`rating_avg` * `review_count`) / SUM(`review_count`) AS global_avg
-      //     FROM `oc_facet_sort`
-      //     WHERE `review_count` >= {$minReviews}
-      //       AND `store_id` = {$store_id}
-      //   ),
+      // Top rated CTE
+      // top_rated uses facet_sort.rating_avg and facet_sort.review_count
+      // facet_sort is intentionally used instead of directly aggregating from oc_review - it's an incremental cache
+      // that is updated in upload\admin\model\catalog\review.php on review add/approve/delete
+      // Recalculating from oc_review with each facet_index rebuild is redundant for a large number of reviews
+      13 => "
+        global AS (
+          -- Global average rating for Bayesian formula
+          -- Weighted by review count to avoid bias from products with few reviews
+          SELECT
+            `store_id`,
+            SUM(`rating_avg` * `review_count`) / SUM(`review_count`) AS global_avg
+          FROM `oc_facet_sort`
+          WHERE `review_count` >= {$minReviews}
+            AND `store_id` = {$store_id}
+        ),
 
-      //   bayesian AS (
-      //     SELECT
-      //       p2c.`product_id`,
-      //       p2c.`store_id`,
-      //       p2c.`category_id`,
-      //       -- Bayesian score: (v * R + m * C) / (v + m)
-      //       -- v = review_count, R = rating_avg, m = minReviews, C = global_avg
-      //       (pst.`review_count` * pst.`rating_avg` + {$minReviews} * g.`global_avg`)
-      //           / (pst.`review_count` + {$minReviews}) AS score
-      //     FROM `oc_product_to_category` p2c
-      //     JOIN `oc_facet_sort` pst
-      //       ON  pst.`product_id` = p2c.`product_id`
-      //       AND pst.`store_id`   = p2c.`store_id`
-      //     -- JOIN `oc_product_to_store` p2s
-      //     --   ON  p2s.`product_id` = p2c.`product_id`
-      //     --   AND p2s.`store_id`   = p2c.`store_id`
-      //     --   AND p2s.`status`     = 1
-      //     JOIN global g ON g.`store_id` = p2c.`store_id`
-      //     WHERE pst.`review_count`  >= {$minReviews}
-      //       AND pst.`store_id`  = {$store_id}
-      //   ),
+        bayesian AS (
+          SELECT
+            p2c.`product_id`,
+            p2c.`store_id`,
+            p2c.`category_id`,
+            -- Bayesian score: (v * R + m * C) / (v + m)
+            -- v = review_count, R = rating_avg, m = minReviews, C = global_avg
+            (pst.`review_count` * pst.`rating_avg` + {$minReviews} * g.`global_avg`)
+                / (pst.`review_count` + {$minReviews}) AS score
+          FROM `oc_product_to_category` p2c
+          JOIN `oc_facet_sort` pst
+            ON  pst.`product_id` = p2c.`product_id`
+            AND pst.`store_id`   = p2c.`store_id`
+          -- JOIN `oc_product_to_store` p2s
+          --   ON  p2s.`product_id` = p2c.`product_id`
+          --   AND p2s.`store_id`   = p2c.`store_id`
+          --   AND p2s.`status`     = 1
+          JOIN global g ON g.`store_id` = p2c.`store_id`
+          WHERE pst.`review_count`  >= {$minReviews}
+            AND pst.`store_id`  = {$store_id}
+        ),
 
-      //   top_rated AS (
-      //     SELECT
-      //       `product_id`,
-      //       `store_id`,
-      //       `category_id`,
-      //       `score`,
-      //       RANK() OVER (
-      //         PARTITION BY `store_id`, `category_id`
-      //         ORDER BY `score` DESC
-      //       ) AS `rank`
-      //     FROM bayesian
-      //   )
-      // ",
+        top_rated AS (
+          SELECT
+            `product_id`,
+            `store_id`,
+            `category_id`,
+            `score`,
+            RANK() OVER (
+              PARTITION BY `store_id`, `category_id`
+              ORDER BY `score` DESC
+            ) AS `rank`
+          FROM bayesian
+        )
+      ",
 
     ];
 
@@ -333,44 +333,46 @@ Class ModelCatalogFacet extends Model {
         // Latest products
         11 => "
           SELECT
-            p2c.`product_id`  AS `product_id`,
-            p2c.`store_id`    AS `store_id`,
+            p2s.`product_id`  AS `product_id`,
+            p2s.`store_id`    AS `store_id`,
             1                 AS `facet_value_id`,
-            p2c.`category_id` AS `facet_group_id`,
+            0                 AS `facet_group_id`,
             12                AS `facet_type`
-          FROM `oc_product_to_category` p2c
+          FROM `oc_product_to_store` p2s
           JOIN `oc_product` p
-            ON  p.`product_id` = p2c.`product_id`
-          JOIN `oc_product_to_store` p2s
-            ON  p2s.`product_id` = p2c.`product_id`
-            AND p2s.`store_id`   = p2c.`store_id`
-            AND p2s.`status`     = 1
+            ON  p.`product_id` = p2s.`product_id`
+          -- JOIN `oc_product_to_store` p2s
+          --   ON  p2s.`product_id` = p2c.`product_id`
+          --   AND p2s.`store_id`   = p2c.`store_id`
+          --   AND p2s.`status`     = 1
           WHERE p.`date_added` >= DATE_SUB(NOW(), INTERVAL {$newDays} DAY)
         ",
 
-        // // Bestsellers (has CTE) 
-        // 11 => "
-        //   SELECT 
-        //     `product_id`      AS product_id, 
-        //     `store_id`        AS store_id, 
-        //     `rank`            AS facet_value_id, 
-        //     `category_id`     AS facet_group_id, 
-        //     11                AS facet_type
-        //   FROM bestseller
-        //   WHERE `rank` <= {$bestsellerCount}
-        // ",
+        // Bestsellers (has CTE) 
+        12 => "
+          SELECT 
+            `product_id`      AS product_id, 
+            `store_id`        AS store_id, 
+            1                 AS facet_value_id, 
+            0                 AS facet_group_id, 
+            11                AS facet_type
+          FROM bestseller
+          WHERE `rank` <= {$bestsellerCount}
+          GROUP BY `product_id`, `store_id`
+        ",
 
-        // // Top rated (has CTE)
-        // 13 => "
-        //   SELECT 
-        //     `product_id`      AS product_id, 
-        //     `store_id`        AS store_id, 
-        //     `rank`            AS facet_value_id, 
-        //     `category_id`     AS facet_group_id, 
-        //     13                AS facet_type
-        //   FROM top_rated
-        //   WHERE `rank` <= {$topRatedCount}
-        // ",
+        // Top rated (has CTE)
+        13 => "
+          SELECT 
+            `product_id`      AS product_id, 
+            `store_id`        AS store_id, 
+            1                 AS facet_value_id, 
+            0                 AS facet_group_id, 
+            13                AS facet_type
+          FROM top_rated
+          WHERE `rank` <= {$topRatedCount}
+          GROUP BY `product_id`, `store_id`
+        ",
     ];
 
     // INSERT wrap
@@ -411,7 +413,8 @@ Class ModelCatalogFacet extends Model {
     }
 
     $this->db->query("ANALYZE TABLE `" . DB_PREFIX . "facet_index`");
-    // $this->buildFacetFlags(flag_type: null, product_id: $product_id, category_id: null, store_id: $store_id);
+    // Temporarily call from here, later move to category add/edit/delete
+    $this->buildProductFlags(flag_type: null, product_id: $product_id, category_id: null, store_id: $store_id);
   }
 
   /**
@@ -423,7 +426,7 @@ Class ModelCatalogFacet extends Model {
    * @param mixed $store_id
    * @return void
    */
-  public function buildFacetFlags(?int $flag_type = null, ?int $product_id = null, ?int $category_id = null, ?int $store_id = null) : void {
+  public function buildProductFlags(?int $flag_type = null, ?int $product_id = null, ?int $category_id = null, ?int $store_id = null) : void {
     $where = [];
     $where[] = "1"; // Dummy fallback if no parameters passed
     if ($category_id    !== null) $where[] = "src.`category_id` = " . $category_id;
