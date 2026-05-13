@@ -45,7 +45,7 @@
                           {% for row in facetGroups %}
                             <div class="niftyItem" data-id="{{ row.facet_value_id }}">
                               <span style="flex: 1"><b>{{ row.name }}</b> {% if row.group_name %} &#9656; {{ row.group_name }}{% endif %}</span>
-                              <button style="padding: 0; line-height: 0; width: 25px; height: 25px;" type="button" class="btn btn-danger niftyItemDelete" onclick="this.closest('.niftyItem').remove()"><i class="fa fa-times"></i></button>
+                              <button style="padding: 0; line-height: 0; width: 25px; height: 25px;" type="button" class="btn btn-danger niftyItemDelete" onclick="this.closest('.niftyItem').remove(); setTimeout(() => {countMatchingProducts()}, 100);"><i class="fa fa-times"></i></button>
                               <input hidden name="filter_page_facet[{{ facetType.facetType }}][{{ row.facet_group_id }}][{{ row.facet_value_id }}]" value="{{ row.facet_value_id }}" />
                             </div>
                           {% endfor %}
@@ -64,7 +64,15 @@
 
                     {# Checkbox type #}
                     {% if facetType.searchType == 'checkbox' %}
-                      <input style="all: revert" type="checkbox" name="filter_page_facet[{{ facetType.facetType }}][0][1]" {% if filter_page_facet[facetType.facetType] %}checked{% endif %} value="1" />
+                      <input 
+                        style="all: revert" 
+                        type="checkbox" 
+                        name="filter_page_facet[{{ facetType.facetType }}][0][1]" {% if filter_page_facet[facetType.facetType] %}checked{% endif %} 
+                        data-facet-type="{{ facetType.facetType }}"
+                        value="1" 
+                        onchange="countMatchingProducts();"
+                      />
+                      <p>{{ text_product_count }} <b class="productCount"></b></p>
                     {% endif %}
                     
                     {# Errors #}
@@ -107,7 +115,7 @@
       const userToken = "{{ user_token }}";
       const productCountTitle = "{{ column_product_count }}";
       
-      inputs.forEach(input => {        
+      inputs.forEach(input => {
         const autocomplete = new niftyAutocomplete({
           input,
           selectedItemsBox: input.previousElementSibling,
@@ -121,6 +129,8 @@
             // Set POST params of autocomplete
             postParams: {
               filters: () => {
+                // Get all previously selected facets to filter matching results - facets with product count > 0
+                // If product count = 0 no result will be displayed. This prevents from creation of empty landing pages
                 const selectedFacets = document.querySelectorAll('input[name^=filter_page_facet]');
                 const formData = new FormData();
                 if (selectedFacets.length) {
@@ -150,6 +160,14 @@
                 <input hidden name="filter_page_facet[${input.dataset.facetType}][${row.facet_group_id}][${row.facet_value_id}]" value="${row.facet_value_id}" />
               </div>
             `,
+            callbackSelect: (row, wrapper) => {
+              // Count matching product for checkbox facets after regular facet in autocomplete is selected
+              // Pass current selected facet, so it is included in filtering
+              countMatchingProducts(row);
+            },
+            callbackRemove: (row) => {     
+              countMatchingProducts();
+            }
           },
           behavior: {
             clearSearchOnSelect: Boolean(input.dataset.facetType === "1"), // Only category (type == 1) is single-select, others are multi-select
@@ -195,6 +213,9 @@
         });
       });
     }
+
+    // Count matching products upon page load
+    countMatchingProducts();
   </script>
 
   <link href="view/javascript/codemirror/lib/codemirror.css" rel="stylesheet" />
