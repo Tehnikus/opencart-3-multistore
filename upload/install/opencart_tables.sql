@@ -2270,6 +2270,19 @@ CREATE TABLE `oc_product_filter` (
   PRIMARY KEY (`product_id`, `store_id`, `filter_group_id`, `filter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Dynamically calculated flags
+
+DROP TABLE IF EXISTS `oc_product_flags`;
+CREATE TABLE `oc_product_flags` (
+    `product_id`  INT          NOT NULL,
+    `store_id`    INT          NOT NULL,
+    `flag_type`   TINYINT      NOT NULL, -- 11=bestseller, 13=top_rated
+    `category_id` INT          NOT NULL,
+    `rank`        SMALLINT     NULL,
+    PRIMARY KEY (`product_id`, `store_id`, `category_id`, `flag_type`),
+    INDEX `getProduct` (`product_id`, `store_id`, `flag_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 --
 -- Table structure for table `oc_product_option`
 --
