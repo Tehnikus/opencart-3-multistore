@@ -90,15 +90,15 @@ Class ModelCatalogFacet extends Model {
       12 => "
         order_qty AS (
           SELECT
-            op.product_id,
-            o.store_id,
-            SUM(op.quantity) AS qty
-          FROM `oc_order` o
-          JOIN `oc_order_product` op
-            ON op.order_id = o.order_id
-          WHERE o.store_id        = {$store_id}
-            -- AND o.order_status_id IN({$completeStatus})
-          GROUP BY op.product_id, o.store_id
+            op.`product_id`,
+            o.`store_id`,
+            SUM(op.`quantity`) AS `qty`
+          FROM `" . DB_PREFIX . "order` o
+          JOIN `" . DB_PREFIX . "order_product` op
+            ON op.`order_id` = o.`order_id`
+          WHERE o.`store_id`        = {$store_id}
+            -- AND o.`order_status_id` IN({$completeStatus})
+          GROUP BY op.`product_id`, o.`store_id`
         ),
 
         bestseller AS (
@@ -106,19 +106,19 @@ Class ModelCatalogFacet extends Model {
             p2c.`product_id`,
             p2c.`store_id`,
             p2c.`category_id`,
-            oq.qty,
+            oq.`qty`,
             RANK() OVER (
               PARTITION BY p2c.`store_id`, p2c.`category_id`
-              ORDER BY oq.qty DESC
+              ORDER BY oq.`qty` DESC
             ) AS `rank`
-          FROM `oc_product_to_category` p2c
-          JOIN order_qty oq
-            ON  oq.product_id = p2c.product_id
-            AND oq.store_id   = p2c.store_id
-          -- JOIN `oc_product_to_store` p2s
-          --   ON  p2s.product_id = p2c.product_id
-          --   AND p2s.store_id   = p2c.store_id
-          --   AND p2s.status     = 1
+          FROM `" . DB_PREFIX . "product_to_category` p2c
+          JOIN `order_qty` oq
+            ON  oq.`product_id` = p2c.`product_id`
+            AND oq.`store_id`   = p2c.`store_id`
+          -- JOIN `" . DB_PREFIX . "product_to_store` p2s
+          --   ON  p2s.`product_id` = p2c.`product_id`
+          --   AND p2s.`store_id`   = p2c.`store_id`
+          --   AND p2s.`status`     = 1
         )
       ",
 
@@ -134,7 +134,7 @@ Class ModelCatalogFacet extends Model {
           SELECT
             `store_id`,
             SUM(`rating_avg` * `review_count`) / SUM(`review_count`) AS global_avg
-          FROM `oc_facet_sort`
+          FROM `" . DB_PREFIX . "facet_sort`
           WHERE `review_count` >= {$minReviews}
             AND `store_id` = {$store_id}
         ),
@@ -148,11 +148,11 @@ Class ModelCatalogFacet extends Model {
             -- v = review_count, R = rating_avg, m = minReviews, C = global_avg
             (pst.`review_count` * pst.`rating_avg` + {$minReviews} * g.`global_avg`)
                 / (pst.`review_count` + {$minReviews}) AS score
-          FROM `oc_product_to_category` p2c
-          JOIN `oc_facet_sort` pst
+          FROM `" . DB_PREFIX . "product_to_category` p2c
+          JOIN `" . DB_PREFIX . "facet_sort` pst
             ON  pst.`product_id` = p2c.`product_id`
             AND pst.`store_id`   = p2c.`store_id`
-          -- JOIN `oc_product_to_store` p2s
+          -- JOIN `" . DB_PREFIX . "product_to_store` p2s
           --   ON  p2s.`product_id` = p2c.`product_id`
           --   AND p2s.`store_id`   = p2c.`store_id`
           --   AND p2s.`status`     = 1
@@ -338,10 +338,10 @@ Class ModelCatalogFacet extends Model {
             1                 AS `facet_value_id`,
             0                 AS `facet_group_id`,
             12                AS `facet_type`
-          FROM `oc_product_to_store` p2s
-          JOIN `oc_product` p
+          FROM `" . DB_PREFIX . "product_to_store` p2s
+          JOIN `" . DB_PREFIX . "product` p
             ON  p.`product_id` = p2s.`product_id`
-          -- JOIN `oc_product_to_store` p2s
+          -- JOIN `" . DB_PREFIX . "product_to_store` p2s
           --   ON  p2s.`product_id` = p2c.`product_id`
           --   AND p2s.`store_id`   = p2c.`store_id`
           --   AND p2s.`status`     = 1
@@ -351,12 +351,12 @@ Class ModelCatalogFacet extends Model {
         // Bestsellers (has CTE) 
         12 => "
           SELECT 
-            `product_id`      AS product_id, 
-            `store_id`        AS store_id, 
-            1                 AS facet_value_id, 
-            0                 AS facet_group_id, 
-            11                AS facet_type
-          FROM bestseller
+            `product_id`      AS `product_id`, 
+            `store_id`        AS `store_id`, 
+            1                 AS `facet_value_id`, 
+            0                 AS `facet_group_id`, 
+            11                AS `facet_type`
+          FROM `bestseller`
           WHERE `rank` <= {$bestsellerCount}
           GROUP BY `product_id`, `store_id`
         ",
@@ -364,12 +364,12 @@ Class ModelCatalogFacet extends Model {
         // Top rated (has CTE)
         13 => "
           SELECT 
-            `product_id`      AS product_id, 
-            `store_id`        AS store_id, 
-            1                 AS facet_value_id, 
-            0                 AS facet_group_id, 
-            13                AS facet_type
-          FROM top_rated
+            `product_id`      AS `product_id`, 
+            `store_id`        AS `store_id`, 
+            1                 AS `facet_value_id`, 
+            0                 AS `facet_group_id`, 
+            13                AS `facet_type`
+          FROM `top_rated`
           WHERE `rank` <= {$topRatedCount}
           GROUP BY `product_id`, `store_id`
         ",
@@ -446,15 +446,15 @@ Class ModelCatalogFacet extends Model {
       12 => "
         order_qty AS (
           SELECT
-            op.product_id,
-            o.store_id,
-            SUM(op.quantity) AS qty
-          FROM `oc_order` o
-          JOIN `oc_order_product` op
-            ON op.order_id = o.order_id
-          WHERE o.store_id        = {$store_id}
-            -- AND o.order_status_id IN({$completeStatus})
-          GROUP BY op.product_id, o.store_id
+            op.`product_id`,
+            o.`store_id`,
+            SUM(op.`quantity`) AS `qty`
+          FROM `" . DB_PREFIX . "order` o
+          JOIN `" . DB_PREFIX . "order_product` op
+            ON op.`order_id` = o.`order_id`
+          WHERE o.`store_id`        = {$store_id}
+            -- AND o.`order_status_id` IN({$completeStatus})
+          GROUP BY op.`product_id`, o.`store_id`
         ),
 
         bestseller AS (
@@ -462,15 +462,15 @@ Class ModelCatalogFacet extends Model {
             p2c.`product_id`,
             p2c.`store_id`,
             p2c.`category_id`,
-            oq.qty,
+            oq.`qty`,
             RANK() OVER (
               PARTITION BY p2c.`store_id`, p2c.`category_id`
-              ORDER BY oq.qty DESC
+              ORDER BY oq.`qty` DESC
             ) AS `rank`
-          FROM `oc_product_to_category` p2c
-          JOIN order_qty oq
-            ON  oq.product_id = p2c.product_id
-            AND oq.store_id   = p2c.store_id
+          FROM `" . DB_PREFIX . "product_to_category` p2c
+          JOIN `order_qty` oq
+            ON  oq.`product_id` = p2c.`product_id`
+            AND oq.`store_id`   = p2c.`store_id`
         )
       ",
 
@@ -486,7 +486,7 @@ Class ModelCatalogFacet extends Model {
           SELECT
             `store_id`,
             SUM(`rating_avg` * `review_count`) / SUM(`review_count`) AS global_avg
-          FROM `oc_facet_sort`
+          FROM `" . DB_PREFIX . "facet_sort`
           WHERE `review_count` >= {$minReviews}
             AND `store_id` = {$store_id}
         ),
@@ -499,8 +499,8 @@ Class ModelCatalogFacet extends Model {
             -- Bayesian score: (v * R + m * C) / (v + m)
             -- v = review_count, R = rating_avg, m = minReviews, C = global_avg
             (pst.`review_count` * pst.`rating_avg` + {$minReviews} * g.`global_avg`) / (pst.`review_count` + {$minReviews}) AS score
-          FROM `oc_product_to_category` p2c
-          JOIN `oc_facet_sort` pst
+          FROM `" . DB_PREFIX . "product_to_category` p2c
+          JOIN `" . DB_PREFIX . "facet_sort` pst
             ON  pst.`product_id` = p2c.`product_id`
             AND pst.`store_id`   = p2c.`store_id`
           JOIN global g ON g.`store_id` = p2c.`store_id`
@@ -717,76 +717,76 @@ Class ModelCatalogFacet extends Model {
       
         LEFT JOIN (
           SELECT
-            t.product_id,
-            t.store_id,
-            MIN(t.price) AS price
+            t.`product_id`,
+            t.`store_id`,
+            MIN(t.`price`) AS `price`
           FROM " . DB_PREFIX . "product_special t
           JOIN (
             SELECT
-              product_id,
-              store_id,
-              MIN(priority) AS priority
+              `product_id`,
+              `store_id`,
+              MIN(`priority`) AS `priority`
             FROM " . DB_PREFIX . "product_special
             WHERE
-              (date_start = '0000-00-00' OR date_start < NOW())
-              AND (date_end = '0000-00-00' OR date_end > NOW())
-            GROUP BY product_id, store_id
+              (`date_start` = '0000-00-00' OR `date_start` < NOW())
+              AND (`date_end` = '0000-00-00' OR `date_end` > NOW())
+            GROUP BY `product_id`, `store_id`
           ) ps_priority
-            ON ps_priority.product_id = t.product_id
-            AND ps_priority.store_id = t.store_id
-            AND ps_priority.priority = t.priority
+            ON ps_priority.`product_id` = t.`product_id`
+            AND ps_priority.`store_id` = t.`store_id`
+            AND ps_priority.`priority` = t.`priority`
           WHERE
-            (t.date_start = '0000-00-00' OR t.date_start < NOW())
-            AND (t.date_end = '0000-00-00' OR t.date_end > NOW())
-          GROUP BY t.product_id, t.store_id
+            (t.`date_start` = '0000-00-00' OR t.`date_start` < NOW())
+            AND (t.`date_end` = '0000-00-00' OR t.`date_end` > NOW())
+          GROUP BY t.`product_id`, t.`store_id`
         ) ps
-        ON ps.product_id = p.product_id
-        AND ps.store_id = p2s.store_id
+        ON ps.`product_id` = p.`product_id`
+        AND ps.`store_id` = p2s.`store_id`
       
         LEFT JOIN (
           SELECT
-            t.product_id,
-            t.store_id,
+            t.`product_id`,
+            t.`store_id`,
             MIN(t.price) AS price
           FROM " . DB_PREFIX . "product_discount t
           JOIN (
             SELECT
-              product_id,
-              store_id,
-              MIN(priority) AS priority
+              `product_id`,
+              `store_id`,
+              MIN(`priority`) AS `priority`
             FROM " . DB_PREFIX . "product_discount
             WHERE
-              (date_start = '0000-00-00' OR date_start < NOW())
-              AND (date_end = '0000-00-00' OR date_end > NOW())
-            GROUP BY product_id, store_id
+              (`date_start` = '0000-00-00' OR `date_start` < NOW())
+              AND (`date_end` = '0000-00-00' OR `date_end` > NOW())
+            GROUP BY `product_id`, `store_id`
           ) pd_priority
-            ON pd_priority.product_id = t.product_id
-            AND pd_priority.store_id  = t.store_id
-            AND pd_priority.priority  = t.priority
+            ON pd_priority.`product_id` = t.`product_id`
+            AND pd_priority.`store_id`  = t.`store_id`
+            AND pd_priority.`priority`  = t.`priority`
           WHERE
-            (t.date_start = '0000-00-00' OR t.date_start < NOW())
-            AND (t.date_end = '0000-00-00' OR t.date_end > NOW())
-          GROUP BY t.product_id, t.store_id
+            (t.`date_start` = '0000-00-00' OR t.`date_start` < NOW())
+            AND (t.`date_end` = '0000-00-00' OR t.`date_end` > NOW())
+          GROUP BY t.`product_id`, t.`store_id`
         ) pd
-        ON pd.product_id = p.product_id
-        AND pd.store_id = p2s.store_id
+        ON pd.`product_id` = p.`product_id`
+        AND pd.`store_id` = p2s.`store_id`
         
         WHERE p2s.`status` = 1
       ) src
       WHERE " . implode(" AND ", $where) . "
 
       ON DUPLICATE KEY UPDATE
-        orders              = src.orders,
-        review_count        = src.review_count,
-        rating_avg          = src.rating_avg,
-        current_price       = src.current_price,
-        is_available        = src.is_available,
-        is_featured         = src.is_featured,
-        has_discount        = src.has_discount,
-        sort_order          = src.sort_order,
-        date_last_order     = src.date_last_order,
-        date_last_review    = src.date_last_review,
-        date_added          = src.date_added
+        `orders`              = src.`orders`,
+        `review_count`        = src.`review_count`,
+        `rating_avg`          = src.`rating_avg`,
+        `current_price`       = src.`current_price`,
+        `is_available`        = src.`is_available`,
+        `is_featured`         = src.`is_featured`,
+        `has_discount`        = src.`has_discount`,
+        `sort_order`          = src.`sort_order`,
+        `date_last_order`     = src.`date_last_order`,
+        `date_last_review`    = src.`date_last_review`,
+        `date_added`          = src.`date_added`
     ");
 
     // Cleanup trash entries
