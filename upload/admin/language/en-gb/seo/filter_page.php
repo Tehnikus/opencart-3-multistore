@@ -2,6 +2,7 @@
 $_['heading_title']             = 'SEO Filter pages';
 $_['text_no_results']           = 'No results';
 $_['text_confirm']              = 'This will delete selected pages! Are you sure?';
+$_['text_product_count']        = 'Products:';
 
 // Buttons
 $_['button_add']                = 'Add new SEO filter page';
