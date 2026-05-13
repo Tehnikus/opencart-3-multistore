@@ -208,9 +208,13 @@ class niftyAutocomplete {
     wrapper.innerHTML = this.item.searchTemplate(row);
 
     wrapper.addEventListener('mouseenter', () => {
-      this.item?.callbackHover?.(wrapper);
+      this.item?.callbackHover?.(row, wrapper);
       this.currentIndex = this.items.indexOf(wrapper);
       this.highlightItem();
+    });
+
+    wrapper.addEventListener('click', () => {
+      this.item?.callbackSelect?.(row, wrapper);
     });
 
     // Add item to results box
@@ -230,11 +234,11 @@ class niftyAutocomplete {
     if (row[this.idKey]) {wrapper.dataset.id = row[this.idKey]}
     wrapper.addEventListener('click', e => {
       if (e.target.closest('.niftyItemDelete')) {
-        this.item?.callbackRemove?.(row);
+        this.item?.callbackRemove?.(row, wrapper);
         wrapper.remove();
       }
       // Click callback
-      this.item?.callbackClick?.(wrapper);
+      this.item?.callbackClick?.(row, wrapper);
     });
 
     // Add item to selected box
