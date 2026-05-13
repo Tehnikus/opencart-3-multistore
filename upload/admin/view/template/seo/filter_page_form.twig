@@ -33,9 +33,9 @@
           <div class="tab-content">
             <div class="tab-pane active" id="tab-general">
               {% for key, facetType in facetTypes %}
-                <div class="form-group  {% if facetType.required %}required{% endif %}">
-                  <label class="col-sm-2 control-label" for="{{ key }}">{{ facetType.title }}</label>
-                  <div class="col-sm-10">
+                <div class="form-group  {% if facetType.required %}required{% endif %}" style="display: flex; align-items: center;">
+                  <label class="col-sm-2 control-label" for="{{ key }}" style="padding: 0">{{ facetType.title }}</label>
+                  <div class="col-sm-10" {% if facetType.searchType == 'checkbox' %}style="display: flex; align-items: center; gap: 1rem;"{% endif %}>
 
                     {# Autocomplete type #}
                     {% if facetType.searchType == 'autocomplete' %}
@@ -72,7 +72,7 @@
                         value="1" 
                         onchange="countMatchingProducts();"
                       />
-                      <p>{{ text_product_count }} <b class="productCount"></b></p>
+                      <p style="margin: 0">{{ text_product_count }} <b class="productCount"></b></p>
                     {% endif %}
                     
                     {# Errors #}
