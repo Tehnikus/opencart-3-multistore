@@ -808,7 +808,6 @@ class ModelCatalogProduct extends Model {
 	public function getFilters($data = []) {
 		$store_id    				 	= (int) $this->config->get('config_store_id');
 		$language_id 				 	= (int) $this->config->get('config_language_id');
-		$facetTypes 				 	= $this->getFacetTypes();
 		$conditions 				 	= [];
 		$base_facet_type     	= null; // Page type, category = 1, manufacturer = 5, has_discount = 9, is_featured = 10
 		$base_facet_value_id 	= null; // Page id if applicable, i.e. category_id. If not applicable then 0 
@@ -817,72 +816,88 @@ class ModelCatalogProduct extends Model {
 		$hasSearch 						= !empty($searchExpression);
 		// $hasFacets 						= !empty(array_intersect_key(array_filter($data), $this->facetTypes));
 
+		// Base products list
+		// Get all facets related to all products from current page
+		// Assume either search of facet is present
 		if ($hasSearch) {
-			
 			$baseProductList = "
 				base_products AS (
-	 				SELECT `product_id`
-	 				FROM `" . DB_PREFIX . "product_search_index`
-	 				WHERE `language_id` = {$language_id}
-	 					AND `store_id`    = {$store_id}
-	 					AND ({$searchExpression}) > 0
-	 			)
+					SELECT `product_id`
+					FROM `" . DB_PREFIX . "product_search_index`
+					WHERE `language_id` = {$language_id}
+						AND `store_id`    = {$store_id}
+						AND ({$searchExpression}) > 0
+				)
 			";
-			
+
 			$facetExpression     = $this->buildFacetExpression($data);
 			$selected_conditions = !empty($facetExpression) ? $facetExpression : "0";
 
 		} else {
-			// Set base facet to filter base product set on this page
-			if ($this->request->get['route'] === 'product/category') {
-				$path 							 = $this->request->get['category_id'] ?? $this->request->get['path'] ?? '';
-				$category_id 				 = explode('_', (string) $path);
-				$category_id 				 = end($category_id);
-				$base_facet_type 		 = 1;
-				$base_facet_value_id = (int) $category_id;
+
+			// Get base facet dynamically from $facetTypes
+			$route               = $this->request->get['route'] ?? '';
+			$base_facet_type     = null;
+			$base_facet_value_id = null;
+
+			foreach ($this->facetTypes as $typeId => $facet) {
+				if ($facet['route'] !== $route) continue;
+
+				$base_facet_type = $typeId;
+
+				if ($facet['isBool']) {
+					// Binary facets that don't need strict facet_value_id: is_featured, has_discount, latest, bestseller, etc.
+					$base_facet_value_id = 1;
+				} else {
+					// Strict facet, get facet_value_id from request
+					$base_facet_value_id = (int)($data[$facet['facetType']] ?? 0);
+
+					// Separate category_id case because we have $request['path'] which also stands for category
+					if ($facet['facetType'] === 'category_id' && !$base_facet_value_id) {
+						$path                = $this->request->get['category_id'] ?? $this->request->get['path'] ?? '';
+						$parts               = explode('_', (string)$path);
+						$base_facet_value_id = (int)end($parts) ?: null;
+					}
+				}
+
+				break;
 			}
 
-			if ($this->request->get['route'] === 'product/manufacturer') {
-				$base_facet_type 		 = 5;
-				$base_facet_value_id = (int) $this->request->get['manufacturer_id'];
+			if (!$base_facet_type || !$base_facet_value_id) {
+				return [];
 			}
 
-			if ($this->request->get['route'] === 'product/special') {
-				$base_facet_type     = 9;
-				$base_facet_value_id = 1;
-			}
+			// The base facet is intentionally included in selected_conditions
+			// So that the page context participates in the AND-between-groups logic.
+			$conditions[] = "(facet_type = {$base_facet_type} AND facet_value_id = {$base_facet_value_id})";
 
-			if ($this->request->get['route'] === 'product/featured') {
-				$base_facet_type     = 10;
-				$base_facet_value_id = 1;
-			}
+			// User facets
+			foreach ($this->facetTypes as $typeId => $facet) {
+				$facetKey = $facet['facetType'];
 
-			// Base facet is intentionally included in selected_conditions
-			// so that base page context is part of selected_groups for AND-between-groups logic
-			$conditions[] = "(facet_type = {$base_facet_type} AND facet_value_id IN (" . $base_facet_value_id . "))";
-			
-			foreach ($data as $key => $ids) {
-				if (!isset($facetTypes[$key])) continue;
-				if ($facetTypes[$key] == $base_facet_type && $ids == $base_facet_value_id) continue;
+				if (empty($data[$facetKey])) continue;
 
-				$type = (int) $facetTypes[$key];
-				$ids = array_values(array_unique(array_map('intval', explode(',', $ids))));
+				// Skip base facet to avoid duplicate expression
+				if ($typeId === $base_facet_type) continue;
 
-				if (!$ids) continue;
-
-				$conditions[] = "(facet_type = {$type} AND facet_value_id IN (" . implode(',', $ids) . "))";
-
+				if ($facet['isBool']) {
+					$conditions[] = "(facet_value_id = 1 AND facet_type = {$typeId})";
+				} else {
+					$ids = array_values(array_unique(array_map('intval', explode(',', $data[$facetKey]))));
+					if (empty($ids)) continue;
+					$conditions[] = "(facet_value_id IN(" . implode(',', $ids) . ") AND facet_type = {$typeId})";
+				}
 			}
 
 			$selected_conditions = $conditions ? implode(" OR ", $conditions) : "1";
 
 			$baseProductList = "
 				base_products AS (
-					SELECT p.product_id
-					FROM " . DB_PREFIX . "facet_index p
-					WHERE p.facet_type = {$base_facet_type}
-					AND p.facet_value_id = {$base_facet_value_id}
-					AND p.store_id = {$store_id}
+					SELECT `product_id`
+					FROM `" . DB_PREFIX . "facet_index`
+					WHERE `facet_type`     = {$base_facet_type}
+						AND `facet_value_id` = {$base_facet_value_id}
+						AND `store_id`       = {$store_id}
 				)
 			";
 		}
