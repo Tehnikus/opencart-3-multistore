@@ -59,8 +59,8 @@
                     <thead>
                       <tr>
                         <td></td>
-                        {% for facetType in facetTypes %}
-                          <td style="width: {{ 100 / (facetTypes|length + 4) }}%" class="text-center">{{ attribute(_context, 'facet_' ~ facetType) }}</td>
+                        {% for facet in facetTypes %}
+                          <td style="width: {{ 100 / (facetTypes|length + 3) }}%" class="text-center">{{ attribute(_context, 'facet_' ~ facet.facetType) }}</td>
                         {% endfor %}
                       </tr>
                     </thead>
@@ -77,10 +77,10 @@
                             </div>
                           </td>
                           {# Checkboxes #}
-                          {% for facetType in facetTypes %}
+                          {% for facet in facetTypes %}
                             <td class="facetType">
-                              <label for="{{ pageType }}_{{ facetType }}">
-                                <input id="{{ pageType }}_{{ facetType }}" style="all: revert" type="checkbox" name="module_facet_filter_settings[{{ pageType }}][{{ facetType }}]" value="1" {% if settings[pageType][facetType] %} checked {% endif %} />
+                              <label for="{{ pageType }}_{{ facet.facetType }}">
+                                <input id="{{ pageType }}_{{ facet.facetType }}" style="all: revert" type="checkbox" name="module_facet_filter_settings[{{ pageType }}][{{ facet.facetType }}]" value="1" {% if settings[pageType][facet.facetType] %} checked {% endif %} />
                               </label>
                             </td>
                           {% endfor %}
@@ -88,22 +88,22 @@
                       {% endfor %}
                       
                       {# Individual category settings #}
-                      <tr><td colspan="14" class="text-center"><b>{{ text_individual_categories }}</b></td></tr>
+                      <tr><td colspan="{{ facetTypes|length + 1}}" class="text-center"><b>{{ text_individual_categories }}</b></td></tr>
                       {% for id, category in settings.distinct_categories %}
                         <tr class="niftyItem" data-id="{{ id }}">
                           <td>
                             <div class="pageType">
                               <b>{{ category.name }}</b>
                               <div class="btn-group pull-right">
-                                <a style="padding: 5px 8px;" class="btn btn-primary" target="_blank" href="/admin/index.php?route=catalog/category/edit&category_id=${row.category_id}&user_token=${userToken}"><i class="fa fa-pencil"></i></a>
+                                <a style="padding: 5px 8px;" class="btn btn-primary" target="_blank" href="/admin/index.php?route=catalog/category/edit&category_id={{ id }}&user_token={{ user_token }}"><i class="fa fa-pencil"></i></a>
                                 <button style="padding: 5px 8px;" type="button" class="btn btn-danger niftyItemDelete" onclick="this.closest('.niftyItem').remove();"><i class="fa fa-times"></i></button>
                               </div>
                             </div>
                           </td>
-                          {% for facetType in facetTypes %}
+                          {% for facet in facetTypes %}
                             <td class="facetType">
-                              <label for="{{id}}_distinctCategory_{{ facetType }}">
-                                <input id="{{id}}_distinctCategory_{{ facetType }}" style="all: revert" type="checkbox" name="module_facet_filter_settings[distinct_categories][{{ id }}][{{ facetType }}]" value="1" {% if settings.distinct_categories[id][facetType] %} checked {% endif %} />
+                              <label for="{{id}}_distinctCategory_{{ facet.facetType }}">
+                                <input id="{{id}}_distinctCategory_{{ facet.facetType }}" style="all: revert" type="checkbox" name="module_facet_filter_settings[distinct_categories][{{ id }}][{{ facet.facetType }}]" value="1" {% if settings.distinct_categories[id][facet.facetType] %} checked {% endif %} />
                               </label>
                             </td>
                           {% endfor %}
@@ -112,7 +112,7 @@
                     </tbody>
                     <tfoot>
                       <tr>
-                        <td colspan="14">
+                        <td colspan="{{ facetTypes|length + 1}}">
                           <input id="categoryAutocomplete" type="text" class="form-control niftyAutocomplete" placeholder="{{ text_add_category }}" />
                         </td>
                       </tr>
@@ -157,10 +157,10 @@
                 </div>
               </div>
             </td>
-            {% for facetType in facetTypes %}
+            {% for facet in facetTypes %}
               <td class="facetType">
-                <label for="${row.category_id}_distinctCategory_{{ facetType }}">
-                  <input id="${row.category_id}_distinctCategory_{{ facetType }}" style="all: revert" type="checkbox" name="module_facet_filter_settings[distinct_categories][${row.category_id}][{{ facetType }}]" value="1" checked />
+                <label for="${row.category_id}_distinctCategory_{{ facet.facetType }}">
+                  <input id="${row.category_id}_distinctCategory_{{ facet.facetType }}" style="all: revert" type="checkbox" name="module_facet_filter_settings[distinct_categories][${row.category_id}][{{ facet.facetType }}]" value="1" checked />
                 </label>
               </td>
             {% endfor %}
