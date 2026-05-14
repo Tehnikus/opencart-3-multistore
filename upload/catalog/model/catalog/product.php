@@ -34,22 +34,29 @@ class ModelCatalogProduct extends Model {
 
 		/**
 		 * Allowed facet types 
-		 * Integers correspond facet type in ENUM column `facet_type` in DB
+		 * Description:
+		 * $facet_id_in_db => [
+		 * 	'facetType' => 'request param, e.g. category_id', 
+		 * 	'isBool'		=> 'only facet presence is considered, any facet value will match filter, e.g. DB entry top_rated=123 is matching filter top_rated=1', 
+		 * 	'group' 		=> 'separate group name to join different facets in groups, like flags or other',
+		 * 	'route' 		=> 'route to controller, e.g. product/category', 
+		 * ],
 		 */
 		$this->facetTypes = [
-			'category_id'   		=> 1,
-			'manufacturer_id'	  => 2,
-			'option'        		=> 3,
-			'attribute'     		=> 4,
-			'filter'        		=> 5,
-			'tag'           		=> 6,
-			'supplier_id'       => 7,
-			'is_available'  		=> 8,
-			'has_discount'  		=> 9,
-			'is_featured'   		=> 10,
-			'bestseller'        => 11,
-      'latest'            => 12,
-      'top_rated'         => 13,
+			1   => ['facetType' => 'category_id',			'isBool' => false, 'group' => false,  	'sort' => 'sort_order', 		'route' => 'product/category'],
+			2   => ['facetType' => 'manufacturer_id',	'isBool' => false, 'group' => false,  	'sort' => 'sort_order', 		'route' => 'product/manufacturer'],
+			3   => ['facetType' => 'option',					'isBool' => false, 'group' => false,  	'sort' => 'sort_order', 		'route' => false],
+			4   => ['facetType' => 'attribute',				'isBool' => false, 'group' => false,  	'sort' => 'sort_order', 		'route' => false],
+			5   => ['facetType' => 'filter',					'isBool' => false, 'group' => false,  	'sort' => 'sort_order', 		'route' => false],
+			6   => ['facetType' => 'tag',							'isBool' => false, 'group' => false,  	'sort' => 'sort_order', 		'route' => false],
+			7   => ['facetType' => 'supplier_id',			'isBool' => false, 'group' => false,  	'sort' => 'sort_order', 		'route' => 'product/supplier'],
+			8   => ['facetType' => 'is_available',		'isBool' => true,  'group' => 'flags',  'sort' => 'sort_order', 		'route' => false],
+			9   => ['facetType' => 'has_discount',		'isBool' => true,  'group' => 'flags',  'sort' => 'discounts', 			'route' => 'product/discount'],
+			10  => ['facetType' => 'is_featured',			'isBool' => true,  'group' => 'flags',  'sort' => 'sort_order', 		'route' => 'product/featured'],
+      11  => ['facetType' => 'latest',					'isBool' => true,  'group' => 'flags',  'sort' => 'date_added', 		'route' => 'product/latest'],
+			12  => ['facetType' => 'bestseller',			'isBool' => true,  'group' => 'flags',  'sort' => 'sales', 					'route' => 'product/bestseller'],
+      13  => ['facetType' => 'top_rated',				'isBool' => true,  'group' => 'flags',  'sort' => 'rating', 				'route' => 'product/top_rated'],
+      14  => ['facetType' => 'popular',					'isBool' => true,  'group' => 'flags',  'sort' => 'trends_by_date', 'route' => 'product/popular'],
 		];
 	}
 
