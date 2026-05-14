@@ -1116,8 +1116,13 @@ class ModelCatalogProduct extends Model {
 				AND af.facet_group_id = b.facet_group_id
 		";
 
+		$facets = [];
 		$query = $this->db->query($sql);
-		return $query->rows;
+		foreach ($query->rows as $row) {
+			$row['facet_type'] = $this->facetTypes[$row['facet_type']]['facetType'];
+			$facets[] = $row;
+		}
+		return $facets;
 	}
 
 	/**
