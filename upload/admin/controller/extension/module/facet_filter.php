@@ -35,10 +35,11 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 
 		// Form data
 		$data['module_facet_filter_status'] = $this->request->post['module_facet_filter_status'] ?? $settings['module_facet_filter_status'] ?? [];
-		$data['settings'] 									= $this->request->post['module_facet_filter_settings'] ?? $settings['module_facet_filter_settings'] ?? [];
-		$data['pageTypes'] 								  = ['category', 'manufacturer', 'special', 'search', 'bestseller', 'latest', 'featured', 'trending'];
-		$data['facetTypes'] 								= array_flip($this->model_catalog_facet->getFacetTypes());
-		$data['user_token'] 								= $this->session->data['user_token'];
+		$data['settings'] 		= $this->request->post['module_facet_filter_settings'] ?? $settings['module_facet_filter_settings'] ?? [];
+		$data['facetTypes'] 	= $this->model_catalog_facet->getFacetTypes();
+		$data['pageTypes'] 		= array_column(array_filter($this->model_catalog_facet->getFacetTypes(), fn($a) => $a['route'] !== false), 'route');
+		$data['pageTypes'][] 	= 'product/search'; // Add search type page explicitly because search page has no own facet type in facet dictionary 
+		$data['user_token'] 	= $this->session->data['user_token'];
 
 		// Get category name for saved categories
 		if (isset($data['settings']['distinct_categories'])) {
