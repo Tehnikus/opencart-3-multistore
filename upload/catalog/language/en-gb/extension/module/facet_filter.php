@@ -19,11 +19,9 @@ $_['sort_trends_by_date']   = 'Popular now';
 $_['sort_relevance']        = 'Best relevance';
 
 // Filter groups
-$_['group_category']      = 'Category';
-$_['group_manufacturer']  = 'Manufacturer';
-$_['group_is_available']  = 'Availability';
-$_['group_has_discount']  = 'Discounts';
-$_['group_is_featured']   = 'Featured';
+$_['group_category_id']      = 'Category';
+$_['group_manufacturer_id']  = 'Manufacturer';
+$_['group_flags']            = 'Features';
 
 // Special filters
 $_['facet_is_available']  = 'Show only available for order';
