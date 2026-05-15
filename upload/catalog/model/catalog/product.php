@@ -818,6 +818,8 @@ class ModelCatalogProduct extends Model {
 		$searchExpression 	 	= $this->buildMatchExpression($data);
 		$baseProductList 	 	 	= "";
 		$hasSearch 						= !empty($searchExpression);
+		$isCacheable 					= false;
+		$cachedFacets 				= false;
 		// $hasFacets 						= !empty(array_intersect_key(array_filter($data), $this->facetTypes));
 
 		// Base products list
@@ -909,6 +911,22 @@ class ModelCatalogProduct extends Model {
 		if (!$hasSearch && !$base_facet_type) {
 			return [];
 		}
+
+		// Cache conditions:
+		// Base facet type and value is set, only one facet selected and it is base, no search used
+		if (!$hasSearch && $base_facet_type && $base_facet_value_id && count($conditions) === 1) {
+			$isCacheable = true;
+		}
+
+		if ($isCacheable) {
+			$facetCacheName = $this->facetTypes[$base_facet_type]['facetType'];
+			$cacheName 			= "filter.store_{$store_id}.language_{$language_id}.{$facetCacheName}.{$base_facet_value_id}";
+			$cachedFacets = $this->cache->get($cacheName);
+			if ($cachedFacets) {
+				return $cachedFacets;
+			}
+		}
+		// End cache
 
 
 		$sql = "
@@ -1126,6 +1144,14 @@ class ModelCatalogProduct extends Model {
 			$row['facet_type'] = $this->facetTypes[$row['facet_type']]['facetType'];
 			$facets[] = $row;
 		}
+
+		// Cache
+		if ($isCacheable && !$cachedFacets) {
+			$cacheName = "filter.store_{$store_id}.language_{$language_id}.{$facetCacheName}.{$base_facet_value_id}";
+			$this->cache->set($cacheName, $facets);
+		}
+		// End cache
+
 		return $facets;
 	}
 
