@@ -1,0 +1,57 @@
+{# {% cache %} #}
+<article role="article" class="miniature" {% if wishlist %}data-wishlist="{{ wishlist }}"{% endif %} {% if compare %}data-compare="{{ compare }}"{% endif %}>
+  <figure role="img" aria-label="{{ product.name }}" class="image" {% if product.special_date_end %}data-special-date-end="{{ product.special_date_end }}"{% endif %}>
+    <a title="{{ product.name }}" href="{{ product.href }}">
+      <img decoding="async" loading="lazy" src="{{ product.thumb }}" alt="{{ product.name }}" title="{{ product.name }}" width="{{product.width}}" height="{{product.height}}" class="img-responsive" />
+    </a>
+  </figure>
+  {% if product.product_flags %}
+  <div class="flags">
+    {% for type, flag in product.product_flags %}
+    <span class="product-flag {{ type }}"> {{ flag }} </span>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <div class="infos">
+    <div class="caption">
+      <span class="h3"><a title="{{ product.name }}" href="{{ product.href }}">{{ product.name }}</a></span>
+      <p class="short-description">{{ product.description }}</p>
+      {% if product.attributes %}{{ product.attributes }}{% endif %}
+      {% if product.rating %}
+        {% include 'helium/template/common/rating_stars.twig' with {rating: product.rating, count: product.reviews} %}
+      {% endif %} 
+      {% if product.price_value and product.price_value != 0 %}
+        <p class="prices h3">
+          {% if not product.special %}
+            <span class="text-price">{{ text_price }}</span> {{ product.price }}
+          {% else %} 
+            <span class="text-price">{{ text_new_price }}</span>
+            <span class="price-new">{{ product.special }}</span>
+            <span class="price-old"><span class="text-price">{{ text_old_price }}</span> {{ product.price }}</span> 
+          {% endif %}
+          {% if product.tax %} 
+            <span class="price-tax">{{ text_tax }} {{ product.tax }}</span> 
+          {% endif %} 
+        </p>
+      {% endif %}
+    </div>
+    <div class="btn-group">
+      <button type="button" 
+        {% if product.price_value and product.price_value != 0 %} 
+          data-action="cartAdd" 
+          data-product_id="{{ product.product_id }}" 
+          data-minimum_qty="{{ product.minimum }}" 
+          aria-haspopup="dialog"
+        {% else %}
+          disabled
+        {% endif %}
+        class="add-to-cart primary" 
+        title="{{ button_cart }} {{ product.name }}">
+        <i class="icon-cart"></i> <span>{{ button_cart }}</span>
+      </button>
+      <button type="button" data-action="wishlistAdd" data-product_id="{{ product.product_id }}" aria-haspopup="dialog" class="wishlist" title="{{ button_wishlist }}"><i class="icon-heart"></i></button>
+      <button type="button" data-action="compareAdd" data-product_id="{{ product.product_id }}" aria-haspopup="dialog" class="compare" title="{{ button_compare }}"><i class="icon-compare"></i></button>
+    </div>
+  </div>
+</article>
+{# {% endcache %} #}
