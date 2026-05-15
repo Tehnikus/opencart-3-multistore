@@ -28,26 +28,7 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 		$category_id 	= end($category_id) ?? null;
 		
 		// Interface data
-		$settings['cache'] = 0;
-		if (isset($settings['cache']) && $settings['cache'] === '1' && $route !== 'product/search') {
-			// Cache except search page
-			$store_id 		= (int) $this->config->get('config_store_id');
-			$language_id 	= (int) $this->config->get('config_language_id');
-			$cachePrefix = explode('/', $route)[1] ?? $route;
-			$cachePostfix = "filters";
-			if ($category_id) {
-				$cachePostfix = (floor($category_id / 100)) . "00.filters_{$category_id}";
-			}
-			$cacheName 	= "{$cachePrefix}.store_{$store_id}.language_{$language_id}.{$cachePostfix}";
-			$data['facetSets'] 	= $this->cache->get($cacheName);
-			if (!$data['facetSets']) {
-				$data['facetSets'] = $this->getFacets();
-				$this->cache->set($cacheName, $data['facetSets']);
-			}
-		} else {
-			// No cache 
-			$data['facetSets'] = $this->getFacets();
-		}
+		$data['facetSets'] = $this->getFacets();
 
 		// Sort requests
 		$data['requestSort'] = $this->request->get['sort'] ?? null;
