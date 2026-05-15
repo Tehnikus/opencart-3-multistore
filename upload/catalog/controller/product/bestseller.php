@@ -8,19 +8,18 @@ class ControllerProductBestseller extends Controller {
 
 		$this->document->setTitle($this->language->get('heading_title'));
 		$data = $this->prepageCommonData();
-		$this->preparePagination('product/bestseller', $data);
 		$data['breadcrumbs'] = $this->prepareBreadcrumbs();
 		$data['products'] = [];
 		$request = $this->model_catalog_product->prepareGetProductsRequest($this->request->get);
 		$results = $this->model_catalog_product->getProducts($request, true);
-		echo '<pre>' . htmlspecialchars(print_r($request, true)) . '</pre>';
 		$data['total'] = $results['total'];
 		
 		foreach ($results['products'] as $row) {
 			$this->load->model('catalog/product');
-			$data['products'][] = $this->model_catalog_product->prepageProductMiniature($row);
+			$data['products'][] = $this->model_catalog_product->prepareProductMiniature($row);
 		}
-
+			
+		$this->preparePagination('product/bestseller', $data);
 		$this->response->setOutput($this->load->view('product/bestseller', $data));
 	}
 
