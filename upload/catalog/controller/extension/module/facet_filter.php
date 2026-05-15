@@ -106,80 +106,68 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 		// Get facets and product count for requested filters
 		$facets = $this->model_catalog_product->getFilters($requestFilters);
 		
-		// Create hierarchical facet list
 		foreach ($facets as $row) {
+			$typeId 			= $row['facet_type_id'];
+			$facetConfig 	= $facetTypes[$typeId];
+			$facetKey    	= $facetConfig['facetType']; // 'category_id', 'option', 'is_available'...
+			
+			if (!isset($facetTypes[$typeId])) continue; // Skip if facet is not in dictionary
+			if (!isset($settings[$facetKey])) continue; // Skip if facet type is not in settings
 
-			// Skip current category in facets list
-			// Temporarily commented to show current category in selected facets.
-			// TODO Later hide current category on category type page, check subcategory filtering
-			// if ($row['facet_type'] === 'category_id' && $row['facet_value_id'] === $requestFilters['filter_category_id']) {
-			// 	continue;
-			// }
-
-			// Apply settings - skip facets that are not in $settings array
-			if (!isset($settings[$row['facet_type']])) {
-				continue;
+			// Определяем тип и группу для $filterSets
+			if ($facetConfig['group'] !== false) {
+				// Facets having gorup explicitly set in dictionary
+				$type  = $facetConfig['group'];
+				$group = $facetConfig['group'];
+			} else {
+				// Regular facets that have own group are grouped by facet_type + facet_group_id
+				$type  = $facetKey;              // Facet type: 'category_id', 'option', 'attribute', etc.
+				$group = $row['facet_group_id']; // Subgroup inside each type: subcategories, option values group, attribute group, etc.
 			}
 
-			$type  			= $row['facet_type'];
-			$group 			= $row['facet_group_id'];
-			$group_name = $row['facet_group_name'];
-			$facet_name = $row['facet_name'];
+			$group_name = $row['facet_group_name'] ?? $this->language->get('group_' . $type); // Group name
+			$facet_name = $row['facet_name'] ?? $this->language->get('facet_' . $facetKey); 	// Facet name
 
-			// Add missing facets and groups names
-			if ($group_name === null) {
-				if ($type === 'category_id') {
-					// Categories have own name but may not have parent group 
-					$group_name = $this->language->get('group_category');
-				}
-				if ($type === 'manufacturer_id') {
-					// Manufacturers have own name but don't have parent group 
-					$group_name = $this->language->get('group_manufacturer');
-				}
-				if ($type === 'is_available') {
-					$group_name = $this->language->get('group_is_available');
-					$facet_name = $this->language->get('facet_is_available');
-				}
-				if ($type === 'has_discount') {
-					$group_name = $this->language->get('group_has_discount');
-					$facet_name = $this->language->get('facet_has_discount');
-				}
-				if ($type === 'is_featured') {
-					$group_name = $this->language->get('group_is_featured');
-					$facet_name = $this->language->get('facet_is_featured');
-				}
-			}
-	
-			// Create group if not exists
+			// Create facet group if not exists
 			if (!isset($filterSets[$type][$group])) {
 				$filterSets[$type][$group] = [
-					'group_name' 				=> $group_name,
-					'filter_group_id' 	=> $group,
+					'group_name'        => $group_name,
+					'filter_group_id'   => $group,
 					'group_is_selected' => $row['group_is_selected'],
-					'group_sort_order'	=> $row['group_sort_order'],
-					'filters' => []
+					'group_sort_order'  => $row['group_sort_order'] ?? 0,
+					'filters'           => [],
 				];
-			}	
-	
-			// Each facet with product count
+			}
+
+			// Facet
 			$facet = [
-				'facet_id' 		 	 	   => $row['facet_value_id'],
-				'facet_type'     	 	 => $row['facet_type'],
-				'facet_group_id' 	 	 => $row['facet_group_id'],
-				'facet_name'      	 => $facet_name,
-				'facet_sort_order' 	 => $row['facet_sort_order'],
-				'base_count' 				 => $row['base_count'],
-				'current_count' 		 => $row['current_count'] ?? 0,
-				'facet_is_selected'  => $row['facet_is_selected'],
-				'facet_is_available' => $row['facet_is_available']
+				'facet_id'           	=> $row['facet_value_id'],
+				'facet_type'         	=> $facetKey,
+				'facet_group_id'     	=> $row['facet_group_id'],
+				'facet_name'         	=> $facet_name,
+				'facet_sort_order'   	=> $row['facet_sort_order'] ?? 0,
+				'base_count'         	=> $row['base_count'],
+				'current_count'      	=> $row['current_count'] ?? 0,
+				'facet_is_selected'  	=> $row['facet_is_selected'],
+				'facet_is_available' 	=> $row['facet_is_available'],
 			];
-			// Create SEO URL for each facet
+
 			$facet['url'] = $this->getFacetUrl($facet);
 
 			$filterSets[$type][$group]['filters'][] = $facet;
-
-			usort(array: $filterSets[$type][$group]['filters'], callback: fn ($a, $b) =>  $a['facet_sort_order'] <=> $b['facet_sort_order']);
 		}
+
+		// Sort facets if they have facet_sort_order
+		foreach ($filterSets as $type => &$groups) {
+			foreach ($groups as &$group) {
+				usort(
+					$group['filters'],
+					fn($a, $b) => $a['facet_sort_order'] <=> $b['facet_sort_order']
+				);
+			}
+			$groups = array_values($groups);
+		}
+		unset($groups, $group);
 		
 		foreach ($filterSets as $type => $groups) {
 			$filterSets[$type] = array_values($groups);
