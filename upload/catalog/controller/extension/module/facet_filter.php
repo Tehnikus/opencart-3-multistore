@@ -84,6 +84,7 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 
 		$this->load->language('extension/module/facet_filter');
 
+		// Reverse dictionary
 		// ['category_id' => 0, 'manufacturer_id' => 1, ...]
 		$facetKeyMap = array_flip(array_column($facetTypes, 'facetType'));
 
