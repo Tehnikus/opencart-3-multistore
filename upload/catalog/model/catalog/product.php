@@ -39,6 +39,7 @@ class ModelCatalogProduct extends Model {
 		 * 	'facetType' => 'request param, e.g. category_id', 
 		 * 	'isBool'		=> 'only facet presence is considered, any facet value will match filter, e.g. DB entry top_rated=123 is matching filter top_rated=1', 
 		 * 	'group' 		=> 'separate group name to join different facets in groups, like flags or other',
+		 *  'sort'      => 'default sort order for this facet',
 		 * 	'route' 		=> 'route to controller, e.g. product/category', 
 		 * ],
 		 */
@@ -51,7 +52,7 @@ class ModelCatalogProduct extends Model {
 			6   => ['facetType' => 'tag',							'isBool' => false, 'group' => false,  	'sort' => 'sort_order', 		'route' => false],
 			7   => ['facetType' => 'supplier_id',			'isBool' => false, 'group' => false,  	'sort' => 'sort_order', 		'route' => 'product/supplier'],
 			8   => ['facetType' => 'is_available',		'isBool' => true,  'group' => 'flags',  'sort' => 'sort_order', 		'route' => false],
-			9   => ['facetType' => 'has_discount',		'isBool' => true,  'group' => 'flags',  'sort' => 'discounts', 			'route' => 'product/discount'],
+			9   => ['facetType' => 'has_discount',		'isBool' => true,  'group' => 'flags',  'sort' => 'discounts', 			'route' => 'product/special'],
 			10  => ['facetType' => 'is_featured',			'isBool' => true,  'group' => 'flags',  'sort' => 'sort_order', 		'route' => 'product/featured'],
       11  => ['facetType' => 'latest',					'isBool' => true,  'group' => 'flags',  'sort' => 'date_added', 		'route' => 'product/latest'],
 			12  => ['facetType' => 'bestseller',			'isBool' => true,  'group' => 'flags',  'sort' => 'sales', 					'route' => 'product/bestseller'],
