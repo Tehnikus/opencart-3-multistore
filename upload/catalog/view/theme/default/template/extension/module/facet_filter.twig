@@ -19,8 +19,8 @@
             {% for facetItem in facetGroup.filters %}
               {% if facetItem.facet_is_available %}
                 <a href="{{ facetItem.url }}" class="facetItem {% if facetItem.facet_is_selected %}active{% endif %}" {% if facetItem.facet_is_selected %}rel="nofollow"{% endif %}>
-                  <input id="{{ facetType }}_{{ facetItem.facet_id }}" type="checkbox" data-facet-type="{{ facetType }}" value="{{ facetItem.facet_id }}" {% if facetItem.facet_is_selected %} checked="checked" {% endif %} class="facetInput" />
-                  <label for="{{ facetType }}_{{ facetItem.facet_id }}" class="facetLabel">
+                  <input id="{{ facetItem.facet_type }}_{{ facetItem.facet_id }}" type="checkbox" data-facet-type="{{ facetType }}" value="{{ facetItem.facet_id }}" {% if facetItem.facet_is_selected %} checked="checked" {% endif %} class="facetInput" />
+                  <label for="{{ facetItem.facet_type }}_{{ facetItem.facet_id }}" class="facetLabel">
                     <span class="facetName">{{ facetItem.facet_name }}</span>
                     <span class="productCount">{% if facetGroup.group_is_selected and not (facetItem.facet_id in requests[facetType]) %}+{% endif %}{% if facetItem.facet_is_selected %}{{ facetItem.base_count }}{% else %}{{ facetItem.current_count }}{% endif %}</span>
                   </label>
