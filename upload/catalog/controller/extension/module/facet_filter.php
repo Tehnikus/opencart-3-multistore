@@ -47,19 +47,6 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 			// No cache 
 			$data['facetSets'] = $this->getFacets();
 		}
-		
-		// Request data to check applied filters
-		$data['requests'] = [
-			'category_id' 			=> explode(',', $this->request->get['category_id'] ?? '') 			?? null,
-			'filter' 						=> explode(',', $this->request->get['filter'] ?? '') 						?? null,
-			'option' 						=> explode(',', $this->request->get['option'] ?? '') 						?? null,
-			'attribute' 				=> explode(',', $this->request->get['attribute'] ?? '') 				?? null,
-			'manufacturer_id' 	=> explode(',', $this->request->get['manufacturer_id'] ?? '') 	?? null,
-			'tag' 							=> explode(',', $this->request->get['tag'] ?? '') 							?? null,
-			'is_available' 			=> explode(',', $this->request->get['is_available'] ?? '') 			?? null,
-			'is_featured' 			=> explode(',', $this->request->get['is_featured'] ?? '') 			?? null,
-			'has_discount' 			=> explode(',', $this->request->get['has_discount'] ?? '') 			?? null,
-		];
 
 		// Sort requests
 		$data['requestSort'] = $this->request->get['sort'] ?? null;
