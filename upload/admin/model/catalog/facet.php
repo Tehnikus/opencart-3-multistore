@@ -303,15 +303,15 @@ Class ModelCatalogFacet extends Model {
               SELECT 1 FROM `" . DB_PREFIX . "product_special` ps
               WHERE ps.`product_id` = p.`product_id`
                 AND ps.`store_id`   = p2s.`store_id`
-                AND (ps.`date_start` = '0000-00-00' OR ps.`date_start` < NOW())
-                AND (ps.`date_end`   = '0000-00-00' OR ps.`date_end`   > NOW())
+                AND (ps.`date_start` IS NULL OR ps.`date_start` = '0000-00-00' OR ps.`date_start` = '0000-00-00 00:00:00' OR ps.`date_start` < NOW())
+                AND (ps.`date_end`   IS NULL OR ps.`date_end`   = '0000-00-00' OR ps.`date_end`   = '0000-00-00 00:00:00' OR ps.`date_end`   > NOW())
             )
             OR EXISTS (
               SELECT 1 FROM `" . DB_PREFIX . "product_discount` pd
               WHERE pd.`product_id` = p.`product_id`
                 AND pd.`store_id`   = p2s.`store_id`
-                AND (pd.`date_start` = '0000-00-00' OR pd.`date_start` < NOW())
-                AND (pd.`date_end`   = '0000-00-00' OR pd.`date_end`   > NOW())
+                AND (pd.`date_start` IS NULL OR pd.`date_start` = '0000-00-00' OR pd.`date_start` = '0000-00-00 00:00:00' OR pd.`date_start` < NOW())
+                AND (pd.`date_end`   IS NULL OR pd.`date_end`   = '0000-00-00' OR pd.`date_end`   = '0000-00-00 00:00:00' OR pd.`date_end`   > NOW())
             )
           )
         ",
@@ -727,17 +727,15 @@ Class ModelCatalogFacet extends Model {
               `store_id`,
               MIN(`priority`) AS `priority`
             FROM " . DB_PREFIX . "product_special
-            WHERE
-              (`date_start` = '0000-00-00' OR `date_start` < NOW())
-              AND (`date_end` = '0000-00-00' OR `date_end` > NOW())
+            WHERE (`date_start` IS NULL OR `date_start` = '0000-00-00' OR `date_start` = '0000-00-00 00:00:00' OR `date_start` < NOW())
+              AND (`date_end`   IS NULL OR `date_end`   = '0000-00-00' OR `date_end`   = '0000-00-00 00:00:00' OR `date_end`   > NOW())
             GROUP BY `product_id`, `store_id`
           ) ps_priority
             ON ps_priority.`product_id` = t.`product_id`
             AND ps_priority.`store_id` = t.`store_id`
             AND ps_priority.`priority` = t.`priority`
-          WHERE
-            (t.`date_start` = '0000-00-00' OR t.`date_start` < NOW())
-            AND (t.`date_end` = '0000-00-00' OR t.`date_end` > NOW())
+          WHERE (t.`date_start` IS NULL OR t.`date_start` = '0000-00-00' OR t.`date_start` = '0000-00-00 00:00:00' OR t.`date_start` < NOW())
+            AND (t.`date_end`   IS NULL OR t.`date_end`   = '0000-00-00' OR t.`date_end`   = '0000-00-00 00:00:00' OR t.`date_end`   > NOW())
           GROUP BY t.`product_id`, t.`store_id`
         ) ps
         ON ps.`product_id` = p.`product_id`
@@ -755,17 +753,15 @@ Class ModelCatalogFacet extends Model {
               `store_id`,
               MIN(`priority`) AS `priority`
             FROM " . DB_PREFIX . "product_discount
-            WHERE
-              (`date_start` = '0000-00-00' OR `date_start` < NOW())
-              AND (`date_end` = '0000-00-00' OR `date_end` > NOW())
+            WHERE (`date_start` IS NULL OR `date_start` = '0000-00-00' OR `date_start` = '0000-00-00 00:00:00' OR `date_start` < NOW())
+              AND (`date_end`   IS NULL OR `date_end`   = '0000-00-00' OR `date_end`   = '0000-00-00 00:00:00' OR `date_end`   > NOW())
             GROUP BY `product_id`, `store_id`
           ) pd_priority
             ON pd_priority.`product_id` = t.`product_id`
             AND pd_priority.`store_id`  = t.`store_id`
             AND pd_priority.`priority`  = t.`priority`
-          WHERE
-            (t.`date_start` = '0000-00-00' OR t.`date_start` < NOW())
-            AND (t.`date_end` = '0000-00-00' OR t.`date_end` > NOW())
+          WHERE (t.`date_start` IS NULL OR t.`date_start` = '0000-00-00' OR t.`date_start` = '0000-00-00 00:00:00' OR t.`date_start` < NOW())
+            AND (t.`date_end`   IS NULL OR t.`date_end`   = '0000-00-00' OR t.`date_end`   = '0000-00-00 00:00:00' OR t.`date_end`   > NOW())
           GROUP BY t.`product_id`, t.`store_id`
         ) pd
         ON pd.`product_id` = p.`product_id`
@@ -1115,16 +1111,16 @@ Class ModelCatalogFacet extends Model {
         FROM " . DB_PREFIX . "product_special ps
         WHERE ps.product_id = fi.product_id
           AND ps.store_id = fi.store_id
-          AND (ps.date_start = '0000-00-00' OR ps.date_start < NOW())
-          AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW())
+          AND (ps.`date_start` IS NULL OR ps.`date_start` = '0000-00-00' OR ps.`date_start` = '0000-00-00 00:00:00' OR ps.`date_start` < NOW())
+          AND (ps.`date_end`   IS NULL OR ps.`date_end`   = '0000-00-00' OR ps.`date_end`   = '0000-00-00 00:00:00' OR ps.`date_end`   > NOW())
       )
       AND NOT EXISTS (
         SELECT 1
         FROM " . DB_PREFIX . "product_discount pd
         WHERE pd.product_id = fi.product_id
           AND pd.store_id = fi.store_id
-          AND (pd.date_start = '0000-00-00' OR pd.date_start < NOW())
-          AND (pd.date_end = '0000-00-00' OR pd.date_end > NOW())
+          AND (pd.`date_start` IS NULL OR pd.`date_start` = '0000-00-00' OR pd.`date_start` = '0000-00-00 00:00:00' OR pd.`date_start` < NOW())
+          AND (pd.`date_end`   IS NULL OR pd.`date_end`   = '0000-00-00' OR pd.`date_end`   = '0000-00-00 00:00:00' OR pd.`date_end`   > NOW())
       )
       $storeWhere
     ");
