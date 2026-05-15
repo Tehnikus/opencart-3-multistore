@@ -9,6 +9,7 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 
 		$this->load->model('catalog/product');
 		$data['sortOrders'] = array_keys($this->model_catalog_product->getSortOrders());
+		$facetTypes 		= $this->model_catalog_product->getFacetTypes();
 
 		$this->load->model('extension/module/facet_filter');
 		$this->load->language('extension/module/facet_filter');
@@ -82,26 +83,31 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 	public function getFacets() : array {
 		$this->load->model('catalog/product');
 		$facetTypes 		= $this->model_catalog_product->getFacetTypes();
+		// Get facets that have own page type: categories, special, bestsellers, popular, latest, top rated, discounts, etc.
+		$pageTypes 			= array_column(array_filter($facetTypes, fn($a) => $a['route'] !== false), 'route');
+		// Add search type page explicitly because search page has no own facet type in facet dictionary 
+		$pageTypes[] 		= 'product/search'; 
 		$requestFilters = []; // Data from $this->request->get
 		$filterSets 		= []; // Result to be returned
-		$route 					= explode('/', $this->request->get['route'] ?? []); // Route to apply page settings 
-		$route 					= end($route) ?? null;
+		$route 					= $this->request->get['route'] ?? null; // Route to apply page settings 
 		$path 					= $this->request->get['category_id'] ?? $this->request->get['path'] ?? ''; // Path to fallback to current category id
-		$category_id 		= explode('_', (string) $path); // Current category id
-		$category_id 		= end($category_id) ?? null;
+		$parts       		= explode('_', (string) $path); // Current category id
+		$category_id 		= (int) end($parts) ?: null;
 		$settings 			= $this->config->get('module_facet_filter_settings');
 		$settings				= $settings['distinct_categories'][$category_id] ?? $settings[$route] ?? null; // Settings by page type, default settings for categories and individual category settings
 		
-		// Only show filters on allowed page types
-		if ($settings === null || $route === null || !in_array($route, ['category', 'manufacturer', 'special', 'latest', 'search', 'bestseller'])) {
+		// Only show filters on allowed page types according to settings
+		if ($settings === null || $route === null || !in_array($route, $pageTypes)) {
 			return [];
 		}
 
 		$this->load->language('extension/module/facet_filter');
 
-		// Get requested filters
+		// ['category_id' => 0, 'manufacturer_id' => 1, ...]
+		$facetKeyMap = array_flip(array_column($facetTypes, 'facetType'));
+
 		foreach ($this->request->get as $filterKey => $filterData) {
-			if (isset($facetTypes[$filterKey])) {
+			if (isset($facetKeyMap[$filterKey])) {
 				$requestFilters[$filterKey] = $filterData;
 			}
 		}
@@ -117,10 +123,9 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 		}
 
 		// Get facets and product count for requested filters
-		$this->load->model('catalog/product');
 		$facets = $this->model_catalog_product->getFilters($requestFilters);
-
-		// Create array hierarchical from facet list
+		
+		// Create hierarchical facet list
 		foreach ($facets as $row) {
 
 			// Skip current category in facets list
@@ -140,7 +145,6 @@ class ControllerExtensionModuleFacetFilter extends Controller {
 			$group_name = $row['facet_group_name'];
 			$facet_name = $row['facet_name'];
 
-		
 			// Add missing facets and groups names
 			if ($group_name === null) {
 				if ($type === 'category_id') {
