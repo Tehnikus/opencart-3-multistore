@@ -140,6 +140,7 @@ class FastFile
     }
 
     // Write temp to $key cache path and file 
+    @touch($tmp, time() + $expire); // First create file to avoid collision when file is already created, but mtime is not set yet, so the file will be treated as expired and deleted again
     if (!@rename($tmp, $path)) {
       @unlink($path);
       if (!@rename($tmp, $path)) {
@@ -148,7 +149,6 @@ class FastFile
       }
     }
 
-    @touch($path, time() + $expire);
     return true;
   }
 
