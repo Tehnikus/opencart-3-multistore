@@ -59,8 +59,7 @@ class FastFile
    * @param string|null $format if not set defaultFormat if used
    * @return mixed|false (array for json, string for html/txt/raw, or false)
    */
-  public function get(string $key, ?string $format = null)
-  {
+  public function get(string $key, ?string $format = null) : bool|array|string {
     $format = $format ?? $this->defaultFormat;
 
     $path = $this->getCachedPath($key, $format);
@@ -97,8 +96,7 @@ class FastFile
    * if is_array($data) then $data is written in JSON, else TXT.
    * Delete previous file if present
    */
-  public function set(string $key, $data, int $expire = 0): bool
-  {
+  public function set(string $key, $data, int $expire = 0) : bool {
     $expire = $expire === 0 ? $this->expire : (int) $expire;
     $format = is_array($data) ? 'json' : 'txt';
 
@@ -155,23 +153,21 @@ class FastFile
   /**
    * Delete cache file by key (both json and txt) 
    */
-  public function delete(string $key): void
-  {
+  public function delete(string $key) : void {
     foreach ($this->formats as $format) {
       $path = $this->getCachedPath($key, $format);
       if (is_file($path)) {
         @unlink($path);
       }
     }
-    // cleanup директорий оставляем на cron/admin, чтобы не замедлять операции
+    $this->removeDir($path);
   }
 
   /**
    * Delete all expired files
    * Expensive operation, run by cron or admin.
    */
-  public function flush(): void
-  {
+  public function flush() : void {
     foreach ($this->collectCacheFiles() as $file) {
       $mtime = @filemtime($file);
       if ($mtime === false || $mtime < time()) {
@@ -185,8 +181,7 @@ class FastFile
    * Delete all cache.
    * Expensive operation, run by cron or admin.
    */
-  public function clear(): void
-  {
+  public function clear() : void {
     foreach ($this->collectCacheFiles() as $file) {
       @unlink($file);
     }
@@ -200,8 +195,7 @@ class FastFile
    * Get all cache files
    * @return array
    */
-  private function collectCacheFiles(): array
-  {
+  private function collectCacheFiles() : array {
     $files = [];
     $baseDir = $this->baseDir;
     if (!is_dir($baseDir))
@@ -230,8 +224,7 @@ class FastFile
    * @param string $format file format
    * @return string 
    */
-  private function getCachedPath(string $key, string $format): string
-  {
+  private function getCachedPath(string $key, string $format) : string {
     $cacheKey = $key . '|' . $format;
     if (isset(self::$pathCache[$cacheKey])) {
       return self::$pathCache[$cacheKey];
@@ -242,8 +235,7 @@ class FastFile
   }
 
   /** Make file path bu cache $key: all parts before last dot become subfolders, part after last dot becomes basename */
-  private function buildFilePath(string $key, string $format): string
-  {
+  private function buildFilePath(string $key, string $format) : string {
     $san = preg_replace('/[^A-Z0-9\._-]/i', '', (string) $key);
     if ($san === '') {
       $san = 'key';
@@ -268,8 +260,7 @@ class FastFile
   /** 
    * Delete empty directories from dir to baseDir 
    */
-  private function cleanupEmptyDirs(string $dir): void
-  {
+  private function cleanupEmptyDirs(string $dir) : void {
     $baseDir = rtrim($this->baseDir, "/\\");
     $dir = rtrim($dir, "/\\");
 
@@ -295,7 +286,7 @@ class FastFile
  * Works by deleting the directory corresponding to the prefix
  * Key parts must be separated by dots: "facets.0.1.1.5"
  */
-  public function deleteByPrefix(string $prefix): void {
+  public function deleteByPrefix(string $prefix) : void {
     $san  = preg_replace('/[^A-Z0-9\._-]/i', '', $prefix);
     $parts = array_filter(explode('.', $san), fn($p) => $p !== '' && $p !== '.' && $p !== '..');
 
@@ -306,7 +297,7 @@ class FastFile
 
     if (is_dir($dir)) {
       $this->removeDir($dir);
-      // Убираем из pathCache все ключи с этим префиксом
+      // Remove all keys with this prefix from pathCache 
       foreach (array_keys(self::$pathCache) as $k) {
         if (str_starts_with($k, $prefix)) {
           unset(self::$pathCache[$k]);
