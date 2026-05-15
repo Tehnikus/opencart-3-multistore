@@ -314,4 +314,22 @@ class FastFile
       }
     }
   }
+  
+  private function removeDir(string $dir) : void {
+    $it = new \RecursiveIteratorIterator(
+      new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+      \RecursiveIteratorIterator::CHILD_FIRST
+    );
+    foreach ($it as $fi) {
+      $fi->isDir() ? @rmdir($fi->getPathname()) : @unlink($fi->getPathname());
+    }
+    @rmdir($dir);
+
+    // Remove from $createdDirs
+    foreach (array_keys(self::$createdDirs) as $k) {
+      if (str_starts_with($k, $dir)) {
+        unset(self::$createdDirs[$k]);
+      }
+    }
+  }
 }
