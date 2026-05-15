@@ -90,66 +90,69 @@ class ModelCatalogProduct extends Model {
 	 * @param mixed $request
 	 * @return array
 	 */
-	public function prepareGetProductsRequest(array $request): array {
-    $result = [];
+	public function prepareGetProductsRequest(array $request) : array {
+		$result = [];
 
-    $routeToParams = [
-			'product/featured'   		=> ['is_featured' 	=> 1],
-			'product/special'    		=> ['has_discount' 	=> 1],
-			'product/latest'     		=> ['sort' => 'date_added', 			'show_all' => true, 'max_products' => (int) ($this->config->get('config_max_products_latest') ?? 100)], // The 'show_all' flag is required for pages that have no base facet
-			'product/bestseller' 		=> ['sort' => 'sales', 						'show_all' => true, 'max_products' => (int) ($this->config->get('config_max_products_bestseller') ?? 100)], // The 'show_all' flag is required for pages that have no base facet
-			'product/popular'    		=> ['sort' => 'trends_all_time', 	'show_all' => true, 'max_products' => (int) ($this->config->get('config_max_products_popular') ?? 100)], // The 'show_all' flag is required for pages that have no base facet
-    ];
-
-    // Category from path
-    if (isset($request['path'])) {
+		// Category from path
+		if (isset($request['path'])) {
 			$parts = explode('_', (string) $request['path']);
-			$result['category_id'] = (int) end($parts);
-    }
+			$result['category_id'] = (int) end($parts) ?: null;
+		}
 
-    // Facet filters from request
-    foreach ($request as $key => $value) {
-			if (isset($this->facetTypes[$key])) {
-				$result[$key] = $value;
+		// Facet filters from request
+		foreach ($this->facetTypes as $facet) {
+			if (isset($request[$facet['facetType']])) {
+				$result[$facet['facetType']] = $request[$facet['facetType']];
 			}
-    }
+		}
 
-    // Search query 'filter_name' is canonical, 'search' is alias
-    $searchQuery = $request['filter_name'] ?? $request['search'] ?? '';
-    if ($searchQuery !== '') {
+		// Search query — filter_name is canonical, search is alias
+		$searchQuery = $request['filter_name'] ?? $request['search'] ?? '';
+		if ($searchQuery !== '') {
 			$result['filter_name'] = (string) $searchQuery;
-    }
+		}
 
-    // Pagination
-    if (isset($request['start'])) {
+		// Pagination
+		if (isset($request['start'])) {
 			$result['start'] = (int) $request['start'];
-    }
-    if (isset($request['limit'])) {
-			$result['limit'] = (int) $request['limit'] ?? 20;
-    }
+		}
+		if (isset($request['limit'])) {
+			$result['limit'] = (int) $request['limit'];
+		}
+		$result['page'] = (int)($request['page'] ?? 1);
 
-    $result['page'] = (int) ($request['page'] ?? 1);
-
-    // Sort order
-    if (isset($request['sort']) && isset($this->sortOrders[strtolower((string) $request['sort'])])) {
-			$result['sort'] = strtolower((string)$request['sort']);
-    }
-    if (isset($request['order']) && in_array(strtoupper((string) $request['order']), ['ASC', 'DESC'])) {
+		// Sort order
+		if (isset($request['sort']) && isset($this->sortOrders[strtolower((string) $request['sort'])])) {
+			$result['sort'] = strtolower((string) $request['sort']);
+		}
+		if (isset($request['order']) && in_array(strtoupper((string) $request['order']), ['ASC', 'DESC'])) {
 			$result['order'] = strtoupper((string) $request['order']);
-    }
+		}
 
-    // Route-specific params applied last, but don't override user-set sort
-    if (isset($request['route']) && isset($routeToParams[$request['route']])) {
-			$routeDefaults = $routeToParams[$request['route']];
-			foreach ($routeDefaults as $key => $value) {
-				// Only if sort isn't selected by user explicitly
-				if (!isset($result[$key])) {
-					$result[$key] = $value;
+		// Route-specific params are built dynamically from facetTypes
+		if (isset($request['route'])) {
+			foreach ($this->facetTypes as $facetType => $facet) {
+
+				if ($facet['route'] !== $request['route']) continue;
+
+				// Boolean facets-routes is_featured, has_discount, latest, bestseller, top_rated
+				// These do not need precise facet_value_id, just it's presence
+				// Thus we can set facet_value_id=1 if $request['route'] matches $facet['route'] and $facet['isBool'] = true
+				// And if facet_value_id is not set explicitly
+				if ($facet['isBool'] && !isset($result[$facet['facetType']])) {
+					$result[$facet['facetType']] = 1;
 				}
-			}
-    }
 
-    return array_filter($result, fn($v) => $v !== '' && $v !== null);
+				// Default route sort if not set explicitly
+				if (!isset($result['sort']) && $facet['sort']) {
+					$result['sort'] = $facet['sort'];
+				}
+
+				break; 
+			}
+		}
+
+		return array_filter($result, fn($v) => $v !== '' && $v !== null);
 	}
 
 	public function updateViewed($product_id) {
