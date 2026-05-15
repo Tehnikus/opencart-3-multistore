@@ -688,7 +688,7 @@ class ModelCatalogProduct extends Model {
 	 */
 	public function getProducts(array $data = [], $withTotal = false) {
     $data         = array_filter($data, fn($v) => $v !== '' && $v !== null);
-    $store_id     = (int)$this->config->get('config_store_id');
+    $store_id     = (int) $this->config->get('config_store_id');
 		$facets 		  = $this->buildFacetExpression($data);
 		$ctes 			  = $this->buildCteExpression($data);  // CTE expressions for fulltext search and/or facets
 		$searchExpression = $this->buildMatchExpression($data);
@@ -794,7 +794,7 @@ class ModelCatalogProduct extends Model {
     $products = [];
 
     foreach ($rows as $row) {
-			$products[] = $this->getProduct((int)$row['product_id']);
+			$products[] = $this->getProduct((int) $row['product_id']);
     }
 
     // Return total if withTotal flag is true
@@ -858,7 +858,7 @@ class ModelCatalogProduct extends Model {
 					// Separate category_id case because we have $request['path'] which also stands for category
 					if ($facet['facetType'] === 'category_id' && !$base_facet_value_id) {
 						$path                = $this->request->get['category_id'] ?? $this->request->get['path'] ?? '';
-						$parts               = explode('_', (string)$path);
+						$parts               = explode('_', (string) $path);
 						$base_facet_value_id = (int)end($parts) ?: null;
 					}
 				}
@@ -1330,10 +1330,10 @@ class ModelCatalogProduct extends Model {
 	}
 
 	public function getProductLayoutId($product_id) {
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_layout WHERE product_id = '" . (int)$product_id . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "'");
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_layout WHERE product_id = '" . (int) $product_id . "' AND store_id = '" . (int) $this->config->get('config_store_id') . "'");
 
 		if ($query->num_rows) {
-			return (int)$query->row['layout_id'];
+			return (int) $query->row['layout_id'];
 		} else {
 			return 0;
 		}
@@ -1353,13 +1353,13 @@ class ModelCatalogProduct extends Model {
 	}
 
 	public function getProfile($product_id, $recurring_id) {
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "recurring r JOIN " . DB_PREFIX . "product_recurring pr ON (pr.recurring_id = r.recurring_id AND pr.product_id = '" . (int)$product_id . "') WHERE pr.recurring_id = '" . (int)$recurring_id . "' AND status = '1' AND pr.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'");
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "recurring r JOIN " . DB_PREFIX . "product_recurring pr ON (pr.recurring_id = r.recurring_id AND pr.product_id = '" . (int) $product_id . "') WHERE pr.recurring_id = '" . (int) $recurring_id . "' AND status = '1' AND pr.customer_group_id = '" . (int) $this->config->get('config_customer_group_id') . "'");
 
 		return $query->row;
 	}
 
 	public function getProfiles($product_id) {
-		$query = $this->db->query("SELECT rd.* FROM " . DB_PREFIX . "product_recurring pr JOIN " . DB_PREFIX . "recurring_description rd ON (rd.language_id = " . (int)$this->config->get('config_language_id') . " AND rd.recurring_id = pr.recurring_id) JOIN " . DB_PREFIX . "recurring r ON r.recurring_id = rd.recurring_id WHERE pr.product_id = " . (int)$product_id . " AND status = '1' AND pr.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "' ORDER BY sort_order ASC");
+		$query = $this->db->query("SELECT rd.* FROM " . DB_PREFIX . "product_recurring pr JOIN " . DB_PREFIX . "recurring_description rd ON (rd.language_id = " . (int) $this->config->get('config_language_id') . " AND rd.recurring_id = pr.recurring_id) JOIN " . DB_PREFIX . "recurring r ON r.recurring_id = rd.recurring_id WHERE pr.product_id = " . (int) $product_id . " AND status = '1' AND pr.customer_group_id = '" . (int) $this->config->get('config_customer_group_id') . "' ORDER BY sort_order ASC");
 
 		return $query->rows;
 	}
