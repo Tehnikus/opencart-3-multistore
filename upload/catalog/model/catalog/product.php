@@ -812,6 +812,7 @@ class ModelCatalogProduct extends Model {
 	public function getFilters($data = []) {
 		$store_id    				 	= (int) $this->config->get('config_store_id');
 		$language_id 				 	= (int) $this->config->get('config_language_id');
+		$route 								= $this->request->get['route'] ?? '';
 		$conditions 				 	= [];
 		$base_facet_type     	= null; // Page type, category = 1, manufacturer = 5, has_discount = 9, is_featured = 10
 		$base_facet_value_id 	= null; // Page id if applicable, i.e. category_id. If not applicable then 0 
@@ -840,12 +841,7 @@ class ModelCatalogProduct extends Model {
 			$selected_conditions = !empty($facetExpression) ? $facetExpression : "0";
 
 		} else {
-
 			// Get base facet dynamically from $facetTypes
-			$route               = $this->request->get['route'] ?? '';
-			$base_facet_type     = null;
-			$base_facet_value_id = null;
-
 			foreach ($this->facetTypes as $typeId => $facet) {
 				if ($facet['route'] !== $route) continue;
 
@@ -1141,7 +1137,8 @@ class ModelCatalogProduct extends Model {
 		$facets = [];
 		$query = $this->db->query($sql);
 		foreach ($query->rows as $row) {
-			$row['facet_type'] = $this->facetTypes[$row['facet_type']]['facetType'];
+			$row['facet_type_id'] = $row['facet_type'];
+			$row['facet_type'] 		= $this->facetTypes[$row['facet_type']]['facetType'];
 			$facets[] = $row;
 		}
 
@@ -1389,39 +1386,5 @@ class ModelCatalogProduct extends Model {
 		$query = $this->db->query("SELECT rd.* FROM " . DB_PREFIX . "product_recurring pr JOIN " . DB_PREFIX . "recurring_description rd ON (rd.language_id = " . (int) $this->config->get('config_language_id') . " AND rd.recurring_id = pr.recurring_id) JOIN " . DB_PREFIX . "recurring r ON r.recurring_id = rd.recurring_id WHERE pr.product_id = " . (int) $product_id . " AND status = '1' AND pr.customer_group_id = '" . (int) $this->config->get('config_customer_group_id') . "' ORDER BY sort_order ASC");
 
 		return $query->rows;
-	}
-
-	
-	/**
-	 * Determine if facet list can be cached:
-	 * - only base facets that have 'route' key
-	 * - only singe facet
-	 * - no other requests
-	 * @param array $data
-	 * @return bool
-	 */
-	private function isFiltersCacheable($facetTypes, $data = null) : bool {
-    // Don't cache if search is present
-    if ($data === null || empty($data) || !empty($data['filter_name']) || !empty($data['search'])) {
-			return false;
-    }
-
-    // 
-    $activeFacets = 0;
-    $hasRouteFacet = false;
-
-    foreach ($facetTypes as $typeId => $facet) {
-			if (empty($data[$facet['facetType']])) continue;
-
-			$activeFacets++;
-
-			// If this facet has route
-			if ($facet['route']) {
-				$hasRouteFacet = true;
-			}
-    }
-
-    // Cache only if current facet has route and only single facet is set
-    return $hasRouteFacet && $activeFacets === 1;
 	}
 }
