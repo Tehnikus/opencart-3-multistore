@@ -1364,4 +1364,38 @@ class ModelCatalogProduct extends Model {
 
 		return $query->rows;
 	}
+
+	
+	/**
+	 * Determine if facet list can be cached:
+	 * - only base facets that have 'route' key
+	 * - only singe facet
+	 * - no other requests
+	 * @param array $data
+	 * @return bool
+	 */
+	private function isFiltersCacheable($facetTypes, $data = null) : bool {
+    // Don't cache if search is present
+    if ($data === null || empty($data) || !empty($data['filter_name']) || !empty($data['search'])) {
+			return false;
+    }
+
+    // 
+    $activeFacets = 0;
+    $hasRouteFacet = false;
+
+    foreach ($facetTypes as $typeId => $facet) {
+			if (empty($data[$facet['facetType']])) continue;
+
+			$activeFacets++;
+
+			// If this facet has route
+			if ($facet['route']) {
+				$hasRouteFacet = true;
+			}
+    }
+
+    // Cache only if current facet has route and only single facet is set
+    return $hasRouteFacet && $activeFacets === 1;
+	}
 }
