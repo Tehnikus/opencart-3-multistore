@@ -191,6 +191,7 @@ class FastFile
       @unlink($file);
     }
     $this->cleanupEmptyDirs($this->baseDir);
+    self::$createdDirs = [];
   }
 
   // Helper methods //
