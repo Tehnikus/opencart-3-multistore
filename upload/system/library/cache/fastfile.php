@@ -289,4 +289,29 @@ class FastFile
       @rmdir($dir);
     }
   }
+
+  /**
+ * Delete all cache files matching key prefix
+ * Works by deleting the directory corresponding to the prefix
+ * Key parts must be separated by dots: "facets.0.1.1.5"
+ */
+  public function deleteByPrefix(string $prefix): void {
+    $san  = preg_replace('/[^A-Z0-9\._-]/i', '', $prefix);
+    $parts = array_filter(explode('.', $san), fn($p) => $p !== '' && $p !== '.' && $p !== '..');
+
+    $dir = rtrim($this->baseDir, DIRECTORY_SEPARATOR);
+    foreach ($parts as $part) {
+      $dir .= DIRECTORY_SEPARATOR . $part;
+    }
+
+    if (is_dir($dir)) {
+      $this->removeDir($dir);
+      // Убираем из pathCache все ключи с этим префиксом
+      foreach (array_keys(self::$pathCache) as $k) {
+        if (str_starts_with($k, $prefix)) {
+          unset(self::$pathCache[$k]);
+        }
+      }
+    }
+  }
 }
