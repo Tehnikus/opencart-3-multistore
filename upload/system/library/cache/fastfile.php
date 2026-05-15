@@ -160,7 +160,6 @@ class FastFile
         @unlink($path);
       }
     }
-    $this->removeDir($path);
   }
 
   /**
