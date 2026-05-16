@@ -63,6 +63,10 @@ class ModelCatalogCategory extends Model {
 		";
 
 		$data = $this->db->query($sql)->row;
+		
+		// Safely return if category does not exist
+		if (empty(array_filter($data))) {return false;}
+
 		$data['seo_keywords'] = json_decode($data['seo_keywords'] ?? '[]', true);
 		$data['faq'] 					= json_decode($data['faq'] ?? '[]', true);
 		$data['how_to'] 			= json_decode($data['how_to'] ?? '[]', true);
