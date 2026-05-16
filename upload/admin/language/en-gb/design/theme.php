@@ -1,6 +1,6 @@
 <?php
 // Heading
-$_['heading_title']     = 'Theme Editor';
+$_['heading_title']     = 'Template Editor';
 
 // Text
 $_['text_success']      = 'Success: You have modified themes!';
@@ -9,7 +9,7 @@ $_['text_store']        = 'Choose your store';
 $_['text_template']     = 'Choose a template';
 $_['text_default']      = 'Default';
 $_['text_history']      = 'Theme History';
-$_['text_twig']         = 'The theme editor uses the template language Twig. You can read about <a href="https://twig.symfony.com/doc/" target="_blank" class="alert-link">Twig syntax here</a>.';
+$_['text_twig']         = 'The template editor uses the template language Twig. You can read about <a href="https://twig.symfony.com/doc/" target="_blank" class="alert-link">Twig syntax here</a>.';
 
 // Column
 $_['column_store']      = 'Store';
@@ -19,5 +19,5 @@ $_['column_date_added'] = 'Date Added';
 $_['column_action']     = 'Action';
 
 // Error
-$_['error_permission']  = 'Warning: You do not have permission to modify the theme editor!';
+$_['error_permission']  = 'Warning: You do not have permission to modify the template editor!';
 $_['error_twig']        = 'Warning: You can only save .twig files!';
