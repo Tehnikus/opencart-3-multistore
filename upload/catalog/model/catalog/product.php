@@ -1151,6 +1151,102 @@ class ModelCatalogProduct extends Model {
 		return $facets;
 	}
 
+	
+	/**
+	 * Get SEO filter page by facet combination
+	 * @param array $request - GET request
+	 * @return array|bool
+	 */
+	public function getFilterPage($request) : array|bool {
+		$facets 				 = $this->getFacetTypes();
+		$facetTypes 		 = array_column($facets, 'facetType');
+		$facetRequest 	 = $this->prepareGetProductsRequest($request);
+		$facetExpression = $this->buildFacetExpression($facetRequest);
+		$facetMatches 	 = array_intersect($facetTypes, array_keys($facetRequest));
+		$language_id 		 = (int) $this->config->get('config_language_id');
+		$store_id 			 = (int) $this->config->get('config_store_id');
+		
+		// Return false if only one facet is applied
+		if (count($facetMatches) <= 1) {
+			return false;
+		}
+
+		$sql = "
+			SELECT 
+				filter_page_id
+			FROM " . DB_PREFIX . "seo_filter_page_facet_index
+			WHERE 1 AND {$facetExpression}
+				AND store_id = {$store_id}
+			GROUP BY filter_page_id
+			
+			HAVING COUNT(*) = " . count($facetMatches) . "
+				AND  COUNT(*) = (
+					SELECT 
+						COUNT(*) 
+					FROM " . DB_PREFIX . "seo_filter_page_facet_index fi2 
+					WHERE fi2.filter_page_id = " . DB_PREFIX . "seo_filter_page_facet_index.filter_page_id
+				)
+			ORDER BY NULL
+			LIMIT 1
+		";
+		$filterPageId = $this->db->query($sql)->row;
+
+		// Return false if no pages found
+		if (empty($filterPageId)) {
+			return false;
+		}
+
+		// Get filter page data
+		$sql = "
+			SELECT
+				sd.`filter_page_id`,
+				sd.`language_id`,
+				sd.`store_id`,
+				sd.`name`,
+				sd.`h1`,
+				sd.`meta_title`,
+				sd.`meta_description`,
+				sd.`meta_keyword`,
+				sd.`description`,
+				sd.`seo_keywords`,
+				sd.`seo_description`,
+				sd.`faq`,
+				sd.`how_to`,
+				sd.`footer`,
+				sd.`date_modified`,
+				JSON_ARRAYAGG(
+					JSON_OBJECT(
+						'image', 				pi.`image`,
+						'sort_order', 	pi.`sort_order`,
+						'description', 	pid.`description`
+					)
+				) AS images
+			FROM " . DB_PREFIX . "seo_filter_page_description sd
+			LEFT JOIN " . DB_PREFIX . "seo_filter_page_image pi
+				ON  pi.`filter_page_id` = sd.`filter_page_id`
+				AND pi.`store_id` 	 		= sd.`store_id`
+			LEFT JOIN " . DB_PREFIX . "seo_filter_page_image_description pid
+				ON  pid.`image_id` 			= pi.`image_id`
+				AND pid.`language_id` 	= sd.`language_id`
+				AND pid.`store_id` 			= sd.`store_id`
+			WHERE sd.`filter_page_id` = {$filterPageId['filter_page_id']}
+				AND sd.`language_id` 	  = {$language_id}
+				AND sd.`store_id` 		  = {$store_id}
+		";
+
+		$filterPageData = $this->db->query($sql)->row;
+
+		$filterPageData['seo_keywords'] = json_decode($data['seo_keywords'] ?? '[]', true);
+		$filterPageData['faq'] 					= json_decode($data['faq'] ?? '[]', true);
+		$filterPageData['how_to'] 			= json_decode($data['how_to'] ?? '[]', true);
+		$filterPageData['footer'] 			= json_decode($data['footer'] ?? '[]', true);
+		$filterPageData['images']				= json_decode($data['images'] ?? '[]', true);
+
+		echo '<pre>' . htmlspecialchars(print_r($filterPageData, true)) . '</pre>';
+
+		return $filterPageData;
+	}
+
 	/**
 	 * Count total products
 	 * This method is left for separate calls, otherwise total products can be obtained in single request like this:
