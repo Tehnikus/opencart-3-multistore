@@ -1,6 +1,6 @@
 <?php
 class ModelCatalogCategory extends Model {
-	public function getCategory($category_id) : array {
+	public function getCategory($category_id) : array|bool {
 		$category_id 	= (int) $category_id;
 		$language_id 	= (int) $this->config->get('config_language_id');
 		$store_id 		= (int) $this->config->get('config_store_id');
