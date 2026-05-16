@@ -6,7 +6,7 @@ $_['header_product']                = 'Products';
 $_['header_manufacturer']           = 'Manufacturers';
 $_['header_article']                = 'Articles';
 $_['header_tag']                    = 'Blog tags';
-$_['header_filter_page']            = 'Landing pages';
+$_['header_filter_page']            = 'Filter pages';
 $_['header_formaulas']              = 'Generation formulas';
 $_['column_formulas']               = 'Formulas';
 

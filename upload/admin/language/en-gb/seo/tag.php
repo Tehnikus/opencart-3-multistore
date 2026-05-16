@@ -2,7 +2,7 @@
 $_['heading_title']             = 'Seo tags';
 $_['text_no_results']           = 'No results';
 $_['text_confirm']              = 'This will delete selected seo tags! Are you sure?';
-$_['text_seo_tags_info']        = 'Here you can create tags to group unrelated products together. To use tags as SEO pages, create a "tag+category" combination in the "<b>SEO/Landing Pages</b>" section.';
+$_['text_seo_tags_info']        = 'Here you can create tags to group unrelated products together. To use tags as SEO pages, create a "tag+category" combination in the "<b>Catalog/Filter Pages</b>" section.';
 $_['text_show_as_flag']         = 'Show as product flag on product miniatures and product pages';
 $_['text_show_as_facet']        = 'Show as filter item in <b>Facet filter</b> block. Select products related to this tag to show them in filtering results. Be sure to fill SEO URL field so URLs are built correctly. Be sure that you have set <b>Show tags</b> in Facet filter settings for selected categories or globally for all categories';
 $_['text_inline_style']         = 'Add inline CSS styles here that will be outputted in <b>style="...your styles..."</b> in frontend';

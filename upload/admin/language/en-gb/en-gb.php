@@ -269,7 +269,7 @@ $_['e_request_not_unique']          = 'A page with this request already exists. 
 
 // Left column menu
 $_['text_seo']                      = 'SEO';
-$_['text_seo_pages']                = 'Landing pages';
+$_['text_seo_pages']                = 'Filter pages';
 $_['text_meta_editor']              = 'Meta editor';
 $_['text_seo_tags']                 = 'Tags';
 $_['text_seo_keywords']             = 'Keywords';
@@ -278,6 +278,7 @@ $_['text_seo_url']                  = 'SEO URLs';
 $_['text_seo_url_setting']          = 'SEO URLs settings';
 $_['text_facet_filter']             = 'Filter settings';
 $_['text_seo_robots_editor']        = 'Edit robots.txt';
+$_['text_theme_settings']           = 'Theme settings';
 // Blog
 $_['text_blog']                     = 'Blog';
 $_['text_blog_articles']            = 'Articles';
