@@ -1242,8 +1242,6 @@ class ModelCatalogProduct extends Model {
 		$filterPageData['footer'] 			= json_decode($data['footer'] ?? '[]', true);
 		$filterPageData['images']				= json_decode($data['images'] ?? '[]', true);
 
-		echo '<pre>' . htmlspecialchars(print_r($filterPageData, true)) . '</pre>';
-
 		return $filterPageData;
 	}
 
