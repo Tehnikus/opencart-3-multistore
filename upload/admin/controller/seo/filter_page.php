@@ -320,15 +320,14 @@ class ControllerSeoFilterPage extends Controller {
         $currentUrl = trim(mb_strtolower($currentUrl));
         if (!$currentUrl) continue;
 
-        $pageRequest = $this->model_design_seo_url->buildQuery(
-          $this->request->post['filter_page_facet'] ?? []
-        );
+        $pageQuery = $this->model_design_seo_url->buildQuery($this->request->post['filter_page_facet'] ?? []);
+        $currentQuery = $this->request->post['filter_page_description'][$langId]['query'];
 
         $isUrlExists = $this->model_design_seo_url->checkUrlDuplicate($currentUrl, $langId, $storeId);
         // $isRequestExists = $this->model_design_seo_url->checkRequestDuplicate($pageRequest, $langId, $storeId);
 
         foreach ($isUrlExists ?? [] as $row) {
-          if ($row['query'] !== $pageRequest) {
+          if ($row['query'] !== $pageQuery && $row['query'] !== html_entity_decode($currentQuery)) {
             $this->error['error_url_not_unique'][$langId] = $this->language->get('e_url_not_unique');
             break;
           }
