@@ -4,31 +4,6 @@ class ModelDesignSeoUrl extends Model {
 	public $requestOrder = [];
 	public function __construct($registry) {
 		parent::__construct($registry);
-		$this->requestOrder = [
-			// Catalog
-			'category_id',
-			'tag',
-			'product_id',
-			'filter',
-			'option',
-			'attribute',
-			'manufacturer_id',
-			'tag_id',
-			'supplier_id',
-			'is_available',
-			'has_discount',
-			'is_featured',
-			// BLog
-			'tag',
-			'article',
-			// Common
-			'sort',
-			'page',
-		];
-	}
-
-	public function getRequestOrder() : array {
-		return $this->requestOrder;
 	}
 
 	public function addSeoUrl($data) {
@@ -208,71 +183,44 @@ class ModelDesignSeoUrl extends Model {
 		return $result;
 	}
 
-	  /**
+	/**
    * Build canonical query for filter page
    * Sorts filter page request params in the same order, avoiding query dublicates
    * @param array $facets POST data from filter_page_form
    * @return string sorted query
    */
-  public function buildQuery(array $facets = []) : string {
+	public function buildQuery(array $facets = []): string {
+		$this->load->model('catalog/facet');
+		$facetTypes  = $this->model_catalog_facet->getFacetTypes();
+		$resultArray = [];
 
-    $this->load->model('catalog/facet');
-    $this->load->model('design/seo_url');
-    // Load allowed orders
-    $facetTypes   = $this->model_catalog_facet->getFacetTypes(); // name => type
-    $requestOrder = $this->model_design_seo_url->getRequestOrder();
+		
+		foreach ($facetTypes as $facetTypeId => $facetConfig) {
 
-    // Flip type => name
-    $typeToName = array_flip($facetTypes);
+			// Skip facet type if it does not exist in data
+			if (!isset($facets[$facetTypeId])) continue;
 
-    // Get values
-    $grouped = [];
+			$facetType = $facetConfig['facetType'];
+			$values    = [];
 
-    foreach ($facets as $facetType => $groups) {
-      $facetType = (int)$facetType;
+			foreach ($facets[$facetTypeId] as $facetValues) {
+				foreach ($facetValues as $facetValue) {
+					$values[] = $facetValue;
+				}
+			}
 
-      if (!isset($typeToName[$facetType])) {
-        continue;
-      }
+			if (empty($values)) continue;
 
-      $name = $typeToName[$facetType];
+			// Unique and sort facet value ids
+			$values = array_unique($values);
+			sort($values, SORT_NUMERIC);
 
-      foreach ($groups as $groupId => $values) {
-        foreach ($values as $valueId) {
-          $grouped[$name][] = (int)$valueId;
-        }
-      }
-    }
+			$resultArray[$facetType] = implode(',', $values);
+		}
 
-    // Unique and sort values
-    foreach ($grouped as $name => $values) {
-      $values = array_unique($values);
-      sort($values, SORT_NUMERIC);
-      $grouped[$name] = $values;
-    }
+		// Create query, decode commas
+		$result = urldecode(http_build_query($resultArray));
+		return $result;
+	}
 
-    // Order by requestOrder
-    $ordered = [];
-
-    foreach ($requestOrder as $key) {
-      if (isset($grouped[$key])) {
-        $ordered[$key] = $grouped[$key];
-        unset($grouped[$key]);
-      }
-    }
-
-    // In case if some new facet_types are added that are not in requestOrder add those queries to the end
-    foreach ($grouped as $key => $values) {
-      $ordered[$key] = $values;
-    }
-
-    // Assemble query
-    $parts = [];
-
-    foreach ($ordered as $key => $values) {
-      $parts[] = $key . '=' . implode(',', $values);
-    }
-
-    return implode('&', $parts);
-  }
 }
