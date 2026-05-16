@@ -174,7 +174,7 @@ class ControllerCommonColumnLeft extends Controller {
 
 			if ($blog) {
 				$data['menus'][] = array(
-					'id'       => 'menu-design',
+					'id'       => 'menu-blog',
 					'icon'	   => 'fa-newspaper-o',
 					'name'	   => $this->language->get('text_blog'),
 					'href'     => '',
@@ -245,13 +245,13 @@ class ControllerCommonColumnLeft extends Controller {
 			// Extension
 			$marketplace = array();
 
-			if ($this->user->hasPermission('access', 'marketplace/marketplace')) {
-				$marketplace[] = array(
-					'name'	   => $this->language->get('text_marketplace'),
-					'href'     => $this->url->link('marketplace/marketplace', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
+			// if ($this->user->hasPermission('access', 'marketplace/marketplace')) {
+			// 	$marketplace[] = array(
+			// 		'name'	   => $this->language->get('text_marketplace'),
+			// 		'href'     => $this->url->link('marketplace/marketplace', 'user_token=' . $this->session->data['user_token'], true),
+			// 		'children' => array()
+			// 	);
+			// }
 
 			if ($this->user->hasPermission('access', 'marketplace/installer')) {
 				$marketplace[] = array(
@@ -297,6 +297,14 @@ class ControllerCommonColumnLeft extends Controller {
 
 			// Design
 			$design = array();
+
+			if ($this->config->get('config_theme') && $this->user->hasPermission('access', 'extension/theme/' . $this->config->get('config_theme'))) {
+				$design[] = array(
+					'name'	   => $this->language->get('text_theme_settings'),
+					'href'     => $this->url->link('extension/theme/' . $this->config->get('config_theme'), 'user_token=' . $this->session->data['user_token'] . '&store_id=' . (int) $this->session->data['store_id'], true),
+					'children' => array()
+				);
+			}
 
 			if ($this->user->hasPermission('access', 'design/layout')) {
 				$design[] = array(
