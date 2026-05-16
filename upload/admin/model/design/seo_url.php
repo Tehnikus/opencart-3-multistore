@@ -194,7 +194,6 @@ class ModelDesignSeoUrl extends Model {
 		$facetTypes  = $this->model_catalog_facet->getFacetTypes();
 		$resultArray = [];
 
-		
 		foreach ($facetTypes as $facetTypeId => $facetConfig) {
 
 			// Skip facet type if it does not exist in data
