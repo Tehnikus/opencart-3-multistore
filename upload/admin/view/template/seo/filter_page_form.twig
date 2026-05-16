@@ -20,6 +20,9 @@
       </div>
       <div class="panel-body">
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-filter-page" class="form-horizontal">
+          {% for language in languages %}
+            <input hidden name="filter_page_description[{{ language.language_id }}][query]" value="{{ filter_page_description[language.language_id].query }}" />
+          {% endfor %}
           <ul class="nav nav-tabs">
             <li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a></li>
             <li><a href="#tab-description"  data-toggle="tab">{{ tab_description }}</a></li>
