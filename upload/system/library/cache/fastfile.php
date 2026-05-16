@@ -97,6 +97,9 @@ class FastFile
    * Delete previous file if present
    */
   public function set(string $key, $data, int $expire = 0) : bool {
+    if (is_array($data) && empty($data)) {
+      return false;
+    }
     $expire = $expire === 0 ? $this->expire : (int) $expire;
     $format = is_array($data) ? 'json' : 'txt';
 
