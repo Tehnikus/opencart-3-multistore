@@ -117,10 +117,9 @@ class ModelCatalogProduct extends Model {
 		if (isset($request['start'])) {
 			$result['start'] = (int) $request['start'];
 		}
-		if (isset($request['limit'])) {
-			$result['limit'] = (int) $request['limit'];
-		}
-		$result['page'] = (int)($request['page'] ?? 1);
+
+		$result['limit'] = (int) ($this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit') ?? 20);
+		$result['page']  = (int) ($request['page'] ?? 1);
 
 		// Sort order
 		if (isset($request['sort']) && isset($this->sortOrders[strtolower((string) $request['sort'])])) {
@@ -696,8 +695,8 @@ class ModelCatalogProduct extends Model {
 		$hasSearch 	  = !empty($searchExpression);
     $hasFacets 	  = !empty($facets);
 		$hasShowAll		= !empty($data['show_all']);
-		$start 				= max(0, (int)($data['start'] ?? 0));
-    $limit 				= max(1, (int)($data['limit'] ?? 20));
+    $limit 				= max(1, (int) ($data['limit'] ?? 20));
+		$offset 			= max(0, ((int) $data['page'] - 1) * (int) $data['limit']);
 
 		// Safely return
 		if (!$hasSearch && !$hasFacets && !$hasShowAll) {
@@ -788,7 +787,7 @@ class ModelCatalogProduct extends Model {
 			GROUP BY {$groupBy}
 			{$having}
 			ORDER BY {$order}
-			LIMIT {$limit} OFFSET {$start}
+			LIMIT {$limit} OFFSET {$offset}
 		";
 
     $rows     = $this->db->query($sql)->rows;
