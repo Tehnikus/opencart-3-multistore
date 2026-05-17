@@ -181,6 +181,47 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /**
+ * Check URL duplpicates by URL, store_id and language_id
+ * @param   {Element}   input SEO URL input
+ * @param   {Function}  callback Function to highlight input or do seomething else
+ * @returns {Array} of duplicate URLs
+ */
+async function checkUrlDuplicates(input) {
+  if (input.disabled) return;
+
+  try {
+    input.closest('.input-group').parentElement.querySelector('.duplicateUrlError')?.remove();
+    const keyword = input.value?.trim();
+    if (!keyword) return;
+    // input.classList.toggle('alert-danger', !keyword);
+
+    const storeId    = input.dataset.storeId || '';
+    const languageId = input.dataset.languageId || '';
+    const request    = input.dataset.request || '';
+
+    // Concat fetch URL
+    let url = `/admin/index.php?route=design/seo_url/fetchCheckUrlDuplicate&user_token=${userToken}`;
+    const body = new FormData();
+    body.append('storeId', storeId);
+    body.append('languageId', languageId);
+    body.append('url', keyword);
+    body.append('request', request);
+
+    const result = await fetch(url, {method: "POST", body}).then(r => r.json());
+    console.log('checkUrlDuplicates: ', result);
+
+    if (Object.keys(result.response.duplicateCheck).length) {
+      let errorHtml = `<div class="text-danger duplicateUrlError">${result.errorMessage}</div>`;
+      input.closest('.input-group')?.parentElement.insertAdjacentHTML('beforeend', errorHtml);
+    }
+    input.closest('.input-group')?.classList.toggle('has-error', Object.keys(result.response.duplicateCheck).length)
+
+  } catch (e) {
+    console.error('checkUrlDuplicates():', e);
+  }
+}
+
+/**
  * Add cloned row to target table
  * Used to add rows in tables like: tab_image_list.twig, tab_faq_list.twig, tab_how_to_list.twig, tab_footer_list.twig, filter_form.twig, meta_editor_list.twig and more
  * @param {Element} button Button in tfoot of table, where rows should be cloned
