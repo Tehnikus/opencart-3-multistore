@@ -92,6 +92,7 @@ class ControllerBlogTag extends Controller {
     $formData['blog_tag']             = $this->model_blog_tag->getBlogTag($blog_tag_id);
     $formData['blog_tag_description'] = $this->model_blog_tag->getTagDescription($blog_tag_id);
     $formData['seo_url']              = $this->model_blog_tag->getSeoUrl($blog_tag_id);
+    $formData['seo_url_request']      = isset($this->request->get['blog_tag_id']) ? "blog_tag_id=" . $this->request->get['blog_tag_id'] : "";
     $formData['blog_tag_images']      = $this->model_blog_tag->getImages($blog_tag_id);
     // Replace actual data with POST data
     if ($this->request->server['REQUEST_METHOD'] == 'POST') {
