@@ -195,26 +195,27 @@ async function checkUrlDuplicates(input) {
     if (!keyword) return;
     // input.classList.toggle('alert-danger', !keyword);
 
-    const storeId    = input.dataset.storeId || '';
     const languageId = input.dataset.languageId || '';
     const request    = input.dataset.request || '';
 
     // Concat fetch URL
     let url = `/admin/index.php?route=design/seo_url/fetchCheckUrlDuplicate&user_token=${userToken}`;
     const body = new FormData();
-    body.append('storeId', storeId);
     body.append('languageId', languageId);
     body.append('url', keyword);
     body.append('request', request);
 
     const result = await fetch(url, {method: "POST", body}).then(r => r.json());
     console.log('checkUrlDuplicates: ', result);
+    let hasError = !!Object.keys(result.response.duplicateCheck).length;
 
-    if (Object.keys(result.response.duplicateCheck).length) {
+    if (hasError) {
       let errorHtml = `<div class="text-danger duplicateUrlError">${result.errorMessage}</div>`;
       input.closest('.input-group')?.parentElement.insertAdjacentHTML('beforeend', errorHtml);
     }
-    input.closest('.input-group')?.classList.toggle('has-error', Object.keys(result.response.duplicateCheck).length)
+    input.closest('.input-group')?.classList.toggle('has-error', hasError)
+    input.classList.toggle('alert-success', !hasError)
+    input.classList.toggle('alert-danger', hasError)
 
   } catch (e) {
     console.error('checkUrlDuplicates():', e);
