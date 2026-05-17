@@ -150,7 +150,15 @@
                       <span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
                       {% include "common/button_create_seo_url.twig" with {seo_url_input: 'option_value[' ~ option_value_row ~ '][option_value_description][' ~ language.language_id ~ '][url]' } %}
                       <input type="text" name="option_value[{{ option_value_row }}][option_value_description][{{ language.language_id }}][name]" value="{{ option_value.option_value_description[language.language_id] ? option_value.option_value_description[language.language_id].name }}" placeholder="{{ entry_option_value }}" class="form-control" />
-                      <input type="text" name="option_value[{{ option_value_row }}][option_value_description][{{ language.language_id }}][url]" value="{{ option_value.option_value_description[language.language_id] ? option_value.option_value_description[language.language_id].url }}" placeholder="{{ entry_keyword }}" class="form-control" />
+                      <input 
+                        type="text" 
+                        name="option_value[{{ option_value_row }}][option_value_description][{{ language.language_id }}][url]" 
+                        value="{{ option_value.option_value_description[language.language_id] ? option_value.option_value_description[language.language_id].url }}" 
+                        placeholder="{{ entry_keyword }}" class="form-control" 
+                        data-language-id="{{ language.language_id }}" 
+                        data-request="{{ option_value.option_value_description[language.language_id].seo_url_request }}" 
+                        onfocusout="checkUrlDuplicates(this)"
+                      />
                     </div>
                     {% if error_option_value[option_value_row][language.language_id] %}
                       <div class="text-danger">{{ error_option_value[option_value_row][language.language_id] }}</div>
@@ -230,12 +238,17 @@ function addOptionValue() {
           name="option_value[${option_value_row}][option_value_description][${language.language_id}][name]" 
           value="" 
           placeholder="{{ entry_option_value }}" 
-          class="form-control" />
+          class="form-control" 
+        />
         <input type="text" 
           name="option_value[${option_value_row}][option_value_description][${language.language_id}][url]" 
           value="" 
           placeholder="{{ entry_keyword }}" 
-          class="form-control" />
+          class="form-control" 
+          data-language-id="${language.language_id}" 
+          data-request="" 
+          onfocusout="checkUrlDuplicates(this)"
+        />
       </div>
     `;
   }

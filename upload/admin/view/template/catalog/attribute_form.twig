@@ -44,6 +44,9 @@
                     value="{{ attribute_description[language.language_id].url }}" 
                     placeholder="{{ entry_keyword }}" 
                     class="form-control"
+                    data-language-id="{{ language.language_id }}"
+                    data-request="{{ seo_url_request }}"
+                    onfocusout="checkUrlDuplicates(this)"
                   />
 
                 </div>
