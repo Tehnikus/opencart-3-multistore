@@ -607,10 +607,11 @@ class ModelCatalogFilter extends Model {
 					AND fd.store_id 	= '" . $this->session->data['store_id'] . "'
 			");
 
-			foreach ($filter_description_query->rows as $filter_description) {
-				$filter_description_data[$filter_description['language_id']] = [
-					'name' => $filter_description['name'],
-					'url'  => $filter_description['url']
+			foreach ($filter_description_query->rows as $row) {
+				$filter_description_data[$row['language_id']] = [
+					'name' => $row['name'],
+					'url'  => $row['url'],
+					'seo_url_request' => 'filter=' . $row['filter_id']
 				];
 			}
 
