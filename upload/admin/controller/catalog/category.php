@@ -492,6 +492,9 @@ class ControllerCatalogCategory extends Controller {
 			$data['seo_url'] = array();
 		}
 
+		// Page request to check url duplicates with async JS, see helpers.js->checkUrlDuplicates()
+		$data['seo_url_request'] = isset($this->request->get['category_id']) ? "category_id=" . $this->request->get['category_id'] : "";
+
 		if (isset($this->request->post['category_layout'])) {
 			$data['category_layout'] = $this->request->post['category_layout'];
 		} elseif (isset($this->request->get['category_id'])) {

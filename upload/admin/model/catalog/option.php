@@ -606,10 +606,11 @@ class ModelCatalogOption extends Model {
 					AND ovd.store_id 				= '" . (int) $this->session->data['store_id']. "'
 			");
 
-			foreach ($option_value_description_query->rows as $option_value_description) {
-				$option_value_description_data[$option_value_description['language_id']] = [
-					'name' => $option_value_description['name'],
-					'url' => $option_value_description['url'],
+			foreach ($option_value_description_query->rows as $row) {
+				$option_value_description_data[$row['language_id']] = [
+					'name' => $row['name'],
+					'url' => $row['url'],
+					'seo_url_request' => 'option=' . $row['option_value_id']
 				];
 			}
 

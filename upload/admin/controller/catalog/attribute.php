@@ -366,6 +366,10 @@ class ControllerCatalogAttribute extends Controller {
 		$data['stores_association'] = $this->request->post['stores_association'] ?? $this->model_catalog_attribute->getStoresAssociation($this->request->get['attribute_id'] ?? null) ?? [];
 		// End store association
 
+		// Page request to check url duplicates with async JS, see helpers.js->checkUrlDuplicates()
+		$data['seo_url_request'] = isset($this->request->get['attribute_id']) ? "attribute_id=" . $this->request->get['attribute_id'] : "";
+
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');

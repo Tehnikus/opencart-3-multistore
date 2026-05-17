@@ -374,6 +374,10 @@ class ControllerCatalogManufacturer extends Controller {
 			$data['seo_url'] = array();
 		}
 
+		// Page request to check url duplicates with async JS, see helpers.js->checkUrlDuplicates()
+		$data['seo_url_request'] = isset($this->request->get['manufacturer_id']) ? "manufacturer_id=" . $this->request->get['manufacturer_id'] : "";
+
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
