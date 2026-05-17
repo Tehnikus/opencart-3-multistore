@@ -15,9 +15,10 @@ class Document {
 	private $description;
 	private $keywords;
 
-	private $links = array();
-	private $styles = array();
-	private $scripts = array();
+	private $links 		= [];
+	private $styles 	= [];
+	private $scripts 	= [];
+	private $jsonLd  	= [];
 
 	/**
      * 
@@ -121,7 +122,7 @@ class Document {
 		if (isset($this->styles[$position])) {
 			return $this->styles[$position];
 		} else {
-			return array();
+			return [];
 		}
 	}
 
@@ -146,7 +147,17 @@ class Document {
 		if (isset($this->scripts[$position])) {
 			return $this->scripts[$position];
 		} else {
-			return array();
+			return [];
 		}
+	}
+
+	/**
+	 * Set document JSON-LD microdata
+	 * @param string $type
+	 * @param array $data
+	 * @return void
+	 */
+	public function setJson(string $type, array $data = []): void {
+		$this->jsonLd[$type] = json_encode($data);
 	}
 }
