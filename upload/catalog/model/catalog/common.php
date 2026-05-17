@@ -1,5 +1,11 @@
 <?php
 class ModelCatalogCommon extends Model {
+
+  /**
+   * Render common data
+   * @param mixed $total
+   * @return array
+   */
   public function prepageCommonData($total = null) : array {
     $data = [];
     $this->addDocumentLinks($total);
@@ -21,6 +27,11 @@ class ModelCatalogCommon extends Model {
     return $data;
   }
 
+  /**
+   * render pagination
+   * @param mixed $total
+   * @return array<string|text>
+   */
   public function preparePagination($total = null) : array {
     if ($total === null) return [];
     $data               = [];
