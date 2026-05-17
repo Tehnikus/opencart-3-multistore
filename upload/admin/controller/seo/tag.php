@@ -94,10 +94,11 @@ class ControllerSeoTag extends Controller {
     $formData       = [];
     $seo_tag_id = $this->request->get['seo_tag_id'] ?? null;
     $this->load->model('seo/tag');
-    $formData['tag'] = $this->model_seo_tag->getTagData($seo_tag_id);
+    $formData['tag']                  = $this->model_seo_tag->getTagData($seo_tag_id);
     $formData['seo_tag_description']  = $this->model_seo_tag->getTagDescription($seo_tag_id);
-    $formData['seo_url'] = $this->model_seo_tag->getSeoUrl($seo_tag_id);
-    $formData['product_tags'] = $this->model_seo_tag->getProductTags($seo_tag_id);
+    $formData['seo_url']              = $this->model_seo_tag->getSeoUrl($seo_tag_id);
+    $formData['seo_url_request']      = isset($this->request->get['seo_tag_id']) ? "tag_id=" . $this->request->get['seo_tag_id'] : "";
+    $formData['product_tags']         = $this->model_seo_tag->getProductTags($seo_tag_id);
     
     // Replace actual data with POST data
     if ($this->request->server['REQUEST_METHOD'] == 'POST') {
