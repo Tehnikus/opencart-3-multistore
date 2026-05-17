@@ -548,4 +548,27 @@ class ControllerDesignSeoUrl extends Controller {
 
 		return !$this->error;
 	}
+
+	public function fetchCheckUrlDuplicate() : void {
+		$this->load->model('design/seo_url');
+		$url 						= $this->request->post['url'];
+		$request 				= $this->request->post['request'];
+		$languageId 		= $this->request->post['languageId'];
+		$storeId 				= (int) $this->session->data['store_id'];
+		$urlChecks  		= $this->model_design_seo_url->checkUrlDuplicate($url, $languageId, $storeId); // Get requests by URL
+		$requestChecks  = $this->model_design_seo_url->checkRequestDuplicate($request, $languageId, $storeId); // Get URLs by requsts
+
+		$json = [
+			'request' => [$url, $request, $languageId, $storeId],
+			'response' => [
+				'urlChecks' 		 => $urlChecks,
+				'requestChecks'  => $requestChecks,
+				'duplicateCheck' => array_diff_key($urlChecks, $requestChecks)
+			],
+			'errorMessage' => $this->language->get('e_url_not_unique')
+		];
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
 }
