@@ -106,4 +106,27 @@ class ModelCatalogCommon extends Model {
     $this->document->setDescription($data['meta_description'] ?? $data['meta_title'] ?? $shortDesciption);
     $this->document->setKeywords($data['meta_keyword']);
   }
+
+  /**
+   * Add JSON-LD Microdata
+   * @param mixed $data
+   * @return void
+   */
+  public function addDocumentJsonLd($data = []) : void {
+    $this->document->setJson('faq',             $data['faq']);
+    $this->document->setJson('howTo',           $data['how_to']);
+    $this->document->setJson('image',           $data['image']);
+    $this->document->setJson('images',          $data['images']);
+    $this->document->setJson('product',         $data['product']);
+    $this->document->setJson('products',        $data['products']);
+    $this->document->setJson('review',          $data['review']);
+    $this->document->setJson('aggregateRating', $data['aggregateRating']);
+    $this->document->setJson('productGroup',    $data['aggregateRating']);
+    $this->document->setJson('Organization',    $data['Organization']);
+    $this->document->setJson('LocalBusiness',   $data['LocalBusiness']);
+    $this->document->setJson('Article',         $data['Article']);
+    $this->document->setJson('BreadcrumbList',  $data['BreadcrumbList']);
+    $this->document->setJson('ItemList',        $data['ItemList']);
+  }
+
 }
