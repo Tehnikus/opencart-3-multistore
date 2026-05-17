@@ -57,7 +57,7 @@
               createSeoUrl(this.closest('.input-group').querySelector('input').value, this.closest('.input-group').querySelector('input').dataset.languageCode), 
               document.querySelector('[name=&quot;seo_url[{{ language.language_id }}]&quot;]'),
               false,
-              () => checkUrlDuplicates(document.querySelector('[name=&quot;seo_url[{{ language.language_id }}]&quot;]'), addInputErrorMessages)
+              () => checkUrlDuplicates(document.querySelector('[name=&quot;seo_url[{{ language.language_id }}]&quot;]'))
             )"
           />
           </div>
@@ -78,7 +78,7 @@
               onclick="
                 let input = this.closest('.input-group').querySelector('input'); 
                 if (input.value && !input.value.endsWith(input.dataset.textPostfix)) {input.value += input.dataset.textPostfix}
-                () => checkUrlDuplicates(document.querySelector('[name=&quot;seo_url[{{ language.language_id }}]&quot;]'), addInputErrorMessages)
+                () => checkUrlDuplicates(document.querySelector('[name=&quot;seo_url[{{ language.language_id }}]&quot;]'))
                 "
             >+{{ language.code|split('-')[0] }}</span>
             <input 
@@ -91,7 +91,7 @@
               data-language-id="{{ language.language_id }}"
               data-request="{{ seo_url_request }}"
               id="input-seo_url_{{ language.language_id }}"
-              onfocusout="checkUrlDuplicates(document.querySelector('[name=&quot;seo_url[{{ language.language_id }}]&quot;]'), addInputErrorMessages)"
+              onfocusout="checkUrlDuplicates(document.querySelector('[name=&quot;seo_url[{{ language.language_id }}]&quot;]'))"
             />
           </div>
           {% if error_seo_url[language.language_id] %}
