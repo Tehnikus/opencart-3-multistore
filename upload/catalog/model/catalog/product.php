@@ -608,8 +608,20 @@ class ModelCatalogProduct extends Model {
 			];
 		}
 
-		$rating 			= ($this->config->get('config_review_status')) ? round((float) $productData['rating'], 1) : false;
-		$description  = mb_substr(trim(strip_tags(html_entity_decode($productData['description'], ENT_QUOTES, 'UTF-8'))), 0, $descLength, 'UTF-8');
+		$rating = ($this->config->get('config_review_status')) ? round((float) $productData['rating'], 1) : false;
+
+		$shortDesciption = '';
+		$description = strip_tags($productData['description']);
+		if (mb_strlen($description) > $descLength) {
+			$description = explode('.', $description);
+			$sentenceCount = 0;
+			while (mb_strlen($shortDesciption) < $descLength) {
+				$shortDesciption .= $description[$sentenceCount] . ". ";
+				$sentenceCount ++;
+			}
+		} else {
+			$shortDesciption = $description;
+		}
 		
 		// Prices
 		$price = ($this->customer->isLogged() || !$this->config->get('config_customer_price')) ? $this->currency->format($this->tax->calculate($productData['price'], $productData['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']) : false;
