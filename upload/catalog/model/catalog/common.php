@@ -105,12 +105,18 @@ class ModelCatalogCommon extends Model {
    */
   public function addDocumentSeo($data = []) {
     $shortDesciption = '';
-    $description = explode('.', strip_tags($data['description']));
-    $sentenceCount = 0;
-    while (mb_strlen($shortDesciption) < 255) {
-      $shortDesciption .= $description[$sentenceCount] . ". ";
-      $sentenceCount ++;
-    }
+		$description = strip_tags($data['description']);
+		if (mb_strlen($description) > 255) {
+			$description = explode('.', $description);
+			$sentenceCount = 0;
+			while (mb_strlen($shortDesciption) < 255) {
+				$shortDesciption .= $description[$sentenceCount] . ". ";
+				$sentenceCount ++;
+			}
+		} else {
+			$shortDesciption = $description;
+		}
+
     $this->document->setTitle($data['meta_title'] ?? $data['h1'] ?? $data['name']);
     $this->document->setDescription($data['meta_description'] ?? $data['meta_title'] ?? $shortDesciption);
     $this->document->setKeywords($data['meta_keyword']);
