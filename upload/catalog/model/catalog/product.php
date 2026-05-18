@@ -593,7 +593,7 @@ class ModelCatalogProduct extends Model {
 			
 		// Images
 		$thumb = [];
-		$additionalThumbs = [];
+		$additionalImages = [];
 		$mainImage 		= $productData['image'] ?? 'no_image.webp';
 		$thumb = [
 			'image' => $this->model_tool_image->resize($mainImage, $imageWidth, $imageHeight),
@@ -601,7 +601,7 @@ class ModelCatalogProduct extends Model {
 		];
 		foreach ($productData['images'] ?? [] as $img) {
 			$additionalThumb = $img['image'] ?? 'no_image.webp';
-			$additionalThumbs[] = [
+			$additionalImages[] = [
 				'image' 		=> $this->model_tool_image->resize($additionalThumb, $imageWidth, $imageHeight),
 				'title' 		=> $img['description'],
 				'sortOrder' => $img['sort_order'],
@@ -652,15 +652,16 @@ class ModelCatalogProduct extends Model {
 			'product_id'  			=> $productData['product_id'],
 			// Images
 			'image'       			=> $thumb,
-			'additional_thumbs' => $additionalThumbs,
-			'image_width'  			=> $imageWidth,
-			'image_height' 			=> $imageHeight,
+			'additionalImages'  => $additionalImages,
+			'imageWidth'  			=> $imageWidth,
+			'imageHeight' 			=> $imageHeight,
 			// Descriptions
 			'name'        			=> $productData['name'],
 			'model'							=> $productData['model'],
 			'location'					=> $productData['location'],
 			'quantity'					=> $productData['quantity'],
-			'description' 			=> $description,
+			'shortDescription' 	=> $shortDesciption,
+			'description'				=> $productData['description'],
 			'meta_title'				=> $productData['meta_title'],
 			'meta_description'	=> $productData['meta_description'],
 			'manufacturer' 			=> $productData['manufacturer'],
@@ -686,7 +687,9 @@ class ModelCatalogProduct extends Model {
 			'rating'      			=> $rating,
 			'reviews'						=> $productData['reviews'],
 			// URL
-			'href'        			=> $this->url->link('product/product', 'product_id=' . $productData['product_id'])
+			'href'        			=> $this->url->link('product/product', 'product_id=' . $productData['product_id']),
+			// Cache version
+			'cache_date'	 			=> strtotime($productData['date_modified']),
 		);
 
 		return $product;
