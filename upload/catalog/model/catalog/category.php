@@ -67,11 +67,45 @@ class ModelCatalogCategory extends Model {
 		// Safely return if category does not exist
 		if (empty(array_filter($data))) {return false;}
 
-		$data['seo_keywords'] = json_decode($data['seo_keywords'] ?? '[]', true);
-		$data['faq'] 					= json_decode($data['faq'] ?? '[]', true);
-		$data['how_to'] 			= json_decode($data['how_to'] ?? '[]', true);
-		$data['footer'] 			= json_decode($data['footer'] ?? '[]', true);
-		$data['images']				= json_decode($data['images'] ?? '[]', true);
+		$this->load->model('tool/image');
+		$imageWidth 	= (int) ($this->config->get('theme_' . $this->config->get('config_theme') . '_image_category_width') ?? 250);
+		$imageHeight 	= (int) ($this->config->get('theme_' . $this->config->get('config_theme') . '_image_category_height') ?? 250);
+
+		$data['cache_date'] 			= strtotime($data['date_modified']); // Cache version
+		$data['seo_keywords'] 		= json_decode($data['seo_keywords'] ?? '[]', true);
+		$data['faq'] 							= json_decode($data['faq'] ?? '[]', true);
+		$data['how_to'] 					= json_decode($data['how_to'] ?? '[]', true);
+		$data['footer'] 					= json_decode($data['footer'] ?? '[]', true);
+		$data['images']						= json_decode($data['images'] ?? '[]', true);
+		$data['description']			= html_entity_decode($data['description'], ENT_QUOTES, 'UTF-8');
+		$data['image'] 						= $this->model_tool_image->resize($data['image'] ?? 'no_image.webp', $imageWidth, $imageHeight);
+		$data['imageWidth']				= $imageWidth;
+		$data['imageHeight']			= $imageHeight;
+		$data['child_categories']	= $this->getCategories($category_id);
+
+		foreach ($data['child_categories'] as $key => $child_category) {
+			$data['child_categories'][$key]['image'] = $this->model_tool_image->resize($child_category['image'] ?? 'no_image.webp', $imageWidth, $imageHeight);
+			$data['child_categories'][$key]['href']  = $this->url->link('product/category', 'path=' . $child_category['category_id']);
+			// Set cache version to max date among child categories
+			if (strtotime($child_category['date_modified']) > $data['cache_date']) {
+				$data['cache_date'] = strtotime($child_category['date_modified']);
+			}
+		}
+
+		foreach ($data['images'] as $key => $image) {
+			$data['images'][$key]['image'] = $this->model_tool_image->resize($image['image'] ?? 'no_image.webp', $imageWidth, $imageHeight);
+		}
+
+		$data['breadcrumbs'] = [];
+		$data['breadcrumbs'][] = [
+			'text' => $this->language->get('text_home'),
+			'href' => $this->url->link('common/home'),
+    ];
+		$data['breadcrumbs'][] = [
+			'text' => $data['name'],
+			'href' => $this->url->link('product/category', 'path=' . $data['category_id']),
+		];
+
     usort(array: $data['images'], callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
 
 		$this->cache->set($categoryCacheName, $data);
