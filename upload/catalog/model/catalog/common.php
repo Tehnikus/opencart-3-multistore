@@ -30,19 +30,28 @@ class ModelCatalogCommon extends Model {
   /**
    * render pagination
    * @param mixed $total
-   * @return array<string|text>
+   * @return array
    */
-  public function preparePagination($total = null) : array {
+  public function preparePagination($allowedRequestParams = [], $total = null) : array {
     if ($total === null) return [];
+    $requestParams      = [];
     $data               = [];
     $route              = $this->request->get['route'];
     $page               = (int) ($this->request->get['page'] ?? 1);
     $limit              = (int) ($this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit') ?? 20);
+
+    foreach ($allowedRequestParams as $param) {
+      if (isset($this->request->get[$param])) {
+        $requestParams[$param] = $this->request->get[$param];
+      }
+    }
+    $requestParams['page'] = '{page}';
+
     $pagination         = new Pagination();
 		$pagination->total  = $total;
 		$pagination->page   = $page;
 		$pagination->limit  = $limit;
-		$pagination->url    = $this->url->link($route, '&page={page}');
+		$pagination->url    = $this->url->link($route, urldecode(http_build_query($requestParams)));
 		$pagination         = $pagination->render();
 
 		$results = sprintf(
