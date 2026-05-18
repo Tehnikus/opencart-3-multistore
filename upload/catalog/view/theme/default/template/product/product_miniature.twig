@@ -17,9 +17,26 @@
       <span class="h3"><a title="{{ product.name }}" href="{{ product.href }}">{{ product.name }}</a></span>
       <p class="short-description">{{ product.description }}</p>
       {% if product.attributes %}{{ product.attributes }}{% endif %}
-      {% if product.rating %}
-        {% include 'helium/template/common/rating_stars.twig' with {rating: product.rating, count: product.reviews} %}
-      {% endif %} 
+        {% if product.rating and product.rating > 0 %}
+          <div aria-label="{{ aria_rating_label }} {{ product.rating }}{% if product.reviews is defined and product.reviews > 0 %}, {{ aria_review_count_label }} {{ product.reviews }}{% endif %}" title="{{ aria_rating_label }} {{ product.rating }}{% if product.reviews is defined and product.reviews > 0 %}, {{ aria_review_count_label }} {{ product.reviews }}{% endif %}">
+            <div class="rating" role="presentation">
+              {% for i in 1..5 %}
+                {% if product.rating >= i %}
+                  <i class="icon-star"></i>
+                {% else %}
+                  {%if product.rating -  i < 0 %}
+                    <i class="icon-star-half"></i>
+                  {% else %}
+                    <i class="icon-star-empty"></i>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+              {% if count is defined and product.reviews > 0 %}
+                <span class="reviews-count">({{ product.reviews }})</span>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
       {% if product.price_value and product.price_value != 0 %}
         <p class="prices h3">
           {% if not product.special %}
