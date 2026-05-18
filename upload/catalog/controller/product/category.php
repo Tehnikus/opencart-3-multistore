@@ -67,17 +67,28 @@ class ControllerProductCategory extends Controller {
 	 * @return array
 	 */
 	private function getDescriptions() : array|bool {
-		// Get SEO filter page. If exists, use description data from there, othewise use category description  
-		$path        	= $this->request->get['path'] ?? '';
+		// Get SEO filter page. If exists, use description data from there, othewise use category description
+		$getRequest 	= $this->request->get;
+		$path        	= $getRequest['path'] ?? '';
 		$parts       	= explode('_', (string) $path);
 		$category_id 	= (int) end($parts) ?: null;
 		$data 				= $this->model_catalog_category->getCategory($category_id);
+
+		// Return if category not exists
 		if (!$data || empty($data)) {
 			return false;
 		}
-		$filterPage 	= $this->model_catalog_product->getFilterPage($this->request->get);
+
+		// Get filter page
+		$filterPage = $this->model_catalog_product->getFilterPage($getRequest);
 		if ($filterPage && !empty($filterPage)) {
 			$data = array_merge($data, $filterPage);
+		}
+
+		// Remove SEO description on all pages except canonical - without pages and sort order
+		if ((isset($getRequest['page']) && $getRequest['page'] !== 1) || (isset($getRequest['sort']) && $getRequest['sort'] !== 'sort_order')) {
+			$data['description'] = '';
+			$data['seoDescription'] = '';
 		}
 
 		// Set H1 fallback
