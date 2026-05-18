@@ -1201,11 +1201,18 @@ class ModelCatalogProduct extends Model {
 			ORDER BY NULL
 			LIMIT 1
 		";
-		$filterPageId = $this->db->query($sql)->row;
+		$filterPageId = $this->db->query($sql)->row['filter_page_id'] ?? false;
 
 		// Return false if no pages found
-		if (empty($filterPageId)) {
+		if (!$filterPageId) {
 			return false;
+		}
+
+		// Cache
+		$cacheName 	= "filter_page.store_{$store_id}.language_{$language_id}." . (floor($filterPageId / 100)) . "00.filter_page__{$filterPageId}";
+		$cachedData = $this->cache->get($cacheName);
+		if ($cachedData) {
+			return $cachedData;
 		}
 
 		// Get filter page data
@@ -1241,20 +1248,23 @@ class ModelCatalogProduct extends Model {
 				ON  pid.`image_id` 			= pi.`image_id`
 				AND pid.`language_id` 	= sd.`language_id`
 				AND pid.`store_id` 			= sd.`store_id`
-			WHERE sd.`filter_page_id` = {$filterPageId['filter_page_id']}
+			WHERE sd.`filter_page_id` = {$filterPageId}
 				AND sd.`language_id` 	  = {$language_id}
 				AND sd.`store_id` 		  = {$store_id}
 		";
 
-		$filterPageData = $this->db->query($sql)->row;
+		$data = $this->db->query($sql)->row;
 
-		$filterPageData['seo_keywords'] = json_decode($data['seo_keywords'] ?? '[]', true);
-		$filterPageData['faq'] 					= json_decode($data['faq'] ?? '[]', true);
-		$filterPageData['how_to'] 			= json_decode($data['how_to'] ?? '[]', true);
-		$filterPageData['footer'] 			= json_decode($data['footer'] ?? '[]', true);
-		$filterPageData['images']				= json_decode($data['images'] ?? '[]', true);
+		$data['seoKeywords']  = json_decode($data['seo_keywords'] ?? '[]', true);
+		$data['faq'] 					= json_decode($data['faq'] ?? '[]', true);
+		$data['howTo'] 				= json_decode($data['how_to'] ?? '[]', true);
+		$data['footer'] 			= json_decode($data['footer'] ?? '[]', true);
+		$data['images']				= json_decode($data['images'] ?? '[]', true);
+		$data['description']	= html_entity_decode($data['description'], ENT_QUOTES, 'UTF-8');
 
-		return $filterPageData;
+		$this->cache->set($cacheName, $data);
+
+		return $data;
 	}
 
 	/**
