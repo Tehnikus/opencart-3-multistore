@@ -587,22 +587,22 @@ class ModelCatalogProduct extends Model {
 		$this->load->model('tool/image');
 		$product 			= [];
 		$theme        = $this->config->get('config_theme');
-		$thumbWidth   = $this->config->get("theme_{$theme}_image_product_width");
-		$thumbHeight  = $this->config->get("theme_{$theme}_image_product_height");
-		$descLength   = $this->config->get("theme_{$theme}_product_description_length");
+		$imageWidth   = (int) ($this->config->get("theme_{$theme}_image_product_width") ?? 500);
+		$imageHeight  = (int) ($this->config->get("theme_{$theme}_image_product_height") ?? 500);
+		$descLength   = (int) ($this->config->get("theme_{$theme}_product_description_length") ?? 255);
 			
 		// Images
 		$thumb = [];
 		$additionalThumbs = [];
 		$mainImage 		= $productData['image'] ?? 'no_image.webp';
 		$thumb = [
-			'image' => $this->model_tool_image->resize($mainImage, $thumbWidth, $thumbHeight),
+			'image' => $this->model_tool_image->resize($mainImage, $imageWidth, $imageHeight),
 			'title' => $productData['name'],
 		];
 		foreach ($productData['images'] ?? [] as $img) {
 			$additionalThumb = $img['image'] ?? 'no_image.webp';
 			$additionalThumbs[] = [
-				'image' 		=> $this->model_tool_image->resize($additionalThumb, $thumbWidth, $thumbHeight),
+				'image' 		=> $this->model_tool_image->resize($additionalThumb, $imageWidth, $imageHeight),
 				'title' 		=> $img['description'],
 				'sortOrder' => $img['sort_order'],
 			];
@@ -651,10 +651,10 @@ class ModelCatalogProduct extends Model {
 		$product = array(
 			'product_id'  			=> $productData['product_id'],
 			// Images
-			'thumb'       			=> $thumb,
+			'image'       			=> $thumb,
 			'additional_thumbs' => $additionalThumbs,
-			'thumb_width'  			=> $thumbWidth,
-			'thumb_height' 			=> $thumbHeight,
+			'image_width'  			=> $imageWidth,
+			'image_height' 			=> $imageHeight,
 			// Descriptions
 			'name'        			=> $productData['name'],
 			'model'							=> $productData['model'],
