@@ -172,6 +172,11 @@ $_['entry_facet_bestseller_count']  = 'Bestseller count';
 $_['entry_facet_top_rated_count']   = 'Top rated count';
 $_['entry_facet_latest_days_count'] = 'Days product consedered new';
 $_['entry_facet_min_reviews_count'] = 'Best rated min reviews count';
+$_['entry_developer_cache_categories']  = 'Cache categories';
+$_['entry_developer_cache_products']    = 'Cache products';
+$_['entry_developer_cache_facet_pages'] = 'Cache filter pages';
+$_['entry_developer_cache_facet_list']  = 'Cache filter list';
+$_['entry_developer_theme']             = 'Theme template cache';
 
 // Tab general lang description => tab_gescription.twig
 $_['entry_h1']                      = 'H1 tag';
