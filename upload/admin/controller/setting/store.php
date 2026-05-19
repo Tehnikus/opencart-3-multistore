@@ -665,7 +665,10 @@ class ControllerSettingStore extends Controller {
 		$data['footer'] = $this->load->controller('common/footer');
 
 		$data['languages_association'] = $this->request->post['languages_association'] ?? $this->model_setting_store->getLanguagesAssociation($this->request->get['store_id'] ?? null) ?? [];
-
+		$data['config_facet_bestseller_count'] 	= $this->request->post['config_facet_bestseller_count']  	?? (int) ($store_info['config_facet_bestseller_count'] ?? 10);
+		$data['config_facet_latest_days_count'] = $this->request->post['config_facet_latest_days_count'] 	?? (int) ($store_info['config_facet_latest_days_count'] ?? 100);
+		$data['config_facet_min_reviews_count'] = $this->request->post['config_facet_min_reviews_count'] 	?? (int) ($store_info['config_facet_min_reviews_count'] ?? 1);
+		$data['config_facet_top_rated_count'] 	= $this->request->post['config_facet_top_rated_count'] 	 	?? (int) ($store_info['config_facet_top_rated_count'] ?? 10);
 		$this->response->setOutput($this->load->view('setting/store_form', $data));
 	}
 
