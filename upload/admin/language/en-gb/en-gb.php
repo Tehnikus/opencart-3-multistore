@@ -144,6 +144,7 @@ $_['tab_activity']                  = 'Recent Activity';
 $_['tab_recurring']                 = 'Recurring';
 $_['tab_action']                    = 'Action';
 $_['tab_google']                    = 'Google';
+$_['tab_facets']                    = 'Dynamic facets';
 
 // Error
 $_['error_exception']               = 'Error Code(%s): %s in %s on line %s';
@@ -167,6 +168,10 @@ $_['entry_parent']                  = 'Main parent category';
 $_['entry_keyword']                 = 'URL';
 $_['entry_wholesale_price']         = 'Wholesale price';
 $_['entry_is_available']            = 'Availble for order';
+$_['entry_facet_bestseller_count']  = 'Bestseller count';
+$_['entry_facet_top_rated_count']   = 'Top rated count';
+$_['entry_facet_latest_days_count'] = 'Days product consedered new';
+$_['entry_facet_min_reviews_count'] = 'Best rated min reviews count';
 
 // Tab general lang description => tab_gescription.twig
 $_['entry_h1']                      = 'H1 tag';
