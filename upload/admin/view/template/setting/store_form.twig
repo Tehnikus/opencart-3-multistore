@@ -38,6 +38,7 @@
             <li><a href="#tab-image" data-toggle="tab">{{ tab_image }}</a></li>
             <li><a href="#tab-server" data-toggle="tab">{{ tab_server }}</a></li>
             <li><a href="#tab-language" data-toggle="tab">{{ tab_languages }}</a></li>
+            <li><a href="#tab-facet" data-toggle="tab">{{ tab_facets }}</a></li>
           </ul>
           <div class="tab-content">
             <div class="tab-pane active" id="tab-general">
@@ -621,7 +622,38 @@
                 </div>
               </div>
               {# End language association #}
-            </div>            
+            </div>
+
+            <div class="tab-pane" id="tab-facet">
+              <div class="form-group">
+                <label for="config_facet_bestseller_count" class="col-sm-2 control-label">{{ entry_facet_bestseller_count }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="config_facet_bestseller_count" value="{{ config_facet_bestseller_count }}" placeholder="{{ entry_facet_bestseller_count }}" id="config_facet_bestseller_count" class="form-control" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="config_facet_latest_days_count" class="col-sm-2 control-label">{{ entry_facet_latest_days_count }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="config_facet_latest_days_count" value="{{ config_facet_latest_days_count }}" placeholder="{{ entry_facet_latest_days_count }}" id="config_facet_latest_days_count" class="form-control" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="config_facet_min_reviews_count" class="col-sm-2 control-label">{{ entry_facet_min_reviews_count }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="config_facet_min_reviews_count" value="{{ config_facet_min_reviews_count }}" placeholder="{{ entry_facet_min_reviews_count }}" id="config_facet_min_reviews_count" class="form-control" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="config_facet_top_rated_count" class="col-sm-2 control-label">{{ entry_facet_top_rated_count }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="config_facet_top_rated_count" value="{{ config_facet_top_rated_count }}" placeholder="{{ entry_facet_top_rated_count }}" id="config_facet_top_rated_count" class="form-control" />
+                </div>
+              </div>
+
+            </div>   
           </div>
         </form>
       </div>
