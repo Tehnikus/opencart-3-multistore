@@ -936,7 +936,11 @@ class ControllerSettingSetting extends Controller {
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
 
-		$data['languages_association'] = $this->request->post['languages_association'] ?? $this->model_setting_store->getLanguagesAssociation($this->request->get['store_id'] ?? null) ?? [];
+		$data['languages_association'] 					= $this->request->post['languages_association'] 				 	?? $this->model_setting_store->getLanguagesAssociation($this->request->get['store_id'] ?? null) ?? [];
+		$data['config_facet_bestseller_count'] 	= $this->request->post['config_facet_bestseller_count']  	?? (int) $this->config->get('config_facet_bestseller_count');
+		$data['config_facet_latest_days_count'] = $this->request->post['config_facet_latest_days_count'] 	?? (int) $this->config->get('config_facet_latest_days_count');
+		$data['config_facet_min_reviews_count'] = $this->request->post['config_facet_min_reviews_count'] 	?? (int) $this->config->get('config_facet_min_reviews_count');
+		$data['config_facet_top_rated_count'] 	= $this->request->post['config_facet_top_rated_count'] 	 	?? (int) $this->config->get('config_facet_top_rated_count');
 
 
 		$this->response->setOutput($this->load->view('setting/setting', $data));
