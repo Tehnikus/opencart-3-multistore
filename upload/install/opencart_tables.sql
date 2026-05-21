@@ -2110,6 +2110,7 @@ DROP TABLE IF EXISTS `oc_facet_sort`;
 CREATE TABLE `oc_facet_sort` (
   `product_id`        INT NOT NULL,
   `store_id`          INT NOT NULL DEFAULT '0',
+  `category_id`       INT NOT NULL DEFAULT '0',
   `views`             INT NOT NULL DEFAULT '0',       -- Sort by views desc
   `orders`            INT NOT NULL DEFAULT '0',       -- Sort by sales desc
   `returns`           INT NOT NULL DEFAULT '0',       -- Sort by returns asc
@@ -2127,7 +2128,8 @@ CREATE TABLE `oc_facet_sort` (
   `date_last_order`   DATETIME DEFAULT NULL,        
   `date_last_review`  DATETIME DEFAULT NULL,
   `date_last_view`    DATETIME DEFAULT NULL,
-  PRIMARY KEY (`product_id`,`store_id`)
+  PRIMARY KEY (`product_id`,`store_id`),
+  KEY `getCategory` (`product_id`, `category_id`, `store_id`)
 ) ENGINE=InnoDB;
 
 
