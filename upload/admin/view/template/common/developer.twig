@@ -44,17 +44,40 @@
   </div>
 </div>
 <style>
-  label.btn-default.active:has(input[value="1"]) {
-    color: #fff;
-    background-color: #3c933c;
-    border-color: #2f722f;
-    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-  }
-  label.btn-default.active:has(input[value="0"]) {
-    color: #fff;
-    background-color: #d0321e;
-    border-color: #a82818;
-    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  .btn-switch {
+    & input {
+      display: none;
+    }
+    & label {
+      color: #666;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      white-space: nowrap;
+      padding: 8px 13px;
+      cursor: pointer;
+      &:first-child {
+        border-radius: 3px 0 0 3px;
+      }
+      &:last-child {
+        border-radius: 0 3px 3px 0;
+      }
+      &:not(:first-child) {
+        border-left: none;
+      }
+      &:has(input[value="1"]:checked) {
+        color: #fff;
+        background-color: #3c933c;
+        border-color: #2f722f;
+      }
+      &:has(input[value="0"]:checked) {
+        color: #fff;
+        background-color: #d0321e;
+        border-color: #a82818;
+      }
+      &:hover {
+        box-shadow: inset 0 0 6px #0003;
+      }
+    }
   }
 </style>
 <script>
