@@ -36,52 +36,60 @@ class ControllerCommonDeveloper extends Controller {
 		$this->response->setOutput($this->load->view('common/developer', $data));
 	}
 
-	public function edit() {
-		$this->load->language('common/developer');
-
-		$json = array();
+	public function fetchEditCacheSettings() {
+		$json = [];
 
 		if (!$this->user->hasPermission('modify', 'common/developer')) {
-			$json['error'] = $this->language->get('error_permission');
+			$json['error'] = $this->language->get('developer_error_permission');
 		} else {
 			$this->load->model('setting/setting');
 
-			$this->model_setting_setting->editSetting('developer', $this->request->post, (int) $this->session->data['store_id']);
+			$this->model_setting_setting->editSetting('cache', $this->request->post, (int) $this->session->data['store_id']);
+			$json['post'] = $this->request->post;
 
-			$json['success'] = $this->language->get('text_success');
+			$json['success'] = $this->language->get('developer_message_success');
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
 	}
 
-	public function theme() {
-		$this->load->language('common/developer');
+	public function fetchClearCache() : void {
+		$cacheTypeKey = $this->request->post['cacheType'] ?? '';
 
-		$json = array();
+		if (!$cacheTypeKey || !isset($this->cacheSettings[$cacheTypeKey])) {
+			$json['error'] = 'Invalid cache type';
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode($json));
+			return;
+		}
 
-		if (!$this->user->hasPermission('modify', 'common/developer')) {
-			$json['error'] = $this->language->get('error_permission');
-		} else {
-			$directories = glob(DIR_CACHE . '/template/*', GLOB_ONLYDIR);
+		$cacheType = $this->cacheSettings[$cacheTypeKey];
+		$json = [];
 
-			if ($directories) {
-				foreach ($directories as $directory) {
-					$files = glob($directory . '/*');
-
-					foreach ($files as $file) { 
-						if (is_file($file)) {
-							unlink($file);
-						}
-					}
-
-					if (is_dir($directory)) {
-						rmdir($directory);
-					}
-				}
+		// Fastfile
+		if ($this->config->get('cache_engine') === 'fastfile') {
+			$path = $cacheType['path'];
+			if (in_array($path, ['product', 'category', 'filter_page', 'filter', 'module', 'header', 'footer'])) {
+				$path = DIR_CACHE . 'cache/' . $path;
+			} elseif ($path === 'session') {
+				$path = DIR_SESSION;
+			} else {
+				$path = DIR_CACHE . $path;
 			}
 
-			$json['success'] = sprintf($this->language->get('text_cache'), $this->language->get('text_theme'));
+			$json['path'] = $path;
+
+			if ($this->clearDirectory($path)) {
+				$json['success'] = sprintf($this->language->get('developer_message_cleared'), $this->language->get('developer_setting_' . $cacheTypeKey));
+			} else {
+				$json['error'] =  $this->language->get('developer_error_chmod');
+			}
+		}
+
+		// Redis
+		if ($this->config->get('cache_engine') === 'redis') {
+			// Delete cache entries by prefixes
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
