@@ -214,24 +214,26 @@ class ModelCatalogProduct extends Model {
 		$language_id 				= (int) $this->config->get('config_language_id');
 		$store_id 					= (int) $this->config->get('config_store_id');
 		$customer_group_id 	= (int) $this->config->get('config_customer_group_id');
+		$cacheSetting 			= (bool) $this->config->get('cache_products');
 		
 		// Cache
-		$cacheName 	= "product.store_{$store_id}.language_{$language_id}." . (floor($product_id / 100)) . "00.product_{$product_id}";
-		$product 		= $this->cache->get($cacheName);
-		
-		if ($product) {
-			/**
-			 * Filter specials and discounts from cached data so cache shoul not invalidate if (current time > date end)
-			 * TODO use $this->getValidDiscount() here for clarity, as these are mostly the same functions
-			 */ 
-			// $now = date('Y-m-d H:i:s');
-			// Get valid discount float prices and dates in YYYY-MM-DD format
-			$product['discount'] 						= $this->getValidDiscount($product['discounts'], $customer_group_id)['price'] 	 ?? null;
-			$product['special'] 						= $this->getValidDiscount($product['specials'],  $customer_group_id)['price'] 	 ?? null;
-			$product['discount_date_end'] 	= $this->getValidDiscount($product['discounts'], $customer_group_id)['date_end'] ?? null;
-			$product['special_date_end'] 		= $this->getValidDiscount($product['specials'],  $customer_group_id)['date_end'] ?? null;
-
-			return $product;
+		if ($cacheSetting) {
+			$cacheName 	= "product.store_{$store_id}.language_{$language_id}." . (floor($product_id / 100)) . "00.product_{$product_id}";
+			$product 		= $this->cache->get($cacheName);
+			
+			if ($product) {
+				/**
+				 * Filter specials and discounts from cached data so cache shoul not invalidate if (current time > date end)
+				 */ 
+				// $now = date('Y-m-d H:i:s');
+				// Get valid discount float prices and dates in YYYY-MM-DD format
+				$product['discount'] 						= $this->getValidDiscount($product['discounts'], $customer_group_id)['price'] 	 ?? null;
+				$product['special'] 						= $this->getValidDiscount($product['specials'],  $customer_group_id)['price'] 	 ?? null;
+				$product['discount_date_end'] 	= $this->getValidDiscount($product['discounts'], $customer_group_id)['date_end'] ?? null;
+				$product['special_date_end'] 		= $this->getValidDiscount($product['specials'],  $customer_group_id)['date_end'] ?? null;
+	
+				return $product;
+			}
 		}
 
 		$sql = "
@@ -548,7 +550,9 @@ class ModelCatalogProduct extends Model {
 		);
 
 		// Set cache
-		$this->cache->set($cacheName, $product);
+		if ($cacheSetting) {
+			$this->cache->set($cacheName, $product);
+		}
 
 		// Filter specials and discounts - return arrays filtered by customer group id and now() date
 		// These arrays are used to show multiple discounts at once
