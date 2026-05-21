@@ -310,6 +310,27 @@ $_['option_on']                     = 'On';
 $_['option_off']                    = 'Off';
 $_['input_add_keyword_group']       = "Add new group";
 
+// Cache clear buttons in upload\admin\view\template\common\developer.twig
+$_['developer_setting_twig']        = 'Twig cache';
+$_['developer_setting_product']     = 'Products data';
+$_['developer_setting_category']    = 'Categories data';
+$_['developer_setting_filter_page'] = 'Filter pages';
+$_['developer_setting_filter']      = 'Filters list';
+$_['developer_setting_module']      = 'Modules';
+$_['developer_setting_header']      = 'Header';
+$_['developer_setting_footer']      = 'Footer';
+$_['developer_setting_all']         = 'All';
+$_['developer_setting_html']        = 'HTML static cache';
+$_['developer_setting_session']     = 'Session (needs relogin)';
+$_['entry_cache_settings']          = 'Cache settings';
+$_['entry_clear_cache']             = 'Clear cache';
+$_['entry_cache_type']              = 'Type';
+$_['developer_message_success']     = 'Cache settings are saved';
+$_['developer_message_cleared']     = 'Cache %s is cleared';
+$_['developer_error_permission']    = 'You have no permission to edit cache settings';
+$_['developer_error_chmod']         = 'Directory is not writeable, set CHMOD to 0777 or delete cache manually';
+
+
 /* When doing translations only include the matching language code */
 
 // Summernote
