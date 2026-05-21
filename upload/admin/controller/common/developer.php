@@ -1,14 +1,37 @@
 <?php
 class ControllerCommonDeveloper extends Controller {
+
+	private $cacheSettings = [];
+	public function __construct($registry) {
+		parent::__construct($registry);
+
+		$this->cacheSettings = [
+			'product' 		=> ['path' => 'product',			'config' => 'cache_products'],
+			'category' 		=> ['path' => 'category',			'config' => 'cache_categories'],
+			'filter_page' => ['path' => 'filter_page',	'config' => 'cache_filter_pages'],
+			'filter' 			=> ['path' => 'filter',				'config' => 'cache_filter_list'],
+			'module' 			=> ['path' => 'module',				'config' => 'cache_module'],
+			'header' 			=> ['path' => 'header',				'config' => 'cache_header'],
+			'footer' 			=> ['path' => 'footer',				'config' => 'cache_footer'],
+			'all' 				=> ['path' => 'cache'],
+			'twig' 				=> ['path' => 'template'],
+			'html'				=> ['path' => 'html'],
+			'session' 		=> ['path' => 'session'],
+		];
+	}
 	public function index() {
-		$this->load->language('common/developer');
 
 		$data['user_token'] = $this->session->data['user_token'];
 		
-		$cacheSettings = ['developer_theme', 'developer_cache_categories', 'developer_cache_products', 'developer_cache_facet_pages', 'developer_cache_facet_list'];
-		foreach ($cacheSettings as $key) {
-			$data['cacheSettings'][$key] = (int) $this->config->get($key);
+		foreach ($this->cacheSettings as $key => $value) {
+			$data['cacheSettings'][$key] = $value;
+			$data['cacheSettings'][$key]['name'] = $this->language->get('developer_setting_' . $key);
+			if (isset($value['config'])) {
+				$data['cacheSettings'][$key]['configValue'] = (int) $this->config->get($value['config']);
+			}
 		}
+
+		$data['cacheEngine'] = $this->config->get('cache_engine');
 
 		$this->response->setOutput($this->load->view('common/developer', $data));
 	}
