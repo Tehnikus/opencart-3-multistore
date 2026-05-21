@@ -633,6 +633,7 @@ Class ModelCatalogFacet extends Model {
       INSERT INTO " . DB_PREFIX . "facet_sort (
         `product_id`,
         `store_id`,
+        `category_id`,
         `orders`,
         `returns`,
         `sort_order`,
@@ -650,6 +651,7 @@ Class ModelCatalogFacet extends Model {
       SELECT
         src.`product_id`,
         src.`store_id`,
+        src.`category_id`,
         src.`orders`,
         src.`returns`,
         src.`sort_order`,
@@ -667,6 +669,7 @@ Class ModelCatalogFacet extends Model {
         SELECT
           p.`product_id`                  AS `product_id`,
           p2s.`store_id`                  AS `store_id`,
+          p2s.`parent_id`                 AS `category_id`,
           COALESCE(o.`orders`, 0)         AS `orders`,
           0                               AS `returns`,
           p2s.`sort_order`                AS `sort_order`,
