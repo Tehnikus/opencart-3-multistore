@@ -1184,6 +1184,7 @@ class ModelCatalogProduct extends Model {
 		$facetMatches 	 = array_intersect($facetTypes, array_keys($facetRequest));
 		$language_id 		 = (int) $this->config->get('config_language_id');
 		$store_id 			 = (int) $this->config->get('config_store_id');
+		$cacheSetting 	 = (bool) $this->config->get('cache_filter_pages');
 		
 		// Return false if only one facet is applied
 		if (count($facetMatches) <= 1) {
@@ -1216,10 +1217,12 @@ class ModelCatalogProduct extends Model {
 		}
 
 		// Cache
-		$cacheName 	= "filter_page.store_{$store_id}.language_{$language_id}." . (floor($filterPageId / 100)) . "00.filter_page__{$filterPageId}";
-		$cachedData = $this->cache->get($cacheName);
-		if ($cachedData) {
-			return $cachedData;
+		if ($cacheSetting) {
+			$cacheName 	= "filter_page.store_{$store_id}.language_{$language_id}." . (floor($filterPageId / 100)) . "00.filter_page_{$filterPageId}";
+			$cachedData = $this->cache->get($cacheName);
+			if ($cachedData) {
+				return $cachedData;
+			}
 		}
 
 		// Get filter page data
@@ -1269,7 +1272,9 @@ class ModelCatalogProduct extends Model {
 		$data['images']				= json_decode($data['images'] ?? '[]', true);
 		$data['description']	= html_entity_decode($data['description'], ENT_QUOTES, 'UTF-8');
 
-		$this->cache->set($cacheName, $data);
+		if ($cacheSetting) {
+			$this->cache->set($cacheName, $data);
+		}
 
 		return $data;
 	}
