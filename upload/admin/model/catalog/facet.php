@@ -674,7 +674,7 @@ Class ModelCatalogFacet extends Model {
           0                               AS `returns`,
           p2s.`sort_order`                AS `sort_order`,
           COALESCE(r.`review_count`, 0)   AS `review_count`,
-          COALESCE(r.`rating_avg`, 0)     AS `rating_avg`,
+          r.`rating_avg`                  AS `rating_avg`,
           r.`date_last_review`            AS `date_last_review`,
           p2s.`is_available`              AS `is_available`,
           p2s.`is_featured`               AS `is_featured`,
