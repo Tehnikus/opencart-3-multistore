@@ -839,6 +839,7 @@ class ModelCatalogProduct extends Model {
 		$hasSearch 						= !empty($searchExpression);
 		$isCacheable 					= false;
 		$cachedFacets 				= false;
+		$cacheSetting 				= (bool) $this->config->get('cache_filter_list');
 		// $hasFacets 						= !empty(array_intersect_key(array_filter($data), $this->facetTypes));
 
 		// Base products list
@@ -932,7 +933,7 @@ class ModelCatalogProduct extends Model {
 			$isCacheable = true;
 		}
 
-		if ($isCacheable) {
+		if ($isCacheable && $cacheSetting) {
 			$facetCacheName = $this->facetTypes[$base_facet_type]['facetType'];
 			$cacheName 			= "filter.store_{$store_id}.language_{$language_id}.{$facetCacheName}.{$base_facet_value_id}";
 			$cachedFacets = $this->cache->get($cacheName);
@@ -1161,7 +1162,7 @@ class ModelCatalogProduct extends Model {
 		}
 
 		// Cache
-		if ($isCacheable && !$cachedFacets) {
+		if ($isCacheable && !$cachedFacets && $cacheSetting) {
 			$cacheName = "filter.store_{$store_id}.language_{$language_id}.{$facetCacheName}.{$base_facet_value_id}";
 			$this->cache->set($cacheName, $facets);
 		}
