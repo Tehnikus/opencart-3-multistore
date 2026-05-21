@@ -2801,8 +2801,6 @@ INSERT INTO `oc_setting` (`store_id`, `code`, `key`, `value`, `serialized`) VALU
 (0, 'theme_default', 'theme_default_image_location_width', '268', 0),
 (0, 'theme_default', 'theme_default_directory', 'default', 0),
 (0, 'theme_default', 'theme_default_status', '1', 0),
-(0, 'developer', 'developer_theme', '1', 0),
-(0, 'developer', 'developer_sass', '1', 0),
 (0, 'total_sub_total', 'total_sub_total_status', '1', 0),
 (0, 'total_sub_total', 'total_sub_total_sort_order', '0', 0),
 (0, 'total_total', 'total_total_status', '1', 0),
