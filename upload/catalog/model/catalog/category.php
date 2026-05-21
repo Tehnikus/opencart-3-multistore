@@ -4,12 +4,15 @@ class ModelCatalogCategory extends Model {
 		$category_id 	= (int) $category_id;
 		$language_id 	= (int) $this->config->get('config_language_id');
 		$store_id 		= (int) $this->config->get('config_store_id');
+		$cacheSetting = (bool) $this->config->get('cache_categories');
 
 		// Cache
-		$categoryCacheName 	= "category.store_{$store_id}.language_{$language_id}." . (floor($category_id / 100)) . "00.category_{$category_id}";
-		$cachedData 				= $this->cache->get($categoryCacheName);
-		if ($cachedData) {
-			return $cachedData;
+		if ($cacheSetting) {
+			$cacheName 	= "category.store_{$store_id}.language_{$language_id}." . (floor($category_id / 100)) . "00.category_{$category_id}";
+			$cachedData = $this->cache->get($cacheName);
+			if ($cachedData) {
+				return $cachedData;
+			}
 		}
 
 		$sql = "
@@ -108,7 +111,9 @@ class ModelCatalogCategory extends Model {
 
     usort(array: $data['images'], callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
 
-		$this->cache->set($categoryCacheName, $data);
+		if ($cacheSetting) {
+			$this->cache->set($cacheName, $data);
+		}
 
 		return $data;
 	}
@@ -119,13 +124,16 @@ class ModelCatalogCategory extends Model {
 		$parent_id 		= (int) $parent_id;
 		$language_id 	= (int) $this->config->get('config_language_id');
 		$store_id 		= (int) $this->config->get('config_store_id');
+		$cacheSetting = (bool) $this->config->get('cache_categories');
 
 		// Cache
-		$childrenCacheName 	= "category.store_{$store_id}.language_{$language_id}." . (floor($parent_id / 100)) . "00.child_categories_{$parent_id}";
-		$cachedData 				= $this->cache->get($childrenCacheName);
-
-		if ($cachedData) {
-			return $cachedData;
+		if ($cacheSetting) {
+			$cacheName 	= "category.store_{$store_id}.language_{$language_id}." . (floor($parent_id / 100)) . "00.child_categories_{$parent_id}";
+			$cachedData = $this->cache->get($cacheName);
+	
+			if ($cachedData) {
+				return $cachedData;
+			}
 		}
 
 		$sql = "
@@ -157,8 +165,9 @@ class ModelCatalogCategory extends Model {
 		";
 
 		$query = $this->db->query($sql);
-
-		$this->cache->set($childrenCacheName, $query->rows);
+		if ($cacheSetting) {
+			$this->cache->set($cacheName, $query->rows);
+		}
 		
 		return $query->rows ?? [];
 	}
