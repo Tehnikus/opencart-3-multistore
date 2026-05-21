@@ -17,6 +17,7 @@ class ControllerCommonDeveloper extends Controller {
 			'twig' 				=> ['path' => 'template'],
 			'html'				=> ['path' => 'html'],
 			'session' 		=> ['path' => 'session'],
+			'cart' 				=> ['path' => 'cart'],
 		];
 	}
 	public function index() {
@@ -58,7 +59,7 @@ class ControllerCommonDeveloper extends Controller {
 		$cacheTypeKey = $this->request->post['cacheType'] ?? '';
 
 		if (!$cacheTypeKey || !isset($this->cacheSettings[$cacheTypeKey])) {
-			$json['error'] = 'Invalid cache type';
+			$json['error'] = $this->language->get('developer_error_cache_engine');
 			$this->response->addHeader('Content-Type: application/json');
 			$this->response->setOutput(json_encode($json));
 			return;
@@ -73,7 +74,9 @@ class ControllerCommonDeveloper extends Controller {
 			if (in_array($path, ['product', 'category', 'filter_page', 'filter', 'module', 'header', 'footer'])) {
 				$path = DIR_CACHE . 'cache/' . $path;
 			} elseif ($path === 'session') {
-				$path = DIR_SESSION;
+				$this->clearSessions();
+			} elseif ($path === 'cart') {
+				$this->clearCarts();
 			} else {
 				$path = DIR_CACHE . $path;
 			}
@@ -94,6 +97,25 @@ class ControllerCommonDeveloper extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	private function clearSessions() {
+		$this->db->query("
+			DELETE FROM " . DB_PREFIX . "session WHERE 1
+		");
+		$this->db->query("
+			DELETE FROM " . DB_PREFIX . "api_session WHERE 1
+		");
+		$this->db->query("
+			DELETE FROM " . DB_PREFIX . "api_ip WHERE 1
+		");
+		$this->clearDirectory('session');
+	}
+
+	private function clearCarts() {
+		$this->db->query("
+			DELETE FROM " . DB_PREFIX . "cart WHERE 1
+		");
 	}
 
 	private function clearDirectory($dir) : bool {
