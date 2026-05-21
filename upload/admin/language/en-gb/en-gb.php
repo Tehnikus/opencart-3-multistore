@@ -172,11 +172,6 @@ $_['entry_facet_bestseller_count']  = 'Bestseller count';
 $_['entry_facet_top_rated_count']   = 'Top rated count';
 $_['entry_facet_latest_days_count'] = 'Days product consedered new';
 $_['entry_facet_min_reviews_count'] = 'Best rated min reviews count';
-$_['entry_developer_cache_categories']  = 'Cache categories';
-$_['entry_developer_cache_products']    = 'Cache products';
-$_['entry_developer_cache_facet_pages'] = 'Cache filter pages';
-$_['entry_developer_cache_facet_list']  = 'Cache filter list';
-$_['entry_developer_theme']             = 'Theme template cache';
 
 // Tab general lang description => tab_gescription.twig
 $_['entry_h1']                      = 'H1 tag';
@@ -322,6 +317,7 @@ $_['developer_setting_footer']      = 'Footer';
 $_['developer_setting_all']         = 'All';
 $_['developer_setting_html']        = 'HTML static cache';
 $_['developer_setting_session']     = 'Session (needs relogin)';
+$_['developer_setting_cart']        = 'Carts';
 $_['entry_cache_settings']          = 'Cache settings';
 $_['entry_clear_cache']             = 'Clear cache';
 $_['entry_cache_type']              = 'Type';
@@ -329,6 +325,7 @@ $_['developer_message_success']     = 'Cache settings are saved';
 $_['developer_message_cleared']     = 'Cache %s is cleared';
 $_['developer_error_permission']    = 'You have no permission to edit cache settings';
 $_['developer_error_chmod']         = 'Directory is not writeable, set CHMOD to 0777 or delete cache manually';
+$_['developer_error_cache_engine']  = 'Invalid cache engine';
 
 
 /* When doing translations only include the matching language code */
