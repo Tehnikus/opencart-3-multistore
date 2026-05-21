@@ -81,22 +81,23 @@
   }
 </style>
 <script>
+
   function fetchSaveDeveloperSetting(e) {
     const body    = new FormData();
     const modal   = e.closest('.modal-dialog');
-    const inputs  = modal.querySelectorAll('input[name^="developer"]:checked');
+    const inputs  = modal.querySelectorAll('input:checked');
     inputs.forEach(input => {
       body.append(input.name, input.value);
     });
-    fetch(`index.php?route=common/developer/edit&user_token={{ user_token }}`, {method: "POST", body})
+    fetch(`index.php?route=common/developer/fetchEditCacheSettings&user_token={{ user_token }}`, {method: "POST", body})
     .then(r =>{ return r.json()})
     .then(r => {
       modal.querySelectorAll('.alert').forEach(e => {e.remove()});
       if (r.error) {
-        modal.querySelector('.modal-body').insertAdjacentHTML('afterbegin', `<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i>${r.error.warning}<button type="button" class="close" data-dismiss="alert">&times;</button></div>`)
+        modal.querySelector('.modal-body').insertAdjacentHTML('afterbegin', `<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ${r.error}<button type="button" class="close" data-dismiss="alert">&times;</button></div>`)
       }
       if (r.success) {
-        modal.querySelector('.modal-body').insertAdjacentHTML('afterbegin', `<div class="alert alert-success alert-dismissible"><i class="fa fa-exclamation-circle"></i>${r.success}<button type="button" class="close" data-dismiss="alert">&times;</button></div>`)
+        modal.querySelector('.modal-body').insertAdjacentHTML('afterbegin', `<div class="alert alert-success alert-dismissible"><i class="fa fa-exclamation-circle"></i> ${r.success}<button type="button" class="close" data-dismiss="alert">&times;</button></div>`)
       }
     })
   }
