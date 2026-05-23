@@ -24,7 +24,11 @@ class ControllerCommonHeader extends Controller {
 			$this->document->addLink($server . 'image/' . $this->config->get('config_icon'), 'icon');
 		}
 
-		$data['title'] = $this->document->getTitle();
+		// Add essential styles
+		$this->document->addStyle('catalog/view/theme/default/css/main.css', 'stylesheet preload', 'screen', 'header');
+		
+		// Add essential scripts
+		$this->document->addScript('catalog/view/theme/default/js/main.js', 'header');
 
 		$data['base'] = $server;
 		$data['description'] = $this->document->getDescription();
