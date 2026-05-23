@@ -2129,7 +2129,7 @@ CREATE TABLE `oc_facet_sort` (
   `date_last_review`  DATETIME DEFAULT NULL,
   `date_last_view`    DATETIME DEFAULT NULL,
   PRIMARY KEY (`product_id`,`store_id`),
-  KEY `getCategory` (`product_id`, `category_id`, `store_id`)
+  KEY `getCategory` (`category_id`, `store_id`, `product_id`, `current_price`, `rating_avg`, `review_count`)
 ) ENGINE=InnoDB;
 
 
