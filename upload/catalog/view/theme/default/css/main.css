@@ -1,0 +1,13 @@
+@layer reset, base, components, utilities;
+
+/* Minimal reset */
+@layer reset {
+  *, *::before, *::after {box-sizing: border-box;}
+  * {margin: 0;}
+  html {interpolate-size: allow-keywords;}
+  body {line-height: 1.5; -webkit-font-smoothing: antialiased;}
+  img, picture, video, canvas, svg, figure {display: block; max-width: 100%;}
+  input, button, textarea, select {font: inherit;}
+  p, h1, h2, h3, h4, h5, h6 {overflow-wrap: break-word;}
+  #root {isolation: isolate;}
+}
