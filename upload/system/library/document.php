@@ -20,68 +20,30 @@ class Document {
 	private $scripts 	= [];
 	private $jsonLd  	= [];
 
-	/**
-     * 
-     *
-     * @param	string	$title
-     */
 	public function setTitle($title) {
 		$this->title = $title;
 	}
 
-	/**
-     * 
-	 * 
-	 * @return	string
-     */
 	public function getTitle() {
 		return $this->title;
 	}
 
-	/**
-     * 
-     *
-     * @param	string	$description
-     */
 	public function setDescription($description) {
 		$this->description = $description;
 	}
 
-	/**
-     * 
-     *
-     * @param	string	$description
-	 * 
-	 * @return	string
-     */
 	public function getDescription() {
 		return $this->description;
 	}
 
-	/**
-     * 
-     *
-     * @param	string	$keywords
-     */
 	public function setKeywords($keywords) {
 		$this->keywords = $keywords;
 	}
 
-	/**
-     *
-	 * 
-	 * @return	string
-     */
 	public function getKeywords() {
 		return $this->keywords;
 	}
 	
-	/**
-     * 
-     *
-     * @param	string	$href
-	 * @param	string	$rel
-     */
 	public function addLink($href, $rel) {
 		$this->links[$href] = array(
 			'href' => $href,
@@ -89,22 +51,10 @@ class Document {
 		);
 	}
 
-	/**
-     * 
-	 * 
-	 * @return	array
-     */
 	public function getLinks() {
 		return $this->links;
 	}
 
-	/**
-     * 
-     *
-     * @param	string	$href
-	 * @param	string	$rel
-	 * @param	string	$media
-     */
 	public function addStyle($href, $rel = 'stylesheet', $media = 'screen', $position = 'header') {
 		$this->styles[$position][$href] = array(
 			'href'  => $href,
@@ -113,11 +63,6 @@ class Document {
 		);
 	}
 
-	/**
-     * 
-	 * 
-	 * @return	array
-     */
 	public function getStyles($position = 'header') {
 		if (isset($this->styles[$position])) {
 			return $this->styles[$position];
@@ -126,23 +71,10 @@ class Document {
 		}
 	}
 
-	/**
-     * 
-     *
-     * @param	string	$href
-	 * @param	string	$position
-     */
 	public function addScript($href, $position = 'header') {
 		$this->scripts[$position][$href] = $href;
 	}
 
-	/**
-     * 
-     *
-     * @param	string	$position
-	 * 
-	 * @return	array
-     */
 	public function getScripts($position = 'header') {
 		if (isset($this->scripts[$position])) {
 			return $this->scripts[$position];
@@ -157,7 +89,11 @@ class Document {
 	 * @param array $data
 	 * @return void
 	 */
-	public function setJson(string $type, array $data = []): void {
-		$this->jsonLd[$type] = json_encode($data);
+	public function setJsonLd(string $type, array $data = []) : void {
+		$this->jsonLd[$type] = $data;
+	}
+
+	public function getJsonLd() : string {
+		return json_encode($this->jsonLd, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_HEX_QUOT|JSON_HEX_APOS);
 	}
 }
