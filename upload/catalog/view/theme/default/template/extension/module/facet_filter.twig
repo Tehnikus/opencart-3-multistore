@@ -40,11 +40,11 @@
 {% endif %}
 <script>
 
-document.getElementById('sortOrder').addEventListener('change', (e) => {
+document.getElementById('sortOrder')?.addEventListener('change', (e) => {
   setParams('sort', e.target.value);
 });
 
-document.querySelectorAll('.facetInput').forEach(e => {
+document.querySelectorAll('.facetInput')?.forEach(e => {
   e.addEventListener('change', () => {
     window.location.href = e.parentElement.href;
   });
