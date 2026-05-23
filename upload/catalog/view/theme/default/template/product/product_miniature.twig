@@ -1,24 +1,23 @@
 {# {% cache %} #}
-<article role="article" class="miniature" {% if wishlist %}data-wishlist="{{ wishlist }}"{% endif %} {% if compare %}data-compare="{{ compare }}"{% endif %}>
-  <figure role="img" aria-label="{{ product.name }}" class="image" {% if product.special_date_end %}data-special-date-end="{{ product.special_date_end }}"{% endif %}>
+<article 
+  role="article" 
+  class="miniature"
+  {% if product.special_date_end %}data-special-date-end="{{ product.special_date_end }}"{% endif %}
+>
+  <figure role="img" aria-label="{{ product.name }}">
     <a title="{{ product.name }}" href="{{ product.href }}">
-      <img decoding="async" loading="lazy" src="{{ product.thumb }}" alt="{{ product.name }}" title="{{ product.name }}" width="{{product.width}}" height="{{product.height}}" class="img-responsive" />
+      <img decoding="async" loading="lazy" src="{{ product.image.image }}" alt="{{ product.image.title }}" title="{{ product.image.title }}" width="{{product.imageWidth }}" height="{{product.imageHeight }}" />
     </a>
   </figure>
-  {% if product.product_flags %}
-  <div class="flags">
-    {% for type, flag in product.product_flags %}
-    <span class="product-flag {{ type }}"> {{ flag }} </span>
-    {% endfor %}
-  </div>
+  {% if product.productFlags %}
   {% endif %}
   <div class="infos">
     <div class="caption">
       <span class="h3"><a title="{{ product.name }}" href="{{ product.href }}">{{ product.name }}</a></span>
-      <p class="short-description">{{ product.description }}</p>
-      {% if product.attributes %}{{ product.attributes }}{% endif %}
+      <p class="shortDescription">{{ product.shortDescription }}</p>
+      
         {% if product.rating and product.rating > 0 %}
-          <div aria-label="{{ aria_rating_label }} {{ product.rating }}{% if product.reviews is defined and product.reviews > 0 %}, {{ aria_review_count_label }} {{ product.reviews }}{% endif %}" title="{{ aria_rating_label }} {{ product.rating }}{% if product.reviews is defined and product.reviews > 0 %}, {{ aria_review_count_label }} {{ product.reviews }}{% endif %}">
+          <div aria-label="{{ aria_rating_label }}" title="{{ aria_rating_label }}">
             <div class="rating" role="presentation">
               {% for i in 1..5 %}
                 {% if product.rating >= i %}
