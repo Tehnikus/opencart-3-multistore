@@ -162,6 +162,8 @@ $_['error_curl']                    = 'CURL: Error Code(%s): %s';
 // Form entries
 $_['entry_store_association']       = 'Store association';
 $_['entry_language_association']    = 'Language association';
+$_['entry_default_currency']        = 'Default language currency';
+$_['hint_default_currency']         = 'Default currency is set so Google bot can see different prices in different languages instead of single default currency across shop';
 $_['entry_language']                = 'Language';
 $_['entry_store']                   = 'Store';
 $_['entry_parent']                  = 'Main parent category';
