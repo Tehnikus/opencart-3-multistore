@@ -1442,13 +1442,14 @@ CREATE TABLE `oc_language` (
   `image`              VARCHAR(64) NOT NULL,
   `directory`          VARCHAR(32) NOT NULL,
   `sort_order`         INT NOT NULL DEFAULT '0',
+  `currency_id`        TINYINT NOT NULL,
   `status`             TINYINT NOT NULL,
   PRIMARY KEY (`language_id`),
   KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `oc_language` (`language_id`, `name`, `code`, `locale`, `image`, `directory`, `sort_order`, `status`) VALUES
-(1, 'English', 'en-gb', 'en-US,en_US.UTF-8,en_US,en-gb,english', 'gb.png', 'english', 1, 1);
+INSERT INTO `oc_language` (`language_id`, `name`, `code`, `locale`, `image`, `directory`, `sort_order`, `currency_id`, `status`) VALUES
+(1, 'English', 'en-gb', 'en-US,en_US.UTF-8,en_US,en-gb,english', 'gb.png', 'english', 1, 1, 1);
 
 DROP TABLE IF EXISTS `oc_language_to_store`;
 CREATE TABLE `oc_language_to_store` (
