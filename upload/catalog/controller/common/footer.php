@@ -1,7 +1,7 @@
 <?php
 class ControllerCommonFooter extends Controller {
 	public function index() {
-
+		$this->load->language('common/footer');
 		$language_id 	= (int) $this->config->get('config_language_id');
 		$store_id			= (int) $this->config->get('config_store_id');
 		$cacheName = "footer.store_{$store_id}.language_{$language_id}";
@@ -19,7 +19,7 @@ class ControllerCommonFooter extends Controller {
 	}
 
 	private function getData() : array {
-		$this->load->language('common/footer');
+		
 		$this->load->model('catalog/information');
 
 		$data['informations'] = [];
