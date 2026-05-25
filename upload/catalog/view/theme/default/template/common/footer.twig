@@ -1,54 +1,43 @@
 {% cache "footer_lang" ~ language_id ~ "store_" ~ store_id %}
-  <footer>
-    <div class="container">
-      <div class="row">
-        {% if informations %}
-        <div class="col-sm-3">
-          <h5>{{ text_information }}</h5>
-          <ul class="list-unstyled">
-          {% for information in informations %}
-            <li><a href="{{ information.href }}">{{ information.title }}</a></li>
-            {% endfor %}
-          </ul>
-        </div>
-        {% endif %}
-        <div class="col-sm-3">
-          <h5>{{ text_service }}</h5>
-          <ul class="list-unstyled">
-            <li><a href="{{ contact }}">{{ text_contact }}</a></li>
-            <li><a href="{{ return }}">{{ text_return }}</a></li>
-            <li><a href="{{ sitemap }}">{{ text_sitemap }}</a></li>
-          </ul>
-        </div>
-        <div class="col-sm-3">
-          <h5>{{ text_extra }}</h5>
-          <ul class="list-unstyled">
-            <li><a href="{{ manufacturer }}">{{ text_manufacturer }}</a></li>
-            <li><a href="{{ voucher }}">{{ text_voucher }}</a></li>
-            <li><a href="{{ affiliate }}">{{ text_affiliate }}</a></li>
-            <li><a href="{{ special }}">{{ text_special }}</a></li>
-            <li><a href="{{ bestseller }}">{{ text_bestseller }}</a></li>
-          </ul>
-        </div>
-        <div class="col-sm-3">
-          <h5>{{ text_account }}</h5>
-          <ul class="list-unstyled">
-            <li><a href="{{ account }}">{{ text_account }}</a></li>
-            <li><a href="{{ order }}">{{ text_order }}</a></li>
-            <li><a href="{{ wishlist }}">{{ text_wishlist }}</a></li>
-            <li><a href="{{ newsletter }}">{{ text_newsletter }}</a></li>
-          </ul>
-        </div>
+  <footer class="flex wrap row">
+    {% if informations %}
+      <div class="flex column">
+        <span class="h5">{{ text_information }}</span>
+        {% for information in informations %}
+          <a href="{{ information.href }}">{{ information.title }}</a>
+        {% endfor %}
       </div>
-      <hr>
-      <p>{{ powered }}</p>
+    {% endif %}
+    <div class="flex column">
+      <span class="h5">{{ text_service }}</span>
+      <a href="{{ contact }}">{{ text_contact }}</a>
+      <a href="{{ return }}">{{ text_return }}</a>
+      <a href="{{ sitemap }}">{{ text_sitemap }}</a>
+      <a href="{{ voucher }}">{{ text_voucher }}</a>
+      <a href="{{ affiliate }}">{{ text_affiliate }}</a>
     </div>
-  </footer>
+    <div class="flex column">
+      <span class="h5">{{ text_extra }}</span>
+      <a href="{{ manufacturer }}">{{ text_manufacturer }}</a>
+      <a href="{{ special }}">{{ text_special }}</a>
+      <a href="{{ bestseller }}">{{ text_bestseller }}</a>
+    </div>
+    <div class="flex column">
+      <span class="h5">{{ text_account }}</span>
+      <a href="{{ account }}">{{ text_account }}</a>
+      <a href="{{ order }}">{{ text_order }}</a>
+      <a href="{{ wishlist }}">{{ text_wishlist }}</a>
+      <a href="{{ newsletter }}">{{ text_newsletter }}</a>
+    </div>
+  <div class="powered flex justify-center">
+    <p>{{ powered }}</p>
+  </div>
+</footer>
   {% for style in styles %}
-  <link href="{{ style.href }}" type="text/css" rel="{{ style.rel }}" media="{{ style.media }}" />
+    <link href="{{ style.href }}" type="text/css" rel="{{ style.rel }}" media="{{ style.media }}" />
   {% endfor %}
   {% for script in scripts %}
-  <script src="{{ script }}" type="text/javascript"></script>
+    <script src="{{ script }}" type="text/javascript"></script>
   {% endfor %}
 {% endcache %}
 </body>
