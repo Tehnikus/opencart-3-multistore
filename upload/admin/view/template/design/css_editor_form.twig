@@ -1,0 +1,82 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="button" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-success saveCss"><i class="fa fa-floppy-o"></i> {{ button_save }}</button>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {# Message #}
+    <div style="display: none" class="cssEditorMessage alert alert-dismissible"></div>
+
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_editor }}</h3>
+          </div>
+          <div class="panel-body">
+            <form action="{{ save }}" method="post" enctype="multipart/form-data" id="form_css">
+              <textarea name="css">{{ css }}</textarea>
+            </form>
+            <div class="row">
+              <div class="col-sm-6 text-left">{{ pagination }}</div>
+              <div class="col-sm-6 text-right">{{ results }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const textarea = document.querySelector('textarea[name="css"]');
+    const userToken = "{{ user_token }}";
+    var codemirror = CodeMirror.fromTextArea(textarea, {
+      mode: 'text/css',
+      height: '500px',
+      lineNumbers: true,
+      autofocus: true,
+      theme: 'monokai'
+    });
+    codemirror.setValue(textarea.value);
+
+
+    document.querySelector('.saveCss').addEventListener('click', () => {
+      const text = codemirror.getValue();
+      data = new FormData();
+      data.append('css', text);
+
+      fetch(`index.php?route=design/css_editor/fetchSave&user_token=${userToken}`, {method: "POST", body: data})
+      .then(r => r.json())
+      .then(r => {
+        const messageBlock = document.querySelector('.cssEditorMessage');
+        messageBlock.classList.toggle('alert-success', r.success);
+        messageBlock.classList.toggle('alert-danger', !r.success);
+        messageBlock.innerText = r.message;
+        messageBlock.style.display = '';
+      })
+    })
+  })
+</script>
+
+<style>
+  #form_css .CodeMirror {
+    height: 80vh;
+    max-height: 80vh
+  }
+</style>
+
+<link href="view/javascript/codemirror/lib/codemirror.css" rel="stylesheet" />
+<link href="view/javascript/codemirror/theme/monokai.css" rel="stylesheet" />
+<script type="text/javascript" src="view/javascript/codemirror/lib/codemirror.js"></script> 
+<script type="text/javascript" src="view/javascript/codemirror/lib/xml.js"></script> 
+<script type="text/javascript" src="view/javascript/codemirror/lib/formatting.js"></script> 
+{{ footer }}
