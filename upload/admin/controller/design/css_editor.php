@@ -3,7 +3,7 @@ class ControllerDesignCssEditor extends Controller {
 
   private $filePath;
   public function __construct($registry) {
-    parent:: $registry;
+    parent::__construct($registry);
     $store_id = (int) $this->session->data['store_id'];
     $themeName = $this->config->get('config_theme');
     $this->load->model('setting/setting');
