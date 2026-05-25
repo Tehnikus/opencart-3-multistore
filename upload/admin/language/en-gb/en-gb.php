@@ -286,6 +286,8 @@ $_['text_seo_url_setting']          = 'SEO URLs settings';
 $_['text_facet_filter']             = 'Filter settings';
 $_['text_seo_robots_editor']        = 'Edit robots.txt';
 $_['text_theme_settings']           = 'Theme settings';
+$_['text_design_css_editor']        = 'CSS Editor';
+$_['text_design_js_editor']         = 'JS Editor';
 // Blog
 $_['text_blog']                     = 'Blog';
 $_['text_blog_articles']            = 'Articles';
