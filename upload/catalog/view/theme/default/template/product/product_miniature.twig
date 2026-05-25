@@ -1,24 +1,20 @@
 {# {% cache %} #}
-<article 
-  role="article" 
-  class="miniature"
-  {% if product.special_date_end %}data-special-date-end="{{ product.special_date_end }}"{% endif %}
->
-  <figure role="img" aria-label="{{ product.name }}">
+<article role="article" class="miniature" {% if product.special_date_end %}data-special-date-end="{{ product.special_date_end }}"{% endif %}>
+  <figure role="img" aria-label="{{ product.name }}" class="">
     <a title="{{ product.name }}" href="{{ product.href }}">
       <img decoding="async" loading="lazy" src="{{ product.image.image }}" alt="{{ product.image.title }}" title="{{ product.image.title }}" width="{{product.imageWidth }}" height="{{product.imageHeight }}" />
     </a>
   </figure>
   {% if product.productFlags %}
   {% endif %}
-  <div class="infos">
-    <div class="caption">
-      <span class="h3"><a title="{{ product.name }}" href="{{ product.href }}">{{ product.name }}</a></span>
-      <p class="shortDescription">{{ product.shortDescription }}</p>
+  <div class="infos flex column">
+    <div class="caption flex column">
+      <span class="h3 title"><a title="{{ product.name }}" href="{{ product.href }}">{{ product.name }}</a></span>
+      {% if product.shortDescription %}<p class="shortDescription">{{ product.shortDescription }}</p>{% endif %}
       
         {% if product.rating and product.rating > 0 %}
           <div aria-label="{{ aria_rating_label }}" title="{{ aria_rating_label }}">
-            <div class="rating" role="presentation">
+            <div class="rating flex align-center justify-center" role="presentation">
               {% for i in 1..5 %}
                 {% if product.rating >= i %}
                   <svg class="i" aria-hidden="true"><use href="catalog/view/theme/default/img/icons.svg#i-star-filled"></use></svg>
@@ -55,8 +51,8 @@
       <button type="button" 
         {% if product.price_value and product.price_value != 0 %} 
           data-action="cartAdd" 
-          data-product_id="{{ product.product_id }}" 
-          data-minimum_qty="{{ product.minimum }}" 
+          data-product-id="{{ product.product_id }}" 
+          data-minimum-qty="{{ product.minimum }}" 
           aria-haspopup="dialog"
         {% else %}
           disabled
