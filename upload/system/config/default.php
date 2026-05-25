@@ -41,7 +41,7 @@ $_['cache_expire']         = 3600;
 
 // Session
 $_['session_engine']       = 'db';
-$_['session_autostart']    = true;
+$_['session_autostart']    = false;
 $_['session_name']         = 'OCSESSID';
 
 // Template
