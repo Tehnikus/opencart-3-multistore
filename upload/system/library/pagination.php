@@ -18,14 +18,12 @@ class Pagination {
 	public $url = '';
 	public $text_first = '|&lt;';
 	public $text_last = '&gt;|';
-	public $text_next = '&gt;';
-	public $text_prev = '&lt;';
+	public $text_next = '&#9656;';
+	public $text_prev = '&#9666;';
 
 	/**
-     * 
-     *
-     * @return	text
-     */
+	 * @return string
+	 */
 	public function render() {
 		$total = $this->total;
 
