@@ -1,4 +1,4 @@
-{{ header }}
+{# {{ header }}
 <div id="product-category" class="container">
   <ul class="breadcrumb">
     {% for breadcrumb in breadcrumbs %}
@@ -14,15 +14,16 @@
         <div class="col-sm-2"><img src="{{ thumb }}" alt="{{ heading_title }}" title="{{ heading_title }}" class="img-thumbnail" /></div>
         {% endif %}
         {% if description %}
-        <div class="col-sm-10">{{ description }}</div>
         {% endif %}</div>
       <hr>
       {% endif %}
+        <div class="col-sm-10">{{ description }}</div>
 
 
       {% for child in child_categories %}
-        <li><a href="{{ child.href }}">{{ child.name }}</a></li>
+        <a href="{{ child.href }}">{{ child.name }}</a>
       {% endfor %}
+
       {% if products %}
 
       <div class="row productList productGrid"> 
@@ -30,6 +31,7 @@
           {% include "default/template/product/product_miniature.twig" %}
         {% endfor %}
       </div>
+      
       <div class="row">
         <div class="col-sm-6 text-left">{{ pagination }}</div>
         <div class="col-sm-6 text-right">{{ results }}</div>
@@ -43,5 +45,51 @@
       {% endif %}
       {{ content_bottom }}</div>
     {{ column_right }}</div>
+</div>
+{{ footer }}  #}
+{{ header }}
+<div id="wrapper">
+  {{ column_left }}
+  <main role="main" id="main" class="flex column wrap">
+    {# Category title and main links #}
+    <hgroup class="flex row nowrap">
+      <h1>{{ heading_title }}</h1>
+    </hgroup>
+    {% if description %}
+      <article role="article" id="category_description">{{ description }}</article>
+    {% endif %}
+    {{ content_top }}
+    {# Subcategories #}
+    {% if child_categories %}
+      <span>{{ text_subcategories }}</span>
+      <div id="subcategories" class="grid">
+        {% for category in child_categories %}
+          <div class="miniature">
+            <a title="{{ category.name }}" href="{{ category.href }}">
+              <img loading="lazy" src="{{ category.image }}" alt="{{ category.name }}" title="{{ category.name }}" class="img-responsive" width="{{ category.width }}" height="{{ category.height }}"/>
+              <span class="h5">{{ category.name }}</span>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {# Product list #}
+    {% if products %}
+      <div id="products" class="product grid" tabindex="0"> 
+      {% for product in products %}
+        {% include 'default/template/product/product_miniature.twig' %}
+        {% include 'default/template/product/product_miniature.twig' %}
+      {% endfor %} 
+      </div>
+
+      <div id="pagination">
+        {% if pagination %}
+          <div>{{ pagination }}</div>
+        {% endif %}
+        <div><span>{{ results }}</span></div>
+      </div>
+    {% endif %}
+  </main>
+  {{ column_right }}
 </div>
 {{ footer }} 
