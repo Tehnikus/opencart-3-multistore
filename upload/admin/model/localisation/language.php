@@ -110,7 +110,17 @@ class ModelLocalisationLanguage extends Model {
 	public function editLanguage($language_id, $data) {
 		$language_query = $this->db->query("SELECT `code` FROM " . DB_PREFIX . "language WHERE language_id = '" . (int)$language_id . "'");
 		
-		$this->db->query("UPDATE " . DB_PREFIX . "language SET name = '" . $this->db->escape($data['name']) . "', code = '" . $this->db->escape($data['code']) . "', locale = '" . $this->db->escape($data['locale']) . "', sort_order = '" . (int)$data['sort_order'] . "', status = '" . (int)$data['status'] . "' WHERE language_id = '" . (int)$language_id . "'");
+		$this->db->query("
+			UPDATE " . DB_PREFIX . "language 
+			SET 
+				name = '" . $this->db->escape($data['name']) . "', 
+				code = '" . $this->db->escape($data['code']) . "', 
+				locale = '" . $this->db->escape($data['locale']) . "', 
+				sort_order = '" . (int)$data['sort_order'] . "', 
+				currency_id = '" . (int)$data['currency_id'] . "', 
+				status = '" . (int)$data['status'] . "' 
+			WHERE language_id = '" . (int)$language_id . "'
+		");
 
 		if ($language_query->row['code'] != $data['code']) {
 			$this->db->query("UPDATE " . DB_PREFIX . "setting SET value = '" . $this->db->escape($data['code']) . "' WHERE `key` = 'config_language' AND value = '" . $this->db->escape($language_query->row['code']) . "'");
