@@ -71,9 +71,10 @@ class ControllerDesignCssEditor extends Controller {
   public function fetchSave() {
     $this->load->language('design/css_editor');
     $result = $this->saveCss(html_entity_decode($this->request->post['css']));
+    $fileName = $this->request->post['filename'] ?? '';
     $json = [
       'success' => $result,
-      'message' => $result ? $this->language->get('message_css_saved') : $this->language->get('message_css_not_writable')
+      'message' => $result ? sprintf($this->language->get('message_css_saved'), $fileName) : sprintf($this->language->get('message_css_not_writable'), $fileName, $this->filePath)
     ]; 
     $this->response->addHeader('Content-Type: application/json');
     $this->response->setOutput(json_encode($json));

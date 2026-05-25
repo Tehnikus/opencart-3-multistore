@@ -40,7 +40,7 @@
     const textarea = document.querySelector('textarea[name="css"]');
     const userToken = "{{ user_token }}";
     var codemirror = CodeMirror.fromTextArea(textarea, {
-      mode: 'text/css',
+      mode: 'text/html',
       height: '500px',
       lineNumbers: true,
       autofocus: true,
@@ -60,7 +60,7 @@
         const messageBlock = document.querySelector('.cssEditorMessage');
         messageBlock.classList.toggle('alert-success', r.success);
         messageBlock.classList.toggle('alert-danger', !r.success);
-        messageBlock.innerText = r.message;
+        messageBlock.innerHTML = `<p>${r.message}</p>`;
         messageBlock.style.display = '';
       })
     })
