@@ -436,7 +436,9 @@ class ModelSeoMetaEditor extends Model
       page_facets AS (
         SELECT
           filter_page_id,
-          COUNT(*) AS facet_count
+          COUNT(*) AS facet_count,
+          facet_type,
+          facet_value_id
         FROM " . DB_PREFIX . "seo_filter_page_facet_index
         WHERE store_id = {$currentStore}
           AND filter_page_id IN (SELECT filter_page_id FROM paged_ids)
@@ -487,7 +489,20 @@ class ModelSeoMetaEditor extends Model
             'discount',   GREATEST(COALESCE(fs.current_price - pd.price, 0), COALESCE(fs.current_price - ps.price, 0), 0),
             'rating',     AVG(fs.rating_avg),
             'reviews',    SUM(fs.review_count),
-            'offers',     COUNT(fs.product_id)
+            'offers',     COUNT(fs.product_id),
+            'parent',     (
+                SELECT 
+                  cd.name
+                FROM `" . DB_PREFIX . $type['main_table'] . "` m
+                LEFT JOIN page_facets pf
+                  ON pf.`" . $type['column_id'] . "` = m.`" . $type['column_id'] . "`
+                LEFT JOIN " . DB_PREFIX . "category_description cd
+                  ON cd.category_id = pf.facet_value_id
+                WHERE pf.facet_type    = 1
+                  AND cd.language_id  = d.language_id 
+                  AND cd.store_id     = d.store_id
+                LIMIT 1
+              )
           )
 
           FROM page_products pp
