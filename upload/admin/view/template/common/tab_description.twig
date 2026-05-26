@@ -4,7 +4,7 @@
     <li {% if loop.first %}class="active"{% endif %}>
       <a href="#description_language_{{ language.language_id }}" data-toggle="tab" data-tab-language-id="{{ language.language_id }}">
         <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> 
-        <span>{{ tab_description }} {{ language.name }}
+        <span>{{ tab_description }} {{ language.name }}</span>
       </a>
     </li>
   {% endfor %}
