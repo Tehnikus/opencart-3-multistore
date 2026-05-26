@@ -322,6 +322,14 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			if ($this->user->hasPermission('access', 'design/js_editor')) {
+				$design[] = array(
+					'name'	   => $this->language->get('text_design_js_editor'),
+					'href'     => $this->url->link('design/js_editor', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
 			if ($this->user->hasPermission('access', 'design/theme')) {
 				$design[] = array(
 					'name'	   => $this->language->get('text_theme'),
