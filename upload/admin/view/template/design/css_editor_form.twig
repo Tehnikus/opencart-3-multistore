@@ -29,10 +29,11 @@
               {% for file in files %}
                 <div class="tab-pane {% if loop.first %}active{% endif %}" id="file_{{ file.name }}">
                   <form action="{{ save }}" method="post" enctype="multipart/form-data" id="form_{{ file.name }}">
-                    <div class="row">
-                      <button type="button" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-success saveCode"><i class="fa fa-floppy-o"></i> {{ button_save }}</button>
+                    <div class="container-fluid">
+                      <button type="button" data-filename="{{ file.name }}" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-success saveCode"><i class="fa fa-floppy-o"></i> {{ button_save }}</button>
                     </div>
-                    <div class="row">
+                    <br>
+                    <div class="container-fluid">
                       <textarea name="{{ file.name }}" class="codeEditor">{{ file.code }}</textarea>
                     </div>
                   </form>
