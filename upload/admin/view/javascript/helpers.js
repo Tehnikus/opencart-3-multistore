@@ -227,6 +227,88 @@ async function checkUrlDuplicates(input) {
 }
 
 /**
+ * Recursively create element from Object
+ * @param   {Object} config An object with regular {Element} JS attributes
+ * @returns {Element}
+ * Usage:
+ * const myElement = createElm({
+ *   tagName: 'div',
+ *   id: 'main-container',
+ *   name: 'some_name[some_other_name]',
+ *   className: 'form-control',
+ *   style: {backgroundColor: 'lightblue', padding: '20px'},
+ *   dataset: {searchColumn: 'language_id'},
+ *   attributes: {'aria-label': 'main content area'},
+ *   children: [
+ *     {
+ *        tagName: 'select',
+ *        name: 'someData[someOtherData]',
+ *        dataset: {selectId: '123'},
+ *        className: "form-control",
+ *        value: '2',
+ *        children: [{tagName: 'option', textContent: 'Option 1 label', value: '1'}, {tagName: 'option', textContent: 'Option 2 label', value: '2'}]
+ *     },
+ *     {
+ *        tagName: 'p',
+ *        textContent: 'Some text inside <p>',
+ *     },
+ *     {
+ *        tagName: 'button',
+ *        textContent: 'Click Me',
+ *        onclick: () => alert('Button clicked!')
+ *     }
+ *  ]
+ * });
+ */
+function createElm(config) {
+  if (!config || !config.tagName) {throw new Error("createElm: 'tagName' is required")}
+
+  const el = document.createElement(config.tagName.toLowerCase());
+
+  if (config.dataset)     { Object.assign(el.dataset, config.dataset) }
+  if (config.style)       { Object.assign(el.style, config.style) }
+  if (config.attributes)  { for (const attr in config.attributes) { el.setAttribute(attr, config.attributes[attr]) }}
+
+  // Children
+  if (Array.isArray(config.children)) {
+    for (const child of config.children) {
+      if      (typeof child === "string") { el.appendChild(document.createTextNode(child)) }
+      else if (child instanceof Node) { el.appendChild(child) }
+      else if (typeof child === "object" && child.tagName) {
+        const childEl = createElm(child);
+        // Set selected state for outerHTML
+        if (config.value && child.value && config.value == child.value) { childEl.setAttribute("selected", "") }
+        el.appendChild(childEl);
+      }
+    }
+  }
+
+  // Event handlers
+  for (const key in config) {
+    if (key.startsWith("on") && typeof config[key] === "function") { el[key] = config[key] }
+  }
+
+  // Primitive properties
+  const skip = new Set(["tagName", "dataset", "style", "attributes", "children", "value"]);
+
+  for (const key in config) {
+    if (skip.has(key)) continue;
+
+    const val = config[key];
+
+    // Set primitives
+    if (typeof val !== "object" && typeof val !== "function") {
+      try { el[key] = val } catch (e) {}
+    }
+  }
+
+  // Set elelment value after all children are added (in case of select element)
+  if (config.value !== null) { el.value = config.value }
+
+  return el;
+}
+
+/**
  * Add cloned row to target table
  * Used to add rows in tables like: tab_image_list.twig, tab_faq_list.twig, tab_how_to_list.twig, tab_footer_list.twig, filter_form.twig, meta_editor_list.twig and more
  * @param {Element} button Button in tfoot of table, where rows should be cloned
