@@ -1,0 +1,107 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <h1>{{ heading_title }}</h1>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {# Messages #}
+    <div style="display: none" class="editorMessage alert alert-dismissible"></div>
+    {% if error_message %}
+      <div class="alert alert-danger">{{ error_message }}</div>
+    {% endif %}
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_editor }}</h3>
+          </div>
+          <div class="panel-body">
+            <ul class="nav nav-tabs" id="files">
+              {% for file in files %}
+                <li {% if loop.first %}class="active"{% endif %}>
+                  <a href="#file_{{ file.name }}" data-toggle="tab">
+                    <span>{{ file.name }}</span>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+            <div class="tab-content">
+              {% for file in files %}
+                <div class="tab-pane {% if loop.first %}active{% endif %}" id="file_{{ file.name }}">
+                  <form action="{{ save }}" method="post" enctype="multipart/form-data" id="form_{{ file.name }}">
+                    <div class="container-fluid">
+                      <button type="button" data-filename="{{ file.name }}" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-success saveCode"><i class="fa fa-floppy-o"></i> {{ button_save }}</button>
+                    </div>
+                    <br>
+                    <div class="container-fluid">
+                      <textarea name="{{ file.name }}" class="codeEditor">{{ file.code }}</textarea>
+                    </div>
+                  </form>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const editors = [];
+    document.querySelectorAll('textarea.codeEditor').forEach(textarea => {
+      const saveButton = textarea.closest('form').querySelector('button.saveCode');
+
+      const editor = CodeMirror.fromTextArea(textarea, {
+        mode: 'text/html',
+        lineNumbers: true,
+        theme: 'monokai'
+      });
+
+      editor.setSize('100%', '500px');
+      editors.push(editor);
+
+      saveButton.addEventListener('click', () => {
+        const data = new FormData();
+        data.append('code', editor.getValue());
+        data.append('fileName', saveButton.dataset.filename);
+
+        fetch(`index.php?route=design/js_editor/fetchSave&user_token=${userToken}`, {method: 'POST', body: data})
+        .then(r => r.json())
+        .then(r => {
+          const messageBlock = document.querySelector('.editorMessage');
+          messageBlock.classList.toggle('alert-success', r.success);
+          messageBlock.classList.toggle('alert-danger', !r.success);
+          messageBlock.innerHTML = `<p>${r.message}</p>`;
+          messageBlock.style.display = '';
+        });
+      });
+    });
+
+    // refresh after tab open
+    document.querySelectorAll('[data-toggle="tab"]').forEach(tab => {
+      tab.addEventListener('click', () => {
+        setTimeout(() => {
+          editors.forEach(editor => editor.refresh());
+        }, 0);
+      });
+    });
+  });
+</script>
+
+<style>
+  form .CodeMirror {
+    height: 80vh;
+    max-height: 80vh
+  }
+</style>
+
+<link href="view/javascript/codemirror/lib/codemirror.css" rel="stylesheet" />
+<link href="view/javascript/codemirror/theme/monokai.css" rel="stylesheet" />
+<script type="text/javascript" src="view/javascript/codemirror/lib/codemirror.js"></script> 
+<script type="text/javascript" src="view/javascript/codemirror/lib/xml.js"></script> 
+<script type="text/javascript" src="view/javascript/codemirror/lib/formatting.js"></script> 
+{{ footer }}
