@@ -37,6 +37,7 @@
     
     --grid-gap: 1rem;
     --width-column: 21rem;
+    --block-gap: 1rem;
   
     /* Transitions */
     --time: .4s;
@@ -162,7 +163,7 @@
     transition: background var(--time) var(--style);
     background: #fff;
     cursor: pointer;
-    gap: calc(var(--grid-gap) * 0.5);
+    gap: calc(var(--block-gap) * 0.5);
     box-shadow: 0 0 3px #0004;
     &.primary{
       flex: 1 1 auto;
@@ -190,7 +191,8 @@
     display: flex;
     flex: 1 0 100%;
     width: 100%;
-    padding: 1rem;
+    padding: var(--grid-gap);
+    gap: var(--grid-gap);
     box-shadow: var(--box-shadow-block);
   }
   
@@ -211,7 +213,6 @@
   }
   
   footer {
-    gap: var(--grid-gap);
     justify-content: space-around;
     background: var(--background-footer);
     color: var(--color-footer-text);
@@ -303,7 +304,7 @@
   background: var(--background-block);
   box-shadow: var(--box-shadow-block);
   border-radius: var(--border-radius-block);
-  padding: calc(var(--grid-gap) * 0.7);
+  padding: calc(var(--block-gap) * 0.7);
 }
 
 /* .grid {
@@ -335,7 +336,7 @@
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  gap: calc(var(--grid-gap) * 0.5);
+  gap: calc(var(--block-gap) * 0.5);
 }
 
 /* Interface */
@@ -346,7 +347,7 @@
   background: var(--background-miniature);
   box-shadow: var(--box-shadow-miniature);
   border-radius: var(--border-radius-block);
-  padding: calc(var(--grid-gap) * 0.7);
+  padding: calc(var(--block-gap) * 0.7);
   & img {
     width: 100%;
     aspect-ratio: 1 / 1;
@@ -361,6 +362,9 @@
   & .infos {
     flex: 1 1 100%;
     width: 100%;
+  }
+  & .rating {
+    gap: calc(var(--block-gap) * 0.5);
   }
   & .caption {
     flex: 1 1 auto;
