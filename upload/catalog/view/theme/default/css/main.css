@@ -359,6 +359,12 @@ aside {
   box-shadow: var(--box-shadow-miniature);
   border-radius: var(--border-radius-block);
   padding: calc(var(--grid-gap) * 0.7);
+  & img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: var(--border-radius-block) var(--border-radius-block) 0 0;
+  }
   & .title {
     display: block;
     text-align: center;
