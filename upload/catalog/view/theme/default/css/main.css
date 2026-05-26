@@ -97,7 +97,7 @@
   }
 
   input {
-    transition: all var(--time) var(--style);
+    transition: color var(--time) var(--style), background-color var(--time) var(--style);
     border: 2px solid currentColor;
     border-radius: calc(var(--border-radius-elements) * 0.5);
 
