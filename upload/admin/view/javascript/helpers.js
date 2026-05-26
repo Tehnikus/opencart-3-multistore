@@ -148,12 +148,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Translate string
     if (e.target.closest('.translateString')) {
       const targetInput = e.target.closest('div').querySelector('input, textarea');
+      const defaultInput = document.querySelector(`[name="${targetInput.name.replace(/\[\d+\](\[[^\]]+\])$/, `[${defaultLanguage.language_id}]$1`)}"]`);
+      const text = targetInput.value || defaultInput.value || '';
+      targetInput.classList.toggle('alert-danger', text === '');
+      
       try {
         let translatedText = await googleTranslate(
-          targetInput.value 
-            || document.querySelector(`[name='${e.target.closest('[data-source-input]').dataset.sourceInput}']`).value, 
-          e.target.closest('[data-target-lang]').dataset.targetLang, 
-          e.target.closest('[data-source-lang]').dataset.sourceLang
+          text,
+          targetInput.dataset.languageCode, 
+          defaultLanguage.code.split('-')[0]
         );
         if (translatedText) {
           targetInput.value = translatedText;
@@ -163,6 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log(e)
       }
     }
+
     // Paste values from adjacent store
     if (e.target.closest('.pasteAdjacent')) {
       const input = e.target.closest('div').querySelector('input, textarea');
