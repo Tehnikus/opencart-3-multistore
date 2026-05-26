@@ -312,34 +312,28 @@ aside {
   padding: calc(var(--grid-gap) * 0.7);
 }
 
-.grid {
-  --auto-grid-min-size: 21rem;
+/* .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--auto-grid-min-size), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(var(--width-column), 1fr));
   grid-gap: var(--grid-gap);
   grid-auto-rows: 1fr;
   width: 100%;
   &#subcategories {
     --auto-grid-min-size: 14rem;
   }
-}
+} */
 
-.grid.flex {
-    display: flex;
-    justify-content: flex-start;
-    align-items: stretch;
-    flex-wrap: wrap;
-    width: 100%;
-    gap: var(--grid-gap);
+.grid {
+	--card-min-width: 21rem;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--grid-gap);
+	width: 100%;
   & .miniature {
-    display: flex;
-    flex-direction: column;
-    width: calc(25% - var(--grid-gap));
-    & img {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      object-fit: cover;
-    }
+    flex: 1 1 var(--card-min-width);
+    min-width: var(--card-min-width);
+    max-width: 100%;
+    min-width: min(100%, var(--card-min-width));
   }
 }
 
