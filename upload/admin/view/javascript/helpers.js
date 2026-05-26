@@ -142,6 +142,30 @@ async function googleTranslate(text, targetLang = 'en', sourceLang = 'auto', att
     return null;
   }
 }
+
+/**
+ * Translate array of texts using Google translate API
+ * @param   {Array}  texts An array of texts to be consequently translated
+ * @param   {String} targetLang target lang code
+ * @param   {String} sourceLang Source lang code
+ * @returns {Array}  An array of translated texts
+ * Usage:
+ * translateArray([
+ *   'Hello world!',
+ *   'This text will be transladed seqentially',
+ *   'from English to Ukrainian'
+ * ], 'uk', 'en'
+ */
+async function translateArray(texts, targetLang = 'en', sourceLang = 'auto') {
+  const results = [];
+  for (const text of texts) {
+    const translated = await googleTranslate(text, targetLang, sourceLang);
+    results.push({ text, translated });
+  }
+  console.table(results);
+  return results;
+}
+
 // Translate buttons event listeners
 document.addEventListener('DOMContentLoaded', async () => {
   document.addEventListener('click', async e => {
