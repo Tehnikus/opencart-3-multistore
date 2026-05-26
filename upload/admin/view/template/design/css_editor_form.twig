@@ -50,36 +50,6 @@
 </div>
 
 <script>
-  // document.addEventListener('DOMContentLoaded', () => {
-  //   const textarea = document.querySelector('textarea[name="css"]');
-  //   const userToken = "{{ user_token }}";
-  //   var codemirror = CodeMirror.fromTextArea(textarea, {
-  //     mode: 'text/html',
-  //     height: '500px',
-  //     lineNumbers: true,
-  //     autofocus: true,
-  //     theme: 'monokai'
-  //   });
-  //   codemirror.setValue(textarea.value);
-
-
-  //   document.querySelector('.save').addEventListener('click', () => {
-  //     const text = codemirror.getValue();
-  //     data = new FormData();
-  //     data.append('code', text);
-
-  //     fetch(`index.php?route=design/css_editor/fetchSave&user_token=${userToken}`, {method: "POST", body: data})
-  //     .then(r => r.json())
-  //     .then(r => {
-  //       const messageBlock = document.querySelector('.editorMessage');
-  //       messageBlock.classList.toggle('alert-success', r.success);
-  //       messageBlock.classList.toggle('alert-danger', !r.success);
-  //       messageBlock.innerHTML = `<p>${r.message}</p>`;
-  //       messageBlock.style.display = '';
-  //     })
-  //   })
-  // });
-
   document.addEventListener('DOMContentLoaded', () => {
     const editors = [];
     document.querySelectorAll('textarea.codeEditor').forEach(textarea => {
