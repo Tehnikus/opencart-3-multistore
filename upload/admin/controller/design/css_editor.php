@@ -2,20 +2,21 @@
 class ControllerDesignCssEditor extends Controller {
 
   private $filePath;
+  private $allowedFiles;
   public function __construct($registry) {
     parent::__construct($registry);
     $store_id = (int) $this->session->data['store_id'];
     $themeName = $this->config->get('config_theme');
     $this->load->model('setting/setting');
     $themeDir = $this->model_setting_setting->getSettingValue("theme_{$themeName}_directory", $store_id);
-    $this->filePath = DIR_CATALOG . "view/theme/" . $themeDir . "/css/";
+    $this->filePath = DIR_CATALOG . "view/theme/{$themeDir}/css/";
+
+    $this->allowedFiles = ["custom_{$store_id}", "main"];
   }
   
-  private $error = [];
   public function index() {
     $this->load->language('design/css_editor');
     $this->document->setTitle($this->language->get('heading_title'));
-    
     $this->getForm();
   }
   
@@ -41,37 +42,41 @@ class ControllerDesignCssEditor extends Controller {
   public function getFormData() : array {
     $this->load->language('design/css_editor');
     $formData = [];
-    $store_id = (int) $this->session->data['store_id'];
-    $path = dirname($this->filePath) . "/custom_{$store_id}.css";
-    
-    if (!is_writable(dirname($path))) {
-      return ['error_message' => $this->language->get('message_css_not_writable')];
-    }
 
-    if (!is_file($path)) {
-      @touch($path);
+    foreach ($this->allowedFiles as $fileName) {
+      $fullPath = "{$this->filePath}{$fileName}.css";
+      
+      if (!is_writable($this->filePath)) {
+        return ['error_message' => sprintf($this->language->get('message_css_not_writable'), $fileName, $this->filePath)];
+      }
+      $formData['files'][$fileName] = [
+        'name' => $fileName,
+        'code' => file_exists($fullPath) ? file_get_contents($fullPath) : '',
+      ];
     }
-
-    $formData['css'] = file_exists($path) ? file_get_contents($path) : '';
 
     return $formData;
   }
 
-  public function saveCss(string $content): bool {
-    $store_id = (int) $this->session->data['store_id'];
-    $path = dirname($this->filePath) . "/custom_{$store_id}.css";
+  public function saveCss(string $content, string $fileName) : bool {
+    // Check file name before save
+    if (!in_array($fileName, $this->allowedFiles)) {
+      return false;
+    }
+    $fullPath = "{$this->filePath}{$fileName}.css";
 
-    if (!is_writable(dirname($path))) {
+    if (!is_writable(dirname($fullPath))) {
       return false;
     }
 
-    return file_put_contents($path, $content, LOCK_EX) !== false;
+    return file_put_contents($fullPath, $content, LOCK_EX) !== false;
   }
   
-  public function fetchSave() {
+  public function fetchSave() : void {
     $this->load->language('design/css_editor');
-    $result = $this->saveCss(html_entity_decode($this->request->post['css']));
-    $fileName = $this->request->post['filename'] ?? '';
+    $fileName = $this->request->post['fileName'] ?? '';
+    $code     = $this->request->post['code'] ?? '';
+    $result   = $this->saveCss(html_entity_decode($code), $fileName);
     $json = [
       'success' => $result,
       'message' => $result ? sprintf($this->language->get('message_css_saved'), $fileName) : sprintf($this->language->get('message_css_not_writable'), $fileName, $this->filePath)
