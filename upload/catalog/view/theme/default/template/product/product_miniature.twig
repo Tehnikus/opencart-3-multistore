@@ -33,18 +33,17 @@
           </div>
         {% endif %}
       {% if product.price_value and product.price_value != 0 %}
-        <p class="prices h3">
+        <div class="prices">
           {% if not product.special %}
-            <span class="text-price">{{ text_price }}</span> {{ product.price }}
+            <p><span class="text-price">{{ text_price }}</span>&nbsp;<span class="price h3 b">{{ product.price }}</span></p>
           {% else %} 
-            <span class="text-price">{{ text_new_price }}</span>
-            <span class="price-new">{{ product.special }}</span>
-            <span class="price-old"><span class="text-price">{{ text_old_price }}</span> {{ product.price }}</span> 
+            <p><span class="text-price">{{ text_new_price }}</span>&nbsp;<span class="price-new h3 b">{{ product.special }}</span></p>
+            <p><span class="text-price">{{ text_old_price }}</span>&nbsp;<s class="price-old disabled">{{ product.price }}</s></p>
           {% endif %}
           {% if product.tax %} 
-            <span class="price-tax">{{ text_tax }} {{ product.tax }}</span> 
+            <p class="price-tax">{{ text_tax }} {{ product.tax }}</p> 
           {% endif %} 
-        </p>
+        </div>
       {% endif %}
     </div>
     <div class="btn-group">
