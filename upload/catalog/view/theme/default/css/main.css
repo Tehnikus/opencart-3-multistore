@@ -78,6 +78,8 @@
   h5, .h5 {font-size: var(--font-size-h5);}
   b, .b, strong, .strong {font-weight: bold; color: var(--color-text-strong)}
   .muted, .disabled, disabled {color: var(--color-text-muted);}
+  s {position: relative; text-decoration: none;}
+  s:before {content: ""; position: absolute; left: 0; top: 50%; right: 0; border-top: 1px solid; border-color: inherit; transform:rotate(-10deg)}
   
   a {
     text-decoration: none;
