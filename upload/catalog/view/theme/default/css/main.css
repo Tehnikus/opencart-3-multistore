@@ -382,6 +382,10 @@
   & .caption {
     flex: 1 1 auto;
   }
+  & .prices {
+    margin-top: auto;
+    text-align: center;
+  }
 }
 
 .facetFilter {
