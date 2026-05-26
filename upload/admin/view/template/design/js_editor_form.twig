@@ -56,9 +56,9 @@
       const saveButton = textarea.closest('form').querySelector('button.saveCode');
 
       const editor = CodeMirror.fromTextArea(textarea, {
-        mode: 'text/html',
+        mode: 'javascript',
         lineNumbers: true,
-        theme: 'monokai'
+        theme: 'vibrant-ink'
       });
 
       editor.setSize('100%', '500px');
@@ -100,8 +100,8 @@
 </style>
 
 <link href="view/javascript/codemirror/lib/codemirror.css" rel="stylesheet" />
-<link href="view/javascript/codemirror/theme/monokai.css" rel="stylesheet" />
+<link href="view/javascript/codemirror/theme/vibrant-ink.css" rel="stylesheet" />
 <script type="text/javascript" src="view/javascript/codemirror/lib/codemirror.js"></script> 
-<script type="text/javascript" src="view/javascript/codemirror/lib/xml.js"></script> 
+<script type="text/javascript" src="view/javascript/codemirror/lib/javascript.js"></script> 
 <script type="text/javascript" src="view/javascript/codemirror/lib/formatting.js"></script> 
 {{ footer }}
