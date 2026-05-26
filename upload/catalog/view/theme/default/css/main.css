@@ -1,4 +1,4 @@
-@layer reset, base, template, interface;
+@layer reset, base, layout, interface;
 
 /* Minimal reset */
 @layer reset {
@@ -182,53 +182,9 @@ body {
     width: calc(var(--font-size) * 1.5);
     height: calc(var(--font-size) * 1.5);
     stroke-width: 2px;
-  }
-}
 
-#wrapper {
-	display: flex;
-	flex: 1;
-	gap: var(--grid-gap);
-	padding: var(--grid-gap);
-	width: 100%;
-	min-width: 0;
-}
-main {
-	flex: 1 1 auto;
-	min-width: 0;
-	background: var(--background-main);
-	display: flex;
-	flex-direction: column;
-	gap: var(--grid-gap);
-}
-aside {
-  background: var(--background-aside);
-	flex: 0 0 var(--width-column);
-	gap: var(--grid-gap);
-}
 
-@media (max-width: 768px) {
-	aside {
-		position: fixed;
-		top: 0;
-		bottom: 0;
-		width: min(--width-column, 90vw);
-		overflow-y: auto;
-		transition: transform .3s ease;
-    left: 0;
-    &#columnLeft {
-      transform: translateX(-100%);
-    }
-    &#columnRight {
-      transform: translateX(100%);
-    }
-    &.open {
-      transform: translateX(0);
-    }
-	}
-}
-
-@layer template {
+@layer layout {
 
   header, footer {
     display: flex;
@@ -241,6 +197,9 @@ aside {
   header {
     justify-content: space-between;
     background: var(--background-header);
+    position: sticky;
+    top: 0;
+    z-index: 2;
     & .left, & .right {
       display: flex;
       flex: 0 1 auto;
@@ -256,24 +215,53 @@ aside {
     justify-content: space-around;
     background: var(--background-footer);
     color: var(--color-footer-text);
-    /* & a {
-      color: var(--color-footer-links);
-      &:hover {
-        oklch(from var(--color-footer-links) calc(l - 0.1) c h);
-      }
-    } */
+    & a {
+      color: var(--color-footer-text);
+      &:hover {color: var(--color-primary-dark)}
+    }
   }
-  
-  main {background: var(--background-main); gap: var(--grid-gap);}
-  aside {background: var(--background-aside); gap: var(--grid-gap);}
+
   #wrapper {
     display: flex;
-    flex-direction: row;
-    flex: 1 0 100%;
+    flex: 1;
     gap: var(--grid-gap);
     padding: var(--grid-gap);
     width: 100%;
-    max-width: 100%;
+    min-width: 0;
+  }
+  main {
+    flex: 1 1 auto;
+    min-width: 0;
+    background: var(--background-main);
+    display: flex;
+    flex-direction: column;
+    gap: var(--grid-gap);
+  }
+  aside {
+    background: var(--background-aside);
+    flex: 0 0 var(--width-column);
+    gap: var(--grid-gap);
+  }
+
+  @media (max-width: 768px) {
+    aside {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: min(--width-column, 90vw);
+      overflow-y: auto;
+      transition: transform var(--time) var(--style);
+      left: 0;
+      &#columnLeft {
+        transform: translateX(-100%);
+      }
+      &#columnRight {
+        transform: translateX(100%);
+      }
+      &.open {
+        transform: translateX(0);
+      }
+    }
   }
   
   nav {
