@@ -327,7 +327,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--width-column), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--width-column), 100%), 1fr));
   gap: var(--grid-gap);
   grid-auto-rows: 1fr;
   width: 100%;
