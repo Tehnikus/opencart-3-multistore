@@ -60,16 +60,17 @@
   </div>
 </nav>
 <header>
-  <div class="container">
-    <div class="row">
-      <div class="col-sm-4">
-        <div id="logo">{% if logo %}<a href="{{ home }}"><img src="{{ logo }}" title="{{ name }}" alt="{{ name }}" class="img-responsive" /></a>{% else %}
-          <h1><a href="{{ home }}">{{ name }}</a></h1>
-          {% endif %}</div>
-      </div>
-      <div class="col-sm-5">{{ search }}</div>
-      <div class="col-sm-3">{{ cart }}</div>
-    </div>
+  <div role="presentation" class="header left">
+    {% if logo %}
+      <a href="{{ home }}">
+        <img src="{{ logo }}" title="{{ name }}" alt="{{ name }}" width="{{ logo_width }}" height="{{ logo_height }}" class="img-responsive" />
+      </a>
+    {% else %}
+      <span><a href="{{ home }}">{{ name }}</a></span>
+    {% endif %}
   </div>
+  <div role="note" class="header center"></div>
+  <div role="note" class="header right"></div>
 </header>
+
 {{ menu }}
