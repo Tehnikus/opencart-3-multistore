@@ -49,8 +49,8 @@
     --color-text-strong: oklch(from var(--color-text) calc(l - 0.2) c h);
   
     --color-primary: #fb8000;
-    --color-primary-light: oklch(from var(--color-primary) calc(l + 0.1) c h);
-    --color-primary-dark: oklch(from var(--color-primary) calc(l - 0.1) c h);
+    --color-primary-light: oklch(from var(--color-primary) calc(l + 0.2) c h);
+    --color-primary-dark: oklch(from var(--color-primary) calc(l - 0.07) c h);
   
     --color-secondary: #333;
     --color-footer-text: #aaa;
@@ -65,7 +65,6 @@
     background: var(--background-body);
     font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,Segoe UI Emoji,Apple Color Emoji,Noto Color Emoji,sans-serif;
     font-family:'Roboto',sans-serif;
-    
   }
 }
 
@@ -264,15 +263,9 @@
       overflow-y: auto;
       transition: transform var(--time) var(--style);
       left: 0;
-      &#columnLeft {
-        transform: translateX(-100%);
-      }
-      &#columnRight {
-        transform: translateX(100%);
-      }
-      &.open {
-        transform: translateX(0);
-      }
+      &#columnLeft {transform: translateX(-100%);}
+      &#columnRight {transform: translateX(100%);}
+      &.open {transform: translateX(0);}
     }
   }
   
@@ -300,7 +293,7 @@
   filter: var(--filter);
   will-change: transform;
   border-radius: var(--border-radius-block);
-  padding: calc(var(--block-gap) * 0.7);
+  padding: calc(var(--grid-gap) * 0.7);
 }
 
 .grid {
@@ -356,6 +349,9 @@
   & .prices {
     margin-top: auto;
     text-align: center;
+    & .price-new {
+      color: crimson;
+    }
   }
 }
 
@@ -368,7 +364,7 @@
     display: flex;
     align-items: center;
     gap: calc(var(--font-size) * 0.7);
-    & .facetLabel {
+    & .facetLabel, & .facetName {
       display: flex;
       flex: 1 0 auto;
       justify-content: space-between;
