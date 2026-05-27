@@ -358,6 +358,7 @@ Class ModelCatalogFacet extends Model {
             12                AS `facet_type`
           FROM `bestseller`
           WHERE `rank` <= {$bestsellerCount}
+            AND `qty` > 0
           GROUP BY `product_id`, `store_id`
         ",
 
