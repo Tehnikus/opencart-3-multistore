@@ -279,30 +279,14 @@
 
 .flex {
   display: flex;
-  &.column {
-    flex-direction: column;
-  }
-  &.row {
-    flex-direction: row;
-  }
-  &.wrap {
-    flex-wrap: wrap;
-  }
-  &.nowrap {
-    flex-wrap: nowrap;
-  }
-  &.align-center {
-    align-items: center;
-  }
-  &.justify-center {
-    justify-content: center;
-  }
-  &.width-100 {
-    width: 100%;
-  }
-  &.flex-1-1-auto {
-    flex: 1 1 auto;
-  }
+  &.column {flex-direction: column;}
+  &.row {flex-direction: row;}
+  &.wrap {flex-wrap: wrap;}
+  &.nowrap {flex-wrap: nowrap;}
+  &.align-center {align-items: center;}
+  &.justify-center {justify-content: center;}
+  &.width-100 {width: 100%;}
+  &.flex-1-1-auto {flex: 1 1 auto;}
 }
 
 .block {
@@ -323,26 +307,6 @@
     --width-column: 14rem;
   }
 }
-
-/* .grid {
-	--width-column: 21rem;
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--grid-gap);
-	width: 100%;
-  justify-content: flex-start;
-  & .miniature {
-    flex: 1 1 var(--width-column);
-    min-width: min(100%, var(--width-column));
-    max-width: 100%;
-    max-width: clamp(
-      var(--width-column),
-      30vw,
-      24rem
-    );
-
-  }
-} */
 
 .btn-group {
   display: flex;
