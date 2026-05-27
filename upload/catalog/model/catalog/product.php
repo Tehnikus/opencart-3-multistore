@@ -615,7 +615,7 @@ class ModelCatalogProduct extends Model {
 		$rating = ($this->config->get('config_review_status')) ? round((float) $productData['rating'], 1) : false;
 
 		$shortDesciption = '';
-		$description = strip_tags($productData['description']);
+		$description = strip_tags(html_entity_decode($productData['description']));
 		if (mb_strlen($description) > $descLength) {
 			$description = explode('.', $description);
 			$sentenceCount = 0;
