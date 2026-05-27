@@ -163,7 +163,7 @@
     justify-content: center;
     white-space: nowrap;
     border-radius: var(--border-radius-elements);
-    padding: calc(var(--font-size) * 0.3);
+    padding: calc(var(--font-size) * 0.5);
     transition: background var(--time) var(--style);
     background: #fff;
     cursor: pointer;
@@ -324,7 +324,7 @@
   filter: var(--filter-miniature);
   will-change: transform;
   border-radius: var(--border-radius-block);
-  padding: calc(var(--block-gap) * 0.7);
+  padding: calc(var(--grid-gap) * 0.7);
   & img {
     width: 100%;
     aspect-ratio: 1 / 1;
@@ -339,9 +339,10 @@
   & .infos {
     flex: 1 1 100%;
     width: 100%;
+    gap: calc(var(--grid-gap) * .5);
   }
   & .rating {
-    gap: calc(var(--block-gap) * 0.5);
+    gap: calc(var(--grid-gap) * 0.5);
   }
   & .caption {
     flex: 1 1 auto;
@@ -353,8 +354,9 @@
 }
 
 .facetFilter {
+  gap: calc(var(--font-size) * .5);
   .facetGroup{
-    gap: .3rem
+    gap: calc(var(--font-size) * .3);
   }
   & .facetItem {
     display: flex;
