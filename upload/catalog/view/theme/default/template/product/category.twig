@@ -38,7 +38,20 @@
         <div><span>{{ results }}</span></div>
       </div>
     {% endif %}
-  </main>
+    {% if faq %}
+      {% for item in faq.mainEntity %}
+        <details>
+          <summary>
+            {{ item.name }}
+          </summary>
+          <div class="content">
+            {{ item.acceptedAnswer.text}}
+          </div>
+        </details>
+      {% endfor %}
+    {% endif %}
+
+    </main>
   {{ column_right }}
 </div>
 {{ footer }} 
