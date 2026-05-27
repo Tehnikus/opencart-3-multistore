@@ -66,7 +66,7 @@ class ControllerCommonHeader extends Controller {
 	}
 
 	private function getCachedData() : array {
-		
+		$data 				= false;
 		$language_id 	= (int) $this->config->get('config_language_id');
 		$store_id 		= (int) $this->config->get('config_store_id');
 		$cacheSetting = (bool) $this->config->get('cache_header');
@@ -76,7 +76,7 @@ class ControllerCommonHeader extends Controller {
 			$data = $this->cache->get($cacheName);
 		}
 
-		if ($data) {
+		if ($data !== false) {
 			return $data;
 		}
 
