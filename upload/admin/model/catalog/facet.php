@@ -337,7 +337,7 @@ Class ModelCatalogFacet extends Model {
             p2s.`store_id`    AS `store_id`,
             1                 AS `facet_value_id`,
             0                 AS `facet_group_id`,
-            12                AS `facet_type`
+            11                AS `facet_type`
           FROM `" . DB_PREFIX . "product_to_store` p2s
           JOIN `" . DB_PREFIX . "product` p
             ON  p.`product_id` = p2s.`product_id`
@@ -355,7 +355,7 @@ Class ModelCatalogFacet extends Model {
             `store_id`        AS `store_id`, 
             1                 AS `facet_value_id`, 
             0                 AS `facet_group_id`, 
-            11                AS `facet_type`
+            12                AS `facet_type`
           FROM `bestseller`
           WHERE `rank` <= {$bestsellerCount}
           GROUP BY `product_id`, `store_id`
