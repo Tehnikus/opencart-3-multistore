@@ -16,7 +16,7 @@
         <tbody>
           {% for key, row in cacheSettings %}
             <tr>
-              <td><b>{{ attribute(_context, 'developer_setting_' ~ key) }}</b></td>
+              <td>{{ attribute(_context, 'developer_setting_' ~ key) }}</td>
               <td>
                 {% if row.config is defined %}
                   <div class="btn-switch" style="display: flex">
