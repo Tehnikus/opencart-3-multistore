@@ -19,10 +19,10 @@ class ModelCatalogCategory extends Model {
 			WITH category_stats AS (
 				SELECT
 					`category_id`,
-					MIN(`current_price`) 	AS `min_price`,
-					MAX(`current_price`) 	AS `max_price`,
-					AVG(`rating_avg`) 		AS `rating_avg`,
-					SUM(`review_count`)		AS `review_count`,
+					MIN(`current_price`) 	AS `price_min`,
+					MAX(`current_price`) 	AS `price_max`,
+					AVG(`rating_avg`) 		AS `rating`,
+					SUM(`review_count`)		AS `reviews`,
 					COUNT(`product_id`)		AS `product_count`
 				FROM " . DB_PREFIX . "facet_sort
 				WHERE `category_id` = {$category_id}
@@ -44,15 +44,15 @@ class ModelCatalogCategory extends Model {
 				cd.`description`,
 				cd.`seo_keywords`,
 				cd.`seo_description`,
-				cd.`faq`,
-				cd.`how_to`,
+				cd.`faq` AS faq_json,
+				cd.`how_to` AS how_to_json,
 				cd.`footer`,
 				cd.`date_modified`,
 				cd.`language_id`,
-				cs.`min_price`,
-				cs.`max_price`,
-				cs.`rating_avg`,
-				cs.`review_count`,
+				cs.`price_min`,
+				cs.`price_max`,
+				cs.`rating`,
+				cs.`reviews`,
 				cs.`product_count`,
 				JSON_ARRAYAGG(
 					JSON_OBJECT(
