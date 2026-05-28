@@ -19,7 +19,7 @@ class ControllerExtensionFeedGoogleSitemap extends Controller {
 
 				if ($product['image']) {
 					$output .= '<image:image>' . PHP_EOL;
-					$output .= '  <image:loc>' . $this->model_tool_image->resize($product['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height')) . '</image:loc>' . PHP_EOL;
+					$output .= '  <image:loc>' . $this->model_tool_image->resize($product['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_main_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_main_height')) . '</image:loc>' . PHP_EOL;
 					$name = html_entity_decode($product['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 					$output .= '  <image:caption>' . htmlspecialchars($name, ENT_XML1 | ENT_QUOTES, 'UTF-8') . '</image:caption>' . PHP_EOL;
 					$output .= '  <image:title>' . htmlspecialchars($name, ENT_XML1 | ENT_QUOTES, 'UTF-8') . '</image:title>' . PHP_EOL;
