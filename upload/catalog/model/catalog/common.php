@@ -8,11 +8,11 @@ class ModelCatalogCommon extends Model {
    */
   public function prepageCommonData($total = null) : array {
     $data = [];
-    $this->addDocumentLinks($total);
+    // $this->addDocumentLinks($total);
     // Pagination
-    $pagination               = $this->preparePagination($total);
-    $data['pagination']       = $pagination['pagiantion'] ?? [];
-    $data['results']          = $pagination['results']    ?? '';
+    // $pagination               = $this->addPagination($total);
+    // $data['pagination']       = $pagination['pagiantion'] ?? [];
+    // $data['results']          = $pagination['results']    ?? '';
 
     $data['page']             = (int) ($this->request->get['page'] ?? 1);
     $data['limit']            = (int) ($this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit') ?? 20);
@@ -32,7 +32,7 @@ class ModelCatalogCommon extends Model {
    * @param mixed $total
    * @return array
    */
-  public function preparePagination($allowedRequestParams = [], $total = null) : array {
+  public function addPagination($allowedRequestParams = [], $total = null) : array {
     if ($total === null) return [];
     $requestParams      = [];
     $data               = [];

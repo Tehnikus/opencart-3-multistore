@@ -21,7 +21,7 @@ class ControllerProductBestseller extends Controller {
 		// Allowed request params for correct pagination links
 		$allowedRequestParams = array_merge(array_column($this->model_catalog_product->getFacetTypes(), 'facetType'));
 		// Pagination
-		$pagination = $this->model_catalog_common->preparePagination($allowedRequestParams, $results['total']);
+		$pagination = $this->model_catalog_common->addPagination($allowedRequestParams, $results['total']);
 		
 		// Canonical links
 		$this->model_catalog_common->addDocumentLinks($results['total']);
@@ -33,8 +33,6 @@ class ControllerProductBestseller extends Controller {
 
 		// Merge all data
 		$data = array_merge($data, $commonData, $pagination);
-
-
 
 		// Display
 		$this->response->setOutput($this->load->view('product/category', $data));

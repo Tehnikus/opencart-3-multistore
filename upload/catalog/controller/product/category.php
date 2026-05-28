@@ -23,7 +23,7 @@ class ControllerProductCategory extends Controller {
 
 			// Get common interface: header, left and right columns, footer, etc.
 			$commonData = $this->model_catalog_common->prepageCommonData($results['total']);
-			$pagination = $this->model_catalog_common->preparePagination($allowedRequestParams, $results['total']);
+			$pagination = $this->model_catalog_common->addPagination($allowedRequestParams, $results['total']);
 			$this->model_catalog_common->addDocumentLinks($results['total']);
 
 			foreach ($results['products'] as $row) {
