@@ -401,6 +401,24 @@ class ModelCatalogProduct extends Model {
 				) AS attributes,
 
 				(
+					SELECT JSON_ARRAYAGG(
+						JSON_OBJECT(
+							'review_text', 		r.`text`,
+							'review_date', 		r.`date_added`,
+							'review_rating', 	r.`rating`,
+							'author',					r.`author`	
+						)
+					)
+					FROM " . DB_PREFIX . "review r
+					WHERE r.`product_id` 	= p2s.`product_id`
+						AND r.`store_id`	 	= p2s.`store_id`
+						AND r.`language_id` = pd.`language_id`
+						AND r.`status` 			= 1
+					ORDER BY r.`date_modified` DESC
+					LIMIT 1
+				) AS last_reviews,
+
+				(
 					SELECT JSON_OBJECTAGG(
 						po.`product_option_id`, JSON_OBJECT(
 
