@@ -105,7 +105,7 @@ class ModelCatalogCommon extends Model {
    */
   public function addDocumentSeo($data = []) {
     $shortDesciption = '';
-		$description = strip_tags($data['description']);
+		$description = strip_tags($data['description'] ?? $data['h1'] ?? $data['name']);
 		if (mb_strlen($description) > 255) {
 			$description = explode('.', $description);
 			$sentenceCount = 0;
