@@ -717,9 +717,14 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
     "xx-large", "xx-small"
   ], valueKeywords = keySet(valueKeywords_);
 
+  var builtin_ = ["html", "body", "img",  "picture", "video", "canvas", "svg", "figure", "input", "button", "textarea", "select", 
+    "p", "h1", "h2", "h3", "h4", "h5", "h6", "span", "strong", "a", 
+    "button", "summary", "dialog", "input", "select", "textarea", "div", "article", "label"
+  ], builtIn = keySet(builtin_);
+
   var allWords = documentTypes_.concat(mediaTypes_).concat(mediaFeatures_).concat(mediaValueKeywords_)
     .concat(propertyKeywords_).concat(nonStandardPropertyKeywords_).concat(colorKeywords_)
-    .concat(valueKeywords_);
+    .concat(valueKeywords_).concat(builtin_);
   CodeMirror.registerHelper("hintWords", "css", allWords);
 
   function tokenCComment(stream, state) {
