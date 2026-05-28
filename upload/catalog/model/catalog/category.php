@@ -94,8 +94,8 @@ class ModelCatalogCategory extends Model {
 
 		$data['cache_date'] 			= strtotime($data['date_modified']); // Cache version
 		$data['seo_keywords'] 		= json_decode($data['seo_keywords'] ?? '[]', true);
-		$data['faq'] 							= json_decode($data['faq'] ?? '[]', true);
-		$data['how_to'] 					= json_decode($data['how_to'] ?? '[]', true);
+		$data['faq'] 							= json_decode($data['faq_json'] ?? '[]', true);
+		$data['how_to'] 					= json_decode($data['how_to_json'] ?? '[]', true);
 		$data['footer'] 					= json_decode($data['footer'] ?? '[]', true);
 		$data['images']						= json_decode($data['images'] ?? '[]', true);
 		$data['description']			= html_entity_decode($data['description'], ENT_QUOTES, 'UTF-8');
