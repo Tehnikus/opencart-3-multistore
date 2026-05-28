@@ -25,6 +25,7 @@
     --background-main: transparent;
     --background-aside: transparent;
     --background-footer: #333;
+    --background-nav-top: #333;
     
     --background-miniature: #fff;
     
@@ -302,6 +303,11 @@
     display: flex;
     flex-wrap: nowrap;
     width: 100%;
+    padding: var(--grid-gap);
+    &#top {
+      background: var(--background-nav-top);
+      & > * {color: var(--color-primary-dark);}
+    }
   }
 }
 
