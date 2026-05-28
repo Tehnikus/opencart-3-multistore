@@ -85,15 +85,16 @@ class Document {
 
 	/**
 	 * Set document JSON-LD microdata
-	 * @param string $type
 	 * @param array $data
 	 * @return void
 	 */
-	public function setJsonLd(string $type, array $data = []) : void {
-		$this->jsonLd[$type] = $data;
+	public function setJsonLd(array $data = []) : void {
+		if (!empty($data)) {
+			$this->jsonLd[] = json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_HEX_QUOT|JSON_HEX_APOS);
+		}
 	}
 
-	public function getJsonLd() : string {
-		return json_encode($this->jsonLd, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_HEX_QUOT|JSON_HEX_APOS);
+	public function getJsonLd() : array {
+		return $this->jsonLd;
 	}
 }
