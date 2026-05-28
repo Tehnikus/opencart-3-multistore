@@ -12,7 +12,6 @@
     {{ content_top }}
     {# Subcategories #}
     {% if child_categories %}
-      <span>{{ text_subcategories }}</span>
       <div id="subcategories" class="grid">
         {% for category in child_categories %}
           <div class="miniature">
@@ -31,7 +30,7 @@
         {% include 'default/template/product/product_miniature.twig' %}
       {% endfor %} 
       </div>
-      <div id="pagination">
+      <div id="pagination" class="flex justyfy-center">
         {% if pagination %}
           <div>{{ pagination }}</div>
         {% endif %}
