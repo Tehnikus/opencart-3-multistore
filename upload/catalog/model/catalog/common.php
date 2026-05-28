@@ -123,25 +123,232 @@ class ModelCatalogCommon extends Model {
   }
 
   /**
-   * Add JSON-LD Microdata
-   * @param mixed $data
-   * @return void
+   * Add JSON-LD microdata to document
    */
-  public function addDocumentJsonLd($data = []) : void {
-    $this->document->setJson('faq',             $data['faq']);
-    $this->document->setJson('howTo',           $data['how_to']);
-    $this->document->setJson('image',           $data['image']);
-    $this->document->setJson('images',          $data['images']);
-    $this->document->setJson('product',         $data['product']);
-    $this->document->setJson('products',        $data['products']);
-    $this->document->setJson('review',          $data['review']);
-    $this->document->setJson('aggregateRating', $data['aggregateRating']);
-    $this->document->setJson('productGroup',    $data['aggregateRating']);
-    $this->document->setJson('Organization',    $data['Organization']);
-    $this->document->setJson('LocalBusiness',   $data['LocalBusiness']);
-    $this->document->setJson('Article',         $data['Article']);
-    $this->document->setJson('BreadcrumbList',  $data['BreadcrumbList']);
-    $this->document->setJson('ItemList',        $data['ItemList']);
+  public function addDocumentJsonLd(array $data) : void {
+    if (!empty($data['product'])) {
+      $schema = $this->buildProductMicroData($data['product']);
+      if ($schema) {
+        $this->document->setJsonLd($schema);
+      }
+    }
+    // TODO Later add buildCategoryMicroData, buildArticleMicroData etc
   }
 
+  /**
+   * Build Product / ProductGroup schema
+   */
+  private function buildProductMicroData(array $product) : array {
+    $currency = $this->config->get('config_currency') ?: 'UAH';
+
+    $schema = [
+      '@context' => 'https://schema.org',
+      '@type'    => 'Product',
+      'name'     => $product['name'],
+    ];
+
+    // Description cleanup tags and entities
+    if (!empty($product['description'])) {
+      $schema['description'] = mb_substr(strip_tags($product['description']), 0, 5000);
+    }
+
+    // GTIN
+    foreach (['gtin13', 'gtin8', 'mpn', 'sku'] as $key) {
+      if (!empty($product[$key])) {
+        $schema[$key] = $product[$key];
+      }
+    }
+
+    // URL
+    if (!empty($product['url'])) {
+      $schema['url'] = $product['url'];
+    }
+
+    // Images
+    $images = $this->buildImageList($product);
+    if (!empty($images)) {
+      $schema['image'] = count($images) === 1 ? $images[0] : $images;
+    }
+
+    // Brand
+    if (!empty($product['manufacturer'])) {
+      $schema['brand'] = [
+        '@type' => 'Brand',
+        'name'  => $product['manufacturer'],
+      ];
+    }
+
+    // Offers
+    $schema['offers'] = $this->buildOffers($product, $currency);
+
+    // Aggregate Rating
+    if (!empty($product['rating']) && !empty($product['reviews'])) {
+      $schema['aggregateRating'] = [
+        '@type'         => 'AggregateRating',
+        'ratingValue'   => $product['rating'],
+        'reviewCount'   => (int) $product['reviews'],
+        'worstRating'   => 1,
+        'bestRating'    => 5,
+      ];
+    }
+
+    // Reviews
+    if (!empty($product['last_reviews'])) {
+      $schema['review'] = $this->buildReviews($product['last_reviews']);
+    }
+
+    return $schema;
+  }
+
+  /**
+   * Offer or AggregateOffer
+   */
+  private function buildOffers(array $product, string $currency) : array {
+    // AggregateOffer
+    if (isset($product['price_min'], $product['price_max'])) {
+      $offer = [
+        '@type'           => 'AggregateOffer',
+        'priceCurrency'   => $currency,
+        'lowPrice'        => $product['price_min'],
+        'highPrice'       => $product['price_max'],
+        'availability'    => 'https://schema.org/InStock',
+        'itemCondition'   => 'https://schema.org/NewCondition',
+      ];
+      if (!empty($product['product_count'])) {
+        $offer['offerCount'] = (int) $product['product_count'];
+      }
+      return $offer;
+    }
+
+    // Offer
+    // Availability might be empty for categories and other product lists
+    $availability = (!empty($product['quantity']) && $product['quantity'] > 0) ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
+
+    $offer = [
+      '@type' => 'Offer',
+      'priceCurrency'     => $currency,
+      'availability'      => $availability,
+      'itemCondition'     => 'https://schema.org/NewCondition',
+      'priceValidUntil'   => $product['special_date_end'] ?? date('Y-m-d', strtotime('+1 month')),
+    ];
+
+    // Apply canonical URL
+    if (!empty($product['url'])) {
+      $offer['url'] = $product['url'];
+    }
+
+    // Apply special price in priceSpecification if applicable
+    if (!empty($product['special'])) {
+      $offer['priceSpecification'] = [
+        [
+          '@type'         => 'UnitPriceSpecification',
+          'price'         => $product['special'],      // current price
+          'priceCurrency' => $currency,
+        ],
+        [
+          '@type'         => 'UnitPriceSpecification',
+          'priceType'     => 'https://schema.org/StrikethroughPrice',
+          'price'         => $product['price'],        // Old price strikethrough
+          'priceCurrency' => $currency,
+        ],
+      ];
+    } else {
+      $offer['price'] = $product['price'];
+    }
+
+    return $offer;
+  }
+
+  /**
+   * List of ImageObject from main image and additional images
+   */
+  private function buildImageList(array $product) : array {
+    $images = [];
+
+    if (!empty($product['image']) && !str_contains($product['image'], 'no_image')) {
+      $images[] = [
+        '@type'   => 'ImageObject',
+        'url'     => $product['image'],
+      ];
+    }
+
+    foreach ($product['images'] ?? [] as $img) {
+      $url = is_array($img) ? ($img['image'] ?? '') : $img;
+      if ($url && !str_contains($url, 'no_image')) {
+        $images[] = [
+          '@type'         => 'ImageObject', 
+          'url'           => $url,
+          'height'        => $img['height'],
+          'width'         => $img['width'],
+          'description'   => $img['description'] ?? $product['name'],
+        ];
+      }
+    }
+
+    return $images;
+  }
+
+  /**
+   * Reviews array
+   */
+  private function buildReviews(array $reviews) : array {
+    $result = [];
+
+    foreach ($reviews as $review) {
+      $item = [
+        '@type' => 'Review',
+        'author' => [
+          '@type' => 'Person',
+          'name' => $review['author'],
+        ],
+        'reviewRating' => [
+          '@type' => 'Rating',
+          'ratingValue' => $review['review_rating'],
+          'worstRating' => 1,
+          'bestRating' => 5,
+        ],
+      ];
+
+      if (!empty($review['review_date'])) {
+        $item['datePublished'] = $review['review_date'];
+      }
+      if (!empty($review['review_text'])) {
+        $item['reviewBody'] = $review['review_text'];
+      }
+
+      $result[] = $item;
+    }
+
+    return $result;
+  }
+
+
+  private function buildShippingDetails() {
+          //   "shippingDetails": {
+          // "@type": "OfferShippingDetails",
+          // "shippingRate": {
+          //   "@type": "MonetaryAmount",
+          //   "value": 3.49,
+          //   "currency": "USD"
+          // },
+          // "shippingDestination": {
+          //   "@type": "DefinedRegion",
+          //   "addressCountry": "US"
+          // },
+          // "deliveryTime": {
+          //   "@type": "ShippingDeliveryTime",
+          //   "handlingTime": {
+          //     "@type": "QuantitativeValue",
+          //     "minValue": 0,
+          //     "maxValue": 1,
+          //     "unitCode": "DAY"
+          //   },
+          //   "transitTime": {
+          //     "@type": "QuantitativeValue",
+          //     "minValue": 1,
+          //     "maxValue": 5,
+          //     "unitCode": "DAY"
+          //   }
+          // }
+  }
 }
