@@ -88,10 +88,6 @@ class ModelCatalogCategory extends Model {
 		// Safely return if category does not exist
 		if (empty(array_filter($data))) {return false;}
 
-		$this->load->model('tool/image');
-		$imageWidth 	= (int) ($this->config->get('theme_' . $this->config->get('config_theme') . '_image_category_width') ?? 250);
-		$imageHeight 	= (int) ($this->config->get('theme_' . $this->config->get('config_theme') . '_image_category_height') ?? 250);
-
 		$data['cache_date'] 			= strtotime($data['date_modified']); // Cache version
 		$data['seo_keywords'] 		= json_decode($data['seo_keywords'] ?? '[]', true);
 		$data['faq'] 							= json_decode($data['faq_json'] ?? '[]', true);
@@ -99,22 +95,51 @@ class ModelCatalogCategory extends Model {
 		$data['footer'] 					= json_decode($data['footer'] ?? '[]', true);
 		$data['images']						= json_decode($data['images'] ?? '[]', true);
 		$data['description']			= html_entity_decode($data['description'], ENT_QUOTES, 'UTF-8');
-		$data['image'] 						= $this->model_tool_image->resize($data['image'] ?? 'no_image.webp', $imageWidth, $imageHeight);
-		$data['imageWidth']				= $imageWidth;
-		$data['imageHeight']			= $imageHeight;
 		$data['child_categories']	= $this->getCategories($category_id);
+		usort(array: $data['images'], callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
 
+		// Resize images to store prepared image links
+		$this->load->model('tool/image');
+		$cover 							= [];
+		$categoryImages 		= [];
+		$theme        	 		= $this->config->get('config_theme');
+		$imgMainWidth  			= (int) ($this->config->get("theme_{$theme}_image_category_main_width") ?? 2000);
+		$imgMainHeight 			= (int) ($this->config->get("theme_{$theme}_image_category_main_height") ?? 2000);
+		$imgMiniatureWidth  = (int) ($this->config->get("theme_{$theme}_image_category_width") ?? 600);
+		$imgMiniatureHeight = (int) ($this->config->get("theme_{$theme}_image_category_height") ?? 600);
+
+		// Add cover to the beginning of images array
+		$cover['image'] 		  = $data['image'] ?? 'no_image.webp';
+		$cover['description'] = $data['name'];
+		
+		array_unshift($data['images'], $cover);
+
+		foreach ($data['images'] as $img) {
+			$categoryImages['covers'][] = [
+				'src' 				=> $this->model_tool_image->resize($img['image'], $imgMainWidth, $imgMainHeight),
+				'description' => $img['description'],
+				'width'				=> $imgMainWidth,
+				'height'			=> $imgMainHeight,
+			];
+
+			$categoryImages['miniatures'][] = [
+				'src' 				=> $this->model_tool_image->resize($img['image'], $imgMiniatureWidth, $imgMiniatureHeight),
+				'description' => $img['description'],
+				'width'				=> $imgMiniatureWidth,
+				'height'			=> $imgMiniatureHeight,
+			];
+		}
+
+		$data['images'] = $categoryImages;
+
+		// Child categories
 		foreach ($data['child_categories'] as $key => $child_category) {
-			$data['child_categories'][$key]['image'] = $this->model_tool_image->resize($child_category['image'] ?? 'no_image.webp', $imageWidth, $imageHeight);
+			$data['child_categories'][$key]['image'] = $this->model_tool_image->resize($child_category['image'] ?? 'no_image.webp', $imgMiniatureWidth, $imgMiniatureHeight);
 			$data['child_categories'][$key]['href']  = $this->url->link('product/category', 'path=' . $child_category['category_id']);
 			// Set cache version to max date among child categories
 			if (strtotime($child_category['date_modified']) > $data['cache_date']) {
 				$data['cache_date'] = strtotime($child_category['date_modified']);
 			}
-		}
-
-		foreach ($data['images'] as $key => $image) {
-			$data['images'][$key]['image'] = $this->model_tool_image->resize($image['image'] ?? 'no_image.webp', $imageWidth, $imageHeight);
 		}
 
 		$data['breadcrumbs'] = [];
@@ -127,7 +152,6 @@ class ModelCatalogCategory extends Model {
 			'href' => $this->url->link('product/category', 'path=' . $data['category_id']),
 		];
 
-    usort(array: $data['images'], callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
 
 		if ($cacheSetting) {
 			$this->cache->set($cacheName, $data);
