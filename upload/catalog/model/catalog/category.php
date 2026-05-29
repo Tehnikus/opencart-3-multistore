@@ -60,7 +60,25 @@ class ModelCatalogCategory extends Model {
 						'sort_order', 	ci.`sort_order`,
 						'description', 	cid.`description`
 					)
-				) AS images
+				) AS images,
+				(
+					SELECT JSON_ARRAYAGG(
+						JSON_OBJECT(
+							'review_text', 		r.`text`,
+							'review_date', 		r.`date_added`,
+							'review_rating', 	r.`rating`,
+							'author',					r.`author`	
+						)
+					)
+					FROM " . DB_PREFIX . "review r
+					WHERE r.`category_id` = c2s.`category_id`
+						AND r.`store_id`	 	= c2s.`store_id`
+						AND r.`language_id` = cd.`language_id`
+						AND r.`status` 			= 1
+					ORDER BY r.`date_modified` DESC
+					LIMIT 1
+				) AS last_reviews
+
 			FROM " . DB_PREFIX . "category_to_store c2s
 			LEFT JOIN " . DB_PREFIX . "category c
 				ON c.`category_id` = c2s.`category_id`
@@ -90,10 +108,11 @@ class ModelCatalogCategory extends Model {
 
 		$data['cache_date'] 			= strtotime($data['date_modified']); // Cache version
 		$data['seo_keywords'] 		= json_decode($data['seo_keywords'] ?? '[]', true);
-		$data['faq'] 							= json_decode($data['faq_json'] ?? '[]', true);
-		$data['how_to'] 					= json_decode($data['how_to_json'] ?? '[]', true);
-		$data['footer'] 					= json_decode($data['footer'] ?? '[]', true);
-		$data['images']						= json_decode($data['images'] ?? '[]', true);
+		$data['faq'] 							= json_decode($data['faq_json'] 		?? '[]', true);
+		$data['how_to'] 					= json_decode($data['how_to_json'] 	?? '[]', true);
+		$data['footer'] 					= json_decode($data['footer'] 			?? '[]', true);
+		$data['images']						= json_decode($data['images'] 			?? '[]', true);
+		$data['last_reviews'] 		= json_decode($data['last_reviews'] ?? '[]', true);
 		$data['description']			= html_entity_decode($data['description'], ENT_QUOTES, 'UTF-8');
 		$data['child_categories']	= $this->getCategories($category_id);
 		usort(array: $data['images'], callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
