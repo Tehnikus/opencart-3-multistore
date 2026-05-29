@@ -2614,6 +2614,7 @@ DROP TABLE IF EXISTS `oc_review`;
 CREATE TABLE `oc_review` (
   `review_id`     INT NOT NULL AUTO_INCREMENT,
   `product_id`    INT NOT NULL,
+  'category_id'   INT NOT NULL,
   `language_id`   INT NOT NULL,
   `store_id`      INT NOT NULL DEFAULT '0',
   `customer_id`   INT NOT NULL,
@@ -2624,8 +2625,9 @@ CREATE TABLE `oc_review` (
   `date_added`    DATETIME NOT NULL,
   `date_modified` DATETIME NOT NULL,
   PRIMARY KEY (`review_id`),
-  KEY `product_id` (`product_id`, `language_id`, `store_id`, `status`),
-  KEY (`date_modified`)
+  KEY `getProduct`  (`product_id`, `language_id`, `store_id`, `status`),
+  KEY `getCategory` (`category_id`, `language_id`, `store_id`, `status`),
+  KEY `sortOrder`   (`date_modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
