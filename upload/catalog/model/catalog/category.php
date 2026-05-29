@@ -76,7 +76,7 @@ class ModelCatalogCategory extends Model {
 						AND r.`language_id` = cd.`language_id`
 						AND r.`status` 			= 1
 					ORDER BY r.`date_modified` DESC
-					LIMIT 1
+					LIMIT 10
 				) AS last_reviews
 
 			FROM " . DB_PREFIX . "category_to_store c2s
