@@ -165,7 +165,7 @@ class ControllerExtensionThemeDefault extends Controller {
 		} elseif (isset($setting_info['theme_default_image_category_width'])) {
 			$data['theme_default_image_category_width'] = $setting_info['theme_default_image_category_width'];
 		} else {
-			$data['theme_default_image_category_width'] = 80;		
+			$data['theme_default_image_category_width'] = 500;		
 		}
 		
 		if (isset($this->request->post['theme_default_image_category_height'])) {
@@ -173,7 +173,7 @@ class ControllerExtensionThemeDefault extends Controller {
 		} elseif (isset($setting_info['theme_default_image_category_height'])) {
 			$data['theme_default_image_category_height'] = $setting_info['theme_default_image_category_height'];
 		} else {
-			$data['theme_default_image_category_height'] = 80;
+			$data['theme_default_image_category_height'] = 500;
 		}
 		
 		if (isset($this->request->post['theme_default_image_thumb_width'])) {
