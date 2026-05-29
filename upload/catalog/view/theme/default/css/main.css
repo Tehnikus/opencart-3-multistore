@@ -309,6 +309,37 @@
       & > * {color: var(--color-primary-dark);}
     }
   }
+
+  .scroll-x {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    gap: var(--grid-gap);
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scrollbar-color: var(--color-primary) transparent;
+    scrollbar-width: thin;
+    
+    &.snap {
+      scroll-snap-type: x mandatory;
+      &>* {scroll-snap-align: center;}
+    }
+    
+    &:not(.single) > * {
+      flex: 0 0 auto;
+      min-width: max-content;
+    }
+    &.single {
+      width: 100%;
+      & > * {
+        flex: 0 0 100%;
+        scroll-snap-stop: always;
+        display: flex;
+        justify-content: center;
+        width: 100%;
+      }
+    }
+  }
 }
 
 .flex {
