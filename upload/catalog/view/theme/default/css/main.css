@@ -391,7 +391,8 @@
   border-radius: var(--border-radius-block);
   padding: calc(var(--grid-gap) * 0.7);
   & img {
-    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
     border-radius: var(--border-radius-block) var(--border-radius-block) 0 0;
@@ -402,7 +403,7 @@
     text-transform: uppercase;
   }
   & .infos {
-    flex: 1 1 100%;
+    flex: 1 1 auto;
     width: 100%;
     gap: calc(var(--grid-gap) * .5);
   }

@@ -567,6 +567,40 @@ class ModelCatalogProduct extends Model {
 			array_column($product['discounts'], 'price'),  	 SORT_ASC,
 		);
 
+		// Resize images to store prepared image links
+		$this->load->model('tool/image');
+		$cover = [];
+		$productImages 			= [];
+		$theme        	 		= $this->config->get('config_theme');
+		$imgMainWidth  			= (int) ($this->config->get("theme_{$theme}_image_product_main_width") ?? 2000);
+		$imgMainHeight 			= (int) ($this->config->get("theme_{$theme}_image_product_main_height") ?? 2000);
+		$imgMiniatureWidth  = (int) ($this->config->get("theme_{$theme}_image_product_width") ?? 600);
+		$imgMiniatureHeight = (int) ($this->config->get("theme_{$theme}_image_product_height") ?? 600);
+
+		// Add cover to the beginning of images array
+		$cover['image'] 		  = $product['image'] ?? 'no_image.webp';
+		$cover['description'] = $product['name'];
+		
+		array_unshift($product['images'], $cover);
+
+		foreach ($product['images'] as $img) {
+			$productImages['covers'][] = [
+				'src' 				=> $this->model_tool_image->resize($img['image'], $imgMainWidth, $imgMainHeight),
+				'description' => $img['description'],
+				'width'				=> $imgMainWidth,
+				'height'			=> $imgMainHeight,
+			];
+
+			$productImages['miniatures'][] = [
+				'src' 				=> $this->model_tool_image->resize($img['image'], $imgMiniatureWidth, $imgMiniatureHeight),
+				'description' => $img['description'],
+				'width'				=> $imgMiniatureWidth,
+				'height'			=> $imgMiniatureHeight,
+			];
+		}
+
+		$product['images'] = $productImages;
+
 		// Set cache
 		if ($cacheSetting) {
 			$this->cache->set($cacheName, $product);
@@ -609,26 +643,8 @@ class ModelCatalogProduct extends Model {
 		$this->load->model('tool/image');
 		$product 			= [];
 		$theme        = $this->config->get('config_theme');
-		$imageWidth   = (int) ($this->config->get("theme_{$theme}_image_product_width") ?? 500);
-		$imageHeight  = (int) ($this->config->get("theme_{$theme}_image_product_height") ?? 500);
+
 		$descLength   = (int) ($this->config->get("theme_{$theme}_product_description_length") ?? 255);
-			
-		// Images
-		$thumb = [];
-		$additionalImages = [];
-		$mainImage 		= $productData['image'] ?? 'no_image.webp';
-		$thumb = [
-			'image' => $this->model_tool_image->resize($mainImage, $imageWidth, $imageHeight),
-			'title' => $productData['name'],
-		];
-		foreach ($productData['images'] ?? [] as $img) {
-			$additionalThumb = $img['image'] ?? 'no_image.webp';
-			$additionalImages[] = [
-				'image' 		=> $this->model_tool_image->resize($additionalThumb, $imageWidth, $imageHeight),
-				'title' 		=> $img['description'],
-				'sortOrder' => $img['sort_order'],
-			];
-		}
 
 		$rating = ($this->config->get('config_review_status')) ? round((float) $productData['rating'], 1) : false;
 
@@ -673,10 +689,7 @@ class ModelCatalogProduct extends Model {
 		$product = array(
 			'product_id'  			=> $productData['product_id'],
 			// Images
-			'image'       			=> $thumb,
-			'additionalImages'  => $additionalImages,
-			'imageWidth'  			=> $imageWidth,
-			'imageHeight' 			=> $imageHeight,
+			'images'       			=> $productData['images'],
 			// Descriptions
 			'name'        			=> $productData['name'],
 			'model'							=> $productData['model'],
