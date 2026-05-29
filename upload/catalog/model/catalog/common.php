@@ -262,22 +262,28 @@ class ModelCatalogCommon extends Model {
   /**
    * List of ImageObject from main image and additional images
    */
-  private function buildImageList(array $product) : array {
+  private function buildImageList(array $product, $allowedType = 'covers') : array {
     $images = [];
 
     if (!empty($product['image']) && !str_contains($product['image'], 'no_image')) {
       $images[] = [
-        '@type'   => 'ImageObject',
-        'url'     => $product['image'],
+        '@type'       => 'ImageObject',
+        'url'         => $product['image'],
+        'description' => $product['name'],
       ];
     }
 
-    foreach ($product['images'] ?? [] as $img) {
-      $url = is_array($img) ? ($img['image'] ?? '') : $img;
-      if ($url && !str_contains($url, 'no_image')) {
+    foreach ($product['images'] ?? [] as $type => $imageSet) {
+
+      if ($type !== $allowedType) continue;
+      
+      foreach ($imageSet ?? [] as $img) {
+
+        if (str_contains($img['src'], 'no_image')) continue;
+
         $images[] = [
           '@type'         => 'ImageObject', 
-          'url'           => $url,
+          'url'           => $img['src'],
           'height'        => $img['height'],
           'width'         => $img['width'],
           'description'   => $img['description'] ?? $product['name'],
