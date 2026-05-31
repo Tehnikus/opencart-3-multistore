@@ -283,6 +283,61 @@ class ModelCatalogCommon extends Model {
     return $offer;
   }
 
+  private function buildOfferShippingDetails(array $cond, string $defaultCurrency) : array {
+    $currency = $cond['currency'] ?? $defaultCurrency;
+
+    $details = ['@type' => 'OfferShippingDetails'];
+
+    if (isset($cond['rate_value'])) {
+      $details['shippingRate'] = [
+        '@type' => 'MonetaryAmount',
+        'value' => $cond['rate_value'],
+        'currency' => $currency,
+      ];
+    }
+
+    if (!empty($cond['countries'])) {
+      $destinations = [];
+      foreach ((array) $cond['countries'] as $country) {
+        $destinations[] = ['@type' => 'DefinedRegion', 'addressCountry' => $country];
+      }
+      $details['shippingDestination'] = count($destinations) === 1
+        ? $destinations[0]
+        : $destinations;
+    }
+
+    if (isset($cond['transit_days_max'])) {
+      $details['deliveryTime'] = $this->buildServicePeriod([
+        'days_min' => $cond['transit_days_min'] ?? 0,
+        'days_max' => $cond['transit_days_max'],
+        'business_days' => $cond['transit_business_days'] ?? null,
+      ]);
+    }
+
+    return $details;
+  }
+
+  private function buildServicePeriod(array $data) : array {
+    $period = ['@type' => 'ServicePeriod'];
+
+    if (!empty($data['cutoff_time'])) {
+      $period['cutoffTime'] = $data['cutoff_time']; // "17:00:00+02:00"
+    }
+
+    if (!empty($data['business_days'])) {
+      $period['businessDays'] = $data['business_days'];
+    }
+
+    $duration = ['@type' => 'QuantitativeValue', 'unitCode' => 'DAY'];
+    if (isset($data['days_min']))
+      $duration['minValue'] = (int) $data['days_min'];
+    if (isset($data['days_max']))
+      $duration['maxValue'] = (int) $data['days_max'];
+    $period['duration'] = $duration;
+
+    return $period;
+  }
+
   /**
    * List of ImageObject from main image and additional images
    */
