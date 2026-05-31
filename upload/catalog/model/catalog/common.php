@@ -2,18 +2,22 @@
 class ModelCatalogCommon extends Model {
 
   /**
-   * Render common data
-   * @param mixed $total
+   * Prepare data common for all pages
+   * @param array $pageData - page description to set SEO tags
+   * @param array $allowedRequestParams - allowed params for correct pagination build
+   * @param string $type JSON-LD microdata type: product, article, webpage, organization, etc.
    * @return array
    */
-  public function prepageCommonData($total = null) : array {
+  public function prepageCommonData($pageData = [], $allowedRequestParams = [], $type = '') : array {
     $data = [];
-    // $this->addDocumentLinks($total);
-    // Pagination
-    // $pagination               = $this->addPagination($total);
-    // $data['pagination']       = $pagination['pagiantion'] ?? [];
-    // $data['results']          = $pagination['results']    ?? '';
+    $this->addDocumentJsonLd($pageData, $type);
+    $this->addDocumentSeo($pageData);
+    $this->addDocumentLinks($pageData['total']);
 
+    // Pagination
+    $pagination               = $this->addPagination($allowedRequestParams, $pageData['total']);
+    $data['pagination']       = $pagination['pagiantion'] ?? [];
+    $data['results']          = $pagination['results']    ?? '';
     $data['page']             = (int) ($this->request->get['page'] ?? 1);
     $data['limit']            = (int) ($this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit') ?? 20);
     $data['sort']             = $this->request->get['sort'] ?? null;
