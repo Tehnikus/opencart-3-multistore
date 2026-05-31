@@ -266,9 +266,9 @@
         <path d="M9 22 C0 23 1 12 9 13 6 2 23 2 22 10 32 7 32 23 23 22 M11 26 L16 30 21 26 M16 16 L16 30" />
     </symbol>
 
-    <symbol id="i-send" viewBox="0 0 32 32">
+    <!-- <symbol id="i-send" viewBox="0 0 32 32">
         <path d="M2 16 L30 2 16 30 12 20 Z M30 2 L12 20" />
-    </symbol>
+    </symbol> -->
 
     <symbol id="i-link" viewBox="0 0 32 32">
         <path d="M18 8 C18 8 24 2 27 5 30 8 29 12 24 16 19 20 16 21 14 17 M14 24 C14 24 8 30 5 27 2 24 3 20 8 16 13 12 16 11 18 15" />
@@ -380,5 +380,8 @@
         <path d="M23 12a11.05 11.05 0 00-22 0zm-5 7a3 3 0 01-6 0v-7" />
     </symbol>
 
+    <symbol id="i-send" viewBox="0 0 24 24" stroke-linecap="round">
+        <line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9"></polygon>
+    </symbol>
 
 </svg>
