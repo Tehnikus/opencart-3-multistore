@@ -1389,8 +1389,8 @@ class ModelCatalogProduct extends Model {
 		// Build CTE expression requied for facet search
 		if ($hasFacets) {
 			$where = [];
-			$where[] = "store_id = {$store_id}";
 			$where[] = "(" . $facets . ")";
+			$where[] = "store_id = {$store_id}";
 
 			$cteList['facet_temp'] = "
 				facet_temp AS (
@@ -1431,7 +1431,7 @@ class ModelCatalogProduct extends Model {
 		foreach ($this->facetTypes as $type => $facet) {
 			if (!empty($data[$facet['facetType']])) {
 				if ($facet['isBool'] === true) {
-					$facets[] = "(facet_value_id IS NOT NULL AND facet_type = {$type})";
+					$facets[] = "(facet_value_id = 1 AND facet_type = {$type})";
 				} else {
 					$ids      = array_values(array_unique(array_map('intval', explode(',', $data[$facet['facetType']]))));
 					$facets[] = "(facet_value_id IN(" . implode(',', $ids) . ") AND facet_type = {$type})";
