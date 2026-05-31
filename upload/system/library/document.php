@@ -19,6 +19,7 @@ class Document {
 	private $styles 	= [];
 	private $scripts 	= [];
 	private $jsonLd  	= [];
+	private $robots 	= [];
 
 	public function setTitle($title) {
 		$this->title = $title;
@@ -96,5 +97,13 @@ class Document {
 
 	public function getJsonLd() : array {
 		return $this->jsonLd;
+	}
+
+	public function setRobots($bot, $indexFollow) {
+		$this->robots[$bot] = $indexFollow;
+	}
+
+	public function getRobots() : array {
+		return $this->robots;
 	}
 }
