@@ -376,5 +376,9 @@
         <rect x="18" y="18" width="10" height="10" rx="3" />
     </symbol>
 
+    <symbol id="i-umbrella" viewBox="0 0 24 24">
+        <path d="M23 12a11.05 11.05 0 00-22 0zm-5 7a3 3 0 01-6 0v-7" />
+    </symbol>
+
 
 </svg>
