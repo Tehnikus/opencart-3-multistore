@@ -1,0 +1,13 @@
+<ol class="scroll-x breadcrumbs">
+  {% for breadcrumb in breadcrumbs %}
+  <li>
+    {% if loop.last == false  %}
+    <a title="{{ breadcrumb.text }}" href="{{ breadcrumb.href }}">
+      {{ breadcrumb.text }}
+    </a>
+    {% else %}
+    <span>{{ breadcrumb.text }}</span>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ol>
