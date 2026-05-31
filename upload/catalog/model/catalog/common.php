@@ -33,6 +33,7 @@ class ModelCatalogCommon extends Model {
    * @return array
    */
   public function addPagination($allowedRequestParams = [], $total = null) : array {
+    
     if ($total === null) return [];
     $requestParams      = [];
     $data               = [];
@@ -104,8 +105,10 @@ class ModelCatalogCommon extends Model {
    * @return void
    */
   public function addDocumentSeo($data = []) {
+
+    // Trim description by sentence end
     $shortDesciption = '';
-		$description = strip_tags($data['description'] ?? $data['h1'] ?? $data['name']);
+		$description = strip_tags($data['description'] ?? $data['h1'] ?? $data['name'] ?? '');
 		if (mb_strlen($description) > 255) {
 			$description = explode('.', $description);
 			$sentenceCount = 0;
@@ -117,9 +120,9 @@ class ModelCatalogCommon extends Model {
 			$shortDesciption = $description;
 		}
 
-    $this->document->setTitle($data['meta_title'] ?? $data['h1'] ?? $data['name']);
+    $this->document->setTitle($data['meta_title'] ?? $data['h1'] ?? $data['name'] ?? $this->config->get('config_name'));
     $this->document->setDescription($data['meta_description'] ?? $data['meta_title'] ?? $shortDesciption);
-    $this->document->setKeywords($data['meta_keyword']);
+    $this->document->setKeywords($data['meta_keyword'] ?? '');
   }
 
   /**
@@ -156,7 +159,7 @@ class ModelCatalogCommon extends Model {
    * Build Product / ProductGroup schema
    */
   private function buildProductMicroData(array $product) : array {
-    $currency = $this->config->get('config_currency') ?: 'UAH';
+    $currency = $this->config->get('config_currency');
 
     $schema = [
       '@context' => 'https://schema.org',
@@ -345,33 +348,4 @@ class ModelCatalogCommon extends Model {
     return $result;
   }
 
-
-  private function buildShippingDetails() {
-          //   "shippingDetails": {
-          // "@type": "OfferShippingDetails",
-          // "shippingRate": {
-          //   "@type": "MonetaryAmount",
-          //   "value": 3.49,
-          //   "currency": "USD"
-          // },
-          // "shippingDestination": {
-          //   "@type": "DefinedRegion",
-          //   "addressCountry": "US"
-          // },
-          // "deliveryTime": {
-          //   "@type": "ShippingDeliveryTime",
-          //   "handlingTime": {
-          //     "@type": "QuantitativeValue",
-          //     "minValue": 0,
-          //     "maxValue": 1,
-          //     "unitCode": "DAY"
-          //   },
-          //   "transitTime": {
-          //     "@type": "QuantitativeValue",
-          //     "minValue": 1,
-          //     "maxValue": 5,
-          //     "unitCode": "DAY"
-          //   }
-          // }
-  }
 }
