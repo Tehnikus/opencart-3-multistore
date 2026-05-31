@@ -293,6 +293,19 @@ class ModelCatalogProduct extends Model {
 				pst.`rating_avg` AS rating,
 
 				(
+					SELECT
+						JSON_OBJECT(
+							'name',  md.name,
+							'title', md.h1,
+							'image', (SELECT mi.image FROM " . DB_PREFIX . "manufacturer_image mi WHERE mi.manufacturer_id = p.manufacturer_id AND mi.store_id = p2s.store_id ORDER BY mi.sort_order ASC LIMIT 1)
+						)
+					FROM " . DB_PREFIX . "manufacturer_description md
+					WHERE md.manufacturer_id = p.manufacturer_id
+						AND md.language_id 		 = pd.language_id
+						AND md.store_id 			 = p2s.store_id
+				) AS manufacturerData,
+
+				(
 					SELECT 
 						md.name 
 					FROM " . DB_PREFIX . "manufacturer_description md 
