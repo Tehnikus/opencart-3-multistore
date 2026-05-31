@@ -281,8 +281,8 @@ class ModelCatalogProduct extends Model {
 				pd.`description`,
 				pd.`seo_keywords`,
 				pd.`seo_description`,
-				pd.`faq`,
-				pd.`how_to`,
+				pd.`faq` 		AS `faq_json`,
+				pd.`how_to` AS `how_to_json`,
 				pd.`footer`,
 				pd.`date_modified` AS description_date_modified,
 
@@ -415,7 +415,7 @@ class ModelCatalogProduct extends Model {
 						AND r.`language_id` = pd.`language_id`
 						AND r.`status` 			= 1
 					ORDER BY r.`date_modified` DESC
-					LIMIT 1
+					LIMIT 10
 				) AS last_reviews,
 
 				(
