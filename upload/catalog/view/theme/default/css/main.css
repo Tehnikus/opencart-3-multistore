@@ -6,7 +6,7 @@
   * {margin: 0;}
   html {interpolate-size: allow-keywords; transition-behavior: allow-discrete; scrollbar-gutter: stable;}
   body {line-height: 1.5; -webkit-font-smoothing: antialiased; margin: 0; min-height: 100dvh; display: flex; flex-direction: column; min-block-size: 100dvh;}
-  img, picture, video, canvas, svg, figure {display: block; max-width: 100%;}
+  img, picture, video, canvas, svg, figure, iframe {display: block; max-width: 100%; height: auto;}
   input, button, textarea, select {font: inherit;}
   p, h1, h2, h3, h4, h5, h6 {overflow-wrap: break-word;}
   #root {isolation: isolate;}
@@ -96,6 +96,7 @@
   a, button, .button, summary, dialog, input, select, textarea, div[tab-index], article {
     border: none;
     border-radius: calc(var(--border-radius-elements) * 0.5);
+    outline: none;
     &:focus {
       outline: calc(var(--font-size) * .1) solid var(--color-primary-light);
       outline-offset: calc(var(--font-size) * .1);
@@ -150,14 +151,14 @@
       }
     }
 
-    &:disabled {background-color: #dadada; cursor: not-allowed;}
+    &:disabled {background-color: #dadada; cursor: not-allowed; opacity: .5;}
   }
 
   label {cursor: pointer;}
 
   @keyframes scale {0% {transform: scale(0)} 100% {transform: scale(1)}}
 
-  button, .button, select {
+  button, .button, select, .tag {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -182,6 +183,10 @@
     &:active {
       box-shadow: inset 0 0.1rem 0.5rem #0003;
       transition: background var(--time) var(--style), box-shadow var(--time) var(--style);
+    }
+    /* Change color dynamically depending on sibling count */
+    &.bgDynamic {
+      background: hsl(calc(sibling-index() * 24), 70%, 85%);
     }
   }
 
@@ -319,7 +324,7 @@
     scroll-behavior: smooth;
     scrollbar-color: var(--color-primary) transparent;
     scrollbar-width: thin;
-    
+    scrollbar-gutter: stable;;
     &.snap {
       scroll-snap-type: x mandatory;
       &>* {scroll-snap-align: center;}
@@ -333,7 +338,7 @@
       width: 100%;
       & > * {
         flex: 0 0 100%;
-        scroll-snap-stop: always;
+        /* scroll-snap-stop: always; */
         display: flex;
         justify-content: center;
         width: 100%;
@@ -360,6 +365,7 @@
   will-change: transform;
   border-radius: var(--border-radius-block);
   padding: calc(var(--grid-gap) * 0.7);
+  gap: calc(var(--grid-gap) * 0.7);
 }
 
 .grid {
