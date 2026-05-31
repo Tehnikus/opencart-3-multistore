@@ -11,25 +11,18 @@ class ControllerProductCategory extends Controller {
 		$data = $this->getDescriptions();
 
 		if ($data) {
-			// Set title, description, keywords
-			$this->model_catalog_common->addDocumentSeo($data); 
+			// Set allowed request params for pagination. Merge 'path' with all facet types, so filter pagination is built correctly
 			$allowedRequestParams = array_merge(['path'], array_column($this->model_catalog_product->getFacetTypes(), 'facetType'));
 			
-			// Get products
+			// Get products with total, price_min, price_max, rating, reviews
 			$data['products'] = [];
 			$request = $this->model_catalog_product->prepareGetProductsRequest($this->request->get);
-			$results = $this->model_catalog_product->getProducts($request, true);
-			$data['total'] = $results['total'];
+			$products = $this->model_catalog_product->getProducts($request, true);
+			$data = array_merge($data, $products);
+			// Get common data - SEO tags, JSON-LD, robots, columns, pagination
+			$commonData = $this->model_catalog_common->prepageCommonData($data, $allowedRequestParams, 'product');
+			$data = array_merge($data, $commonData);
 
-			// Get common interface: header, left and right columns, footer, etc.
-			$commonData = $this->model_catalog_common->prepageCommonData($results['total']);
-			$pagination = $this->model_catalog_common->addPagination($allowedRequestParams, $results['total']);
-			$this->model_catalog_common->addDocumentLinks($results['total']);
-
-			foreach ($results['products'] as $row) {
-				$data['products'][] = $this->model_catalog_product->prepareProductMiniature($row);
-			}
-			$data = array_merge($data, $commonData, $pagination);
 			$this->response->setOutput($this->load->view('product/category', $data));
 
 		} else {
