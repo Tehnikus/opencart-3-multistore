@@ -3,37 +3,47 @@ class ControllerProductSpecial extends Controller {
 	public function index() {
 		$this->load->model('catalog/product');
 		$this->load->model('catalog/common');
-		// Set document SEO properties
-		$this->model_catalog_common->addDocumentSeo([]);
-		$data['products'] = [];
-		
-		// Prepare request: get base facet type from page route and other applied facets
-		$request = $this->model_catalog_product->prepareGetProductsRequest($this->request->get);
-		
-		// Get products and product count
-		$results = $this->model_catalog_product->getProducts(data: $request, withTotal: true);
-		$data['total'] = $results['total'];
-		
-		// Common data: all controllers and serve requests - page, limit, sort
-		$commonData = $this->model_catalog_common->prepageCommonData($results['total']);
-		
-		// Allowed request params for correct pagination links
-		$allowedRequestParams = array_merge(array_column($this->model_catalog_product->getFacetTypes(), 'facetType'));
-		// Pagination
-		$pagination = $this->model_catalog_common->addPagination($allowedRequestParams, $results['total']);
-		
-		// Canonical links
-		$this->model_catalog_common->addDocumentLinks($results['total']);
 
-		// Products
-		foreach ($results['products'] as $row) {
-			$data['products'][] = $this->model_catalog_product->prepareProductMiniature($row);
+		$data = $this->getDescriptions();
+		$allowedRequestParams = array_column($this->model_catalog_product->getFacetTypes(), 'facetType');
+		
+		// Get products with total, price_min, price_max, rating, reviews
+		$data['products'] = [];
+		$request  = $this->model_catalog_product->prepareGetProductsRequest($this->request->get);
+		$products = $this->model_catalog_product->getProducts($request, true);
+		$data = array_merge($data, $products);
+		// Get common data - SEO tags, JSON-LD, robots, columns, pagination
+		$commonData = $this->model_catalog_common->prepageCommonData($data, $allowedRequestParams, 'product');
+		$data = array_merge($data, $commonData);
+
+		$this->response->setOutput($this->load->view('product/category', $data));
+	}
+
+	/**
+	 * Get filter page description in case when a combination of current page and filter parameters exists 
+	 * E.g. "bestseller" + "brand" or "latest" + "option value"
+	 * @return array
+	 */
+	private function getDescriptions() : array|bool {
+		$data = [];
+		// Get SEO filter page. If exists, use description data from there, othewise use category description
+		$getRequest 	= $this->request->get;
+
+		// Get filter page
+		$filterPage = $this->model_catalog_product->getFilterPage($getRequest);
+		if ($filterPage && !empty($filterPage)) {
+			$data = array_merge($data, $filterPage);
 		}
 
-		// Merge all data
-		$data = array_merge($data, $commonData, $pagination);
+		// Remove SEO description on all pages except canonical - without pages and sort order
+		if ((isset($getRequest['page']) && $getRequest['page'] !== 1) || (isset($getRequest['sort']) && $getRequest['sort'] !== 'sort_order')) {
+			$data['description'] = '';
+			$data['seoDescription'] = '';
+		}
 
-		// Display
-		$this->response->setOutput($this->load->view('product/category', $data));
+		// Set H1 fallback
+		$data['h1'] = $data['h1'] ?? $data['name'];
+
+		return $data;
 	}
 }
