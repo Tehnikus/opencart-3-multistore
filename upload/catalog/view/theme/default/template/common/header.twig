@@ -27,6 +27,9 @@
 {# Add analytics #}
 {% for analytic in analytics %}{{ analytic }}{% endfor %}
 
+{# Add robots tag #}
+{% for robot, value in robots %}<meta name="{{ robot }}" content="{{ value }}" />{% endfor %}
+
 {# Preload logo image to mitigate cummulative layout shift #}
 {% if logo %}<link rel="preload" as="image" href="{{ logo }}">{% endif %}
 </head>
