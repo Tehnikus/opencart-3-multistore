@@ -125,14 +125,31 @@ class ModelCatalogCommon extends Model {
   /**
    * Add JSON-LD microdata to document
    */
-  public function addDocumentJsonLd(array $data) : void {
-    if (!empty($data['product'])) {
-      $schema = $this->buildProductMicroData($data['product']);
-      if ($schema) {
-        $this->document->setJsonLd($schema);
-      }
+  public function addDocumentJsonLd(array $data, string $type) : void {
+    $schema = [];
+    switch ($type) {
+      case 'product':
+        $schema = $this->buildProductMicroData($data);
+        break;
+
+      case 'organization':
+        $schema = $this->buildOrganizationMicroData($data);
+        break;
+
+      case 'webpage':
+        $schema = $this->buildWebpageMicroData($data);
+        break;
+
+      case 'article':
+        $schema = $this->buildArticleMicroData($data);
+        break;
+
+      default:
+        return;
+
     }
-    // TODO Later add buildCategoryMicroData, buildArticleMicroData etc
+    
+    $this->document->addJsonLd($schema);
   }
 
   /**
