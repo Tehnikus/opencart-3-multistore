@@ -11,7 +11,7 @@
   {% endif %}
   <div class="infos flex column">
     <div class="caption flex column">
-      <span class="h3 title"><a title="{{ product.name }}" href="{{ product.href }}">{{ product.name }}</a></span>
+      <span class="h3 title"><a title="{{ product.name }}" href="{{ product.url }}">{{ product.name }}</a></span>
       {% if product.shortDescription %}<p class="shortDescription">{{ product.shortDescription }}</p>{% endif %}
       
         {% if product.rating and product.rating > 0 %}
@@ -34,13 +34,13 @@
             </div>
           </div>
         {% endif %}
-      {% if product.price_value and product.price_value != 0 %}
+      {% if product.price and product.price != 0 %}
         <div class="prices">
           {% if not product.special %}
-            <p><span class="text-price">{{ text_price }}</span>&nbsp;<span class="price h3 b">{{ product.price }}</span></p>
+            <p><span class="text-price">{{ text_price }}</span>&nbsp;<span class="price h3 b">{{ product.priceFormat }}</span></p>
           {% else %} 
-            <p><span class="text-price">{{ text_new_price }}</span>&nbsp;<span class="price-new h3 b">{{ product.special }}</span></p>
-            <p><span class="text-price">{{ text_old_price }}</span>&nbsp;<s class="price-old disabled">{{ product.price }}</s></p>
+            <p><span class="text-price">{{ text_new_price }}</span>&nbsp;<span class="price-new h3 b">{{ product.priceSpecialFormat }}</span></p>
+            <p><span class="text-price">{{ text_old_price }}</span>&nbsp;<s class="price-old disabled">{{ product.priceFormat }}</s></p>
           {% endif %}
           {% if product.tax %} 
             <p class="price-tax">{{ text_tax }} {{ product.tax }}</p> 
@@ -50,7 +50,7 @@
     </div>
     <div class="btn-group">
       <button type="button" 
-        {% if product.price_value and product.price_value != 0 %} 
+        {% if product.price and product.price != 0 %} 
           data-action="cartAdd" 
           data-product-id="{{ product.product_id }}" 
           data-minimum-qty="{{ product.minimum }}" 
