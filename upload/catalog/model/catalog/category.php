@@ -114,6 +114,7 @@ class ModelCatalogCategory extends Model {
 		$data['images']						= json_decode($data['images'] 			?? '[]', true);
 		$data['last_reviews'] 		= json_decode($data['last_reviews'] ?? '[]', true);
 		$data['description']			= html_entity_decode($data['description'], ENT_QUOTES, 'UTF-8');
+		$data['seo_description']	= html_entity_decode($data['seo_description'], ENT_QUOTES, 'UTF-8');
 		$data['child_categories']	= $this->getCategories($category_id);
 		usort(array: $data['images'], callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
 
@@ -150,6 +151,7 @@ class ModelCatalogCategory extends Model {
 		}
 
 		$data['images'] = $categoryImages;
+		// End images
 
 		// Child categories
 		foreach ($data['child_categories'] as $key => $child_category) {
@@ -160,7 +162,9 @@ class ModelCatalogCategory extends Model {
 				$data['cache_date'] = strtotime($child_category['date_modified']);
 			}
 		}
+		// End child categories
 
+		// Breadcrumbs
 		$data['breadcrumbs'] = [];
 		$data['breadcrumbs'][] = [
 			'text' => $this->language->get('text_home'),
@@ -170,7 +174,11 @@ class ModelCatalogCategory extends Model {
 			'text' => $data['name'],
 			'href' => $this->url->link('product/category', 'path=' . $data['category_id']),
 		];
+		// End breadcrumbs
 
+		// Category URL
+		$data['url'] = $this->url->link('product/category', "product_id={$category_id}", true);
+		// End category URL
 
 		if ($cacheSetting) {
 			$this->cache->set($cacheName, $data);
