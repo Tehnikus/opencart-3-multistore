@@ -70,3 +70,5 @@ __*
 # All languages excluding main en-gb
 upload/admin/language/*
 !upload/admin/language/en-gb
+
+/upload/sitemaps*
