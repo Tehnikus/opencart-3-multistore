@@ -238,7 +238,7 @@
 
   header, footer {
     display: flex;
-    flex: 1 0 100%;
+    flex: 0;
     width: 100%;
     padding: var(--grid-gap);
     gap: var(--grid-gap);
