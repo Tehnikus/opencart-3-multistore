@@ -8,7 +8,7 @@
       <h1>{{ h1 }}</h1>
     </hgroup>
     {% if description %}
-      <article role="article" id="category_description">{{ description }}</article>
+      <article role="article" class="categoryDescription" id="categoryDescription">{{ description }}</article>
     {% endif %}
     {{ content_top }}
     {# Subcategories #}
@@ -31,7 +31,7 @@
         {% include 'default/template/product/product_miniature.twig' %}
       {% endfor %} 
       </div>
-      <div id="pagination" class="flex justyfy-center">
+      <div id="pagination" class="flex justify-center">
         {% if pagination %}
           <div>{{ pagination }}</div>
         {% endif %}
