@@ -38,6 +38,10 @@
         <div><span>{{ results }}</span></div>
       </div>
     {% endif %}
+    {% if seo_description %}
+      <div class="categoryDescription">{{ seo_description }}</div>
+    {% endif %}
+    
     {% if faq %}
       {% for item in faq.mainEntity %}
         <details>
