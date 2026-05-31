@@ -39,6 +39,7 @@ class ControllerCommonHeader extends Controller {
 		$data['styles'] 			= $this->document->getStyles();
 		$data['scripts'] 			= $this->document->getScripts('header');
 		$data['jsonLd']				= $this->document->getJsonLd();
+		$data['robots']				= $this->document->getRobots();
 		
 		$data['lang'] 				= $this->language->get('code');
 		$data['direction'] 		= $this->language->get('direction');
