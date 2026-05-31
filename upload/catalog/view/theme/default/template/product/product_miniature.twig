@@ -1,10 +1,12 @@
 {# {% cache %} #}
 <article role="article" class="miniature" {% if product.special_date_end %}data-special-date-end="{{ product.special_date_end }}"{% endif %}>
-  <figure role="img" aria-label="{{ product.name }}" class="">
-    <a title="{{ product.name }}" href="{{ product.href }}">
-      <img decoding="async" loading="lazy" src="{{ product.image.image }}" alt="{{ product.image.title }}" title="{{ product.image.title }}" width="{{product.imageWidth }}" height="{{product.imageHeight }}" />
-    </a>
-  </figure>
+  <a title="{{ img.description }}" href="{{ product.url }}" class="scroll-x snap single markers">
+    {% for key, img in product.images.miniatures %}
+      <figure role="img" aria-label="{{ img.description }}">
+        <img id="img_{{ product.product_id }}_{{ key }}" decoding="async" loading="lazy" src="{{ img.src }}" alt="{{ img.description }}" title="{{ img.description }}" width="{{ img.width }}" height="{{ img.height }}" />
+      </figure>
+    {% endfor %}
+  </a>
   {% if product.productFlags %}
   {% endif %}
   <div class="infos flex column">
