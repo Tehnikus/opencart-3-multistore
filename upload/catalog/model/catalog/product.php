@@ -601,11 +601,58 @@ class ModelCatalogProduct extends Model {
 		}
 
 		$product['images'] = $productImages;
+		// End images
+
+		// Trim short description
+		$theme        = $this->config->get('config_theme');
+		$descLength   = (int) ($this->config->get("theme_{$theme}_product_description_length") ?? 255);
+
+		$shortDesciption = '';
+		$description = strip_tags(html_entity_decode($product['description']));
+		if (mb_strlen($description) > $descLength) {
+			$description = explode('.', $description);
+			$sentenceCount = 0;
+			while (mb_strlen($shortDesciption) < $descLength) {
+				$shortDesciption .= $description[$sentenceCount] . ". ";
+				$sentenceCount ++;
+			}
+		} else {
+			$shortDesciption = $description;
+		}
+		$product['shortDescription'] = $shortDesciption;
+		// End trim short description
+
+		// Product URL
+		$product['url'] = $this->url->link('product/product', "product_id={$product_id}", true);
+		// End product URL
+
+		// Breadcrumbs
+		$product['breadcrumbs'] = [];
+		$product['breadcrumbs'][] = [
+			'text' => $this->language->get('text_home'),
+			'href' => $this->url->link('common/home'),
+    ];
+		$product['breadcrumbs'][] = [
+			'text' => $this->language->get('text_home'),
+			'href' => $this->url->link('product/category', 'path=' . $product['parent_id']),
+    ];
+		$product['breadcrumbs'][] = [
+			'text' => $product['name'],
+			'href' => $this->url->link('product/category', 'path=' . $product_id),
+		];
+		// End breadcrumbs
+
+		// Rating
+		$product['rating'] = ($this->config->get('config_review_status')) ? round((float) $product['rating'], 1) : false;
+		// End rating
 
 		// Set cache
 		if ($cacheSetting) {
 			$this->cache->set($cacheName, $product);
 		}
+
+		// Following data is dynamic, thus can not be cached
+		// This involves currency, customer group and current date
 
 		// Filter specials and discounts - return arrays filtered by customer group id and now() date
 		// These arrays are used to show multiple discounts at once
@@ -632,6 +679,26 @@ class ModelCatalogProduct extends Model {
 				)
 			;
 		});
+
+		// Prices
+		$priceFormat = ($this->customer->isLogged() || !$this->config->get('config_customer_price')) ? $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']) : false;
+		if (!is_null($product['special']) && (float) $product['special'] >= 0) {
+			$priceSpecialFormat = $this->currency->format($this->tax->calculate($product['special'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+			$priceTaxValue 			= (float) $product['special'];
+		} else {
+			$priceSpecialFormat = false;
+			$priceTaxValue 			= (float) $product['price'];
+		}
+		$priceTaxFormat = ($this->config->get('config_tax')) ? $this->currency->format($priceTaxValue, $this->session->data['currency']) : false;
+		$product['priceFormat'] 	 			= $priceFormat;
+		$product['priceTaxFormat'] 			= $priceTaxFormat;
+		$product['priceSpecialFormat'] 	= $priceSpecialFormat;
+		$product['priceTaxValue'] 			= $priceTaxValue;
+		// End prices
+
+		// Cache date for static HTML cache
+		$product['cache_date'] = strtotime($product['date_modified']);
+
 		return $product;
 	}
 
