@@ -756,7 +756,11 @@ class ModelCatalogProduct extends Model {
 		// Columns to select
 		$selectColumns = ['f.`product_id`'];
 		if ($withTotal) {
-			$selectColumns[] = "COUNT(*) OVER() AS total_count";
+			$selectColumns[] = "COUNT(*) 									OVER() AS `total_count`";
+			$selectColumns[] = "MAX(pst.`current_price`) 	OVER() AS `price_max`";
+			$selectColumns[] = "MIN(pst.`current_price`) 	OVER() AS `price_min`";
+			$selectColumns[] = "SUM(pst.`review_count`)		OVER() AS `reviews`";
+			$selectColumns[] = "AVG(pst.`rating_avg`) 		OVER() AS `rating`";
 		}
 
 		// Main query part depending on present search, facets or search + facets
@@ -850,8 +854,12 @@ class ModelCatalogProduct extends Model {
     // Return total if withTotal flag is true
     if ($withTotal) {
 			return [
-				'products' => $products,
-				'total'    => (int)($rows[0]['total_count'] ?? 0),
+				'products' 		=> $products,
+				'total'    		=> (int)($rows[0]['total_count'] ?? 0),
+				'price_min'   => (int)($rows[0]['price_min'] ?? 0),
+				'price_max'   => (int)($rows[0]['price_max'] ?? 0),
+				'reviews'   	=> (int)($rows[0]['reviews'] ?? 0),
+				'rating'   		=> (int)($rows[0]['rating'] ?? 0),
 			];
     }
 
