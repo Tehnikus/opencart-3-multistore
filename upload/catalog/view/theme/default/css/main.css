@@ -9,6 +9,7 @@
   img, picture, video, canvas, svg, figure, iframe {display: block; max-width: 100%; height: auto;}
   input, button, textarea, select {font: inherit;}
   p, h1, h2, h3, h4, h5, h6 {overflow-wrap: break-word;}
+  h1, h2, h3, h4, h5, h6 {text-wrap: balance;}
   #root {isolation: isolate;}
   /* Variables */
   :root {
@@ -97,7 +98,7 @@
     border: none;
     border-radius: calc(var(--border-radius-elements) * 0.5);
     outline: none;
-    &:focus {
+    &:focus-visible {
       outline: calc(var(--font-size) * .1) solid var(--color-primary-light);
       outline-offset: calc(var(--font-size) * .1);
       transition: color, outline-offset var(--style) var(--time);
@@ -434,6 +435,9 @@
   }
   & .caption {
     flex: 1 1 auto;
+    & .shortDescription {
+      text-align: justify;
+    }
   }
   & .prices {
     margin-top: auto;
