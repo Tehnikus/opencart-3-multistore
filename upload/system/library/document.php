@@ -89,7 +89,7 @@ class Document {
 	 * @param array $data
 	 * @return void
 	 */
-	public function setJsonLd(array $data = []) : void {
+	public function addJsonLd(array $data = []) : void {
 		if (!empty($data)) {
 			$this->jsonLd[] = json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_HEX_QUOT|JSON_HEX_APOS);
 		}
