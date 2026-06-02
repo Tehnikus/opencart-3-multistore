@@ -37,6 +37,8 @@
         {% endif %}
         <div><span>{{ results }}</span></div>
       </div>
+    {% else %}
+      <p>{{ text_no_products_in_category|format(name) }}</p>
     {% endif %}
     {% if seo_description %}
       <div role="complementary" class="categoryDescription" aria-label="{{ aria_seo_description }}">{{ seo_description }}</div>
