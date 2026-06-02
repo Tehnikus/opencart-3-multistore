@@ -51,7 +51,7 @@
     </div>
     <div class="btn-group">
       <button type="button" 
-        {% if product.showPrice and product.is_available %} 
+        {% if product.showPrice and product.isAvailable %} 
           data-action="cartAdd" 
           data-product-id="{{ product.product_id }}" 
           data-minimum-qty="{{ product.minimum }}" 

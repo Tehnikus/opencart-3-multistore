@@ -227,6 +227,10 @@ class ModelCatalogProduct extends Model {
 				 */ 
 				// $now = date('Y-m-d H:i:s');
 				// Get valid discount float prices and dates in YYYY-MM-DD format
+				$product['discount'] 				= $this->getValidDiscount($product['discounts'], $customer_group_id)['price'] 	 ?? null;
+				$product['special'] 				= $this->getValidDiscount($product['specials'],  $customer_group_id)['price'] 	 ?? null;
+				$product['discountDateEnd'] = $this->getValidDiscount($product['discounts'], $customer_group_id)['date_end'] ?? null;
+				$product['specialDateEnd'] 	= $this->getValidDiscount($product['specials'],  $customer_group_id)['date_end'] ?? null;
 				$this->buildProductDynamicData($product);
 	
 				return $product;
@@ -265,7 +269,7 @@ class ModelCatalogProduct extends Model {
 				p2s.`parent_id`,
 				p2s.`status`,
 				p2s.`date_modified`,
-				p2s.`is_available`,
+				p2s.`is_available` AS isAvailable,
 				p2s.`is_featured`,
 
 				COALESCE(p2s.`image`, p.`image`) AS image,
@@ -276,12 +280,12 @@ class ModelCatalogProduct extends Model {
 				pd.`meta_description`,
 				pd.`meta_keyword`,
 				pd.`description`,
-				pd.`seo_keywords`,
+				pd.`seo_keywords` AS seoKeywords,
 				pd.`seo_description`,
-				pd.`faq` 		AS `faq_json`,
-				pd.`how_to` AS `how_to_json`,
+				pd.`faq` 		AS `faqJson`,
+				pd.`how_to` AS `howToJson`,
 				pd.`footer`,
-				pd.`date_modified` AS description_date_modified,
+				pd.`date_modified` AS descriptionDateModified,
 
 				pst.`views`,
 				pst.`orders`,
@@ -426,7 +430,7 @@ class ModelCatalogProduct extends Model {
 						AND r.`status` 			= 1
 					ORDER BY r.`date_modified` DESC
 					LIMIT 10
-				) AS last_reviews,
+				) AS lastReviews,
 
 				(
 					SELECT JSON_OBJECTAGG(
@@ -550,22 +554,23 @@ class ModelCatalogProduct extends Model {
 		 * Decode JSON aggregated data
 		 * Faster then bouncing requests to get separate product data and easier to store cached data
 		 */
-		$product['footer'] 							= json_decode($product['footer'] 			 ?? '[]', true);
-		$product['faq'] 								= json_decode($product['faq_json'] 		 ?? '[]', true);
-		$product['how_to'] 							= json_decode($product['how_to_json']  ?? '[]', true);
-		$product['seo_keywords'] 				= json_decode($product['seo_keywords'] ?? '[]', true);
-		$product['images'] 							= json_decode($product['images'] 			 ?? '[]', true);
-		$product['specials'] 						= json_decode($product['specials'] 		 ?? '[]', true);
-		$product['discounts'] 					= json_decode($product['discounts'] 	 ?? '[]', true);
-		$product['options'] 						= json_decode($product['options'] 		 ?? '[]', true);
-		$product['attributes'] 					= json_decode($product['attributes'] 	 ?? '[]', true);
-		$product['last_reviews'] 				= json_decode($product['last_reviews'] ?? '[]', true);
-		$product['reward'] 							= json_decode($product['rewards'] 		 ?? '[]', true)[$customer_group_id] ?? null;
+		$product['footer'] 							= json_decode($product['footer'] 			 		 ?? '[]', true);
+		$product['faq'] 								= json_decode($product['faqJson'] 		 		 ?? '[]', true);
+		$product['howTo'] 							= json_decode($product['howToJson']  	 		 ?? '[]', true);
+		$product['seoKeywords'] 				= json_decode($product['seoKeywords']  		 ?? '[]', true);
+		$product['images'] 							= json_decode($product['images'] 			 		 ?? '[]', true);
+		$product['specials'] 						= json_decode($product['specials'] 		 		 ?? '[]', true);
+		$product['discounts'] 					= json_decode($product['discounts'] 	 		 ?? '[]', true);
+		$product['options'] 						= json_decode($product['options'] 		 		 ?? '[]', true);
+		$product['attributes'] 					= json_decode($product['attributes'] 	 		 ?? '[]', true);
+		$product['lastReviews'] 				= json_decode($product['lastReviews']  		 ?? '[]', true);
+		$product['manufacturerData'] 		= json_decode($product['manufacturerData'] ?? '[]', true);
+		$product['reward'] 							= json_decode($product['rewards'] 		 		 ?? '[]', true)[$customer_group_id] ?? null;
 		// Get valid discount float prices and dates in YYYY-MM-DD format
 		$product['discount'] 						= $this->getValidDiscount($product['discounts'], $customer_group_id)['price'] 	 ?? null; // Single valid discount price
-		$product['discount_date_end'] 	= $this->getValidDiscount($product['discounts'], $customer_group_id)['date_end'] ?? null; // Discount date end
+		$product['discountDateEnd'] 		= $this->getValidDiscount($product['discounts'], $customer_group_id)['date_end'] ?? null; // Discount date end
 		$product['special'] 						= $this->getValidDiscount($product['specials'],  $customer_group_id)['price'] 	 ?? null; // Single valid special price
-		$product['special_date_end'] 		= $this->getValidDiscount($product['specials'],  $customer_group_id)['date_end'] ?? null; // Special date end
+		$product['specialDateEnd'] 			= $this->getValidDiscount($product['specials'],  $customer_group_id)['date_end'] ?? null; // Special date end
 		// Sort data
 		usort(array: $product['images'], 		 callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
 		usort(array: $product['options'], 	 callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
@@ -632,9 +637,11 @@ class ModelCatalogProduct extends Model {
 		$product['shortDescription'] = $shortDesciption;
 		// End trim short description
 
-		// Product URL
-		$product['url'] = $this->url->link('product/product', "product_id={$product_id}", true);
-		// End product URL
+		// URLs
+		$product['url'] 						= $this->url->link('product/product', "product_id={$product_id}", true);
+		$product['manufacturerUrl'] = $this->url->link('product/manufacturer', "manufacturer_id={$product['manufacturer_id']}", true);
+		$product['parentUrl'] 		  = $this->url->link('product/category', "path={$product['parent_id']}", true);
+		// End URLs
 
 		// Breadcrumbs
 		$product['breadcrumbs'] = [];
@@ -887,7 +894,7 @@ class ModelCatalogProduct extends Model {
 				: 'pst.`sort_order` ASC';
 
 			// Reset CTEs - remove group_count because without facet expression there is no group count present
-			$ctes   = [];
+			$ctes = [];
 			// Add limit to main CTE so avoid showing all products at once
 			// Also works with pagination correctly limiting max products before pagination applied
 			$ctes[] = "
@@ -1372,10 +1379,10 @@ class ModelCatalogProduct extends Model {
 				sd.`meta_description`,
 				sd.`meta_keyword`,
 				sd.`description`,
-				sd.`seo_keywords`,
+				sd.`seo_keywords` AS seoKeywords,
 				sd.`seo_description`,
-				sd.`faq`,
-				sd.`how_to`,
+				sd.`faq` AS faqJson,
+				sd.`how_to` AS howToJson,
 				sd.`footer`,
 				sd.`date_modified`,
 				JSON_ARRAYAGG(
@@ -1400,11 +1407,11 @@ class ModelCatalogProduct extends Model {
 
 		$data = $this->db->query($sql)->row;
 
-		$data['seoKeywords']  = json_decode($data['seo_keywords'] ?? '[]', true);
-		$data['faq'] 					= json_decode($data['faq'] ?? '[]', true);
-		$data['howTo'] 				= json_decode($data['how_to'] ?? '[]', true);
-		$data['footer'] 			= json_decode($data['footer'] ?? '[]', true);
-		$data['images']				= json_decode($data['images'] ?? '[]', true);
+		$data['seoKeywords']  = json_decode($data['seoKeywords'] ?? '[]', true);
+		$data['faq'] 					= json_decode($data['faqJson'] 		 ?? '[]', true);
+		$data['howTo'] 				= json_decode($data['howToJson'] 	 ?? '[]', true);
+		$data['footer'] 			= json_decode($data['footer'] 		 ?? '[]', true);
+		$data['images']				= json_decode($data['images'] 		 ?? '[]', true);
 		$data['description']	= html_entity_decode($data['description'], ENT_QUOTES, 'UTF-8');
 
 		if ($cacheSetting) {
