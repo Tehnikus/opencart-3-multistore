@@ -8,44 +8,44 @@
       <h1>{{ h1 }}</h1>
     </hgroup>
     {% if description %}
-      <article role="article" class="categoryDescription" id="categoryDescription">{{ description }}</article>
+      <section role="region" aria-label="{{ aria_category_description }}" class="categoryDescription" id="categoryDescription">{{ description }}</section>
     {% endif %}
     {{ content_top }}
     {# Subcategories #}
     {% if child_categories %}
-      <div id="subcategories" class="grid">
+      <nav id="subcategories" class="grid" role="navigation" aria-label="{{ aria_child_categories }}">
         {% for category in child_categories %}
           <div class="miniature">
             <a title="{{ category.name }}" href="{{ category.href }}">
               <img loading="lazy" src="{{ category.image }}" alt="{{ category.name }}" title="{{ category.name }}" class="img-responsive" width="{{ category.width }}" height="{{ category.height }}"/>
-              <span class="h5">{{ category.name }}</span>
+              <span class="h5 title">{{ category.name }}</span>
             </a>
           </div>
         {% endfor %}
-      </div>
+      </nav>
     {% endif %}
     {# Product list #}
     {% if products %}
-      <div id="products" class="product grid" tabindex="0"> 
-      {% for product in products %}
-        {% include 'default/template/product/product_miniature.twig' %}
-      {% endfor %} 
-      </div>
+      <section id="products" class="product grid" tabindex="0" aria-label="{{ aria_product_list }}">
+        {% for product in products %}
+          {% include 'default/template/product/product_miniature.twig' %}
+        {% endfor %} 
+      </section>
       <div id="pagination" class="flex justify-center">
         {% if pagination %}
-          <div>{{ pagination }}</div>
+          <nav role="navigation" aria-label="{{ aria_pagination }}" id="pagination">{{ pagination }}</nav>
         {% endif %}
         <div><span>{{ results }}</span></div>
       </div>
     {% endif %}
     {% if seo_description %}
-      <div class="categoryDescription">{{ seo_description }}</div>
+      <div role="complementary" class="categoryDescription" aria-label="{{ aria_seo_description }}">{{ seo_description }}</div>
     {% endif %}
     
     {% if faq %}
       {% for item in faq.mainEntity %}
         <details>
-          <summary>
+          <summary role="button">
             {{ item.name }}
           </summary>
           <div class="content">
