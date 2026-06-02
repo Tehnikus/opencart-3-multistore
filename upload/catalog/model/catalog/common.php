@@ -195,10 +195,11 @@ class ModelCatalogCommon extends Model {
     }
 
     // Brand
-    if (!empty($product['manufacturer'])) {
+    if (!empty($product['manufacturerData'])) {
       $schema['brand'] = [
         '@type' => 'Brand',
-        'name'  => $product['manufacturer'],
+        'name'  => $product['manufacturerData']['name'],
+        'url'   => $product['manufacturerData']['url'],
       ];
     }
 
