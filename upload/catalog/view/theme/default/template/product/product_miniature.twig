@@ -35,7 +35,7 @@
             </div>
           </div>
         {% endif %}
-      {% if product.price and product.price != 0 %}
+      {% if product.showPrice %}
         <div class="prices">
           {% if not product.special %}
             <p><span class="text-price">{{ text_price }}</span>&nbsp;<span class="price h3 b">{{ product.priceFormat }}</span></p>
@@ -51,7 +51,7 @@
     </div>
     <div class="btn-group">
       <button type="button" 
-        {% if product.price and product.price != 0 %} 
+        {% if product.showPrice and product.is_available %} 
           data-action="cartAdd" 
           data-product-id="{{ product.product_id }}" 
           data-minimum-qty="{{ product.minimum }}" 

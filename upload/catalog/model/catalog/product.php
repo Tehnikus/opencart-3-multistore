@@ -227,10 +227,7 @@ class ModelCatalogProduct extends Model {
 				 */ 
 				// $now = date('Y-m-d H:i:s');
 				// Get valid discount float prices and dates in YYYY-MM-DD format
-				$product['discount'] 						= $this->getValidDiscount($product['discounts'], $customer_group_id)['price'] 	 ?? null;
-				$product['special'] 						= $this->getValidDiscount($product['specials'],  $customer_group_id)['price'] 	 ?? null;
-				$product['discount_date_end'] 	= $this->getValidDiscount($product['discounts'], $customer_group_id)['date_end'] ?? null;
-				$product['special_date_end'] 		= $this->getValidDiscount($product['specials'],  $customer_group_id)['date_end'] ?? null;
+				$this->buildProductDynamicData($product);
 	
 				return $product;
 			}
@@ -666,23 +663,39 @@ class ModelCatalogProduct extends Model {
 
 		// Following data is dynamic, thus can not be cached
 		// This involves currency, customer group and current date
+		$this->buildProductDynamicData($product);
+
+		return $product;
+	}
+
+	private function buildProductDynamicData(&$data) : void {
+		// Prices
+		$tax 			= $this->config->get('config_tax');
+		$currency = $this->session->data['currency'];
+
+		$priceFormat = $this->currency->format($this->tax->calculate($data['price'], $data['tax_class_id'], $tax), $currency);
+		if (!is_null($data['special']) && (float) $data['special'] >= 0) {
+			$priceSpecialFormat = $this->currency->format($this->tax->calculate($data['special'], $data['tax_class_id'], $tax), $currency);
+			$priceTaxValue 			= (float) $data['special'];
+		} else {
+			$priceSpecialFormat = false;
+			$priceTaxValue 			= (float) $data['price'];
+		}
+		$priceTaxFormat = ($this->config->get('config_tax')) ? $this->currency->format($priceTaxValue, $currency) : false;
+		$data['priceFormat'] 	 			= $priceFormat;
+		$data['priceTaxFormat'] 		= $priceTaxFormat;
+		$data['priceSpecialFormat'] = $priceSpecialFormat;
+		$data['priceTaxValue'] 			= $priceTaxValue;
+		$data['currencyCode'] 			= $this->session->data['currency'];
+		$data['customerGroupId']		= (int) $this->config->get('config_customer_group_id');
+		$data['showPrice']					= $this->customer->isLogged() || !$this->config->get('config_customer_price');
+		// End prices
 
 		// Filter specials and discounts - return arrays filtered by customer group id and now() date
 		// These arrays are used to show multiple discounts at once
 		$now = date('Y-m-d H:i:s');
 		// Array of specials
-		$product['specials'] = array_filter($product['specials'], function ($var) use ($now) {
-			return 
-				strtotime($var['date_start']) <= strtotime($now)
-				&& (
-					strtotime($var['date_end']) >= strtotime($now) 
-					|| $var['date_end'] === null
-					|| str_contains($var['date_end'], '0000-00-00')
-				)
-			;
-		});
-		// Array of discounts
-		$product['discounts'] = array_filter($product['discounts'], function ($var) use ($now) {
+		$data['specials'] = array_filter($data['specials'], function ($var) use ($now) {
 			return 
 				strtotime($var['date_start']) <= strtotime($now)
 				&& (
@@ -693,26 +706,27 @@ class ModelCatalogProduct extends Model {
 			;
 		});
 
-		// Prices
-		$priceFormat = ($this->customer->isLogged() || !$this->config->get('config_customer_price')) ? $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']) : false;
-		if (!is_null($product['special']) && (float) $product['special'] >= 0) {
-			$priceSpecialFormat = $this->currency->format($this->tax->calculate($product['special'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
-			$priceTaxValue 			= (float) $product['special'];
-		} else {
-			$priceSpecialFormat = false;
-			$priceTaxValue 			= (float) $product['price'];
+		foreach ($data['specials'] as $key => $special) {
+			$data['specials'][$key]['priceFormat'] = $this->currency->format($this->tax->calculate($special['price'], $data['tax_class_id'], $tax), $currency);
 		}
-		$priceTaxFormat = ($this->config->get('config_tax')) ? $this->currency->format($priceTaxValue, $this->session->data['currency']) : false;
-		$product['priceFormat'] 	 			= $priceFormat;
-		$product['priceTaxFormat'] 			= $priceTaxFormat;
-		$product['priceSpecialFormat'] 	= $priceSpecialFormat;
-		$product['priceTaxValue'] 			= $priceTaxValue;
-		// End prices
 
-		// Cache date for static HTML cache
-		$product['cache_date'] = strtotime($product['date_modified']);
+		// Array of discounts
+		$data['discounts'] = array_filter($data['discounts'], function ($var) use ($now) {
+			return 
+				strtotime($var['date_start']) <= strtotime($now)
+				&& (
+					strtotime($var['date_end']) >= strtotime($now) 
+					|| $var['date_end'] === null
+					|| str_contains($var['date_end'], '0000-00-00')
+				)
+			;
+		});
 
-		return $product;
+		foreach ($data['discounts'] as $key => $special) {
+			$data['discounts'][$key]['priceFormat'] = $this->currency->format($this->tax->calculate($special['price'], $data['tax_class_id'], $tax), $currency);
+		}
+
+		$data['cacheDate'] = max(strtotime($data['descriptionDateModified']), strtotime($data['date_modified']));
 	}
 
 	/**
