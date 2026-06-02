@@ -73,6 +73,20 @@ $_['error_curl']            = 'CURL: Error Code(%s): %s';
 // Titles
 $_['title_bestseller']      = 'Bestsellers';
 
+// Product miniature
+$_['button_cart']       = 'Add to cart';
+$_['button_wishlist']   = 'Add to whishlist';
+$_['button_compare']    = 'Compare';
+$_['text_tax']          = 'Tax incl.';
+$_['text_price']        = 'Price';
+$_['text_new_price']    = 'New price';
+$_['text_old_price']    = 'Old price';
+$_['aria_rating_label'] = 'Product rating: %s';
+
+// Category
+$_['text_no_products_in_category'] = 'There are no products in %s category';
+
+
 /* When doing translations only include the matching language code */
 
 // Datepicker
