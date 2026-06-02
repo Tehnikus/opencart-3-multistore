@@ -359,7 +359,7 @@ class ModelCatalogCommon extends Model {
       
       foreach ($imageSet ?? [] as $img) {
 
-        if (str_contains($img['src'], 'no_image')) continue;
+        if (isset($img['src']) && str_contains($img['src'], 'no_image')) continue;
 
         $images[] = [
           '@type'         => 'ImageObject', 

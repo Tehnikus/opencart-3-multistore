@@ -13,6 +13,7 @@
   <div class="infos flex column">
     <div class="caption flex column">
       <span class="h3 title"><a title="{{ product.name }}" href="{{ product.url }}">{{ product.name }}</a></span>
+      {% if product.manufacturerData %}<span class="title">{{ product.manufacturerData.name }}</span>{% endif %}
       {% if product.shortDescription %}<p class="shortDescription">{{ product.shortDescription }}</p>{% endif %}
       
         {% if product.rating and product.rating > 0 %}
