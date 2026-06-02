@@ -698,6 +698,21 @@ class ModelCatalogProduct extends Model {
 		$data['showPrice']					= $this->customer->isLogged() || !$this->config->get('config_customer_price');
 		// End prices
 
+		// Options
+		$options = [];
+		foreach ($data['options'] ?? [] as $optionGroup) {
+			foreach ($optionGroup['product_option_value'] as $key => $optionValue) {
+				$optionValue['price_value'] = $optionValue['price'];
+				$optionValue['price']       = $this->currency->format(
+					$this->tax->calculate($optionValue['price'], $data['tax_class_id'], $this->config->get('config_tax')),
+					$this->session->data['currency']
+				);
+				$optionGroup['product_option_value'][$key] = $optionValue;
+			}
+			$options[$optionGroup['product_option_id']] = $optionGroup; 
+		}
+		$data['options'] = $options;
+
 		// Filter specials and discounts - return arrays filtered by customer group id and now() date
 		// These arrays are used to show multiple discounts at once
 		$now = date('Y-m-d H:i:s');
