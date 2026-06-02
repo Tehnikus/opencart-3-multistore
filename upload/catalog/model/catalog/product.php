@@ -592,6 +592,8 @@ class ModelCatalogProduct extends Model {
 		$imgMainHeight 			= (int) ($this->config->get("theme_{$theme}_image_product_main_height") ?? 2000);
 		$imgMiniatureWidth  = (int) ($this->config->get("theme_{$theme}_image_product_width") ?? 600);
 		$imgMiniatureHeight = (int) ($this->config->get("theme_{$theme}_image_product_height") ?? 600);
+		$imgManufacturerWidth  = (int) ($this->config->get("theme_{$theme}_image_manufacturer_height") ?? 600);
+		$imgManufacturerHeight = (int) ($this->config->get("theme_{$theme}_image_manufacturer_height") ?? 200);
 
 		// Add cover to the beginning of images array
 		$cover['image'] 		  = $product['image'] ?? 'no_image.webp';
@@ -613,6 +615,10 @@ class ModelCatalogProduct extends Model {
 				'width'				=> $imgMiniatureWidth,
 				'height'			=> $imgMiniatureHeight,
 			];
+		}
+
+		if (!empty($product['manufacturerData'])) {
+			$product['manufacturerData']['image'] = $this->model_tool_image->resize($product['manufacturerData']['image'] ?? 'no_image.webp', $imgManufacturerWidth, $imgManufacturerHeight);
 		}
 
 		$product['images'] = $productImages;
