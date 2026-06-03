@@ -1,0 +1,30 @@
+{# {% if seoFooter %}
+  <section class="tabWrapper flex column">
+    {% for tab in seoFooter %}
+      <details name="tabName" {% if loop.first %}open{% endif %}>
+        <summary>{{ tab.name }}</summary>
+        <div class="tabContent">
+          {{ tab.description }}
+        </div>
+      </details>
+    {% endfor %}
+  </section>
+{% endif %} #}
+
+<section class="flex column tabs">
+  <span id="footerTitle" class="h3">{{ tab_seo_footer }}</span>
+  <div class="tabsTitle">
+    <ul aria-labelledby="footerTitle" class="flex row gap unstyled">
+      {% for key, tab in seoFooter %}
+        <li><a id="tab_{{ key }}" href="#tab_key_{{ key }}" class="button {% if loop.first %}active{% endif %} tabToggle">{{ tab.name }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="tabsContainer flex column" aria-labelledby="tab_{{ key }}">
+    {% for key, tab in seoFooter %}
+      <div id="tab_key_{{ key }}" class="{% if loop.first %}active{% endif %} tabContent flex block width-100">
+        {{ tab.description }}
+      </div>
+    {% endfor %}
+  </div>
+</section>
