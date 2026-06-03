@@ -1,0 +1,12 @@
+{% if faq %}
+  {% for item in faq.mainEntity %}
+    <details>
+      <summary role="button">
+        <h5>{{ item.name }}</h5>
+      </summary>
+      <div class="content">
+        {{ item.acceptedAnswer.text}}
+      </div>
+    </details>
+  {% endfor %}
+{% endif %}
