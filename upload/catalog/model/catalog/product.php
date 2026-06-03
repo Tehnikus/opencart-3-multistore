@@ -1338,6 +1338,38 @@ class ModelCatalogProduct extends Model {
 		$data['footer'] 			= json_decode($data['footer'] 		 ?? '[]', true);
 		$data['images']				= json_decode($data['images'] 		 ?? '[]', true);
 		$data['description']	= html_entity_decode($data['description'], ENT_QUOTES, 'UTF-8');
+		// Resize images to store prepared image links
+		$this->load->model('tool/image');
+		$cover 							= [];
+		$images 						= [];
+		$theme        	 		= $this->config->get('config_theme');
+		$imgMainWidth  			= (int) ($this->config->get("theme_{$theme}_image_category_main_width") ?? 2000);
+		$imgMainHeight 			= (int) ($this->config->get("theme_{$theme}_image_category_main_height") ?? 2000);
+		$imgMiniatureWidth  = (int) ($this->config->get("theme_{$theme}_image_category_width") ?? 600);
+		$imgMiniatureHeight = (int) ($this->config->get("theme_{$theme}_image_category_height") ?? 600);
+		// Add cover to the beginning of images array
+		$cover['image'] 		  = $data['image'] ?? 'no_image.webp';
+		$cover['description'] = $data['name'];
+		array_unshift($data['images'], $cover);
+
+		foreach ($data['images'] as $img) {
+			$images['covers'][] = [
+				'src' 				=> $this->model_tool_image->resize($img['image'], $imgMainWidth, $imgMainHeight),
+				'description' => $img['description'],
+				'width'				=> $imgMainWidth,
+				'height'			=> $imgMainHeight,
+			];
+
+			$images['miniatures'][] = [
+				'src' 				=> $this->model_tool_image->resize($img['image'], $imgMiniatureWidth, $imgMiniatureHeight),
+				'description' => $img['description'],
+				'width'				=> $imgMiniatureWidth,
+				'height'			=> $imgMiniatureHeight,
+			];
+		}
+
+		$data['images'] = $images;
+		// End images
 
 		if ($cacheSetting) {
 			$this->cache->set($cacheName, $data);
