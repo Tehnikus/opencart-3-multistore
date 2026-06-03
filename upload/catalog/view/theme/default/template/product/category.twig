@@ -44,18 +44,7 @@
       <div role="complementary" class="categoryDescription" aria-label="{{ aria_seo_description }}">{{ seo_description }}</div>
     {% endif %}
     
-    {% if faq %}
-      {% for item in faq.mainEntity %}
-        <details>
-          <summary role="button">
-            {{ item.name }}
-          </summary>
-          <div class="content">
-            {{ item.acceptedAnswer.text}}
-          </div>
-        </details>
-      {% endfor %}
-    {% endif %}
+    {% include "default/template/elements/faq.twig" with {faq: faq} %}
 
     </main>
   {{ column_right }}
