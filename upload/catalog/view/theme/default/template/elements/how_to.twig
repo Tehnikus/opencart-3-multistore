@@ -1,0 +1,61 @@
+{% if howTo %}
+  <section class="howTo">
+    <header class="howToHeader">
+      <h2 class="howToTitle">
+        {{ how_to.name }}
+      </h2>
+      <div class="howToMeta">
+        <span class="howToTime">
+          {{ how_to.totalTime }}
+        </span>
+        <span class="howToCost">
+          {{ how_to.estimatedCost.value }}
+          {{ how_to.estimatedCost.currency }}
+        </span>
+      </div>
+    </header>
+    <p class="howToDescription">
+      {{ how_to.description }}
+    </p>
+    <div class="howToGrid">
+      {% if how_to.supply %}
+      <div class="howToBlock">
+        <h3>{{ how_to_header_supplies }}</h3>
+        <ul>
+          {% for item in how_to.supply %}
+            <li>{{ item.name }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      {% if how_to.tool %}
+      <div class="howToBlock">
+        <h3>{{ how_to_header_tools }}</h3>
+        <ul>
+          {% for item in how_to.tool %}
+            <li>{{ item.name }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+      <h3>{{ how_to_header_steps }}</h3>
+      <ol class="howToSteps">
+      {% for step in how_to.step %}
+        <li class="howToStep">
+          <div class="stepIndex">
+            {{ loop.index }}
+          </div>
+          <div class="stepBody">
+            <h4 class="stepTitle">
+              {{ step.name }}
+            </h4>
+            <p class="stepText">
+              {{ step.text }}
+            </p>
+          </div>
+        </li>
+      {% endfor %}
+    </ol>
+  </section>
+{% endif %}
