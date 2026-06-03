@@ -1,0 +1,18 @@
+{% if rating and rating > 0 %}
+  <div class="rating flex align-center justify-center" aria-label="{{ aria_rating_label|format(rating) }}" title="{{ aria_rating_label|format(rating) }}">
+    {% for i in 1..5 %}
+      {% if rating >= i %}
+        <svg class="i" aria-hidden="true"><use href="catalog/view/theme/default/img/icons.svg#i-star-filled"></use></svg>
+      {% else %}
+        {%if rating - i < 0 %}
+          <svg class="i" aria-hidden="true"><use href="catalog/view/theme/default/img/icons.svg#i-star-half"></use></svg>
+        {% else %}
+          <svg class="i" aria-hidden="true"><use href="catalog/view/theme/default/img/icons.svg#i-star-empty"></use></svg>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+    {% if reviews is defined and reviews > 0 %}
+      <span>({{ reviews }})</span>
+    {% endif %}
+  </div>
+{% endif %}
