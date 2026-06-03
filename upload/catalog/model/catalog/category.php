@@ -44,9 +44,9 @@ class ModelCatalogCategory extends Model {
 				cd.`description`,
 				cd.`seo_keywords`,
 				cd.`seo_description`,
-				cd.`faq` AS faq_json,
-				cd.`how_to` AS how_to_json,
-				cd.`footer`,
+				cd.`faq` 		AS `faq_json`,
+				cd.`how_to` AS `how_to_json`,
+				cd.`footer` AS `seoFooter`,
 				cd.`date_modified`,
 				cd.`language_id`,
 				-- cs.`price_min`,
@@ -110,12 +110,15 @@ class ModelCatalogCategory extends Model {
 		$data['seo_keywords'] 		= json_decode($data['seo_keywords'] ?? '[]', true);
 		$data['faq'] 							= json_decode($data['faq_json'] 		?? '[]', true);
 		$data['how_to'] 					= json_decode($data['how_to_json'] 	?? '[]', true);
-		$data['footer'] 					= json_decode($data['footer'] 			?? '[]', true);
+		$data['seoFooter'] 				= json_decode($data['seoFooter'] 		?? '[]', true);
 		$data['images']						= json_decode($data['images'] 			?? '[]', true);
 		$data['last_reviews'] 		= json_decode($data['last_reviews'] ?? '[]', true);
+		$data['child_categories']	= $this->getCategories($category_id);
 		$data['description']			= html_entity_decode($data['description'], ENT_QUOTES, 'UTF-8');
 		$data['seo_description']	= html_entity_decode($data['seo_description'], ENT_QUOTES, 'UTF-8');
-		$data['child_categories']	= $this->getCategories($category_id);
+		foreach ($data['seoFooter'] ?? [] as $key => $tab) {
+			$data['seoFooter'][$key]['description'] = html_entity_decode($tab['description'], ENT_QUOTES, 'UTF-8');
+		}
 		usort(array: $data['images'], callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
 
 		// Resize images to store prepared image links
