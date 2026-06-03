@@ -6,6 +6,7 @@
     {# Category title and main links #}
     <hgroup class="flex row nowrap">
       <h1>{{ h1 }}</h1>
+      {% include "default/template/elements/rating_stars.twig" %}
     </hgroup>
     {% if description %}
       <section role="region" aria-label="{{ aria_category_description }}" class="categoryDescription" id="categoryDescription">{{ description }}</section>
