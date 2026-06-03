@@ -16,26 +16,7 @@
       {% if product.manufacturerData %}<span class="title">{{ product.manufacturerData.name }}</span>{% endif %}
       {% if product.shortDescription %}<p class="shortDescription">{{ product.shortDescription }}</p>{% endif %}
       
-        {% if product.rating and product.rating > 0 %}
-          <div aria-label="{{ aria_rating_label|format(rating) }}" title="{{ aria_rating_label|format(rating) }}">
-            <div class="rating flex align-center justify-center" role="presentation">
-              {% for i in 1..5 %}
-                {% if product.rating >= i %}
-                  <svg class="i" aria-hidden="true"><use href="catalog/view/theme/default/img/icons.svg#i-star-filled"></use></svg>
-                {% else %}
-                  {%if product.rating -  i < 0 %}
-                    <svg class="i" aria-hidden="true"><use href="catalog/view/theme/default/img/icons.svg#i-star-half"></use></svg>
-                  {% else %}
-                    <svg class="i" aria-hidden="true"><use href="catalog/view/theme/default/img/icons.svg#i-star-empty"></use></svg>
-                  {% endif %}
-                {% endif %}
-              {% endfor %}
-              {% if count is defined and product.reviews > 0 %}
-                <span class="reviews-count">({{ product.reviews }})</span>
-              {% endif %}
-            </div>
-          </div>
-        {% endif %}
+      {% include "default/template/elements/rating_stars.twig" with {rating:product.rating} %}
       {% if product.showPrice %}
         <div class="prices">
           {% if not product.special %}
