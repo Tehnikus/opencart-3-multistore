@@ -1,7 +1,7 @@
 {% cache "productMiniature;" ~ store_id ~ ";" ~ language_id ~ ";" ~ product.product_id ~ ";" ~ product.currencyCode ~ ";" ~ product.cacheDate ttl(2592000) %}
 <article role="article" aria-label="{{ product.name }}" class="miniature" {% if product.specialDateEnd %}data-special-date-end="{{ product.specialDateEnd }}"{% endif %}>
   <!-- Cached at {{ "now"|date("d.m.Y H:i:s") }} -->
-  <a title="{{ img.description }}" href="{{ product.url }}" class="scroll-x snap single markers">
+  <a title="{{ product.name }}" href="{{ product.url }}" class="scroll-x snap single markers">
     {% for key, img in product.images.miniatures %}
       <figure>
         <img id="img_{{ product.product_id }}_{{ key }}" decoding="async" loading="lazy" src="{{ img.src }}" alt="{{ img.description }}" title="{{ img.description }}" width="{{ img.width }}" height="{{ img.height }}" />
