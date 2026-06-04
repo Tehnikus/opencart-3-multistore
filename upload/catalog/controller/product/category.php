@@ -62,6 +62,18 @@ class ControllerProductCategory extends Controller {
 		// Set H1 fallback
 		$data['h1'] = $data['h1'] ?? $data['name'];
 
+		// Add page number to h1 and title
+		if (isset($getRequest['page'])) {
+			$data['h1'] .= ', ' . sprintf($this->language->get('page_seo_title'), (int) $getRequest['page']);
+			$data['meta_title'] .= ', ' . sprintf($this->language->get('page_seo_title'), (int) $getRequest['page']);
+		}
+
+		// Add sort order to h1 and title
+		if (isset($getRequest['sort']) && isset($sortOrders[$getRequest['sort']]) && $getRequest['sort'] !== 'sort_order') {
+			$data['h1'] .= ', '. sprintf($this->language->get('sort_seo_title'), strtolower($this->language->get("sort_{$getRequest['sort']}")));
+			$data['meta_title'] .= ', '. sprintf($this->language->get('sort_seo_title'), strtolower($this->language->get("sort_{$getRequest['sort']}")));
+		}
+
 		return $data;
 	}
 }
