@@ -42,9 +42,24 @@ class ControllerProductCategory extends Controller {
 		$category_id 	= (int) end($parts) ?: null;
 		$data 				= $this->model_catalog_category->getCategory($category_id);
 
+		// Remove default sort order from GET request
+		if (isset($getRequest['sort']) && $getRequest['sort'] === 'sort_order') {
+			unset($getRequest['sort']);
+		}
+		// Remove furst page param from GET request
+		if (isset($getRequest['page']) && $getRequest['page'] === '1') {
+			unset($getRequest['page']);
+		}
+
 		// Return if category not exists
 		if (!$data || empty($data)) {
 			return false;
+		}
+
+		// Remove description and SEO description on all category pages except canonical: pagination, sort, filter
+		if (!empty(array_diff_key($getRequest, ['path' => '', 'route' => '']))) {
+			$data['description'] = '';
+			$data['seoDescription'] = '';
 		}
 
 		// Get filter page
@@ -53,8 +68,8 @@ class ControllerProductCategory extends Controller {
 			$data = array_merge($data, $filterPage);
 		}
 
-		// Remove SEO description on all pages except canonical - without pages and sort order
-		if ((isset($getRequest['page']) && $getRequest['page'] !== 1) || (isset($getRequest['sort']) && $getRequest['sort'] !== 'sort_order')) {
+		// Remove description and SEO description on pagination and sort filter pages except canonical
+		if (!empty($filterPage) && (isset($getRequest['page']) || isset($getRequest['sort']))) {
 			$data['description'] = '';
 			$data['seoDescription'] = '';
 		}
