@@ -35,6 +35,8 @@ class ControllerProductCategory extends Controller {
 	 * @return array
 	 */
 	private function getDescriptions() : array|bool {
+		$this->load->model('catalog/product');
+		$sortOrders = $this->model_catalog_product->getSortOrders();
 		// Get SEO filter page. If exists, use description data from there, othewise use category description
 		$getRequest 	= $this->request->get;
 		$path        	= $getRequest['path'] ?? '';
