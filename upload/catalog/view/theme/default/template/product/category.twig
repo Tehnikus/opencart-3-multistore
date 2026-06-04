@@ -13,9 +13,9 @@
     {% endif %}
     {{ content_top }}
     {# Subcategories #}
-    {% if child_categories %}
+    {% if childCategories %}
       <nav id="subcategories" class="grid" role="navigation" aria-label="{{ aria_child_categories }}">
-        {% for category in child_categories %}
+        {% for category in childCategories %}
           <div class="miniature">
             <a title="{{ category.name }}" href="{{ category.href }}">
               <img loading="lazy" src="{{ category.image }}" alt="{{ category.name }}" title="{{ category.name }}" class="img-responsive" width="{{ category.width }}" height="{{ category.height }}"/>
@@ -41,12 +41,11 @@
     {% else %}
       <p>{{ text_no_products_in_category|format(name) }}</p>
     {% endif %}
-    {% if seo_description %}
-      <div role="complementary" class="categoryDescription" aria-label="{{ aria_seo_description }}">{{ seo_description }}</div>
-    {% endif %}
-    
     {% include "default/template/elements/faq.twig" with {faq: faq} %}
-
+    {{ content_bottom }}
+    {% if seoDescription %}
+      <div role="complementary" class="categoryDescription" aria-label="{{ aria_seo_description }}">{{ seoDescription }}</div>
+    {% endif %}
     </main>
   {{ column_right }}
 </div>
