@@ -14,7 +14,7 @@
   <section class="flex column tabs">
     <span id="footerTitle" class="h3">{{ tab_seo_footer }}</span>
     <div class="tabsTitle">
-      <ul aria-labelledby="footerTitle" class="flex row gap unstyled">
+      <ul aria-labelledby="footerTitle" class="flex row gap unstyledList">
         {% for key, tab in seoFooter %}
           <li><a id="tab_{{ key }}" href="#tab_key_{{ key }}" class="button tabToggle {% if loop.first %}active{% endif %}">{{ tab.name }}</a></li>
         {% endfor %}
