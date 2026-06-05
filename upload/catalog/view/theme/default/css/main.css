@@ -91,6 +91,7 @@
   h5, .h5 {font-size: var(--font-size-h5);}
   b, .b, strong, .strong {font-weight: bold; color: var(--color-text-strong)}
   .muted, .disabled, disabled {color: var(--color-text-muted);}
+  .disabled, disabled {cursor: default;}
   s {position: relative; text-decoration: none;}
   s:before {content: ""; position: absolute; left: 0; top: 50%; right: 0; border-top: 1px solid; border-color: inherit; transform:rotate(-10deg)}
   
@@ -166,9 +167,7 @@
 
     &:disabled {background-color: #dadada; cursor: not-allowed; opacity: .5;}
   }
-
   label {cursor: pointer;}
-
   @keyframes scale {0% {transform: scale(0)} 100% {transform: scale(1)}}
 
   button, .button, select, .tag {
@@ -223,6 +222,7 @@
       padding: calc(var(--grid-gap) * .7);
       /* list-style-position: outside; */
       color: var(--color-primary);
+      list-style-type: none;
       &:hover {
         color: var(--color-primary-dark);
       }
@@ -233,6 +233,7 @@
   }
 
   .unstyledList, .unstyledList > li {
+    margin: 0;
     padding: 0;
     list-style-type: none;
   }
@@ -292,7 +293,20 @@
     padding: var(--grid-gap);
     width: 100%;
     min-width: 0;
+    align-items: start;
+    & aside#columnLeft {order: 1}
+    & aside#columnRight {order: 3}
+    & main {order: 2}
   }
+
+  body > section {
+    display: flex;
+    flex: 1;
+    gap: var(--grid-gap);
+    padding: var(--grid-gap);
+    width: 100%;
+  }
+
   main {
     flex: 1 1 auto;
     min-width: 0;
@@ -300,6 +314,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--grid-gap);
+    view-transition-name: mainblock;
   }
   aside {
     background: var(--background-aside);
@@ -336,13 +351,16 @@
   .scroll-x {
     display: flex;
     overflow-x: auto;
+    overflow-y: hidden;
     white-space: nowrap;
     gap: var(--grid-gap);
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
-    scrollbar-color: var(--color-primary) transparent;
+    /* scrollbar-color: var(--color-primary) transparent; */
     scrollbar-width: thin;
-    scrollbar-gutter: stable;;
+    scrollbar-color: transparent transparent; 
+    transition: scrollbar-color var(--time) var(--style);
+    &:hover {scrollbar-color: var(--color-primary) transparent;}
     &.snap {
       scroll-snap-type: x mandatory;
       &>* {scroll-snap-align: center;}
@@ -382,8 +400,10 @@
   &.nowrap {flex-wrap: nowrap;}
   &.align-center {align-items: center;}
   &.justify-center {justify-content: center;}
+  &.justify-space-between {justify-content: space-between;}
   &.width-100 {width: 100%;}
   &.flex-1-1-auto {flex: 1 1 auto;}
+  &.gap {gap: var(--block-gap)} 
 }
 
 .block {
