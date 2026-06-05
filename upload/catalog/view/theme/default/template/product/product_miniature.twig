@@ -1,5 +1,5 @@
 {% cache "productMiniature;" ~ store_id ~ ";" ~ language_id ~ ";" ~ product.product_id ~ ";" ~ product.currencyCode ~ ";" ~ product.cacheDate ttl(2592000) %}
-<article role="article" aria-label="{{ product.name }}" class="miniature" {% if product.specialDateEnd %}data-special-date-end="{{ product.specialDateEnd }}"{% endif %}>
+<article role="article" aria-label="{{ product.name }}" class="miniature" {% if product.specialDateEnd %}data-special-date-end="{{ product.specialDateEnd }}"{% endif %} style="view-transition-name: i_{{ product.product_id }};">
   <!-- Cached at {{ "now"|date("d.m.Y H:i:s") }} -->
   <a title="{{ product.name }}" href="{{ product.url }}" class="scroll-x snap single markers">
     {% for key, img in product.images.miniatures %}
