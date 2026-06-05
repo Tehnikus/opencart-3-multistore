@@ -681,9 +681,16 @@ class ModelCatalogProduct extends Model {
 			];
 		}
 
-		if (!empty($product['manufacturerData'])) {
-			$product['manufacturerData']['image'] = $this->model_tool_image->resize($product['manufacturerData']['image'] ?? 'no_image.webp', $imgManufacturerWidth, $imgManufacturerHeight);
-		}
+		// if (!empty($product['manufacturerData'])) {
+		// 	$product['manufacturerData']['image'] 		= $this->model_tool_image->resize($product['manufacturerData']['image'] ?? 'no_image.webp', $imgManufacturerWidth, $imgManufacturerHeight);
+		// 	$product['manufacturerData']['url'] 			= $this->url->link('product/manufacturer', "manufacturer_id={$product['manufacturer_id']}", true);
+		// 	$product['manufacturerData']['facetLink'] = $this->url->link('product/category', "path={$product['parent_id']}&manufacturer_id={$product['manufacturer_id']}", true);
+		// }
+		// if (!empty($product['parentData'])) {
+		// 	$product['parentData']['image'] 		= $this->model_tool_image->resize($product['parentData']['image'] ?? 'no_image.webp', $imgManufacturerWidth, $imgManufacturerHeight);
+		// 	$product['parentData']['url'] 			= $this->url->link('product/manufacturer', "manufacturer_id={$product['manufacturer_id']}", true);
+		// 	$product['parentData']['facetLink'] = $this->url->link('product/category', "path={$product['parent_id']}&manufacturer_id={$product['manufacturer_id']}", true);
+		// }
 
 		$product['images'] = $productImages;
 		// End images
