@@ -10,21 +10,22 @@
     {% endfor %}
   </section>
 {% endif %} #}
-
-<section class="flex column tabs">
-  <span id="footerTitle" class="h3">{{ tab_seo_footer }}</span>
-  <div class="tabsTitle">
-    <ul aria-labelledby="footerTitle" class="flex row gap unstyled">
+{% if seoFooter %}
+  <section class="flex column tabs">
+    <span id="footerTitle" class="h3">{{ tab_seo_footer }}</span>
+    <div class="tabsTitle">
+      <ul aria-labelledby="footerTitle" class="flex row gap unstyled">
+        {% for key, tab in seoFooter %}
+          <li><a id="tab_{{ key }}" href="#tab_key_{{ key }}" class="button tabToggle {% if loop.first %}active{% endif %}">{{ tab.name }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="tabsContainer flex column" aria-labelledby="tab_{{ key }}">
       {% for key, tab in seoFooter %}
-        <li><a id="tab_{{ key }}" href="#tab_key_{{ key }}" class="button tabToggle {% if loop.first %}active{% endif %}">{{ tab.name }}</a></li>
+        <div id="tab_key_{{ key }}" class="{% if loop.first %}active{% endif %} tabContent flex block width-100" {% if not loop.first %}aria-hidden="true"{% endif %}>
+          {{ tab.description }}
+        </div>
       {% endfor %}
-    </ul>
-  </div>
-  <div class="tabsContainer flex column" aria-labelledby="tab_{{ key }}">
-    {% for key, tab in seoFooter %}
-      <div id="tab_key_{{ key }}" class="{% if loop.first %}active{% endif %} tabContent flex block width-100" {% if not loop.first %}aria-hidden="true"{% endif %}>
-        {{ tab.description }}
-      </div>
-    {% endfor %}
-  </div>
-</section>
+    </div>
+  </section>
+{% endif %}
