@@ -693,7 +693,7 @@ class ModelCatalogProduct extends Model {
 		$descLength   = (int) ($this->config->get("theme_{$theme}_product_description_length") ?? 255);
 
 		$shortDesciption = '';
-		$description = strip_tags(html_entity_decode($product['description']));
+		$description = strip_tags($product['description']);
 		if (mb_strlen($description) > $descLength) {
 			$description = explode('.', $description);
 			$sentenceCount = 0;
