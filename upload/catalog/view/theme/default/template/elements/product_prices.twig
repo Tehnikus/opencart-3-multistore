@@ -1,0 +1,13 @@
+{% if product.showPrice %}
+  <div class="prices">
+    {% if not product.special %}
+      <p><span class="text-price">{{ text_price }}</span>&nbsp;<span class="price h3 b">{{ product.priceFormat }}</span></p>
+    {% else %} 
+      <p><span class="text-price">{{ text_new_price }}</span>&nbsp;<span class="price-new h3 b">{{ product.priceSpecialFormat }}</span></p>
+      <p class="disabled"><span class="text-price">{{ text_old_price }}</span>&nbsp;<s class="price-old">{{ product.priceFormat }}</s></p>
+    {% endif %}
+    {% if product.tax %} 
+      <p class="price-tax">{{ text_tax }} {{ product.tax }}</p> 
+    {% endif %} 
+  </div>
+{% endif %}
