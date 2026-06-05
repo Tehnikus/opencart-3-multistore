@@ -294,27 +294,55 @@ class ModelCatalogProduct extends Model {
 				pst.`review_count` AS reviews,
 				pst.`rating_avg` AS rating,
 
-				(
-					SELECT
-						JSON_OBJECT(
-							'name',  md.name,
-							'title', md.h1,
-							'image', (SELECT mi.image FROM " . DB_PREFIX . "manufacturer_image mi WHERE mi.manufacturer_id = p.manufacturer_id AND mi.store_id = p2s.store_id ORDER BY mi.sort_order ASC LIMIT 1)
-						)
-					FROM " . DB_PREFIX . "manufacturer_description md
-					WHERE md.manufacturer_id = p.manufacturer_id
-						AND md.language_id 		 = pd.language_id
-						AND md.store_id 			 = p2s.store_id
-				) AS manufacturerData,
+				-- (
+				-- 	SELECT
+				-- 		JSON_OBJECT(
+				-- 			'name',  md.name,
+				-- 			'title', md.h1,
+				-- 			'image', (SELECT mi.image FROM " . DB_PREFIX . "manufacturer_image mi WHERE mi.manufacturer_id = p.manufacturer_id AND mi.store_id = p2s.store_id ORDER BY mi.sort_order ASC LIMIT 1)
+				-- 		)
+				-- 	FROM " . DB_PREFIX . "manufacturer_description md
+				-- 	WHERE md.manufacturer_id = p.manufacturer_id
+				-- 		AND md.language_id 		 = pd.language_id
+				-- 		AND md.store_id 			 = p2s.store_id
+				-- ) AS manufacturerData,
+				-- (
+				-- 	SELECT
+				-- 		JSON_OBJECT(
+				-- 			'name',  cd.`name`,
+				-- 			'title', cd.`h1`,
+				-- 			'image', c2s.`image`
+				-- 		)
+				-- 	FROM " . DB_PREFIX . "category_description cd
+				-- 	LEFT JOIN " . DB_PREFIX . "category_to_store c2s
+				-- 		ON  c2s.`category_id` = p2s.`parent_id`
+				-- 		AND c2s.`store_id` 	  = p2s.`store_id`
+				-- 	WHERE cd.`category_id`  = p2s.`parent_id`
+				-- 		AND cd.`language_id`  = pd.`language_id`
+				-- 		AND cd.`store_id` 	  = p2s.`store_id`
+				-- ) AS parentData,
 
 				(
-					SELECT 
-						md.name 
-					FROM " . DB_PREFIX . "manufacturer_description md 
-					WHERE md.manufacturer_id = p.manufacturer_id 
-						AND md.language_id 	= {$language_id}
-						AND md.store_id 		= {$store_id}
-				) AS manufacturer,
+					SELECT JSON_ARRAYAGG(
+						JSON_OBJECT(
+							'facetName', 	 	fn.`name`,
+							'groupName', 	 	fn.`group_name`,
+							'sortOrder', 		fn.`sort_order`,
+							'facetTypeId',  fi.`facet_type`,
+							'facetGroupId', fi.`facet_group_id`,
+							'facetValueId', fi.`facet_value_id`
+						)
+					)
+					FROM " . DB_PREFIX . "facet_index fi
+					LEFT JOIN " . DB_PREFIX . "facet_name fn
+						ON  fn.`facet_value_id` = fi.`facet_value_id`
+						AND fn.`facet_group_id` = fi.`facet_group_id`
+						AND fn.`facet_type` 		= fi.`facet_type`
+						AND fn.`language_id` 		= pd.`language_id`
+						AND fn.`store_id` 			= p2s.`store_id`
+					WHERE fi.`product_id` = p2s.`product_id`
+						AND fi.`store_id` 	= p2s.`store_id`
+				) AS facetsData,
 
 				(
 					SELECT JSON_OBJECTAGG(
