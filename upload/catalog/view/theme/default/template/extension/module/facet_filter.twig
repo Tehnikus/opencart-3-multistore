@@ -25,7 +25,7 @@
               {% else %}
               <span class="facetItem">
                 <input type="checkbox" class="facetInput" disabled />
-                <span class="facetName disabled">{{ facetItem.facet_name }}</span>
+                <label class="facetName disabled">{{ facetItem.facet_name }}</label>
               </span>
               {% endif %}
             {% endfor %}
@@ -60,6 +60,20 @@ function setParams(param, value = null) {
 
   // For future reference when filter will get products by JS fetch
   // history.replaceState(null, '', url);
+  // Function that handles the page change
+function navigateToPage(url) {
+  // Check for browser support
+  if (!document.startViewTransition) {
+    updateDOMContent(url); // Fallback if not supported
+    return;
+  }
+
+  // Trigger the view transition
+  document.startViewTransition(async () => {
+    // Fetch and update your DOM here
+    await updateDOMContent(url); 
+  });
+}
 }
 
 </script>
