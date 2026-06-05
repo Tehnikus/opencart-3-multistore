@@ -15,44 +15,9 @@
       <span class="h3 title"><a title="{{ product.name }}" href="{{ product.url }}">{{ product.name }}</a></span>
       {% if product.manufacturerData %}<span class="title">{{ product.manufacturerData.name }}</span>{% endif %}
       {% if product.shortDescription %}<p class="shortDescription">{{ product.shortDescription }}</p>{% endif %}
-      
-      {% include "default/template/elements/rating_stars.twig" with {rating:product.rating} %}
-      {% if product.showPrice %}
-        <div class="prices">
-          {% if not product.special %}
-            <p><span class="text-price">{{ text_price }}</span>&nbsp;<span class="price h3 b">{{ product.priceFormat }}</span></p>
-          {% else %} 
-            <p><span class="text-price">{{ text_new_price }}</span>&nbsp;<span class="price-new h3 b">{{ product.priceSpecialFormat }}</span></p>
-            <p class="disabled"><span class="text-price">{{ text_old_price }}</span>&nbsp;<s class="price-old">{{ product.priceFormat }}</s></p>
-          {% endif %}
-          {% if product.tax %} 
-            <p class="price-tax">{{ text_tax }} {{ product.tax }}</p> 
-          {% endif %} 
-        </div>
-      {% endif %}
-    </div>
-    <div class="btn-group">
-      <button type="button" 
-        {% if product.showPrice and product.isAvailable %} 
-          data-action="cartAdd" 
-          data-product-id="{{ product.product_id }}" 
-          data-minimum-qty="{{ product.minimum }}" 
-          aria-haspopup="dialog"
-        {% else %}
-          disabled
-        {% endif %}
-        class="add-to-cart primary" 
-        title="{{ button_cart }} {{ product.name }}"
-      >
-        <svg class="i" aria-hidden="true"><use href="catalog/view/theme/default/img/icons.svg#i-cart"></use></svg>
-        <span>{{ button_cart }}</span>
-      </button>
-      <button type="button" data-action="wishlistAdd" data-product-id="{{ product.product_id }}" aria-haspopup="dialog" class="wishlist" title="{{ button_wishlist }}">
-        <svg class="i" aria-hidden="true"><use href="catalog/view/theme/default/img/icons.svg#i-heart"></use></svg>
-      </button>
-      <button type="button" data-action="compareAdd" data-product-id="{{ product.product_id }}" aria-haspopup="dialog" class="compare" title="{{ button_compare }}">
-        <svg class="i" aria-hidden="true"><use href="catalog/view/theme/default/img/icons.svg#i-compare"></use></svg>
-      </button>
+      {% include "default/template/elements/rating_stars.twig" with {rating: product.rating} %}
+      {% include "default/template/elements/product_prices.twig" with {product: product} %}
+      {% include "default/template/elements/product_buttons.twig" with {product: product} %}
     </div>
   </div>
 </article>
