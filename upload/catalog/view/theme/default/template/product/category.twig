@@ -1,7 +1,7 @@
 {{ header }}
 {% include 'default/template/common/breadcrumbs.twig' %}
 <div id="wrapper">
-  {{ column_left }}
+  
   <main role="main" id="category" class="flex column wrap">
     {# Category title and main links #}
     <hgroup class="flex row nowrap">
@@ -47,6 +47,7 @@
       <div role="complementary" class="categoryDescription" aria-label="{{ aria_seo_description }}">{{ seoDescription }}</div>
     {% endif %}
     </main>
+  {{ column_left }}
   {{ column_right }}
 </div>
 {% include "default/template/elements/seo_footer.twig" with {seoFooter: seoFooter} %}
