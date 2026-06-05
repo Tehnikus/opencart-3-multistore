@@ -276,6 +276,7 @@ class ModelCatalogProduct extends Model {
 				COALESCE(NULLIF(p2s.`price`, 0), p.`price`) AS price,
 
 				pd.`name`,
+				pd.`h1`,
 				pd.`meta_title`,
 				pd.`meta_description`,
 				pd.`meta_keyword`,
