@@ -593,7 +593,9 @@ class ModelCatalogProduct extends Model {
 		$product['options'] 						= json_decode($product['options'] 		 		 ?? '[]', true);
 		$product['attributes'] 					= json_decode($product['attributes'] 	 		 ?? '[]', true);
 		$product['lastReviews'] 				= json_decode($product['lastReviews']  		 ?? '[]', true);
-		$product['manufacturerData'] 		= json_decode($product['manufacturerData'] ?? '[]', true);
+		// $product['manufacturerData'] 		= json_decode($product['manufacturerData'] ?? '[]', true);
+		// $product['parentData'] 					= json_decode($product['parentData'] 			 ?? '[]', true);
+		$product['facetsData'] 					= json_decode($product['facetsData'] 			 ?? '[]', true);
 		$product['reward'] 							= json_decode($product['rewards'] 		 		 ?? '[]', true)[$customer_group_id] ?? null;
 		// Get valid discount float prices and dates in YYYY-MM-DD format
 		$product['discount'] 						= $this->getValidDiscount($product['discounts'], $customer_group_id)['price'] 	 ?? null; // Single valid discount price
@@ -617,6 +619,33 @@ class ModelCatalogProduct extends Model {
 			array_column($product['discounts'], 'priority'), SORT_ASC,
 			array_column($product['discounts'], 'price'),  	 SORT_ASC,
 		);
+
+		// Group product facets and add SEO links
+		$facetGroups = [
+			'grouped' 	=> [],
+			'ungrouped' => [],
+		];
+		foreach ($product['facetsData'] ?? [] as $facet) {
+			$facet['facetType'] = $this->facetTypes[$facet['facetTypeId']]['facetType'];
+			$facet['url'] 			= $this->url->link('product/category', "{$facet['facetType']}={$facet['facetValueId']}", true);
+
+			// Facets that have group are gruped by type and group
+			if ($facet['facetGroupId']) {
+				// Create group if not exists
+				if (!isset($facetGroups['grouped'][$facet['facetTypeId']][$facet['facetGroupId']])) {
+					$facetGroups['grouped'][$facet['facetTypeId']][$facet['facetGroupId']] = [
+						'groupName' 		=> $facet['groupName'],
+						'facetGroupId' 	=> $facet['facetGroupId'],
+						'facets' 				=> [],
+					];
+				}
+				// Add facet to group 
+				$facetGroups['grouped'][$facet['facetTypeId']][$facet['facetGroupId']]['facets'][] = $facet;
+			} else {
+				$facetGroups['ungrouped'][$facet['facetTypeId']] = $facet;
+			}
+		}
+		$product['facetsData'] = $facetGroups;
 
 		// Resize images to store prepared image links
 		$this->load->model('tool/image');
