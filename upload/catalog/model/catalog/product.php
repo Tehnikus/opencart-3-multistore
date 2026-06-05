@@ -185,7 +185,7 @@ class ModelCatalogProduct extends Model {
 
 			// Normalize null dates from non strict SQL to null
 			$start 	= (!$r['date_start'] || str_starts_with($r['date_start'],	'0000-00-00')) ? null : strtotime($r['date_start']);
-			$end 	= (!$r['date_end'] || str_starts_with($r['date_end'],	'0000-00-00')) ? null : strtotime($r['date_end']);;
+			$end 	= (!$r['date_end'] || str_starts_with($r['date_end'],	'0000-00-00')) ? null : strtotime($r['date_end']);
 			
 			// Remove all rows where discount starts later then now
 			if ($start && $start > $now) {return false;}
@@ -656,7 +656,7 @@ class ModelCatalogProduct extends Model {
 		$imgMainHeight 			= (int) ($this->config->get("theme_{$theme}_image_product_main_height") ?? 2000);
 		$imgMiniatureWidth  = (int) ($this->config->get("theme_{$theme}_image_product_width") ?? 600);
 		$imgMiniatureHeight = (int) ($this->config->get("theme_{$theme}_image_product_height") ?? 600);
-		$imgManufacturerWidth  = (int) ($this->config->get("theme_{$theme}_image_manufacturer_height") ?? 600);
+		$imgManufacturerWidth  = (int) ($this->config->get("theme_{$theme}_image_manufacturer_width") ?? 600);
 		$imgManufacturerHeight = (int) ($this->config->get("theme_{$theme}_image_manufacturer_height") ?? 200);
 
 		// Add cover to the beginning of images array
