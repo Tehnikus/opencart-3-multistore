@@ -1,0 +1,23 @@
+    <div class="btn-group">
+      <button type="button" 
+        {% if product.showPrice and product.isAvailable %} 
+          data-action="cartAdd" 
+          data-product-id="{{ product.product_id }}" 
+          data-minimum-qty="{{ product.minimum }}" 
+          aria-haspopup="dialog"
+        {% else %}
+          disabled
+        {% endif %}
+        class="add-to-cart primary" 
+        title="{{ button_cart }} {{ product.name }}"
+      >
+        <svg class="i" aria-hidden="true"><use href="catalog/view/theme/default/img/icons.svg#i-cart"></use></svg>
+        <span>{{ button_cart }}</span>
+      </button>
+      <button type="button" data-action="wishlistAdd" data-product-id="{{ product.product_id }}" aria-haspopup="dialog" class="wishlist" title="{{ button_wishlist }}">
+        <svg class="i" aria-hidden="true"><use href="catalog/view/theme/default/img/icons.svg#i-heart"></use></svg>
+      </button>
+      <button type="button" data-action="compareAdd" data-product-id="{{ product.product_id }}" aria-haspopup="dialog" class="compare" title="{{ button_compare }}">
+        <svg class="i" aria-hidden="true"><use href="catalog/view/theme/default/img/icons.svg#i-compare"></use></svg>
+      </button>
+    </div>
