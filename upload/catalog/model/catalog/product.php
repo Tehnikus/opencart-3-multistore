@@ -583,7 +583,7 @@ class ModelCatalogProduct extends Model {
 		 * Decode JSON aggregated data
 		 * Faster then bouncing requests to get separate product data and easier to store cached data
 		 */
-		$product['footer'] 							= json_decode($product['footer'] 			 		 ?? '[]', true);
+		$product['seoFooter'] 					= json_decode($product['seoFooter']		 		 ?? '[]', true);
 		$product['faq'] 								= json_decode($product['faqJson'] 		 		 ?? '[]', true);
 		$product['howTo'] 							= json_decode($product['howToJson']  	 		 ?? '[]', true);
 		$product['seoKeywords'] 				= json_decode($product['seoKeywords']  		 ?? '[]', true);
@@ -600,6 +600,12 @@ class ModelCatalogProduct extends Model {
 		$product['discountDateEnd'] 		= $this->getValidDiscount($product['discounts'], $customer_group_id)['date_end'] ?? null; // Discount date end
 		$product['special'] 						= $this->getValidDiscount($product['specials'],  $customer_group_id)['price'] 	 ?? null; // Single valid special price
 		$product['specialDateEnd'] 			= $this->getValidDiscount($product['specials'],  $customer_group_id)['date_end'] ?? null; // Special date end
+		// Decode descriptions
+		$product['description']			= html_entity_decode($product['description'], ENT_QUOTES, 'UTF-8');
+		$product['seoDescription']	= html_entity_decode($product['seoDescription'], ENT_QUOTES, 'UTF-8');
+		foreach ($product['seoFooter'] ?? [] as $key => $tab) {
+			$product['seoFooter'][$key]['description'] = html_entity_decode($tab['description'], ENT_QUOTES, 'UTF-8');
+		}
 		// Sort data
 		usort(array: $product['images'], 		 callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
 		usort(array: $product['options'], 	 callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
