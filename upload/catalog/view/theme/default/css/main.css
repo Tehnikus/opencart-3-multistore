@@ -413,6 +413,17 @@
   flex-wrap: nowrap;
   gap: calc(var(--block-gap) * 0.5);
 }
+.tabs {
+  & .tabContent {
+    &:not(.active) {
+      display: none;
+    }
+  }
+  & .tabToggle.active {
+    background: var(--color-primary);
+    color: hsl(from var(--color-primary) h s calc(l + 60));
+  }
+}
 
 /* Interface */
 .miniature {
