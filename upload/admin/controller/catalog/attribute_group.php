@@ -339,6 +339,9 @@ class ControllerCatalogAttributeGroup extends Controller {
 			$data['sort_order'] = '';
 		}
 
+		$data['img_placeholder'] = HTTPS_CATALOG . 'image/no_image.webp';
+		$data['image'] = isset($attribute_group_info['image']) ? HTTPS_CATALOG . 'image/' . $attribute_group_info['image'] :  '';
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');

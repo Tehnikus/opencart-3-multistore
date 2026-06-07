@@ -34,6 +34,7 @@ class ModelCatalogAttributeGroup extends Model {
 						INSERT INTO " . DB_PREFIX . "attribute_group_to_store
 						SET
 							`attribute_group_id` 	= '" . (int) $attribute_group_id . "', 
+							`image`								= '" . $this->db->escape($data['image']) . "',
 							`store_id` 						= '" . (int) $store_id . "',
 							`sort_order` 					= '" . (int) $data['sort_order'] . "'
 					");
@@ -110,6 +111,7 @@ class ModelCatalogAttributeGroup extends Model {
 						INSERT INTO " . DB_PREFIX . "attribute_group_to_store
 						SET
 							`attribute_group_id` 	= '" . (int) $attribute_group_id . "', 
+							`image`								= '" . $this->db->escape($data['image']) . "',
 							`store_id` 						= '" . (int) $store_id . "',
 							`sort_order` 					= '" . (int) $data['sort_order'] . "'
 						");
@@ -119,6 +121,7 @@ class ModelCatalogAttributeGroup extends Model {
 							INSERT IGNORE INTO " . DB_PREFIX . "attribute_group_to_store
 							SET
 								`attribute_group_id` 	= '" . (int) $attribute_group_id . "', 
+								`image`								= '" . $this->db->escape($data['image']) . "',
 								`store_id` 						= '" . (int) $store_id . "',
 								`sort_order` 					= '" . (int) $data['sort_order'] . "'
 						");
@@ -230,8 +233,13 @@ class ModelCatalogAttributeGroup extends Model {
 	public function getAttributeGroup($attribute_group_id) {
 
 		$query = $this->db->query("
-			SELECT * FROM " . DB_PREFIX . "attribute_group 
-			WHERE attribute_group_id = '" . (int)$attribute_group_id . "'
+			SELECT 
+				* 
+			FROM " . DB_PREFIX . "attribute_group ag
+			LEFT JOIN " . DB_PREFIX . "attribute_group_to_store a2s
+				ON ag.attribute_group_id = a2s.attribute_group_id
+			WHERE ag.attribute_group_id = '" . (int)$attribute_group_id . "'
+				AND a2s.store_id = " . (int) $this->session->data['store_id'] . "
 		");
 
 		return $query->row;

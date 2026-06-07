@@ -149,6 +149,7 @@ CREATE TABLE `oc_attribute_group` (
 DROP TABLE IF EXISTS `oc_attribute_group_to_store`;
 CREATE TABLE `oc_attribute_group_to_store` (
   `attribute_group_id` INT NOT NULL,
+  `image`              VARCHAR(255) DEFAULT NULL,
   `store_id`           INT NOT NULL DEFAULT '0',
   `sort_order`         INT NOT NULL DEFAULT '0',
   PRIMARY KEY (`attribute_group_id`, `store_id`),
