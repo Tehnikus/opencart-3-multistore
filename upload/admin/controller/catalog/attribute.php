@@ -369,6 +369,8 @@ class ControllerCatalogAttribute extends Controller {
 		// Page request to check url duplicates with async JS, see helpers.js->checkUrlDuplicates()
 		$data['seo_url_request'] = isset($this->request->get['attribute_id']) ? "attribute_id=" . $this->request->get['attribute_id'] : "";
 
+		$data['img_placeholder'] = HTTPS_CATALOG . 'image/no_image.webp';
+		$data['image'] = isset($attribute_info['image']) ? HTTPS_CATALOG . 'image/' . $attribute_info['image'] :  '';
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');

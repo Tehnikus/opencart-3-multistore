@@ -128,6 +128,7 @@ CREATE TABLE `oc_attribute_to_store` (
   `attribute_id`        INT NOT NULL,
   `store_id`            INT NOT NULL DEFAULT '0',
   `sort_order`          INT NOT NULL DEFAULT '0',
+  `image`               VARCHAR(255) DEFAULT NULL,
   `attribute_group_id`  INT NOT NULL,
   PRIMARY KEY (`attribute_id`, `store_id`),
   KEY (`attribute_group_id`, `store_id`, `sort_order`)

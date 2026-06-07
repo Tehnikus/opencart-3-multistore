@@ -57,7 +57,8 @@ class ModelCatalogAttribute extends Model {
 							`attribute_id` 				= '" . (int) $attribute_id . "', 
 							`attribute_group_id` 	= '" . (int) $data['attribute_group_id'] . "', 
 							`store_id` 		 				= '" . (int) $store_id . "',
-							`sort_order` 	 				= '" . (int) $data['sort_order'] . "'
+							`sort_order` 	 				= '" . (int) $data['sort_order'] . "',
+							`image`								= '" . $this->db->escape($data['image']) . "'
 					");
 				}
 			}
@@ -156,7 +157,8 @@ class ModelCatalogAttribute extends Model {
 								`attribute_id` 				= '" . (int) $attribute_id . "', 
 								`attribute_group_id` 	= '" . (int) $data['attribute_group_id'] . "', 
 								`store_id` 		 				= '" . (int) $store_id . "',
-								`sort_order` 	 				= '" . (int) $data['sort_order'] . "'
+								`sort_order` 	 				= '" . (int) $data['sort_order'] . "',
+								`image`								= '" . $this->db->escape($data['image']) . "'
 						");
 					} else {
 						// Skip if data for other stores already exists
@@ -166,7 +168,8 @@ class ModelCatalogAttribute extends Model {
 								`attribute_id` 				= '" . (int) $attribute_id . "', 
 								`attribute_group_id` 	= '" . (int) $data['attribute_group_id'] . "', 
 								`store_id` 		 				= '" . (int) $store_id . "',
-								`sort_order` 	 				= '" . (int) $data['sort_order'] . "'
+								`sort_order` 	 				= '" . (int) $data['sort_order'] . "',
+								`image`								= '" . $this->db->escape($data['image']) . "'
 						");
 					}
 				}
@@ -285,9 +288,12 @@ class ModelCatalogAttribute extends Model {
 				* 
 			FROM " . DB_PREFIX . "attribute a 
 			LEFT JOIN " . DB_PREFIX . "attribute_description ad ON (a.attribute_id = ad.attribute_id) 
+			LEFT JOIN " . DB_PREFIX . "attribute_to_store a2s
+				ON a2s.attribute_id  = a.attribute_id
 			WHERE a.attribute_id = '" . (int)$attribute_id . "' 
-				AND ad.language_id = '" . (int)$this->config->get('config_language_id') . "'
-				AND ad.store_id 			 = '" . (int) $this->session->data['store_id'] . "'
+				AND ad.language_id 	= '" . (int) $this->config->get('config_language_id') . "'
+				AND ad.store_id 		= '" . (int) $this->session->data['store_id'] . "'
+				AND a2s.store_id 		= '" . (int) $this->session->data['store_id'] . "'
 		");
 
 		return $query->row;
