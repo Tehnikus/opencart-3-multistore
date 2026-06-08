@@ -953,27 +953,10 @@ class ControllerCatalogProduct extends Controller {
 		}
 
 		// Attributes
-		$this->load->model('catalog/attribute');
-
-		if (isset($this->request->post['product_attribute'])) {
-			$product_attributes = $this->request->post['product_attribute'];
-		} elseif (isset($this->request->get['product_id'])) {
-			$product_attributes = $this->model_catalog_product->getProductAttributes($this->request->get['product_id']);
-		} else {
-			$product_attributes = array();
-		}
-
-		$data['product_attributes'] = array();
-
-		foreach ($product_attributes as $product_attribute) {
-			$attribute_info = $this->model_catalog_attribute->getAttribute($product_attribute['attribute_id']);
-
-			if ($attribute_info) {
-				$data['product_attributes'][] = array(
-					'attribute_id'                  => $product_attribute['attribute_id'],
-					'name'                          => $attribute_info['name'],
-					'product_attribute_description' => $product_attribute['product_attribute_description']
-				);
+		$data['product_attributes'] = $this->model_catalog_product->getProductAttributes($this->request->get['product_id'] ?? null);
+		foreach ($data['product_attributes'] as &$attribute) {
+			if (!empty($attribute['image'])) {
+				$attribute['thumb'] = HTTPS_CATALOG . 'image/' . $attribute['image'];
 			}
 		}
 

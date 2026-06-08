@@ -2210,6 +2210,7 @@ CREATE TABLE `oc_product_attribute` (
   `store_id`            INT NOT NULL DEFAULT '0',
   `language_id`         INT NOT NULL,
   `text`                TEXT NOT NULL,
+  `image`               VARCHAR(255) DEFAULT NULL,
   PRIMARY KEY (`product_id`,`attribute_id`,`language_id`,`store_id`),
   KEY `getProduct` (`product_id`, `language_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -94,26 +94,17 @@ class ModelCatalogProduct extends Model {
 				}
 			}
 	
+			// Removes duplicates
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "product_attribute 
+				WHERE `product_id` 		= '" . (int) $product_id . "' 
+					AND `store_id` 			= '" . (int) $this->session->data['store_id'] . "'
+			");
 			if (isset($data['product_attribute'])) {
 				foreach ($data['product_attribute'] as $product_attribute) {
 					if ($product_attribute['attribute_id']) {
-						// Removes duplicates
-						$this->db->query("
-							DELETE FROM " . DB_PREFIX . "product_attribute 
-							WHERE `product_id` 		= '" . (int) $product_id . "' 
-								AND `attribute_id` 	= '" . (int) $product_attribute['attribute_id'] . "'
-								AND `store_id` 			= '" . (int) $this->session->data['store_id'] . "'
-						");
 	
 						foreach ($product_attribute['product_attribute_description'] as $language_id => $product_attribute_description) {
-							$this->db->query("
-								DELETE FROM " . DB_PREFIX . "product_attribute 
-								WHERE `product_id` 		= '" . (int) $product_id . "' 
-									AND `attribute_id` 	= '" . (int) $product_attribute['attribute_id'] . "' 
-									AND `language_id`		= '" . (int) $language_id . "'
-									AND `store_id` 			= '" . (int) $this->session->data['store_id'] . "'
-							");
-	
 							$this->db->query("
 								INSERT INTO " . DB_PREFIX . "product_attribute 
 								SET 
@@ -122,7 +113,8 @@ class ModelCatalogProduct extends Model {
 									`attribute_group_id` 	= (SELECT a2s.attribute_group_id FROM " . DB_PREFIX . "attribute_to_store a2s WHERE a2s.attribute_id = '" . (int) $product_attribute['attribute_id'] . "' AND a2s.store_id = '" . (int) $this->session->data['store_id'] . "'),
 									`store_id` 						= '" . (int) $this->session->data['store_id'] . "',
 									`language_id` 				= '" . (int) $language_id . "', 
-									`text` 								= '" . $this->db->escape($product_attribute_description['text']) . "'
+									`text` 								= '" . $this->db->escape($product_attribute_description['text']) . "',
+									`image` 							= '" . $this->db->escape($product_attribute['image']) . "'
 							");
 						}
 					}
@@ -504,15 +496,7 @@ class ModelCatalogProduct extends Model {
 	
 			if (!empty($data['product_attribute'])) {
 				foreach ($data['product_attribute'] as $product_attribute) {
-					if ($product_attribute['attribute_id']) {
-						// Removes duplicates
-						$this->db->query("
-							DELETE FROM " . DB_PREFIX . "product_attribute 
-							WHERE `product_id` 		= '" . (int) $product_id . "' 
-								AND `attribute_id` 	= '" . (int) $product_attribute['attribute_id'] . "'
-								AND `store_id` 			= '" . (int) $this->session->data['store_id'] . "'
-						");
-	
+					if ($product_attribute['attribute_id']) {	
 						foreach ($product_attribute['product_attribute_description'] as $language_id => $product_attribute_description) {
 							$this->db->query("
 								INSERT INTO " . DB_PREFIX . "product_attribute 
@@ -522,7 +506,8 @@ class ModelCatalogProduct extends Model {
 									`attribute_id` 				= '" . (int) $product_attribute['attribute_id'] . "', 
 									`attribute_group_id` 	= (SELECT a2s.attribute_group_id FROM " . DB_PREFIX . "attribute_to_store a2s WHERE a2s.attribute_id = '" . (int) $product_attribute['attribute_id'] . "' AND a2s.store_id = '" . (int) $this->session->data['store_id'] . "'),
 									`language_id` 				= '" . (int) $language_id . "', 
-									`text` 								= '" .  $this->db->escape($product_attribute_description['text']) . "'
+									`text` 								= '" .  $this->db->escape($product_attribute_description['text']) . "',
+									`image` 							= '" . $this->db->escape($product_attribute['image']) . "'
 							");
 						}
 					}
@@ -1543,41 +1528,33 @@ class ModelCatalogProduct extends Model {
 	// and in admin/model/catalog/copyProduct() to duplicate product
 	// Should always rely on store_id context
 	// Returns all languages data, so no lang context needed here
-	public function getProductAttributes($product_id) : array {
-		$product_attribute_data = [];
-
-		$product_attribute_query = $this->db->query("
-			SELECT 
-				`attribute_id` 
-			FROM " . DB_PREFIX . "product_attribute 
-			WHERE `product_id`  = '" . (int)$product_id . "' 
-				AND `store_id` 		= '" . (int) $this->session->data['store_id'] . "'
-			GROUP BY `attribute_id`
-		");
-
-		foreach ($product_attribute_query->rows as $product_attribute) {
-			$product_attribute_description_data = [];
-
-			$product_attribute_description_query = $this->db->query("
-				SELECT 
-					* 
-				FROM " . DB_PREFIX . "product_attribute 
-				WHERE `product_id` 		= '" . (int) $product_id . "' 
-					AND `attribute_id` 	= '" . (int) $product_attribute['attribute_id'] . "'
-					AND `store_id` 			= '" . (int) $this->session->data['store_id'] . "'
-			");
-
-			foreach ($product_attribute_description_query->rows as $product_attribute_description) {
-				$product_attribute_description_data[$product_attribute_description['language_id']] = ['text' => $product_attribute_description['text']];
-			}
-
-			$product_attribute_data[] = [
-				'attribute_id'                  => $product_attribute['attribute_id'],
-				'product_attribute_description' => $product_attribute_description_data
-			];
+	public function getProductAttributes($product_id = null) : array {
+		$data = [];
+		if ($product_id === null) {
+			return $data;
 		}
 
-		return $product_attribute_data;
+		$query = $this->db->query("
+			SELECT
+				pa.*,
+				ad.attribute_id,
+				ad.name
+			FROM " . DB_PREFIX . "product_attribute pa
+			LEFT JOIN " . DB_PREFIX . "attribute_description ad
+				ON  ad.attribute_id = pa.attribute_id
+				AND ad.language_id 	= " . (int) $this->config->get('config_language_id') . "
+				and ad.store_id 		= pa.store_id
+			WHERE pa.product_id = " . (int) $product_id . "
+				AND pa.store_id 	 = " . (int) $this->session->data['store_id'] ."
+		");
+
+		foreach ($query->rows as $row) {
+			if (!isset($data[$row['attribute_id']])) {
+				$data[$row['attribute_id']] = $row;
+			}
+			$data[$row['attribute_id']]['product_attribute_description'][$row['language_id']]['text'] = $row['text'];
+		}
+		return $data;
 	}
 
 	// Get product associated options
