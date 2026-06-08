@@ -515,7 +515,7 @@
                               </thead>
                               <tbody>
                                 {% for product_option_value in product_option.product_option_value %}
-                                  <tr id="option-value-row{{ option_value_row }}">
+                                  <tr class="option-value-row{{ option_value_row }}">
                                     <td class="text-left">
                                       <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][option_value_id]" class="form-control">
                                         {% if option_values[product_option.option_id] %}
@@ -588,8 +588,19 @@
                                         {% else %}
                                           <option value="-">-</option>
                                         {% endif %}
-                                      </select> <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][weight]" value="{{ product_option_value.weight }}" placeholder="{{ entry_weight }}" class="form-control"/></td>
-                                    <td class="text-right"><button type="button" onclick="$(this).tooltip('destroy');$('#option-value-row{{ option_value_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
+                                      </select> <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][weight]" value="{{ product_option_value.weight }}" placeholder="{{ entry_weight }}" class="form-control"/>
+                                    </td>
+                                    <td rowspan="2" class="text-right"><button type="button" onclick="document.querySelectorAll('.option-value-row{{ option_value_row }}').forEach(el => el.remove());" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
+                                  </tr>
+                                  <tr class="option-value-row{{ option_value_row }}">
+                                    <td colspan="7">
+                                      {% for language in languages %}
+                                        <div class="input-group">
+                                          <span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
+                                          <textarea name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][description][{{ language.language_id }}]" placeholder="{{ entry_description }} {{ language.name }}" class="form-control">{{ product_option_value.description }}</textarea>
+                                        </div>
+                                      {% endfor %}
+                                    </td>
                                   </tr>
                                   {% set option_value_row = option_value_row + 1 %}
                                 {% endfor %}
