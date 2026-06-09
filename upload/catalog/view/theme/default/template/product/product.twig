@@ -42,7 +42,7 @@
             <div class="flex column gap align-center">
               <h4>{{ manufacturerData.name }}</h4>
               <img src="{{ manufacturerData.image }}" loading="lazy" />
-              <a title="{{ manufacturer_parent_facet_title|format(manufacturerData.name, parentData.name) }}" href="{{ manufacturerData.facetLink }}">{{ manufacturer_parent_facet_format|format(manufacturerData.name, parentData.name) }}</a>
+              <a title="{{ manufacturer_facet_title|format(manufacturerData.name, parentData.name) }}" href="{{ manufacturerData.facetLink }}">{{ manufacturer_facet_link|format(manufacturerData.name, parentData.name) }}</a>
             </div>
           {% endif %}
         </div>
