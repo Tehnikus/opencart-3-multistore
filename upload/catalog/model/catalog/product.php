@@ -215,6 +215,15 @@ class ModelCatalogProduct extends Model {
 		$store_id 					= (int) $this->config->get('config_store_id');
 		$customer_group_id 	= (int) $this->config->get('config_customer_group_id');
 		$cacheSetting 			= (bool) $this->config->get('cache_products');
+		$theme        	 		= $this->config->get('config_theme');
+		$imgManufacturerWidth  	= (int) ($this->config->get("theme_{$theme}_image_manufacturer_width") ?? 600);
+		$imgManufacturerHeight 	= (int) ($this->config->get("theme_{$theme}_image_manufacturer_height") ?? 200);
+		$imgCategoryWidth  			= (int) ($this->config->get("theme_{$theme}_image_category_width") ?? 500);
+		$imgCategoryHeight 			= (int) ($this->config->get("theme_{$theme}_image_category_height") ?? 500);
+		$imgMainWidth  					= (int) ($this->config->get("theme_{$theme}_image_product_main_width") ?? 2000);
+		$imgMainHeight 					= (int) ($this->config->get("theme_{$theme}_image_product_main_height") ?? 2000);
+		$imgMiniatureWidth  		= (int) ($this->config->get("theme_{$theme}_image_product_width") ?? 600);
+		$imgMiniatureHeight 		= (int) ($this->config->get("theme_{$theme}_image_product_height") ?? 600);
 		
 		// Cache
 		if ($cacheSetting) {
@@ -294,33 +303,8 @@ class ModelCatalogProduct extends Model {
 				pst.`review_count` AS reviews,
 				pst.`rating_avg` AS rating,
 
-				-- (
-				-- 	SELECT
-				-- 		JSON_OBJECT(
-				-- 			'name',  md.name,
-				-- 			'title', md.h1,
-				-- 			'image', (SELECT mi.image FROM " . DB_PREFIX . "manufacturer_image mi WHERE mi.manufacturer_id = p.manufacturer_id AND mi.store_id = p2s.store_id ORDER BY mi.sort_order ASC LIMIT 1)
-				-- 		)
-				-- 	FROM " . DB_PREFIX . "manufacturer_description md
-				-- 	WHERE md.manufacturer_id = p.manufacturer_id
-				-- 		AND md.language_id 		 = pd.language_id
-				-- 		AND md.store_id 			 = p2s.store_id
-				-- ) AS manufacturerData,
-				-- (
-				-- 	SELECT
-				-- 		JSON_OBJECT(
-				-- 			'name',  cd.`name`,
-				-- 			'title', cd.`h1`,
-				-- 			'image', c2s.`image`
-				-- 		)
-				-- 	FROM " . DB_PREFIX . "category_description cd
-				-- 	LEFT JOIN " . DB_PREFIX . "category_to_store c2s
-				-- 		ON  c2s.`category_id` = p2s.`parent_id`
-				-- 		AND c2s.`store_id` 	  = p2s.`store_id`
-				-- 	WHERE cd.`category_id`  = p2s.`parent_id`
-				-- 		AND cd.`language_id`  = pd.`language_id`
-				-- 		AND cd.`store_id` 	  = p2s.`store_id`
-				-- ) AS parentData,
+				(SELECT m2s.image FROM " . DB_PREFIX . "manufacturer_to_store m2s WHERE m2s.manufacturer_id = p.manufacturer_id AND m2s.store_id = p2s.store_id LIMIT 1) AS manufacturerImage,
+				(SELECT c2s.image FROM " . DB_PREFIX . "category_to_store c2s WHERE c2s.category_id = p2s.parent_id AND c2s.store_id = p2s.store_id LIMIT 1) AS parentImage,
 
 				(
 					SELECT JSON_ARRAYAGG(
@@ -396,52 +380,6 @@ class ModelCatalogProduct extends Model {
 					 AND pd.`store_id` 		 = p2s.`store_id`
 				) AS discounts,
 
-				(
-					SELECT JSON_ARRAYAGG(
-						JSON_OBJECT(
-							'attribute_group_id', t.`attribute_group_id`,
-							'name', 							t.`group_name`,
-							'attribute', 					t.`attributes_json`
-						)
-					)
-					FROM (
-						SELECT
-							pa.attribute_group_id,
-							agd.`name` AS `group_name`,
-				
-							JSON_ARRAYAGG(
-								JSON_OBJECT(
-									'name', 				ad.`name`,
-									'attribute_id', pa.`attribute_id`,
-									'text', 				pa.`text`,
-									'sort_order', 	a2s.`sort_order`
-								)
-							) AS `attributes_json`
-				
-						FROM " . DB_PREFIX . "product_attribute pa
-						FORCE INDEX (getProduct)
-				
-						LEFT JOIN " . DB_PREFIX . "attribute_description ad
-							ON ad.`attribute_id` = pa.`attribute_id`
-							AND ad.`language_id` = pa.`language_id`
-							AND ad.`store_id` = pa.`store_id`
-				
-						LEFT JOIN " . DB_PREFIX . "attribute_group_description agd
-							ON  agd.`attribute_group_id` = pa.`attribute_group_id`
-							AND agd.`language_id` = pa.`language_id`
-							AND agd.`store_id` = pa.`store_id`
-				
-						LEFT JOIN " . DB_PREFIX . "attribute_to_store a2s
-							ON a2s.`attribute_id` = pa.`attribute_id`
-							AND a2s.`store_id` = pa.`store_id`
-				
-						WHERE pa.product_id = p2s.product_id
-							AND pa.`language_id` = pd.`language_id`
-							AND pa.`store_id` = p2s.`store_id`
-				
-						GROUP BY pa.`attribute_group_id`
-					) t
-				) AS attributes,
 
 				(
 					SELECT JSON_ARRAYAGG(
@@ -583,6 +521,7 @@ class ModelCatalogProduct extends Model {
 		 * Decode JSON aggregated data
 		 * Faster then bouncing requests to get separate product data and easier to store cached data
 		 */
+		$this->load->model('tool/image');
 		$product['seoFooter'] 					= json_decode($product['seoFooter']		 		 ?? '[]', true);
 		$product['faq'] 								= json_decode($product['faqJson'] 		 		 ?? '[]', true);
 		$product['howTo'] 							= json_decode($product['howToJson']  	 		 ?? '[]', true);
@@ -593,8 +532,6 @@ class ModelCatalogProduct extends Model {
 		$product['options'] 						= json_decode($product['options'] 		 		 ?? '[]', true);
 		$product['attributes'] 					= json_decode($product['attributes'] 	 		 ?? '[]', true);
 		$product['lastReviews'] 				= json_decode($product['lastReviews']  		 ?? '[]', true);
-		// $product['manufacturerData'] 		= json_decode($product['manufacturerData'] ?? '[]', true);
-		// $product['parentData'] 					= json_decode($product['parentData'] 			 ?? '[]', true);
 		$product['facetsData'] 					= json_decode($product['facetsData'] 			 ?? '[]', true);
 		$product['reward'] 							= json_decode($product['rewards'] 		 		 ?? '[]', true)[$customer_group_id] ?? null;
 		// Get valid discount float prices and dates in YYYY-MM-DD format
@@ -622,42 +559,62 @@ class ModelCatalogProduct extends Model {
 
 		// Group product facets and add SEO links
 		$facetGroups = [
-			'grouped' 	=> [],
-			'ungrouped' => [],
+			'facets' 			=> [],
+			'tags' 				=> [],
+			'categories' 	=> [],
 		];
 		foreach ($product['facetsData'] ?? [] as $facet) {
 			$facet['facetType'] = $this->facetTypes[$facet['facetTypeId']]['facetType'];
-			$facet['url'] 			= $this->url->link('product/category', "{$facet['facetType']}={$facet['facetValueId']}", true);
+			$facet['url'] 			= $this->url->link('product/category', "path={$product['parent_id']}&{$facet['facetType']}={$facet['facetValueId']}", true);
+			// Boolean facets have no name in DB
+			if (in_array($facet['facetType'], array_column(array_filter($this->facetTypes, fn($a) => $a['isBool']), 'facetType'))) {
+				$facet['facetName'] = $this->language->get('facet_' . $facet['facetType']);
+			}
+
+			if ($facet['facetType'] === 'manufacturer_id') {
+				$product['manufacturerData'] = [
+					'name'			=> $facet['facetName'],
+					'image' 		=> $this->model_tool_image->resize($product['manufacturerImage'] ?? 'no_image.webp', $imgManufacturerWidth, $imgManufacturerHeight),
+					'url' 			=> $this->url->link('catalog/manufacturer', "manufacturer_id={$facet['facetValueId']}", true),
+					'facetLink' => $this->url->link('product/category', "path={$product['parent_id']}&manufacturer_id={$facet['facetValueId']}", true),
+				];
+				continue;
+			}
+
+			if ($facet['facetType'] === 'category_id' && $facet['facetValueId'] == $product['parent_id']) {
+				$product['parentData'] = [
+					'name'			=> $facet['facetName'],
+					'image' 		=> $this->model_tool_image->resize($product['manufacturerImage'] ?? 'no_image.webp', $imgCategoryWidth, $imgCategoryHeight),
+					'url' 			=> $this->url->link('catalog/manufacturer', "manufacturer_id={$facet['facetValueId']}", true),
+				];
+				continue;
+			}
+
+			if ($facet['facetType'] === 'category_id' && $facet['facetValueId'] !== $product['parent_id']) {
+				$facetGroups['categories'] = $facet;
+			}
 
 			// Facets that have group are gruped by type and group
-			if ($facet['facetGroupId']) {
+			if ($facet['facetGroupId'] && $facet['facetType'] !== 'category_id') {
 				// Create group if not exists
-				if (!isset($facetGroups['grouped'][$facet['facetTypeId']][$facet['facetGroupId']])) {
-					$facetGroups['grouped'][$facet['facetTypeId']][$facet['facetGroupId']] = [
+				if (!isset($facetGroups['facets'][$facet['facetTypeId']][$facet['facetGroupId']])) {
+					$facetGroups['facets'][$facet['facetTypeId']][$facet['facetGroupId']] = [
 						'groupName' 		=> $facet['groupName'],
 						'facetGroupId' 	=> $facet['facetGroupId'],
 						'facets' 				=> [],
 					];
 				}
 				// Add facet to group 
-				$facetGroups['grouped'][$facet['facetTypeId']][$facet['facetGroupId']]['facets'][] = $facet;
+				$facetGroups['facets'][$facet['facetTypeId']][$facet['facetGroupId']]['facets'][] = $facet;
 			} else {
-				$facetGroups['ungrouped'][$facet['facetTypeId']] = $facet;
+				$facetGroups['tags'][$facet['facetTypeId']] = $facet;
 			}
 		}
 		$product['facetsData'] = $facetGroups;
 
 		// Resize images to store prepared image links
-		$this->load->model('tool/image');
-		$cover = [];
-		$productImages 			= [];
-		$theme        	 		= $this->config->get('config_theme');
-		$imgMainWidth  			= (int) ($this->config->get("theme_{$theme}_image_product_main_width") ?? 2000);
-		$imgMainHeight 			= (int) ($this->config->get("theme_{$theme}_image_product_main_height") ?? 2000);
-		$imgMiniatureWidth  = (int) ($this->config->get("theme_{$theme}_image_product_width") ?? 600);
-		$imgMiniatureHeight = (int) ($this->config->get("theme_{$theme}_image_product_height") ?? 600);
-		$imgManufacturerWidth  = (int) ($this->config->get("theme_{$theme}_image_manufacturer_width") ?? 600);
-		$imgManufacturerHeight = (int) ($this->config->get("theme_{$theme}_image_manufacturer_height") ?? 200);
+		$cover 				 = [];
+		$productImages = [];
 
 		// Add cover to the beginning of images array
 		$cover['image'] 		  = $product['image'] ?? 'no_image.webp';
@@ -680,17 +637,6 @@ class ModelCatalogProduct extends Model {
 				'height'			=> $imgMiniatureHeight,
 			];
 		}
-
-		// if (!empty($product['manufacturerData'])) {
-		// 	$product['manufacturerData']['image'] 		= $this->model_tool_image->resize($product['manufacturerData']['image'] ?? 'no_image.webp', $imgManufacturerWidth, $imgManufacturerHeight);
-		// 	$product['manufacturerData']['url'] 			= $this->url->link('product/manufacturer', "manufacturer_id={$product['manufacturer_id']}", true);
-		// 	$product['manufacturerData']['facetLink'] = $this->url->link('product/category', "path={$product['parent_id']}&manufacturer_id={$product['manufacturer_id']}", true);
-		// }
-		// if (!empty($product['parentData'])) {
-		// 	$product['parentData']['image'] 		= $this->model_tool_image->resize($product['parentData']['image'] ?? 'no_image.webp', $imgManufacturerWidth, $imgManufacturerHeight);
-		// 	$product['parentData']['url'] 			= $this->url->link('product/manufacturer', "manufacturer_id={$product['manufacturer_id']}", true);
-		// 	$product['parentData']['facetLink'] = $this->url->link('product/category', "path={$product['parent_id']}&manufacturer_id={$product['manufacturer_id']}", true);
-		// }
 
 		$product['images'] = $productImages;
 		// End images
@@ -716,8 +662,6 @@ class ModelCatalogProduct extends Model {
 
 		// URLs
 		$product['url'] 						= $this->url->link('product/product', "product_id={$product_id}", true);
-		$product['manufacturerUrl'] = $this->url->link('product/manufacturer', "manufacturer_id={$product['manufacturer_id']}", true);
-		$product['parentUrl'] 		  = $this->url->link('product/category', "path={$product['parent_id']}", true);
 		// End URLs
 
 		// Breadcrumbs
@@ -727,12 +671,12 @@ class ModelCatalogProduct extends Model {
 			'href' => $this->url->link('common/home'),
     ];
 		$product['breadcrumbs'][] = [
-			'text' => $this->language->get('text_home'),
+			'text' => $product['parentData']['name'],
 			'href' => $this->url->link('product/category', 'path=' . $product['parent_id']),
     ];
 		$product['breadcrumbs'][] = [
 			'text' => $product['name'],
-			'href' => $this->url->link('product/category', 'path=' . $product_id),
+			'href' => $this->url->link('product/product', 'product_id=' . $product_id),
 		];
 		// End breadcrumbs
 
