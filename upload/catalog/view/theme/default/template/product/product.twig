@@ -6,7 +6,7 @@
     {{ content_top }}
     {# Header #}
     <hgroup class="flex row wrap align-center justify-space-between ">
-      <div class="columnLeft flex row wrap">
+      <div class="columnLeft flex column wrap">
         <h1 class="productName">{{ h1 }}</h1>
         {% include "default/template/elements/rating_stars.twig" %}
       </div>
@@ -20,10 +20,8 @@
         </div>
       </div>
     </hgroup>
-
-    <section class="productTop flex wrap row block">
-
-      <div class="columnLeft">
+    <section class="productTop flex wrap row gap">
+      <div class="columnLeft block">
         <div class="scroll-x snap single markers">
           {% for key, img in images.covers %}
             <figure>
@@ -32,16 +30,16 @@
           {% endfor %}
         </div>
       </div>
-      <div class="columnRight flex column">
-        <div class="columnLeft flex column gap">
+      <div class="columnRight flex column gap">
+        <div class="columnLeft flex column gap block">
           {% include "default/template/elements/product_prices.twig" with {product: _context} %}
           {% include "default/template/elements/product_options.twig" %}
           {% include "default/template/elements/product_buttons.twig" with {product: _context} %}
           {# Recurrings #}
         </div>
-        <div class="columnRight">
+        <div class="columnRight flex column block gap">
           {% if manufacturerData %}
-            <div class="flex column gap">
+            <div class="flex column gap align-center">
               <h4>{{ manufacturerData.name }}</h4>
               <img src="{{ manufacturerData.image }}" loading="lazy" />
               <a title="{{ manufacturer_parent_facet_title|format(manufacturerData.name, parentData.name) }}" href="{{ manufacturerData.facetLink }}">{{ manufacturer_parent_facet_format|format(manufacturerData.name, parentData.name) }}</a>
@@ -53,7 +51,7 @@
 
     {% if description %}
       <section id="description" class="block">
-        <span class="h1">{{ tab_description }}</span>
+        <span class="h2">{{ tab_description }}</span>
         <article role="article">{{ description }}</article>
       </section>
     {% endif %}
@@ -96,7 +94,7 @@
     {# Reviews #}
     {% if lastReviews %}
       <section id="reviews" class="block">
-        <span class="h1">{{ tab_reviews|format(reviews) }}</span>
+        <span class="h2">{{ heading_reviews }}</span>
         {% for review in lastReviews %}
           <article class="review">
             <figure>
@@ -118,7 +116,7 @@
     {# Related products #}
     {% if relatedProducts %}
       <div class="module">
-        <span class="h3">{{ tab_related|format(reviews) }}</span>
+        <span class="h2">{{ heading_related }}</span>
         <div id="related" class="scroll-x">
           {% for product in relatedProducts %}
             {% include 'default/template/product/product_miniature.twig' with {product: product} %}
