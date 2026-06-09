@@ -89,6 +89,7 @@
   h3, .h3 {font-size: var(--font-size-h3);}
   h4, .h4 {font-size: var(--font-size-h4);}
   h5, .h5 {font-size: var(--font-size-h5);}
+  p + p {margin-top: calc(var(--font-size) * 0.5)}
   b, .b, strong, .strong {font-weight: bold; color: var(--color-text-strong)}
   .muted, .disabled, disabled {color: var(--color-text-muted);}
   .disabled, disabled {cursor: default;}
@@ -97,7 +98,7 @@
   
   a {
     text-decoration: none;
-    color: var(--color-secondary);
+    color: var(--color-link, --color-secondary);
     display: inline-block;
     background: transparent;
     transition: color var(--time) var(--style);
@@ -360,6 +361,7 @@
     scrollbar-width: thin;
     scrollbar-color: transparent transparent; 
     transition: scrollbar-color var(--time) var(--style);
+    overflow-clip-margin: 5px;
     &:hover {scrollbar-color: var(--color-primary) transparent;}
     &.snap {
       scroll-snap-type: x mandatory;
