@@ -2335,7 +2335,19 @@ CREATE TABLE `oc_product_option_value` (
   KEY `getProduct` (`product_id`, `product_option_id`, `store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
+DROP TABLE IF EXISTS `oc_product_option_value_description`;
+CREATE TABLE `oc_product_option_value_description` (
+  `product_option_value_id` INT NOT NULL,
+  `product_option_id`       INT NOT NULL,
+  `product_id`              INT NOT NULL,
+  `option_id`               INT NOT NULL,
+  `option_value_id`         INT NOT NULL,
+  `description`             TEXT DEFAULT NULL,
+  `language_id`             INT NOT NULL,
+  `store_id`                INT NOT NULL DEFAULT '0',
+  PRIMARY KEY (`product_option_value_id`),
+  KEY `getProduct` (`product_id`, `language_id`, `store_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 --
