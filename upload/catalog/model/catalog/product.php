@@ -329,6 +329,32 @@ class ModelCatalogProduct extends Model {
 				) AS facetsData,
 
 				(
+					SELECT JSON_ARRAYAGG(
+						JSON_OBJECT(
+							'attribute_id', pa.attribute_id,
+							'description', pa.text
+						)
+					)
+					FROM " . DB_PREFIX . "product_attribute pa
+					WHERE pa.product_id  = p2s.product_id
+						AND pa.language_id = pd.language_id
+						AND pa.store_id 	 = p2s.store_id
+				) AS attributeDescriptions,
+
+				(
+					SELECT JSON_ARRAYAGG(
+						JSON_OBJECT(
+							'option_value_id', povd.option_value_id,
+							'description',     povd.description
+						)
+					)
+					FROM " . DB_PREFIX . "product_option_value_description povd
+					WHERE povd.product_id  = p2s.product_id
+						AND povd.language_id = pd.language_id
+						AND povd.store_id 	 = p2s.store_id
+				) AS optionDescriptions,
+
+				(
 					SELECT JSON_OBJECTAGG(
 						pi.image_id, JSON_OBJECT(
 							'image_id',			pi.`image_id`,
@@ -379,7 +405,6 @@ class ModelCatalogProduct extends Model {
 					 WHERE pd.`product_id` = p2s.`product_id`
 					 AND pd.`store_id` 		 = p2s.`store_id`
 				) AS discounts,
-
 
 				(
 					SELECT JSON_ARRAYAGG(
@@ -533,6 +558,8 @@ class ModelCatalogProduct extends Model {
 		$product['attributes'] 					= json_decode($product['attributes'] 	 		 ?? '[]', true);
 		$product['lastReviews'] 				= json_decode($product['lastReviews']  		 ?? '[]', true);
 		$product['facetsData'] 					= json_decode($product['facetsData'] 			 ?? '[]', true);
+		$product['optionDescriptions']    = json_decode($product['optionDescriptions'] 		?? '[]', true);
+		$product['attributeDescriptions'] = json_decode($product['attributeDescriptions'] ?? '[]', true);
 		$product['reward'] 							= json_decode($product['rewards'] 		 		 ?? '[]', true)[$customer_group_id] ?? null;
 		// Get valid discount float prices and dates in YYYY-MM-DD format
 		$product['discount'] 						= $this->getValidDiscount($product['discounts'], $customer_group_id)['price'] 	 ?? null; // Single valid discount price
@@ -566,11 +593,27 @@ class ModelCatalogProduct extends Model {
 		foreach ($product['facetsData'] ?? [] as $facet) {
 			$facet['facetType'] = $this->facetTypes[$facet['facetTypeId']]['facetType'];
 			$facet['url'] 			= $this->url->link('product/category', "path={$product['parent_id']}&{$facet['facetType']}={$facet['facetValueId']}", true);
+
+			// Add description to facet to display in specification table on product page
+			if ($facet['facetType'] === 'attribute') {
+				$facetDescriptionRow = array_filter($product['attributeDescriptions'], fn($a) => $a['attribute_id'] == $facet['facetValueId']);
+				$facetDescriptionRow = array_merge(...$facetDescriptionRow);
+				$facet['description'] = $facetDescriptionRow['description'] ?? '';
+			}
+
+			// Add description to facet to display in specification table on product page
+			if ($facet['facetType'] === 'option') {
+				$facetDescriptionRow = array_filter($product['optionDescriptions'], fn($a) => $a['option_value_id'] == $facet['facetValueId']);
+				$facetDescriptionRow = array_merge(...$facetDescriptionRow);
+				$facet['description'] = $facetDescriptionRow['description'] ?? '';
+			}
+
 			// Boolean facets have no name in DB
 			if (in_array($facet['facetType'], array_column(array_filter($this->facetTypes, fn($a) => $a['isBool']), 'facetType'))) {
 				$facet['facetName'] = $this->language->get('facet_' . $facet['facetType']);
 			}
 
+			// Manufacturer
 			if ($facet['facetType'] === 'manufacturer_id') {
 				$product['manufacturerData'] = [
 					'name'			=> $facet['facetName'],
@@ -581,6 +624,7 @@ class ModelCatalogProduct extends Model {
 				continue;
 			}
 
+			// Parent category
 			if ($facet['facetType'] === 'category_id' && $facet['facetValueId'] == $product['parent_id']) {
 				$product['parentData'] = [
 					'name'			=> $facet['facetName'],
@@ -590,6 +634,7 @@ class ModelCatalogProduct extends Model {
 				continue;
 			}
 
+			// All associated categories
 			if ($facet['facetType'] === 'category_id' && $facet['facetValueId'] !== $product['parent_id']) {
 				$facetGroups['categories'] = $facet;
 			}
@@ -607,6 +652,7 @@ class ModelCatalogProduct extends Model {
 				// Add facet to group 
 				$facetGroups['facets'][$facet['facetTypeId']][$facet['facetGroupId']]['facets'][] = $facet;
 			} else {
+				// Treat flag type facets as tags
 				$facetGroups['tags'][$facet['facetTypeId']] = $facet;
 			}
 		}
