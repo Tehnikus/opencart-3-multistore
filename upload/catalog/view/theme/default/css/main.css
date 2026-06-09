@@ -520,6 +520,28 @@
   }
 }
 
+/* Product page */
+main#product {
+  & .columnLeft, & .columnRight {flex: 1;} 
+  @media (max-width: 768px) {
+    & .columnLeft, & .columnRight {flex: auto}
+  }
+  & #featuresTable {
+    & .colFeatureName {
+      width: 20%;
+      min-width: 200px;
+    }
+    & .colFeatureValue {
+      width: 80%;
+      min-width: 500px;
+    }
+    & a {
+      --color-link: var(--color-primary-dark);
+      font-weight: bold;
+    }
+  }
+}
+
 .facetFilter {
   gap: calc(var(--font-size) * .5);
   .facetGroup{
