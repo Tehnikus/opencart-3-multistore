@@ -42,7 +42,8 @@
             <div class="flex column gap align-center">
               <h4>{{ manufacturerData.name }}</h4>
               <img src="{{ manufacturerData.image }}" loading="lazy" />
-              <a title="{{ manufacturer_facet_title|format(manufacturerData.name, parentData.name) }}" href="{{ manufacturerData.facetLink }}">{{ manufacturer_facet_link|format(manufacturerData.name, parentData.name) }}</a>
+              <a title="{{ manufacturer_facet_title|format(manufacturerData.name, parentData.name) }}" href="{{ manufacturerData.facetLink }}" class="b">{{ manufacturer_facet_link|format(manufacturerData.name, parentData.name) }}</a>
+              <a title="{{ manufacturer_page_title|format(manufacturerData.name) }}" href="{{ manufacturerData.url }}" class="b">{{ manufacturer_page_link|format(manufacturerData.name) }}</a>
             </div>
           {% endif %}
         </div>
@@ -59,12 +60,12 @@
     {% if facetsData.facets %}
       <section id="specification" class="block ">
         <span class="h2">{{ product_features_table|format(name) }}</span>
-        <div class="scroll-x">
+        <div class="tableWrapper">
           <table id="featuresTable">
             <thead>
               <tr>
-                <th scope="col" class="feature">{{ facet_name }}</th>
-                <th scope="col" class="featureValue">{{ facet_value }}</th>
+                <th scope="col" class="colFeatureName">{{ facet_name }}</th>
+                <th scope="col" class="colFeatureValue">{{ facet_value }}</th>
               </tr>
             </thead>
             <tbody>
@@ -74,11 +75,11 @@
                   {% for i, facet in facets %}
                     <tr>
                       {% if loop.first %}
-                        <th scope="rowgroup" rowspan="{{ facets|length }}">
+                        <th class="colFeatureName" scope="rowgroup" rowspan="{{ facets|length }}">
                           {{ group.groupName }}
                         </th>
                       {% endif %}
-                      <td>
+                      <td class="colFeatureValue">
                         <a href="{{ facet.url }}" title="{{ facet_link_title|format(parentData.name, facet.groupName, facet.facetName) }}">{{ facet.facetName }}</a>{% if facet.description %} {{ facet.description }}{% endif %}
                       </td>
                     </tr>
