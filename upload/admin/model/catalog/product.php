@@ -156,6 +156,22 @@ class ModelCatalogProduct extends Model {
 										`weight` 									= '" . (float) $product_option_value['weight'] . "', 
 										`weight_prefix` 					= '" . $this->db->escape($product_option_value['weight_prefix']) . "'
 								");
+
+								foreach ($product_option_value['description'] as $language_id => $description) {
+									if (empty($description)) continue;
+									$this->db->query("
+										INSERT INTO " . DB_PREFIX . "product_option_value_description
+										SET
+											`product_option_value_id`  = '" . (int) $product_option_value['product_option_value_id'] . "',
+											`product_option_id`      	 = '" . (int) $product_option_id . "',
+											`product_id`             	 = '" . (int) $product_id . "',
+											`option_id`              	 = '" . (int) $product_option['option_id'] . "',
+											`option_value_id`        	 = '" . (int) $product_option_value['option_value_id'] . "',
+											`description`            	 = '" . $this->db->escape($description) . "',
+											`language_id`            	 = '" . (int) $language_id . "',
+											`store_id`               	 = '" . (int) $this->session->data['store_id'] . "'
+									");
+								}
 							}
 						}
 					} else {
@@ -519,8 +535,15 @@ class ModelCatalogProduct extends Model {
 				WHERE `product_id` 	= '" . (int) $product_id . "'
 					AND `store_id` 		= '" . (int) $this->session->data['store_id'] . "'
 			");
+
 			$this->db->query("
 				DELETE FROM " . DB_PREFIX . "product_option_value 
+				WHERE `product_id` 	= '" . (int) $product_id . "'
+					AND `store_id` 		= '" . (int) $this->session->data['store_id'] . "'
+			");
+
+			$this->db->query("
+				DELETE FROM " . DB_PREFIX . "product_option_value_description
 				WHERE `product_id` 	= '" . (int) $product_id . "'
 					AND `store_id` 		= '" . (int) $this->session->data['store_id'] . "'
 			");
@@ -562,7 +585,23 @@ class ModelCatalogProduct extends Model {
 										`points_prefix` 					= '" . $this->db->escape($product_option_value['points_prefix']) . "',  
 										`weight` 									= '" . (float) $product_option_value['weight'] . "',  
 										`weight_prefix` 					= '" . $this->db->escape($product_option_value['weight_prefix']) . "'
+								");
+
+								foreach ($product_option_value['description'] as $language_id => $description) {
+									if (empty($description)) continue;
+									$this->db->query("
+										INSERT INTO " . DB_PREFIX . "product_option_value_description
+										SET
+											`product_option_value_id`  = '" . (int) $product_option_value['product_option_value_id'] . "',
+											`product_option_id`      	 = '" . (int) $product_option_id . "',
+											`product_id`             	 = '" . (int) $product_id . "',
+											`option_id`              	 = '" . (int) $product_option['option_id'] . "',
+											`option_value_id`        	 = '" . (int) $product_option_value['option_value_id'] . "',
+											`description`            	 = '" . $this->db->escape($description) . "',
+											`language_id`            	 = '" . (int) $language_id . "',
+											`store_id`               	 = '" . (int) $this->session->data['store_id'] . "'
 									");
+								}
 							}
 						}
 					} else {
@@ -959,6 +998,7 @@ class ModelCatalogProduct extends Model {
 			'product_image',
 			'product_option',
 			'product_option_value',
+			'product_option_value_description',
 			'product_related',
 			'product_reward',
 			'product_special',
@@ -1585,15 +1625,33 @@ class ModelCatalogProduct extends Model {
 
 			$product_option_value_query = $this->db->query("
 				SELECT 
-					* 
+					*
 				FROM " . DB_PREFIX . "product_option_value pov 
-				LEFT JOIN " . DB_PREFIX . "option_value ov ON(pov.option_value_id = ov.option_value_id) 
+				LEFT JOIN " . DB_PREFIX . "option_value ov 
+					ON pov.option_value_id = ov.option_value_id
 				WHERE pov.product_option_id = '" . (int) $product_option['product_option_id'] . "' 
 					AND ov.store_id 					= '" . (int) $this->session->data['store_id'] . "'
 					AND pov.store_id 					= '" . (int) $this->session->data['store_id'] . "'
-				ORDER BY ov.sort_order ASC");
+				ORDER BY ov.sort_order ASC
+			");
+
+
 
 			foreach ($product_option_value_query->rows as $product_option_value) {
+				$descriptions = [];
+				$optionDescriptions = $this->db->query("
+					SELECT
+						`description`,
+						`language_id`
+					FROM " . DB_PREFIX . "product_option_value_description
+					WHERE product_option_value_id = " . (int) $product_option_value['product_option_value_id'] . "
+						AND store_id = " . (int) $this->session->data['store_id'] . "
+				")->rows;
+
+				foreach ($optionDescriptions as $row) {
+					$descriptions[$row['language_id']] = $row['description'];
+				}
+
 				$product_option_value_data[] = [
 					'product_option_value_id' => $product_option_value['product_option_value_id'],
 					'option_value_id'         => $product_option_value['option_value_id'],

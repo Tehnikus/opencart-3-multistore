@@ -527,7 +527,8 @@
                                             {% endif %}
                                           {% endfor %}
                                         {% endif %}
-                                      </select> <input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][product_option_value_id]" value="{{ product_option_value.product_option_value_id }}"/></td>
+                                      </select> 
+                                      <input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][product_option_value_id]" value="{{ product_option_value.product_option_value_id }}"/></td>
                                     <td class="text-right"><input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][quantity]" value="{{ product_option_value.quantity }}" placeholder="{{ entry_quantity }}" class="form-control"/></td>
                                     <td class="text-left">
                                       <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][subtract]" class="form-control">
@@ -597,7 +598,7 @@
                                       {% for language in languages %}
                                         <div class="input-group">
                                           <span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
-                                          <textarea name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][description][{{ language.language_id }}]" placeholder="{{ entry_description }} {{ language.name }}" class="form-control">{{ product_option_value.description }}</textarea>
+                                          <textarea name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][description][{{ language.language_id }}]" placeholder="{{ entry_description }} {{ language.name }}" class="form-control">{{ product_option_value.description[language.language_id] }}</textarea>
                                         </div>
                                       {% endfor %}
                                     </td>

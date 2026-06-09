@@ -599,6 +599,7 @@ class ControllerCatalogProduct extends Controller {
 			$product_info = $this->model_catalog_product->getProduct($this->request->get['product_id']);
 		}
 
+		$data['heading_title'] = $product_info['name'] ?? $this->language->get('heading_title');
 		$data['user_token'] = $this->session->data['user_token'];
 
 		$this->load->model('localisation/language');
@@ -990,7 +991,8 @@ class ControllerCatalogProduct extends Controller {
 						'points'                  => $product_option_value['points'],
 						'points_prefix'           => $product_option_value['points_prefix'],
 						'weight'                  => $product_option_value['weight'],
-						'weight_prefix'           => $product_option_value['weight_prefix']
+						'weight_prefix'           => $product_option_value['weight_prefix'],
+						'description'							=> $product_option_value['description'],
 					);
 				}
 			}
