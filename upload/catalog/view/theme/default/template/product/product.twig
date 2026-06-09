@@ -12,11 +12,11 @@
       </div>
       <div class="columnRight">
         <div class="scroll-x">
-          <a class="button" href="#description" title="{{ tab_description }}">{{ tab_description }}</a>
-          <a class="button" href="#images" title="{{ tab_images }}">{{ tab_images }}</a>
-          <a class="button" href="#specification" title="{{ tab_attributes }}">{{ tab_attribute }}</a>
-          <a class="button" href="#reviews" title="{{ tab_reviews|format(reviews) }}">{{ tab_reviews|format(reviews) }}</a>
-          <a class="button" href="#related" title="{{ tab_related|format(related) }}">{{ tab_related|format(related) }}</a>
+          {% if description %}<a class="button" href="#description" title="{{ tab_description }}">{{ tab_description }}</a>{% endif %}
+          {% if images %}<a class="button" href="#images" title="{{ tab_images }}">{{ tab_images }}</a>{% endif %}
+          {% if facetsData %}<a class="button" href="#specification" title="{{ tab_attributes }}">{{ tab_attributes }}</a>{% endif %}
+          {% if lastReviews %}<a class="button" href="#reviews" title="{{ tab_reviews|format(reviews) }}">{{ tab_reviews|format(reviews) }}</a>{% endif %}
+          {% if relatedProduct %}<a class="button" href="#related" title="{{ tab_related|format(related) }}">{{ tab_related|format(related) }}</a>{% endif %}
         </div>
       </div>
     </hgroup>
