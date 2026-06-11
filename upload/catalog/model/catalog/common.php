@@ -218,8 +218,8 @@ class ModelCatalogCommon extends Model {
     }
 
     // Reviews
-    if (!empty($product['last_reviews'])) {
-      $schema['review'] = $this->buildReviews($product['last_reviews']);
+    if (!empty($product['lastReviews'])) {
+      $schema['review'] = $this->buildReviews($product['lastReviews']);
     }
 
     return $schema;
