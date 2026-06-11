@@ -217,13 +217,15 @@ class ModelCatalogProduct extends Model {
 		$cacheSetting 			= (bool) $this->config->get('cache_products');
 		$theme        	 		= $this->config->get('config_theme');
 		$imgManufacturerWidth  	= (int) ($this->config->get("theme_{$theme}_image_manufacturer_width") ?? 600);
-		$imgManufacturerHeight 	= (int) ($this->config->get("theme_{$theme}_image_manufacturer_height") ?? 200);
+		$imgManufacturerHeight 	= (int) ($this->config->get("theme_{$theme}_image_manufacturer_height") ?? 400);
 		$imgCategoryWidth  			= (int) ($this->config->get("theme_{$theme}_image_category_width") ?? 500);
 		$imgCategoryHeight 			= (int) ($this->config->get("theme_{$theme}_image_category_height") ?? 500);
 		$imgMainWidth  					= (int) ($this->config->get("theme_{$theme}_image_product_main_width") ?? 2000);
 		$imgMainHeight 					= (int) ($this->config->get("theme_{$theme}_image_product_main_height") ?? 2000);
 		$imgMiniatureWidth  		= (int) ($this->config->get("theme_{$theme}_image_product_width") ?? 600);
 		$imgMiniatureHeight 		= (int) ($this->config->get("theme_{$theme}_image_product_height") ?? 600);
+		$imgFacetWeight 				= (int) ($this->config->get("theme_{$theme}_image_facet_width") ?? 100);
+		$imgFacetHeight 				= (int) ($this->config->get("theme_{$theme}_image_facet_height") ?? 100);
 		
 		// Cache
 		if ($cacheSetting) {
@@ -626,7 +628,7 @@ class ModelCatalogProduct extends Model {
 		foreach ($product['options'] as $keyOption => $option) {
 			foreach ($option['product_option_value'] as $keyValue => $optionValue) {
 				if (!empty($optionValue['image'])) {
-					$product['options'][$keyOption]['product_option_value'][$keyValue]['image'] = $this->model_tool_image->resize($optionValue['image'], $imgOptionWidth, $imgOptionHeight);
+					$product['options'][$keyOption]['product_option_value'][$keyValue]['image'] = $this->model_tool_image->resize($optionValue['image'], $imgFacetWeight, $imgFacetHeight);
 				}
 			}
 		}
@@ -634,7 +636,7 @@ class ModelCatalogProduct extends Model {
 		// Attributes images
 		foreach ($product['attributeDescriptions'] as $key => $attribute) {
 			if (!empty($attribute['image'])) {
-				$product['attributeDescriptions'][$key]['image'] = $this->model_tool_image->resize($attribute['image'], $imgOptionWidth, $imgOptionHeight);
+				$product['attributeDescriptions'][$key]['image'] = $this->model_tool_image->resize($attribute['image'], $imgFacetWeight, $imgFacetHeight);
 			}
 		}
 		// End images
