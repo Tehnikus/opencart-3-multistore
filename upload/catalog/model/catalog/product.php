@@ -332,10 +332,14 @@ class ModelCatalogProduct extends Model {
 					SELECT JSON_ARRAYAGG(
 						JSON_OBJECT(
 							'attribute_id', pa.attribute_id,
-							'description', pa.text
+							'description',  pa.text,
+							'image',				COALESCE(pa.image, a2s.image)
 						)
 					)
 					FROM " . DB_PREFIX . "product_attribute pa
+					LEFT JOIN " . DB_PREFIX . "attribute_to_store a2s
+						ON a2s.attribute_id = pa.attribute_id
+						AND a2s.store_id 		= p2s.store_id
 					WHERE pa.product_id  = p2s.product_id
 						AND pa.language_id = pd.language_id
 						AND pa.store_id 	 = p2s.store_id
