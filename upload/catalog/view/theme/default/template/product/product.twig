@@ -49,24 +49,42 @@
               </div>
             </div>
           {% endif %}
-          <div class="columnRight block">
-            <div>
-              {% for code, method in shippingMethods %}
-                <div class="deliveryMethod flex gap align-center">
-                  {% if method.image.src %}
-                    <img src="{{ method.image.src }}" width="{{ method.image.width }}" height="{{ method.image.height }}" loading="lazy" class="deliveryMethod">
-                  {% endif %}
-                  <p>
-                    <span class="h5">{{ method.quote[code].title }}</span>
-                    <span class="b">{% if method.quote[code].cost == 0 %}{{ text_shipping_free }}{% else %}{{ method.quote[code].text }}{% endif %}</span>
-                  </p>
-                </div>
-              {% endfor %}
-            </div>
-            <div>
-              <p>Payment foo</p>
-              <p>Payment bar</p>
-            </div>
+          <div class="columnRight block flex column gap">
+            {% if shippingMethods %}
+              <div class="shippingMethods flex column gap">
+                {% for code, method in shippingMethods %}
+                  <div class="shippingMethod block flex gap align-center">
+                    {% if method.image.src %}
+                      <img src="{{ method.image.src }}" width="{{ method.image.width }}" height="{{ method.image.height }}" loading="lazy" class="deliveryMethod">
+                    {% endif %}
+                    <div>
+                    <p><span class="h5">{{ method.quote[code].title }}</span></p>
+                    <p>{% if method.quote[code].cost == 0 %}<span class="b text-warning">{{ text_shipping_free }}</span>{% else %}<span class="b">{{ method.quote[code].text }}</span>{% endif %}</p>
+                    {% if method.terms %}
+                      <p class="text-sm">{{ method.terms }}</p>
+                    {% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+            {% if paymentMethods %}
+              <div class="paymentMethods flex column gap">
+                {% for code, method in paymentMethods %}
+                  <div class="paymentMethod block flex gap align-center">
+                    {% if method.image.src %}
+                      <img src="{{ method.image.src }}" width="{{ method.image.width }}" height="{{ method.image.height }}" loading="lazy" class="deliveryMethod">
+                    {% endif %}
+                    <div>
+                      <p class="h5">{{ method.title }}</p>
+                      {% if method.terms %}
+                        <p class="text-sm">{{ method.terms }}</p>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
           </div>
         </div>
       </div>
