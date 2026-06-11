@@ -30,11 +30,11 @@ class ModelCatalogCategory extends Model {
 				cd.`meta_description`,
 				cd.`meta_keyword`,
 				cd.`description`,
-				cd.`seo_keywords`,
-				cd.`seo_description`,
-				cd.`faq` 		AS `faq_json`,
-				cd.`how_to` AS `how_to_json`,
-				cd.`footer` AS `seoFooter`,
+				cd.`seo_keywords` 		AS `seoKeywords`,
+				cd.`seo_description` 	AS `seoDescription`,
+				cd.`faq` 							AS `faqJson`,
+				cd.`how_to` 					AS `howToJson`,
+				cd.`footer` 					AS `seoFooter`,
 				cd.`date_modified`,
 				cd.`language_id`,
 				JSON_ARRAYAGG(
@@ -60,7 +60,7 @@ class ModelCatalogCategory extends Model {
 						AND r.`status` 			= 1
 					ORDER BY r.`date_modified` DESC
 					LIMIT 10
-				) AS last_reviews
+				) AS lastReviews
 
 			FROM " . DB_PREFIX . "category_to_store c2s
 			LEFT JOIN " . DB_PREFIX . "category c
@@ -91,14 +91,14 @@ class ModelCatalogCategory extends Model {
 
 		$data['cache_date'] 			= strtotime($data['date_modified']); // Cache version
 		$data['seo_keywords'] 		= json_decode($data['seo_keywords'] ?? '[]', true);
-		$data['faq'] 							= json_decode($data['faq_json'] 		?? '[]', true);
-		$data['how_to'] 					= json_decode($data['how_to_json'] 	?? '[]', true);
+		$data['faq'] 							= json_decode($data['faqJson'] 			?? '[]', true);
+		$data['howTo'] 						= json_decode($data['howToJson'] 		?? '[]', true);
 		$data['seoFooter'] 				= json_decode($data['seoFooter'] 		?? '[]', true);
 		$data['images']						= json_decode($data['images'] 			?? '[]', true);
-		$data['last_reviews'] 		= json_decode($data['last_reviews'] ?? '[]', true);
-		$data['child_categories']	= $this->getCategories($category_id);
+		$data['lastReviews'] 			= json_decode($data['lastReviews'] 	?? '[]', true);
+		$data['childCategories']	= $this->getCategories($category_id);
 		$data['description']			= html_entity_decode($data['description'], ENT_QUOTES, 'UTF-8');
-		$data['seo_description']	= html_entity_decode($data['seo_description'], ENT_QUOTES, 'UTF-8');
+		$data['seoDescription']		= html_entity_decode($data['seoDescription'], ENT_QUOTES, 'UTF-8');
 		foreach ($data['seoFooter'] ?? [] as $key => $tab) {
 			$data['seoFooter'][$key]['description'] = html_entity_decode($tab['description'], ENT_QUOTES, 'UTF-8');
 		}
@@ -140,9 +140,9 @@ class ModelCatalogCategory extends Model {
 		// End images
 
 		// Child categories
-		foreach ($data['child_categories'] as $key => $child_category) {
-			$data['child_categories'][$key]['image'] = $this->model_tool_image->resize($child_category['image'] ?? 'no_image.webp', $imgMiniatureWidth, $imgMiniatureHeight);
-			$data['child_categories'][$key]['href']  = $this->url->link('product/category', 'path=' . $child_category['category_id']);
+		foreach ($data['childCategories'] as $key => $child_category) {
+			$data['childCategories'][$key]['image'] = $this->model_tool_image->resize($child_category['image'] ?? 'no_image.webp', $imgMiniatureWidth, $imgMiniatureHeight);
+			$data['childCategories'][$key]['href']  = $this->url->link('product/category', 'path=' . $child_category['category_id']);
 			// Set cache version to max date among child categories
 			if (strtotime($child_category['date_modified']) > $data['cache_date']) {
 				$data['cache_date'] = strtotime($child_category['date_modified']);
@@ -183,7 +183,7 @@ class ModelCatalogCategory extends Model {
 
 		// Cache
 		if ($cacheSetting) {
-			$cacheName 	= "category.store_{$store_id}.language_{$language_id}." . (floor($parent_id / 100)) . "00.child_categories_{$parent_id}";
+			$cacheName 	= "category.store_{$store_id}.language_{$language_id}." . (floor($parent_id / 100)) . "00.childCategories_{$parent_id}";
 			$cachedData = $this->cache->get($cacheName);
 	
 			if ($cachedData) {
