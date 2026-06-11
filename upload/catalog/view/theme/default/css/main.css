@@ -4,7 +4,8 @@
 @layer reset {
   *, *::before, *::after {box-sizing: border-box;}
   * {margin: 0;}
-  html {interpolate-size: allow-keywords; transition-behavior: allow-discrete; scrollbar-gutter: stable;}
+  html {interpolate-size: allow-keywords; transition-behavior: allow-discrete; scrollbar-gutter: stable; scroll-behavior: smooth; scrollbar-color: var(--color-secondary) transparent; }
+  ::-webkit-scrollbar-track {background: transparent;}
   body {line-height: 1.5; -webkit-font-smoothing: antialiased; margin: 0; min-height: 100dvh; display: flex; flex-direction: column; min-block-size: 100dvh;}
   img, picture, video, canvas, svg, figure, iframe {display: block; max-width: 100%; height: auto;}
   input, button, textarea, select {font: inherit;}
