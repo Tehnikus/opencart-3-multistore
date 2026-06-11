@@ -13,7 +13,9 @@ class ModelExtensionShippingFree extends Model {
 			$status = false;
 		}
 
-		if ($this->cart->getSubTotal() < $this->config->get('shipping_free_total')) {
+		if (
+			$this->cart->getSubTotal() < $this->config->get('shipping_free_total') && 
+			((int) ($address['total'] ?? 0) < (int) $this->config->get('shipping_free_total'))) {
 			$status = false;
 		}
 
