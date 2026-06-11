@@ -114,7 +114,7 @@ class ModelCatalogProduct extends Model {
 									`store_id` 						= '" . (int) $this->session->data['store_id'] . "',
 									`language_id` 				= '" . (int) $language_id . "', 
 									`text` 								= '" . $this->db->escape($product_attribute_description['text']) . "',
-									`image` 							= '" . $this->db->escape($product_attribute['image']) . "'
+									`image` 						 	= " . ($product_attribute['image'] !== '' ? "'" . $this->db->escape($product_attribute['image']) . "'": "NULL") . "
 							");
 						}
 					}
@@ -523,7 +523,7 @@ class ModelCatalogProduct extends Model {
 									`attribute_group_id` 	= (SELECT a2s.attribute_group_id FROM " . DB_PREFIX . "attribute_to_store a2s WHERE a2s.attribute_id = '" . (int) $product_attribute['attribute_id'] . "' AND a2s.store_id = '" . (int) $this->session->data['store_id'] . "'),
 									`language_id` 				= '" . (int) $language_id . "', 
 									`text` 								= '" .  $this->db->escape($product_attribute_description['text']) . "',
-									`image` 							= '" . $this->db->escape($product_attribute['image']) . "'
+									`image` 						 	= " . ($product_attribute['image'] !== '' ? "'" . $this->db->escape($product_attribute['image']) . "'": "NULL") . "
 							");
 						}
 					}
