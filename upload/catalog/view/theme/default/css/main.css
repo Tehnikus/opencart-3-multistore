@@ -543,6 +543,7 @@ main#product {
       --color-link: var(--color-primary-dark);
       font-weight: bold;
     }
+    & .facetImage {float: left; margin-right: var(--block-gap); border-radius: var(--border-radius-elements); box-shadow: var(--box-shadow-miniature); background: #fff;}
   }
 }
 
