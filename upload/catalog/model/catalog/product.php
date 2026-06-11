@@ -1427,11 +1427,11 @@ class ModelCatalogProduct extends Model {
 				sd.`meta_description`,
 				sd.`meta_keyword`,
 				sd.`description`,
-				sd.`seo_keywords` AS seoKeywords,
-				sd.`seo_description`,
-				sd.`faq` AS faqJson,
-				sd.`how_to` AS howToJson,
-				sd.`footer`,
+				sd.`seo_keywords` 	 AS `seoKeywords`,
+				sd.`seo_description` AS `seoDescription`,
+				sd.`faq` 						 AS `faqJson`,
+				sd.`how_to` 				 AS `howToJson`,
+				sd.`footer` 				 AS `seoFooter`,
 				sd.`date_modified`,
 				{$manufacturerRequest}
 				JSON_ARRAYAGG(
