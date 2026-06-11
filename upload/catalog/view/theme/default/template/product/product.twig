@@ -80,6 +80,7 @@
                         </th>
                       {% endif %}
                       <td class="colFeatureValue">
+                        <img src="{{ facet.image }}" title="{{ facet.facetName }}" loading="lazy" style="float: left;padding-right: 1rem" />
                         <a href="{{ facet.url }}" title="{{ facet_link_title|format(parentData.name, facet.groupName, facet.facetName) }}">{{ facet.facetName }}</a>{% if facet.description %} {{ facet.description }}{% endif %}
                       </td>
                     </tr>
