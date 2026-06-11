@@ -846,6 +846,60 @@ class ModelCatalogProduct extends Model {
 		return $deliveryMethods;
 	}
 
+	/**
+	 * Get available payment methods list 
+	 * @param int $total - price for payment methods that have minimum price to be enabled
+	 * @return array
+	 */
+	public function getPaymentMethods($total) : array {
+		$this->load->model('tool/image');
+		$paymentMethods 		= [];
+		$theme        	 		= $this->config->get('config_theme');
+		$imgPaymentWidth  	= (int) ($this->config->get("theme_{$theme}_image_payment_width") ?? 50);
+		$imgPaymentHeight 	= (int) ($this->config->get("theme_{$theme}_image_payment_height") ?? 50);
+
+		$address = [
+			'country_id' 		=> $this->config->get('config_country_id'),
+			'zone_id'    		=> 0,
+			'postcode'   		=> '',
+			'forceDisplay' 	=> true,
+		];
+
+		$this->load->model('setting/extension');
+
+		$paymentModules = $this->model_setting_extension->getExtensions('payment');
+
+		foreach ($paymentModules as $module) {
+			if ($this->config->get('payment_' . $module['code'] . '_status')) {
+				$this->load->model('extension/payment/' . $module['code']);
+				$quote = $this->{'model_extension_payment_' . $module['code']}->getMethod($address, $total);
+				if (!$quote) continue;
+
+				$extensions = ['svg', 'webp', 'png', 'jpg', 'jpeg'];
+				foreach ($extensions as $ext) {
+					$file = DIR_IMAGE . 'catalog/payment/' . $module['code'] . '.' . $ext;
+
+					if (is_file($file)) {
+						if ($ext === 'svg') {
+							$quote['image']['src'] = $this->config->get('config_ssl') . 'image/catalog/payment/' . basename($file);
+						} else {
+							$image = 'catalog/payment/' . $module['code'] . '.' . $ext;
+							$quote['image']['src'] = $this->model_tool_image->resize($image, $imgPaymentWidth, $imgPaymentHeight);
+						}
+						break;
+					} else {
+						$quote['image']['src'] = $this->config->get('config_ssl') . 'image/catalog/payment/payment_default.svg';
+					}
+				}
+				$quote['image']['width'] = $imgPaymentWidth;
+				$quote['image']['height'] = $imgPaymentHeight;
+
+				$paymentMethods[$module['code']] = $quote;
+			}
+		}
+		return $paymentMethods;
+	}
+
 	private function buildProductDynamicData(&$data) : void {
 		// Prices
 		$tax 			= $this->config->get('config_tax');
