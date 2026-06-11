@@ -1398,6 +1398,23 @@ class ModelCatalogProduct extends Model {
 			}
 		}
 
+		$manufacturerRequest = '';
+		if (isset($facetRequest['manufacturer_id'])) {
+			$manufacturerRequest = "
+				(
+					SELECT
+						JSON_OBJECT(
+							'name',  md.name,
+							'title', md.h1,
+							'image', (SELECT mi.image FROM " . DB_PREFIX . "manufacturer_image mi WHERE mi.manufacturer_id = {$facetRequest['manufacturer_id']} AND mi.store_id = sd.store_id ORDER BY mi.sort_order ASC LIMIT 1)
+						)
+					FROM " . DB_PREFIX . "manufacturer_description md
+					WHERE md.manufacturer_id = {$facetRequest['manufacturer_id']}
+						AND md.language_id 		 = sd.language_id
+						AND md.store_id 			 = sd.store_id
+				) AS manufacturerData,";
+		}
+
 		// Get filter page data
 		$sql = "
 			SELECT
@@ -1416,6 +1433,7 @@ class ModelCatalogProduct extends Model {
 				sd.`how_to` AS howToJson,
 				sd.`footer`,
 				sd.`date_modified`,
+				{$manufacturerRequest}
 				JSON_ARRAYAGG(
 					JSON_OBJECT(
 						'image', 				pi.`image`,
