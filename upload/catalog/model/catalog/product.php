@@ -783,6 +783,7 @@ class ModelCatalogProduct extends Model {
 		// Shipping methods
 		$product['shippingMethods'] = $this->getShippingMethods($product['price']);
 		// End shipping methods
+		$product['paymentMethods'] = $this->getPaymentMethods($product['price']);
 
 		// Set cache
 		if ($cacheSetting) {
@@ -796,7 +797,11 @@ class ModelCatalogProduct extends Model {
 		return $product;
 	}
 
-	// Get available delivery methods
+	/**
+	 *  Get available delivery methods
+	 * @param int $total - price for delivery method if it has minimum price to be enabled
+	 * @return array
+	 */
 	public function getShippingMethods($total) : array {
 		$this->load->model('tool/image');
 		$deliveryMethods 		= [];
@@ -832,15 +837,15 @@ class ModelCatalogProduct extends Model {
 							$image = 'catalog/shipping/' . $module['code'] . '.' . $ext;
 							$quote['image']['src'] = $this->model_tool_image->resize($image, $imgDeliveryWidth, $imgDeliveryHeight);
 						}
-						$quote['image']['width'] = $imgDeliveryWidth;
-						$quote['image']['height'] = $imgDeliveryHeight;
 						break;
+					} else {
+						$quote['image']['src'] = $this->config->get('config_ssl') . 'image/catalog/shipping/shipping_default.svg';
 					}
 				}
+				$quote['image']['width']  = $imgDeliveryWidth;
+				$quote['image']['height'] = $imgDeliveryHeight;
 
-				if ($quote) {
-					$deliveryMethods[$module['code']] = $quote;
-				}
+				$deliveryMethods[$module['code']] = $quote;
 			}
 		}
 		return $deliveryMethods;
