@@ -18,20 +18,25 @@ class ModelExtensionShippingItem extends Model {
 		if ($status) {
 			$items = 0;
 
-			foreach ($this->cart->getProducts() as $product) {
-				if ($product['shipping']) {
-					$items += $product['quantity'];
+			if (empty($this->cart->getProducts())) {
+				$items = 1; // Set single item so module is displayed on product page correcly, when there are no products in cart
+			} else {
+				foreach ($this->cart->getProducts() as $product) {
+					if ($product['shipping']) {
+						$items += $product['quantity'];
+					}
 				}
 			}
+
 
 			$quote_data = array();
 
 			$quote_data['item'] = array(
 				'code'         => 'item.item',
 				'title'        => $this->language->get('text_description'),
-				'cost'         => $this->config->get('shipping_item_cost') * $items,
+				'cost'         => (int) $this->config->get('shipping_item_cost') * $items,
 				'tax_class_id' => $this->config->get('shipping_item_tax_class_id'),
-				'text'         => $this->currency->format($this->tax->calculate($this->config->get('shipping_item_cost') * $items, $this->config->get('shipping_item_tax_class_id'), $this->config->get('config_tax')), $this->session->data['currency'])
+				'text'         => $this->currency->format($this->tax->calculate((int) $this->config->get('shipping_item_cost') * $items, $this->config->get('shipping_item_tax_class_id'), $this->config->get('config_tax')), $this->session->data['currency'])
 			);
 
 			$method_data = array(
