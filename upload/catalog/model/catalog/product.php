@@ -780,6 +780,10 @@ class ModelCatalogProduct extends Model {
 		}
 		// End reviews
 
+		// Shipping methods
+		$product['shippingMethods'] = $this->getShippingMethods();
+		// End shipping methods
+
 		// Set cache
 		if ($cacheSetting) {
 			$this->cache->set($cacheName, $product);
@@ -790,6 +794,54 @@ class ModelCatalogProduct extends Model {
 		$this->buildProductDynamicData($product);
 
 		return $product;
+	}
+
+	// Get available delivery methods
+	public function getShippingMethods() : array {
+		$deliveryMethods 		= [];
+		$theme        	 		= $this->config->get('config_theme');
+		$imgDeliveryWidth  	= (int) ($this->config->get("theme_{$theme}_image_delivery_width") ?? 100);
+		$imgDeliveryHeight 	= (int) ($this->config->get("theme_{$theme}_image_delivery_height") ?? 100);
+
+		$address = [
+			'country_id' => $this->config->get('config_country_id'),
+			'zone_id'    => 0,
+			'postcode'   => ''
+		];
+
+		$this->load->model('setting/extension');
+
+		$shippingModules = $this->model_setting_extension->getExtensions('shipping');
+
+		foreach ($shippingModules as $module) {
+			if ($this->config->get('shipping_' . $module['code'] . '_status')) {
+				$this->load->model('extension/shipping/' . $module['code']);
+				$quote = $this->{'model_extension_shipping_' . $module['code']}->getQuote($address);
+				
+				$this->load->model('tool/image');
+
+				$extensions = ['svg', 'webp', 'png', 'jpg', 'jpeg'];
+				foreach ($extensions as $ext) {
+					$file = DIR_IMAGE . 'catalog/shipping/' . $module['code'] . '.' . $ext;
+
+					if (is_file($file)) {
+						if ($ext === 'svg') {
+							$quote['image']['src'] = HTTPS_SERVER . 'image/catalog/shipping/' . basename($file);
+						} else {
+							$quote['image']['src'] = $this->model_tool_image->resize($file, $imgDeliveryWidth, $imgDeliveryHeight);
+						}
+						$quote['image']['width'] = $imgDeliveryWidth;
+						$quote['image']['height'] = $imgDeliveryHeight;
+						break;
+					}
+				}
+
+				if ($quote) {
+					$deliveryMethods[$module['code']] = $quote;
+				}
+			}
+		}
+		return $deliveryMethods;
 	}
 
 	private function buildProductDynamicData(&$data) : void {

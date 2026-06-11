@@ -51,8 +51,17 @@
           {% endif %}
           <div class="columnRight block">
             <div>
-              <p>Delivery foo</p>
-              <p>Delivery bar</p>
+              {% for code, method in shippingMethods %}
+                <div class="deliveryMethod flex">
+                  {% if method.image.src %}
+                    <img src="{{ method.image.src }}" width="{{ method.image.width }}" height="{{ method.image.height }}" loading="lazy" class="deliveryMethod">
+                  {% endif %}
+                  <p>
+                    <span class="h5">{{ method.quote[code].title }}</span>
+                    <span class="b">{% if method.quote[code].cost == 0 %}{{ text_shipping_free }}{% else %}{{ method.quote[code].text }}{% endif %}</span>
+                  </p>
+                </div>
+              {% endfor %}
             </div>
             <div>
               <p>Payment foo</p>
