@@ -577,6 +577,7 @@ class ModelCatalogProduct extends Model {
 		usort(array: $product['options'], 	 callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
 		usort(array: $product['attributes'], callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
 		usort(array: $product['specials'], 	 callback: fn ($a, $b) =>  $a['priority'] 	<=> $b['priority']);
+		usort(array: $product['lastReviews'], callback: fn ($a, $b) =>  strtotime($b['review_date']) <=> strtotime($a['review_date']));
 		array_multisort(
 			$product['discounts'],
 			array_column($product['discounts'], 'quantity'), SORT_ASC,
