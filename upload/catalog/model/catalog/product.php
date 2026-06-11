@@ -638,6 +638,7 @@ class ModelCatalogProduct extends Model {
 			'tags' 				=> [],
 			'categories' 	=> [],
 		];
+
 		foreach ($product['facetsData'] ?? [] as $facet) {
 			$facet['facetType'] = $this->facetTypes[$facet['facetTypeId']]['facetType'];
 			$facet['url'] 			= $this->url->link('product/category', "path={$product['parent_id']}&{$facet['facetType']}={$facet['facetValueId']}", true);
@@ -645,15 +646,23 @@ class ModelCatalogProduct extends Model {
 			// Add description to facet to display in specification table on product page
 			if ($facet['facetType'] === 'attribute') {
 				$facetDescriptionRow = array_filter($product['attributeDescriptions'], fn($a) => $a['attribute_id'] == $facet['facetValueId']);
-				$facetDescriptionRow = array_merge(...$facetDescriptionRow);
+				$facetDescriptionRow = array_merge(...$facetDescriptionRow); // Remove one layer from array association
 				$facet['description'] = $facetDescriptionRow['description'] ?? '';
+				$facet['image'] 		  = $facetDescriptionRow['image'];
 			}
 
 			// Add description to facet to display in specification table on product page
 			if ($facet['facetType'] === 'option') {
 				$facetDescriptionRow = array_filter($product['optionDescriptions'], fn($a) => $a['option_value_id'] == $facet['facetValueId']);
-				$facetDescriptionRow = array_merge(...$facetDescriptionRow);
+				$facetDescriptionRow = array_merge(...$facetDescriptionRow); // Remove one layer from array association
 				$facet['description'] = $facetDescriptionRow['description'] ?? '';
+				foreach ($product['options'] as $option) {
+					foreach ($option['product_option_value'] as $value) {
+						if ($value['option_value_id'] == $facet['facetValueId']) {
+							$facet['image'] = $value['image'];
+						}
+					}
+				}
 			}
 
 			// Boolean facets have no name in DB
@@ -705,35 +714,7 @@ class ModelCatalogProduct extends Model {
 			}
 		}
 		$product['facetsData'] = $facetGroups;
-
-		// Resize images to store prepared image links
-		$cover 				 = [];
-		$productImages = [];
-
-		// Add cover to the beginning of images array
-		$cover['image'] 		  = $product['image'] ?? 'no_image.webp';
-		$cover['description'] = $product['name'];
-		
-		array_unshift($product['images'], $cover);
-
-		foreach ($product['images'] as $img) {
-			$productImages['covers'][] = [
-				'src' 				=> $this->model_tool_image->resize($img['image'], $imgMainWidth, $imgMainHeight),
-				'description' => $img['description'],
-				'width'				=> $imgMainWidth,
-				'height'			=> $imgMainHeight,
-			];
-
-			$productImages['miniatures'][] = [
-				'src' 				=> $this->model_tool_image->resize($img['image'], $imgMiniatureWidth, $imgMiniatureHeight),
-				'description' => $img['description'],
-				'width'				=> $imgMiniatureWidth,
-				'height'			=> $imgMiniatureHeight,
-			];
-		}
-
-		$product['images'] = $productImages;
-		// End images
+		// End facets
 
 		// Trim short description
 		$theme        = $this->config->get('config_theme');
