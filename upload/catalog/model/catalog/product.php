@@ -552,31 +552,34 @@ class ModelCatalogProduct extends Model {
 		 * Faster then bouncing requests to get separate product data and easier to store cached data
 		 */
 		$this->load->model('tool/image');
-		$product['seoFooter'] 					= json_decode($product['seoFooter']		 		 ?? '[]', true);
-		$product['faq'] 								= json_decode($product['faqJson'] 		 		 ?? '[]', true);
-		$product['howTo'] 							= json_decode($product['howToJson']  	 		 ?? '[]', true);
-		$product['seoKeywords'] 				= json_decode($product['seoKeywords']  		 ?? '[]', true);
-		$product['images'] 							= json_decode($product['images'] 			 		 ?? '[]', true);
-		$product['specials'] 						= json_decode($product['specials'] 		 		 ?? '[]', true);
-		$product['discounts'] 					= json_decode($product['discounts'] 	 		 ?? '[]', true);
-		$product['options'] 						= json_decode($product['options'] 		 		 ?? '[]', true);
-		$product['attributes'] 					= json_decode($product['attributes'] 	 		 ?? '[]', true);
-		$product['lastReviews'] 				= json_decode($product['lastReviews']  		 ?? '[]', true);
-		$product['facetsData'] 					= json_decode($product['facetsData'] 			 ?? '[]', true);
+		$product['seoFooter'] 						= json_decode($product['seoFooter']		 		 			?? '[]', true);
+		$product['faq'] 									= json_decode($product['faqJson'] 		 		 			?? '[]', true);
+		$product['howTo'] 								= json_decode($product['howToJson']  	 		 			?? '[]', true);
+		$product['seoKeywords'] 					= json_decode($product['seoKeywords']  		 			?? '[]', true);
+		$product['images'] 								= json_decode($product['images'] 			 		 			?? '[]', true);
+		$product['specials'] 							= json_decode($product['specials'] 		 		 			?? '[]', true);
+		$product['discounts'] 						= json_decode($product['discounts'] 	 		 			?? '[]', true);
+		$product['options'] 							= json_decode($product['options'] 		 		 			?? '[]', true);
+		$product['attributes'] 						= json_decode($product['attributes'] 	 		 			?? '[]', true);
+		$product['lastReviews'] 					= json_decode($product['lastReviews']  		 			?? '[]', true);
+		$product['facetsData'] 						= json_decode($product['facetsData'] 			 			?? '[]', true);
 		$product['optionDescriptions']    = json_decode($product['optionDescriptions'] 		?? '[]', true);
 		$product['attributeDescriptions'] = json_decode($product['attributeDescriptions'] ?? '[]', true);
-		$product['reward'] 							= json_decode($product['rewards'] 		 		 ?? '[]', true)[$customer_group_id] ?? null;
+		$product['reward'] 								= json_decode($product['rewards'] 		 		 			?? '[]', true)[$customer_group_id] ?? null;
+
 		// Get valid discount float prices and dates in YYYY-MM-DD format
-		$product['discount'] 						= $this->getValidDiscount($product['discounts'], $customer_group_id)['price'] 	 ?? null; // Single valid discount price
-		$product['discountDateEnd'] 		= $this->getValidDiscount($product['discounts'], $customer_group_id)['date_end'] ?? null; // Discount date end
-		$product['special'] 						= $this->getValidDiscount($product['specials'],  $customer_group_id)['price'] 	 ?? null; // Single valid special price
-		$product['specialDateEnd'] 			= $this->getValidDiscount($product['specials'],  $customer_group_id)['date_end'] ?? null; // Special date end
+		$product['discount'] 				= $this->getValidDiscount($product['discounts'], $customer_group_id)['price'] 	 ?? null; // Single valid discount price
+		$product['discountDateEnd'] = $this->getValidDiscount($product['discounts'], $customer_group_id)['date_end'] ?? null; // Discount date end
+		$product['special'] 				= $this->getValidDiscount($product['specials'],  $customer_group_id)['price'] 	 ?? null; // Single valid special price
+		$product['specialDateEnd'] 	= $this->getValidDiscount($product['specials'],  $customer_group_id)['date_end'] ?? null; // Special date end
+		
 		// Decode descriptions
 		$product['description']			= html_entity_decode($product['description'], ENT_QUOTES, 'UTF-8');
 		$product['seoDescription']	= html_entity_decode($product['seoDescription'], ENT_QUOTES, 'UTF-8');
 		foreach ($product['seoFooter'] ?? [] as $key => $tab) {
 			$product['seoFooter'][$key]['description'] = html_entity_decode($tab['description'], ENT_QUOTES, 'UTF-8');
 		}
+
 		// Sort data
 		usort(array: $product['images'], 		 callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
 		usort(array: $product['options'], 	 callback: fn ($a, $b) =>  $a['sort_order'] <=> $b['sort_order']);
@@ -741,7 +744,7 @@ class ModelCatalogProduct extends Model {
 		// End trim short description
 
 		// URLs
-		$product['url'] 						= $this->url->link('product/product', "product_id={$product_id}", true);
+		$product['url'] = $this->url->link('product/product', "product_id={$product_id}", true);
 		// End URLs
 
 		// Breadcrumbs
