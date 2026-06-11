@@ -1456,12 +1456,22 @@ class ModelCatalogProduct extends Model {
 
 		$data = $this->db->query($sql)->row;
 
-		$data['seoKeywords']  = json_decode($data['seoKeywords'] ?? '[]', true);
-		$data['faq'] 					= json_decode($data['faqJson'] 		 ?? '[]', true);
-		$data['howTo'] 				= json_decode($data['howToJson'] 	 ?? '[]', true);
-		$data['footer'] 			= json_decode($data['footer'] 		 ?? '[]', true);
-		$data['images']				= json_decode($data['images'] 		 ?? '[]', true);
-		$data['description']	= html_entity_decode($data['description'], ENT_QUOTES, 'UTF-8');
+		$data['seoKeywords']  	= json_decode($data['seoKeywords'] ?? '[]', true);
+		$data['faq'] 						= json_decode($data['faqJson'] 		 ?? '[]', true);
+		$data['howTo'] 					= json_decode($data['howToJson'] 	 ?? '[]', true);
+		$data['footer'] 				= json_decode($data['footer'] 		 ?? '[]', true);
+		$data['images']					= json_decode($data['images'] 		 ?? '[]', true);
+		$data['seoFooter']			= json_decode($data['seoFooter'] 	 ?? '[]', true);
+		// Decode descriptions
+		$data['description']		= html_entity_decode($data['description'], ENT_QUOTES, 'UTF-8');
+		$data['seoDescription']	= html_entity_decode($data['seoDescription'], ENT_QUOTES, 'UTF-8');
+		foreach ($data['seoFooter'] ?? [] as $key => $tab) {
+			$data['seoFooter'][$key]['description'] = html_entity_decode($tab['description'], ENT_QUOTES, 'UTF-8');
+		}
+
+		// If filter request includes manufacturer_id add 'manufacturerData' for JSON-LD microdata
+		$data['manufacturerData'] = json_decode($data['manufacturerData'] ?? '[]', true);
+
 		// Resize images to store prepared image links
 		$this->load->model('tool/image');
 		$cover 							= [];
