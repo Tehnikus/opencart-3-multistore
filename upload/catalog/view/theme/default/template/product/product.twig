@@ -21,7 +21,7 @@
       </div>
     </hgroup>
     <section class="productTop flex wrap row gap">
-      <div class="columnLeft block">
+      <div id="images" class="columnLeft block">
         <div class="scroll-x snap single markers">
           {% for key, img in images.covers %}
             <figure>
@@ -40,19 +40,19 @@
         <div class="columnRight flex row wrap gap">
           {% if manufacturerData %}
             <div class="columnLeft flex block">
-                <div class="flex column gap align-center justify-center">
-                  <a title="{{ manufacturer_page_title|format(manufacturerData.name) }}" href="{{ manufacturerData.url }}" class="flex align-center column">
-                    <span class="h3 b">{{ manufacturerData.name }}</span>
-                    <img src="{{ manufacturerData.image }}" loading="lazy" />
-                  </a>
-                  <a title="{{ manufacturer_facet_title|format(manufacturerData.name, parentData.name) }}" href="{{ manufacturerData.facetLink }}" class="flex b">{{ manufacturer_facet_link|format(manufacturerData.name, parentData.name) }} <svg class="i" aria-hidden="true"><use href="catalog/view/theme/default/img/icons.svg#i-chevron-right"></use></svg></a>
-                </div>
+              <div class="flex column gap align-center justify-center">
+                <a title="{{ manufacturer_page_title|format(manufacturerData.name) }}" href="{{ manufacturerData.url }}" class="flex align-center column">
+                  <span class="h3 b">{{ manufacturerData.name }}</span>
+                  <img src="{{ manufacturerData.image }}" loading="lazy" />
+                </a>
+                <a title="{{ manufacturer_facet_title|format(manufacturerData.name, parentData.name) }}" href="{{ manufacturerData.facetLink }}" class="flex b">{{ manufacturer_facet_link|format(manufacturerData.name, parentData.name) }} <svg class="i" aria-hidden="true"><use href="catalog/view/theme/default/img/icons.svg#i-chevron-right"></use></svg></a>
+              </div>
             </div>
           {% endif %}
           <div class="columnRight block">
             <div>
               {% for code, method in shippingMethods %}
-                <div class="deliveryMethod flex">
+                <div class="deliveryMethod flex gap align-center">
                   {% if method.image.src %}
                     <img src="{{ method.image.src }}" width="{{ method.image.width }}" height="{{ method.image.height }}" loading="lazy" class="deliveryMethod">
                   {% endif %}
