@@ -600,9 +600,6 @@ class ModelCatalogProduct extends Model {
 		$cover 				 = [];
 		$productImages = [];
 
-		// Add cover to the beginning of images array
-		$cover['image'] 		  = $product['image'] ?? 'no_image.webp';
-		$cover['description'] = $product['name'];
 		
 		$cover['image'] 		  = $product['image'] ?? 'no_image.webp'; // Set main image fallback
 		$cover['description'] = $product['name']; // Set main cover description
