@@ -224,7 +224,7 @@ class ModelCatalogProduct extends Model {
 		$imgMainHeight 					= (int) ($this->config->get("theme_{$theme}_image_product_main_height") ?? 2000);
 		$imgMiniatureWidth  		= (int) ($this->config->get("theme_{$theme}_image_product_width") ?? 600);
 		$imgMiniatureHeight 		= (int) ($this->config->get("theme_{$theme}_image_product_height") ?? 600);
-		$imgFacetWeight 				= (int) ($this->config->get("theme_{$theme}_image_facet_width") ?? 100);
+		$imgFacetWidth 				= (int) ($this->config->get("theme_{$theme}_image_facet_width") ?? 100);
 		$imgFacetHeight 				= (int) ($this->config->get("theme_{$theme}_image_facet_height") ?? 100);
 		
 		// Cache
@@ -604,7 +604,9 @@ class ModelCatalogProduct extends Model {
 		$cover['image'] 		  = $product['image'] ?? 'no_image.webp';
 		$cover['description'] = $product['name'];
 		
-		array_unshift($product['images'], $cover);
+		$cover['image'] 		  = $product['image'] ?? 'no_image.webp'; // Set main image fallback
+		$cover['description'] = $product['name']; // Set main cover description
+		array_unshift($product['images'], $cover); // Add main cover image to the beginning of images array
 
 		foreach ($product['images'] as $img) {
 			$productImages['covers'][] = [
@@ -628,7 +630,7 @@ class ModelCatalogProduct extends Model {
 		foreach ($product['options'] as $keyOption => $option) {
 			foreach ($option['product_option_value'] as $keyValue => $optionValue) {
 				if (!empty($optionValue['image'])) {
-					$product['options'][$keyOption]['product_option_value'][$keyValue]['image'] = $this->model_tool_image->resize($optionValue['image'], $imgFacetWeight, $imgFacetHeight);
+					$product['options'][$keyOption]['product_option_value'][$keyValue]['image'] = $this->model_tool_image->resize($optionValue['image'], $imgFacetWidth, $imgFacetHeight);
 				}
 			}
 		}
@@ -636,7 +638,7 @@ class ModelCatalogProduct extends Model {
 		// Attributes images
 		foreach ($product['attributeDescriptions'] as $key => $attribute) {
 			if (!empty($attribute['image'])) {
-				$product['attributeDescriptions'][$key]['image'] = $this->model_tool_image->resize($attribute['image'], $imgFacetWeight, $imgFacetHeight);
+				$product['attributeDescriptions'][$key]['image'] = $this->model_tool_image->resize($attribute['image'], $imgFacetWidth, $imgFacetHeight);
 			}
 		}
 		// End images
@@ -658,7 +660,11 @@ class ModelCatalogProduct extends Model {
 				$facetDescriptionRow = array_filter($product['attributeDescriptions'], fn($a) => $a['attribute_id'] == $facet['facetValueId']);
 				$facetDescriptionRow = array_merge(...$facetDescriptionRow); // Remove one layer from array association
 				$facet['description'] = $facetDescriptionRow['description'] ?? '';
-				$facet['image'] 		  = $facetDescriptionRow['image'];
+				if (!empty($facetDescriptionRow['image'])) {
+					$facet['image']['src'] 		  = $facetDescriptionRow['image'];
+					$facet['image']['width'] 		= $imgFacetWidth;
+					$facet['image']['height'] 	= $imgFacetHeight;
+				}
 			}
 
 			// Add description to facet to display in specification table on product page
@@ -668,8 +674,10 @@ class ModelCatalogProduct extends Model {
 				$facet['description'] = $facetDescriptionRow['description'] ?? '';
 				foreach ($product['options'] as $option) {
 					foreach ($option['product_option_value'] as $value) {
-						if ($value['option_value_id'] == $facet['facetValueId']) {
-							$facet['image'] = $value['image'];
+						if ($value['option_value_id'] == $facet['facetValueId'] && !empty($value['image'])) {
+							$facet['image']['src'] 			= $value['image'];
+							$facet['image']['width'] 		= $imgFacetWidth;
+							$facet['image']['height'] 	= $imgFacetHeight;
 						}
 					}
 				}

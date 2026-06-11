@@ -93,7 +93,9 @@
                         </th>
                       {% endif %}
                       <td class="colFeatureValue">
-                        <img src="{{ facet.image }}" title="{{ facet.facetName }}" loading="lazy" style="float: left;padding-right: 1rem" />
+                        {% if facet.image %}
+                          <img src="{{ facet.image.src }}" width="{{ facet.image.width }}" height="{{ facet.image.width }}" title="{{ facet.facetName }}" loading="lazy" class="facetImage" />
+                        {% endif %}
                         <a href="{{ facet.url }}" title="{{ facet_link_title|format(parentData.name, facet.groupName, facet.facetName) }}">{{ facet.facetName }}</a>{% if facet.description %} {{ facet.description }}{% endif %}
                       </td>
                     </tr>
