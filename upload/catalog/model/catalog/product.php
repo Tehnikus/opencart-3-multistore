@@ -798,10 +798,11 @@ class ModelCatalogProduct extends Model {
 
 	// Get available delivery methods
 	public function getShippingMethods() : array {
+		$this->load->model('tool/image');
 		$deliveryMethods 		= [];
 		$theme        	 		= $this->config->get('config_theme');
-		$imgDeliveryWidth  	= (int) ($this->config->get("theme_{$theme}_image_delivery_width") ?? 100);
-		$imgDeliveryHeight 	= (int) ($this->config->get("theme_{$theme}_image_delivery_height") ?? 100);
+		$imgDeliveryWidth  	= (int) ($this->config->get("theme_{$theme}_image_delivery_width") ?? 50);
+		$imgDeliveryHeight 	= (int) ($this->config->get("theme_{$theme}_image_delivery_height") ?? 50);
 
 		$address = [
 			'country_id' => $this->config->get('config_country_id'),
@@ -817,8 +818,7 @@ class ModelCatalogProduct extends Model {
 			if ($this->config->get('shipping_' . $module['code'] . '_status')) {
 				$this->load->model('extension/shipping/' . $module['code']);
 				$quote = $this->{'model_extension_shipping_' . $module['code']}->getQuote($address);
-				
-				$this->load->model('tool/image');
+				if (!$quote) continue;
 
 				$extensions = ['svg', 'webp', 'png', 'jpg', 'jpeg'];
 				foreach ($extensions as $ext) {
@@ -826,9 +826,10 @@ class ModelCatalogProduct extends Model {
 
 					if (is_file($file)) {
 						if ($ext === 'svg') {
-							$quote['image']['src'] = HTTPS_SERVER . 'image/catalog/shipping/' . basename($file);
+							$quote['image']['src'] = $this->config->get('config_ssl') . 'image/catalog/shipping/' . basename($file);
 						} else {
-							$quote['image']['src'] = $this->model_tool_image->resize($file, $imgDeliveryWidth, $imgDeliveryHeight);
+							$image = 'catalog/shipping/' . $module['code'] . '.' . $ext;
+							$quote['image']['src'] = $this->model_tool_image->resize($image, $imgDeliveryWidth, $imgDeliveryHeight);
 						}
 						$quote['image']['width'] = $imgDeliveryWidth;
 						$quote['image']['height'] = $imgDeliveryHeight;
