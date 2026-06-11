@@ -413,6 +413,7 @@ class ModelCatalogProduct extends Model {
 				(
 					SELECT JSON_ARRAYAGG(
 						JSON_OBJECT(
+							'reviewId',				r.`review_id`,
 							'review_text', 		r.`text`,
 							'review_date', 		r.`date_added`,
 							'review_rating', 	r.`rating`,
