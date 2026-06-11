@@ -585,6 +585,53 @@ class ModelCatalogProduct extends Model {
 			array_column($product['discounts'], 'price'),  	 SORT_ASC,
 		);
 
+		// Images
+		// Resize images to store prepared image links
+		$cover 				 = [];
+		$productImages = [];
+
+		// Add cover to the beginning of images array
+		$cover['image'] 		  = $product['image'] ?? 'no_image.webp';
+		$cover['description'] = $product['name'];
+		
+		array_unshift($product['images'], $cover);
+
+		foreach ($product['images'] as $img) {
+			$productImages['covers'][] = [
+				'src' 				=> $this->model_tool_image->resize($img['image'], $imgMainWidth, $imgMainHeight),
+				'description' => $img['description'],
+				'width'				=> $imgMainWidth,
+				'height'			=> $imgMainHeight,
+			];
+
+			$productImages['miniatures'][] = [
+				'src' 				=> $this->model_tool_image->resize($img['image'], $imgMiniatureWidth, $imgMiniatureHeight),
+				'description' => $img['description'],
+				'width'				=> $imgMiniatureWidth,
+				'height'			=> $imgMiniatureHeight,
+			];
+		}
+
+		$product['images'] = $productImages;
+
+		// Option values images
+		foreach ($product['options'] as $keyOption => $option) {
+			foreach ($option['product_option_value'] as $keyValue => $optionValue) {
+				if (!empty($optionValue['image'])) {
+					$product['options'][$keyOption]['product_option_value'][$keyValue]['image'] = $this->model_tool_image->resize($optionValue['image'], $imgOptionWidth, $imgOptionHeight);
+				}
+			}
+		}
+
+		// Attributes images
+		foreach ($product['attributeDescriptions'] as $key => $attribute) {
+			if (!empty($attribute['image'])) {
+				$product['attributeDescriptions'][$key]['image'] = $this->model_tool_image->resize($attribute['image'], $imgOptionWidth, $imgOptionHeight);
+			}
+		}
+		// End images
+
+		// Facets
 		// Group product facets and add SEO links
 		$facetGroups = [
 			'facets' 			=> [],
