@@ -781,7 +781,7 @@ class ModelCatalogProduct extends Model {
 		// End reviews
 
 		// Shipping methods
-		$product['shippingMethods'] = $this->getShippingMethods();
+		$product['shippingMethods'] = $this->getShippingMethods($product['price']);
 		// End shipping methods
 
 		// Set cache
@@ -797,7 +797,7 @@ class ModelCatalogProduct extends Model {
 	}
 
 	// Get available delivery methods
-	public function getShippingMethods() : array {
+	public function getShippingMethods($total) : array {
 		$this->load->model('tool/image');
 		$deliveryMethods 		= [];
 		$theme        	 		= $this->config->get('config_theme');
@@ -807,7 +807,8 @@ class ModelCatalogProduct extends Model {
 		$address = [
 			'country_id' => $this->config->get('config_country_id'),
 			'zone_id'    => 0,
-			'postcode'   => ''
+			'postcode'   => '',
+			'total'			 => $total,
 		];
 
 		$this->load->model('setting/extension');
