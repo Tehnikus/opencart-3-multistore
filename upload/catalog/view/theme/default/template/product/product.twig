@@ -94,22 +94,24 @@
     
     {# Reviews #}
     {% if lastReviews %}
-      <section id="reviews" class="block">
+      <section id="reviews" class="block flex column gap">
         <span class="h2">{{ heading_reviews }}</span>
         {% for review in lastReviews %}
-          <article class="review">
+          <article id="review_{{ review.reviewId }}" class="review block">
             <figure>
-              <blockquote cite="https://example.com">
+              <div class="flex gap justify-space-between">
+                <figcaption>
+                  <svg class="i" aria-hidden="true"><use href="catalog/view/theme/default/img/icons.svg#i-user"></use></svg>
+                  <span class="author b">{{ review.author }}</span>, 
+                  <time datetime="{{ review.review_date }}">{{ review.review_date }}</time>
+                </figcaption>
+                {% include "default/template/elements/rating_stars.twig" with {rating: review.review_rating, reviews: false} %}
+              </div>
+              <blockquote cite="{{ url }}#review_{{ review.reviewId }}">
                 <p>{{ review.review_text }}</p>
               </blockquote>
-              <figcaption>
-                <span class="author">{{ review.author }}</span>, 
-                <time datetime="{{ review.review_date }}">{{ review.review_date }}</time>
-              </figcaption>
             </figure>
-            {% include "default/template/elements/rating_stars.twig" with {rating: review.review_rating, reviews: false} %}
           </article>
-
         {% endfor %}
       </section>
     {% endif %}
