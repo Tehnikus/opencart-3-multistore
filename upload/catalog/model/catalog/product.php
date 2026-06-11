@@ -1474,13 +1474,15 @@ class ModelCatalogProduct extends Model {
 
 		// Resize images to store prepared image links
 		$this->load->model('tool/image');
-		$cover 							= [];
-		$images 						= [];
-		$theme        	 		= $this->config->get('config_theme');
-		$imgMainWidth  			= (int) ($this->config->get("theme_{$theme}_image_category_main_width") ?? 2000);
-		$imgMainHeight 			= (int) ($this->config->get("theme_{$theme}_image_category_main_height") ?? 2000);
-		$imgMiniatureWidth  = (int) ($this->config->get("theme_{$theme}_image_category_width") ?? 600);
-		$imgMiniatureHeight = (int) ($this->config->get("theme_{$theme}_image_category_height") ?? 600);
+		$cover 	= [];
+		$images = [];
+		$theme        	 			 = $this->config->get('config_theme');
+		$imgMainWidth  				 = (int) ($this->config->get("theme_{$theme}_image_category_main_width") ?? 2000);
+		$imgMainHeight 				 = (int) ($this->config->get("theme_{$theme}_image_category_main_height") ?? 2000);
+		$imgMiniatureWidth  	 = (int) ($this->config->get("theme_{$theme}_image_category_width") ?? 600);
+		$imgMiniatureHeight 	 = (int) ($this->config->get("theme_{$theme}_image_category_height") ?? 600);
+		$imgManufacturerWidth  = (int) ($this->config->get("theme_{$theme}_image_manufacturer_width") ?? 600);
+		$imgManufacturerHeight = (int) ($this->config->get("theme_{$theme}_image_manufacturer_height") ?? 400);
 		// Add cover to the beginning of images array
 		$cover['image'] 		  = $data['image'] ?? 'no_image.webp';
 		$cover['description'] = $data['name'];
@@ -1500,6 +1502,11 @@ class ModelCatalogProduct extends Model {
 				'width'				=> $imgMiniatureWidth,
 				'height'			=> $imgMiniatureHeight,
 			];
+		}
+
+		if (!empty($data['manufacturerData'])) {
+			$data['manufacturerData']['image'] = $this->model_tool_image->resize($data['manufacturerData']['image'] ?? 'no_image.webp', $imgManufacturerWidth, $imgManufacturerHeight);
+			$data['manufacturerData']['url'] = $this->url->link('product/manufacturer', "manufacturer_id={$facetRequest['manufacturer_id']}", true);
 		}
 
 		$data['images'] = $images;
