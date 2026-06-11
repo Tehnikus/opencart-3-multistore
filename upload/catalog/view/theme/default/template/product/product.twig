@@ -6,11 +6,11 @@
     {{ content_top }}
     {# Header #}
     <hgroup class="flex row wrap align-center justify-space-between ">
-      <div class="columnLeft flex column wrap">
+      <div class="">
         <h1 class="productName">{{ h1 }}</h1>
         {% include "default/template/elements/rating_stars.twig" %}
       </div>
-      <div class="columnRight">
+      <div class="">
         <div class="scroll-x">
           {% if description %}<a class="button" href="#description" title="{{ tab_description }}">{{ tab_description }}</a>{% endif %}
           {% if images %}<a class="button" href="#images" title="{{ tab_images }}">{{ tab_images }}</a>{% endif %}
