@@ -16,18 +16,6 @@ class ModelCatalogCategory extends Model {
 		}
 
 		$sql = "
-			-- WITH category_stats AS (
-			-- 	SELECT
-			-- 		`category_id`,
-			-- 		MIN(`current_price`) 	AS `price_min`,
-			-- 		MAX(`current_price`) 	AS `price_max`,
-			-- 		AVG(`rating_avg`) 		AS `rating`,
-			-- 		SUM(`review_count`)		AS `reviews`,
-			-- 		COUNT(`product_id`)		AS `product_count`
-			-- 	FROM " . DB_PREFIX . "facet_sort
-			-- 	WHERE `category_id` = {$category_id}
-			-- 		AND `store_id` 		= {$store_id}
-			-- )
 			SELECT 
 				c.`category_id`,
 				c2s.`store_id`,
@@ -49,11 +37,6 @@ class ModelCatalogCategory extends Model {
 				cd.`footer` AS `seoFooter`,
 				cd.`date_modified`,
 				cd.`language_id`,
-				-- cs.`price_min`,
-				-- cs.`price_max`,
-				-- cs.`rating`,
-				-- cs.`reviews`,
-				-- cs.`product_count`,
 				JSON_ARRAYAGG(
 					JSON_OBJECT(
 						'image', 				ci.`image`,
