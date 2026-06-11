@@ -764,6 +764,12 @@ class ModelCatalogProduct extends Model {
 		$product['rating'] = ($this->config->get('config_review_status')) ? round((float) $product['rating'], 1) : false;
 		// End rating
 
+		// Reviews
+		foreach ($product['lastReviews'] as $key => $review) {
+			$product['lastReviews'][$key]['review_date'] = date($this->language->get('date_format_long'), strtotime($review['review_date']));
+		}
+		// End reviews
+
 		// Set cache
 		if ($cacheSetting) {
 			$this->cache->set($cacheName, $product);
