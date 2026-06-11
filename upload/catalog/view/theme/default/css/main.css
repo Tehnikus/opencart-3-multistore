@@ -466,6 +466,12 @@
   }
 }
 
+.prices {
+  & .price-new {
+    color: crimson;
+  }
+}
+
 .tabs {
   & .tabContent {
     &:not(.active) {
@@ -514,9 +520,6 @@
   & .prices {
     margin-top: auto;
     text-align: center;
-    & .price-new {
-      color: crimson;
-    }
   }
 }
 
