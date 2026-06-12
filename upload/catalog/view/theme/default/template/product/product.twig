@@ -137,6 +137,20 @@
         </div>
       </section>
     {% endif %}
+
+    {# FAQ #}
+    {% if faq %}
+      <section id="faq" class="flex column gap">
+        {% include "default/template/elements/faq.twig" with {faq: faq} %}
+      </section>
+    {% endif %}
+    
+    {# HowTo #}
+    {% if howTo %}
+      <section id="howTo" class="flex column gap">
+        {% include "default/template/elements/how_to.twig" with {howTo: howTo} %}
+      </section>
+    {% endif %}
     
     {# Reviews #}
     {% if lastReviews %}
