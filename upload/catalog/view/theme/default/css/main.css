@@ -359,6 +359,10 @@
       &#columnRight {transform: translateX(100%);}
       &.open {transform: translateX(0);}
     }
+    hgroup {
+      & .pageTitle {width: 100%; max-width: 100%; text-align: center;}
+      & .pageContents {width: 100%; max-width: 100%;}
+    }
   }
   
   nav {
