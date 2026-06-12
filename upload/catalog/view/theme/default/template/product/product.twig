@@ -6,17 +6,20 @@
     {{ content_top }}
     {# Header #}
     <hgroup class="flex row wrap align-center justify-space-between ">
-      <div class="">
+      <div class="pageTitle">
         <h1 class="productName">{{ h1 }}</h1>
         {% include "default/template/elements/rating_stars.twig" %}
       </div>
-      <div class="">
+      <div class="pageContents">
         <div class="scroll-x">
           {% if description %}<a class="button" href="#description" title="{{ tab_description }}">{{ tab_description }}</a>{% endif %}
           {% if images %}<a class="button" href="#images" title="{{ tab_images }}">{{ tab_images }}</a>{% endif %}
           {% if facetsData %}<a class="button" href="#specification" title="{{ tab_attributes }}">{{ tab_attributes }}</a>{% endif %}
           {% if lastReviews %}<a class="button" href="#reviews" title="{{ tab_reviews|format(reviews) }}">{{ tab_reviews|format(reviews) }}</a>{% endif %}
           {% if relatedProduct %}<a class="button" href="#related" title="{{ tab_related|format(related) }}">{{ tab_related|format(related) }}</a>{% endif %}
+          {% if upsellProducts %}<a class="button" href="#upsell" title="{{ tab_upsell|format(upsell) }}">{{ tab_upsell|format(upsell) }}</a>{% endif %}
+          {% if faq %}<a class="button" href="#faq" title="{{ tab_faq }}">{{ tab_faq }}</a>{% endif %}
+          {% if howTo %}<a class="button" href="#howTo" title="{{ tab_how_to }}">{{ tab_how_to }}</a>{% endif %}
         </div>
       </div>
     </hgroup>
