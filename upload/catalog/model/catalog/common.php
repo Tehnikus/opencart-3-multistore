@@ -205,7 +205,10 @@ class ModelCatalogCommon extends Model {
 
     // Offers
     $schema['offers'] = $this->buildOffers($product, $currency);
-    $schema['offers']['shippingDetails'] = $this->buildOfferShippingDetails($product['shippingMethods'] ?? [], ['transit_min' => 1, 'transit_max' => 3, 'cutoff_time' => '17:00:00+02:00']);
+    $schema['offers']['shippingDetails'] = $this->buildOfferShippingDetails(
+      $product['shippingMethods'] ?? [], 
+      ['transit_min' => 1, 'transit_max' => 3, 'handling_max' => 2]
+    );
 
     // Aggregate Rating
     if (!empty($product['rating']) && !empty($product['reviews'])) {
