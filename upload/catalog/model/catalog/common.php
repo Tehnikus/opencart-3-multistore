@@ -159,6 +159,10 @@ class ModelCatalogCommon extends Model {
     $this->document->addJsonLd($schema);
   }
 
+  public function addDocumentJsonLdPlain(string $data) {
+    $this->document->addJsonLd($data);
+  }
+
   /**
    * Build Product / ProductGroup schema
    */
@@ -255,6 +259,7 @@ class ModelCatalogCommon extends Model {
 
     $offer = [
       '@type' => 'Offer',
+      'price'             => $product['special'] ?? $product['price'],
       'priceCurrency'     => $currency,
       'availability'      => $availability,
       'itemCondition'     => 'https://schema.org/NewCondition',
@@ -271,6 +276,7 @@ class ModelCatalogCommon extends Model {
       $offer['priceSpecification'] = [
         [
           '@type'         => 'UnitPriceSpecification',
+          'priceType'     => 'https://schema.org/SalePrice',
           'price'         => $product['special'],      // current price
           'priceCurrency' => $currency,
         ],
@@ -281,8 +287,6 @@ class ModelCatalogCommon extends Model {
           'priceCurrency' => $currency,
         ],
       ];
-    } else {
-      $offer['price'] = $product['price'];
     }
 
     return $offer;
@@ -363,6 +367,48 @@ class ModelCatalogCommon extends Model {
     return $details;
   }
 
+  private function buildMerchantReturnPolicy($data) : array {
+    $result = [];
+
+    return $result;
+  }
+
+  /**
+   * Build certificates list
+   * @param array $data
+   * Example:
+   * $data = [
+   *  "name" => "ISO 9001:2015 Quality Management",
+   *  "certificationIdentification" => "ISO-9001-99482",
+   *  "url" => "https://iso.org",
+   *  "rating" => "D"
+   * ]   
+   * @return array
+   */
+  private function buildCertification(array $data) : array {
+    $result = [];
+
+    foreach ($data as $item) {
+      $certificate = [
+        "@type" => "Certification",
+        "issuedBy" => [
+          "@type" => "Organization",
+          "name"  => $item['issuedBy'],
+          "url"   => $item['url'],
+        ],
+        "name" => $item['name'],
+        "certificationIdentification" => $item['id'],
+      ];
+      if (isset($item['rating'])) {
+        $certificate["certificationRating"] = [
+          "@type" => "Rating",
+          "ratingValue" => $item['rating']
+        ];
+      }
+    }
+    return $result;
+  }
+
 
   /**
    * List of ImageObject from main image and additional images
@@ -406,6 +452,7 @@ class ModelCatalogCommon extends Model {
     $result = [];
 
     foreach ($reviews as $review) {
+
       $item = [
         '@type' => 'Review',
         'author' => [
@@ -419,6 +466,39 @@ class ModelCatalogCommon extends Model {
           'bestRating' => 5,
         ],
       ];
+
+      if (isset($review['positiveNotes'])) {
+        $item['positiveNotes'] = [
+          "@type" => "ItemList",
+          "itemListElement" => [],
+        ];
+
+        foreach ($review['positiveNotes'] as $position => $note) {
+
+          $item['positiveNotes']['itemListElement'] = [
+            "@type" => "ListItem",
+            "position" => $position,
+            "name" => $note['name'],
+          ];
+        }
+      }
+
+
+      if (isset($review['negativeNotes'])) {
+        $item['negativeNotes'] = [
+          "@type" => "ItemList",
+          "itemListElement" => [],
+        ];
+
+        foreach ($review['negativeNotes'] as $position => $note) {
+
+          $item['negativeNotes']['itemListElement'] = [
+            "@type" => "ListItem",
+            "position" => $position,
+            "name" => $note['name'],
+          ];
+        }
+      }
 
       if (!empty($review['review_date'])) {
         $item['datePublished'] = $review['review_date'];
