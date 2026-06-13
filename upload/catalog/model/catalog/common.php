@@ -205,6 +205,7 @@ class ModelCatalogCommon extends Model {
 
     // Offers
     $schema['offers'] = $this->buildOffers($product, $currency);
+    $schema['offers']['shippingDetails'] = $this->buildOfferShippingDetails($product['shippingMethods'] ?? [], ['transit_min' => 1, 'transit_max' => 3, 'cutoff_time' => '17:00:00+02:00']);
 
     // Aggregate Rating
     if (!empty($product['rating']) && !empty($product['reviews'])) {
@@ -284,60 +285,81 @@ class ModelCatalogCommon extends Model {
     return $offer;
   }
 
-  private function buildOfferShippingDetails(array $cond, string $defaultCurrency) : array {
-    $currency = $cond['currency'] ?? $defaultCurrency;
+/**
+ * Build offer shipping data for product and category
+ * Usage:
+ * $base['offers']['shippingDetails'] = $this->buildOfferShippingDetails(...) in buildProductMicroData().
+ *
+ * @param array $shippingMethods  Shipping methods array according to product model
+ * @param array $options {
+ *     currency      : string   country ISO code, e.g. 'EUR'   (mandatory)
+ *     country       : string   country ISO 3166-1, e.g. 'UA'  (recommended)
+ *     transit_min   : int      Minimum transit days           (optional)
+ *     transit_max   : int      Maximum transit days           (optional)
+ *     cutoff_time   : string   Lattest order place time to be processed today '17:00:00+02:00' (optional)
+ *     business_days : array    Working days                   (optional)
+ * }
+ */
+  private function buildOfferShippingDetails(array $shippingMethods, array $options = []) : array {
+    $currency = $options['currency'] ?? $this->config->get('config_currency') ?: 'UAH';
+    $details = [];
 
-    $details = ['@type' => 'OfferShippingDetails'];
+    foreach ($shippingMethods as $method) {
+      // If error occured or quote is empty - skip
+      if (!empty($method['error']) || !isset($method['quote'])) continue;
 
-    if (isset($cond['rate_value'])) {
-      $details['shippingRate'] = [
-        '@type' => 'MonetaryAmount',
-        'value' => $cond['rate_value'],
-        'currency' => $currency,
-      ];
-    }
+      foreach ($method['quote'] ?? [] as $quote) {
+        $item = [
+          '@type' => 'OfferShippingDetails',
+          'shippingLabel' => $quote['title'] ?? $method['title'],
+          'shippingRate' => [
+            '@type'     => 'MonetaryAmount',
+            'value'     => (float) $quote['cost'],
+            'currency'  => $currency,
+          ],
+        ];
 
-    if (!empty($cond['countries'])) {
-      $destinations = [];
-      foreach ((array) $cond['countries'] as $country) {
-        $destinations[] = ['@type' => 'DefinedRegion', 'addressCountry' => $country];
+        // Delivery region required by Google to show in regional SERP
+        if (!empty($method['country'])) {
+          $item['shippingDestination'] = [
+            '@type'          => 'DefinedRegion',
+            'addressCountry' => $method['country']['iso_code_2'],
+          ];
+        }
+
+        // Delivery time, at least transit_max days required
+        if (isset($options['transit_max'])) {
+          $item['deliveryTime'] = [
+            "@type" => "ShippingDeliveryTime",
+            "transitTime" => [
+              "@type"    => "QuantitativeValue",
+              "minValue" => $options['transit_min'] ?? 0,
+              "maxValue" => $options['transit_max'],
+              "unitCode" => "DAY",
+            ],
+          ];
+        }
+
+        // Handling time, at least handling_max days required
+        if (isset($options['handling_max'])) {
+          $item['deliveryTime'] = [
+            "@type" => "ShippingDeliveryTime",
+            "transitTime" => [
+              "@type"    => "QuantitativeValue",
+              "minValue" => $options['handling_min'] ?? 0,
+              "maxValue" => $options['handling_max'],
+              "unitCode" => "DAY",
+            ],
+          ];
+        }
+
+        $details[] = $item;
       }
-      $details['shippingDestination'] = count($destinations) === 1
-        ? $destinations[0]
-        : $destinations;
-    }
-
-    if (isset($cond['transit_days_max'])) {
-      $details['deliveryTime'] = $this->buildServicePeriod([
-        'days_min' => $cond['transit_days_min'] ?? 0,
-        'days_max' => $cond['transit_days_max'],
-        'business_days' => $cond['transit_business_days'] ?? null,
-      ]);
     }
 
     return $details;
   }
 
-  private function buildServicePeriod(array $data) : array {
-    $period = ['@type' => 'ServicePeriod'];
-
-    if (!empty($data['cutoff_time'])) {
-      $period['cutoffTime'] = $data['cutoff_time']; // "17:00:00+02:00"
-    }
-
-    if (!empty($data['business_days'])) {
-      $period['businessDays'] = $data['business_days'];
-    }
-
-    $duration = ['@type' => 'QuantitativeValue', 'unitCode' => 'DAY'];
-    if (isset($data['days_min']))
-      $duration['minValue'] = (int) $data['days_min'];
-    if (isset($data['days_max']))
-      $duration['maxValue'] = (int) $data['days_max'];
-    $period['duration'] = $duration;
-
-    return $period;
-  }
 
   /**
    * List of ImageObject from main image and additional images
